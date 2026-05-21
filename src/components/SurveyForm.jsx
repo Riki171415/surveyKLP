@@ -104,6 +104,13 @@ export default function SurveyForm({ isEdit = false }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Mencegah submit prematur (misal saat user menekan 'Enter' di input)
+    if (step < 4) {
+      nextStep();
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
