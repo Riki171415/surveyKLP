@@ -15,7 +15,6 @@
     "nama": "Puskesmas Bantul 2",
     "provinsi": "DIY"
   },
-
   "user_5": {
     "nama": "Puskesmas Jetis 2 Bantul",
     "provinsi": "DIY"
@@ -120,7 +119,6 @@
     "nama": "Puskesmas Banguntapan 1",
     "provinsi": "DIY"
   },
-
   "user_32": {
     "nama": "Puskesmas Pasirkaliki Kota Bandung",
     "provinsi": "JAWA BARAT"
@@ -377,20 +375,12 @@
     "nama": "Puskesmas Rawat Inap Gedong Tataan",
     "provinsi": "LAMPUNG"
   },
-  "user_96": {
-    "nama": "Puskesmas Rawat Inap Sriwijaya Mataram Lampung Tengah",
-    "provinsi": "LAMPUNG"
-  },
   "user_97": {
     "nama": "Puskesmas Rawat Inap Semuli Raya",
     "provinsi": "LAMPUNG"
   },
   "user_98": {
     "nama": "Puskesmas  Bandar Agung",
-    "provinsi": "LAMPUNG"
-  },
-  "user_99": {
-    "nama": "Puskesmas  Bandar Jaya",
     "provinsi": "LAMPUNG"
   },
   "user_100": {
@@ -436,10 +426,6 @@
   "user_110": {
     "nama": "Puskesmas Walantaka Kota Serang",
     "provinsi": "BANTEN"
-  },
-  "user_111": {
-    "nama": "Puskesmas Rasimah Ahmad  Bukittinggi",
-    "provinsi": "SUMATERA BARAT"
   },
   "user_112": {
     "nama": "Pukesmas Sungai Pua",
@@ -487,10 +473,6 @@
   },
   "user_123": {
     "nama": "Pukesmas Koto Katiak",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_124": {
-    "nama": "Pukesmas MUaro Bodi",
     "provinsi": "SUMATERA BARAT"
   },
   "user_125": {
@@ -637,10 +619,6 @@
     "nama": "Puskesmas Meranti",
     "provinsi": "JAMBI"
   },
-  "user_161": {
-    "nama": "Puskesmas Muara Tebo",
-    "provinsi": "JAMBI"
-  },
   "user_162": {
     "nama": "Puskesmas Rimbo Bujang IX",
     "provinsi": "JAMBI"
@@ -667,10 +645,6 @@
   },
   "user_168": {
     "nama": "Puskesmas Bandar Petalangan",
-    "provinsi": "RIAU"
-  },
-  "user_169": {
-    "nama": "Puskesmas Bandar Seikijang",
     "provinsi": "RIAU"
   },
   "user_170": {
@@ -703,10 +677,6 @@
   },
   "user_177": {
     "nama": "Puskesmas Selat Baru",
-    "provinsi": "RIAU"
-  },
-  "user_178": {
-    "nama": "Puskesmas Tanjung Medang Kecamatan Rupat Utara",
     "provinsi": "RIAU"
   },
   "user_179": {
