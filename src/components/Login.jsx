@@ -1,21 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import { Database, Lock, User, Loader2 } from 'lucide-react';
+import { Database, Lock, User, Loader2, RefreshCw } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+
+const generateCaptcha = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Dibuang huruf/angka membingungkan spt O, 0, 1, I
+  let result = '';
+  for (let i = 0; i < 5; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [captchaText, setCaptchaText] = useState('');
+  const [captchaInput, setCaptchaInput] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    setCaptchaText(generateCaptcha());
+  }, []);
+
+  const refreshCaptcha = () => {
+    setCaptchaText(generateCaptcha());
+    setCaptchaInput('');
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError('');
+
+    if (captchaInput.toUpperCase() !== captchaText) {
+      setError('Kode Captcha salah. Silakan coba lagi.');
+      refreshCaptcha();
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       const { data, error: sbError } = await supabase
@@ -94,6 +121,33 @@ export default function Login() {
                   placeholder="••••••••"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Keamanan (Captcha)</label>
+              <div className="flex space-x-3 mb-2 items-center">
+                <div className="flex-1 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center py-2 relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDBMOCA4Wk04IDBMMCA4WiIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiPjwvcGF0aD4KPC9zdmc+')]"></div>
+                  <span className="font-mono text-2xl tracking-[0.3em] font-bold text-slate-800 relative z-10 select-none line-through decoration-slate-400 decoration-2">{captchaText}</span>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={refreshCaptcha}
+                  className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
+                  title="Ganti Kode Captcha"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              </div>
+              <input
+                required
+                type="text"
+                value={captchaInput}
+                onChange={(e) => setCaptchaInput(e.target.value)}
+                className="block w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 text-sm font-mono uppercase"
+                placeholder="Ketik 5 kode di atas"
+                maxLength={5}
+              />
             </div>
 
             <div>
