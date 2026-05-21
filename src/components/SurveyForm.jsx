@@ -99,18 +99,31 @@ export default function SurveyForm({ isEdit = false }) {
     }));
   };
 
-  const nextStep = () => setStep(prev => Math.min(prev + 1, 4));
+  // Validasi Step
+  const isStep1Valid = formData.fktpName.trim() !== '' && formData.city.trim() !== '' && formData.role !== '';
+  const isStep2Valid = formData.timeInPoli !== '' && formData.timeHomeVisit !== '' && 
+                       formData.propInFktp !== '' && formData.propOutFktp !== '' &&
+                       (Number(formData.propInFktp) + Number(formData.propOutFktp) === 100) &&
+                       kompetensiLayanan.every((_, idx) => formData.kompetensi[idx]?.status);
+  const isStep3Valid = jknBenefits.every((_, idx) => formData.jkn[idx]?.skala);
+  const isStep4Valid = nonOptimalServices.every((_, idx) => formData.nonOptimal[idx]?.masukJkn && formData.nonOptimal[idx]?.skala);
+
+  const canProceed = () => {
+    if (step === 1) return isStep1Valid;
+    if (step === 2) return isStep2Valid;
+    if (step === 3) return isStep3Valid;
+    if (step === 4) return isStep4Valid;
+    return false;
+  };
+
+  const nextStep = () => {
+    if (canProceed()) setStep(prev => Math.min(prev + 1, 4));
+  };
+  
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Mencegah submit prematur (misal saat user menekan 'Enter' di input)
-    if (step < 4) {
-      nextStep();
-      return;
-    }
-
+  const submitData = async () => {
+    if (!isStep4Valid) return;
     setIsSubmitting(true);
     
     try {
@@ -187,7 +200,7 @@ export default function SurveyForm({ isEdit = false }) {
 
       {/* Main Form Card */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <form onSubmit={handleSubmit} className="animate-fade-in relative">
+        <form onSubmit={(e) => e.preventDefault()} className="animate-fade-in relative">
           
           <div className="p-6 sm:p-8">
             {/* Step 1: Identitas */}
@@ -289,15 +302,21 @@ export default function SurveyForm({ isEdit = false }) {
                         <tr key={idx} className="hover:bg-slate-50 transition-colors group">
                           <td className="px-4 py-3 text-slate-800 text-xs md:text-sm">{item}</td>
                           <td className="px-4 py-3 text-center">
-                            <select 
-                              className="px-2 py-1.5 bg-white border border-slate-200 rounded-md w-full focus:ring-2 focus:ring-primary-500 outline-none text-sm"
-                              value={formData.kompetensi[idx]?.status || ''}
-                              onChange={(e) => handleNestedChange('kompetensi', idx, 'status', e.target.value)}
-                            >
-                              <option value="">- Pilih -</option>
-                              <option value="sudah">Sudah</option>
-                              <option value="belum">Belum</option>
-                            </select>
+                            <div className="flex justify-center gap-2">
+                              {['sudah', 'belum'].map(status => (
+                                <label key={status} className={`cursor-pointer px-3 py-1.5 rounded-md text-xs font-semibold border transition-all ${formData.kompetensi[idx]?.status === status ? 'bg-primary-600 text-white border-primary-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'}`}>
+                                  <input 
+                                    type="radio" 
+                                    className="hidden" 
+                                    name={`komp-${idx}`} 
+                                    value={status}
+                                    checked={formData.kompetensi[idx]?.status === status}
+                                    onChange={(e) => handleNestedChange('kompetensi', idx, 'status', e.target.value)}
+                                  />
+                                  {status === 'sudah' ? 'Sudah' : 'Belum'}
+                                </label>
+                              ))}
+                            </div>
                           </td>
                           <td className="px-4 py-3">
                             <input 
@@ -419,15 +438,21 @@ export default function SurveyForm({ isEdit = false }) {
                         <tr key={idx} className="hover:bg-slate-50 transition-colors">
                           <td className="px-4 py-3 text-slate-800 text-xs md:text-sm">{item}</td>
                           <td className="px-4 py-3 text-center">
-                            <select 
-                              className="px-2 py-1.5 bg-white border border-slate-200 rounded-md w-full focus:ring-2 focus:ring-primary-500 outline-none text-sm"
-                              value={formData.nonOptimal[idx]?.masukJkn || ''}
-                              onChange={(e) => handleNestedChange('nonOptimal', idx, 'masukJkn', e.target.value)}
-                            >
-                              <option value="">-</option>
-                              <option value="Ya">Ya</option>
-                              <option value="Tidak">Tidak</option>
-                            </select>
+                            <div className="flex justify-center gap-2">
+                              {['Ya', 'Tidak'].map(pilihan => (
+                                <label key={pilihan} className={`cursor-pointer px-3 py-1.5 rounded-md text-xs font-semibold border transition-all ${formData.nonOptimal[idx]?.masukJkn === pilihan ? 'bg-primary-600 text-white border-primary-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'}`}>
+                                  <input 
+                                    type="radio" 
+                                    className="hidden" 
+                                    name={`masukJkn-${idx}`} 
+                                    value={pilihan}
+                                    checked={formData.nonOptimal[idx]?.masukJkn === pilihan}
+                                    onChange={(e) => handleNestedChange('nonOptimal', idx, 'masukJkn', e.target.value)}
+                                  />
+                                  {pilihan}
+                                </label>
+                              ))}
+                            </div>
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex justify-center gap-1">
@@ -482,15 +507,17 @@ export default function SurveyForm({ isEdit = false }) {
               <button 
                 type="button" 
                 onClick={nextStep}
-                className="flex items-center px-6 py-2 bg-slate-900 text-white rounded-lg font-medium text-sm hover:bg-slate-800 transition-colors shadow-sm"
+                disabled={!canProceed()}
+                className={`flex items-center px-6 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm ${!canProceed() ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
               >
                 Selanjutnya <ChevronRight className="w-4 h-4 ml-1.5" />
               </button>
             ) : (
               <button 
-                type="submit" 
-                disabled={isSubmitting}
-                className={`flex items-center px-6 py-2 text-white rounded-lg font-medium text-sm transition-all shadow-sm ${isSubmitting ? 'bg-slate-400 cursor-wait' : 'bg-primary-600 hover:bg-primary-700'}`}
+                type="button" 
+                onClick={submitData}
+                disabled={isSubmitting || !canProceed()}
+                className={`flex items-center px-6 py-2 text-white rounded-lg font-medium text-sm transition-all shadow-sm ${isSubmitting || !canProceed() ? 'bg-slate-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'}`}
               >
                 {isSubmitting ? 'Memproses...' : 'Simpan Data'}
                 {!isSubmitting && <Save className="w-4 h-4 ml-2" />}
