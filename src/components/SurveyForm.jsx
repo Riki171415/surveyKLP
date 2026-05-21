@@ -497,6 +497,20 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
                   <h2 className="text-xl font-bold text-slate-800">C. Paket Manfaat JKN Saat Ini</h2>
                 </div>
+
+                <div className="border border-blue-100 bg-blue-50/50 rounded-lg p-4 flex items-start space-x-3 mb-6">
+                  <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-blue-900">
+                    <span className="font-semibold block mb-1">Panduan Penilaian Skala (1-4):</span>
+                    Pilih nilai sesuai tingkat kebutuhan kompetensi Sp.KKLP pada layanan tersebut.
+                    <ul className="list-decimal pl-5 mt-1 space-y-1">
+                      <li>Dapat optimal dilakukan dokter umum</li>
+                      <li>Dokter umum perlu pelatihan tambahan</li>
+                      <li>Lebih baik dengan supervisi/kolaborasi Sp.KKLP</li>
+                      <li>Kompetensi utama Sp.KKLP</li>
+                    </ul>
+                  </div>
+                </div>
                 
                 <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
                   <table className="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
