@@ -47,6 +47,7 @@ const interviewQuestions = [
 
 export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const [step, setStep] = useState(1);
+  const [earlyExit, setEarlyExit] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -186,6 +187,10 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   };
 
   const nextStep = () => {
+    if (step === 1 && !formData.docKklp) {
+      setEarlyExit(true);
+      return;
+    }
     if (canProceed()) setStep(prev => Math.min(prev + 1, totalSteps));
   };
   
@@ -241,6 +246,28 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
       setIsSubmitting(false);
     }
   };
+
+  if (earlyExit) {
+    return (
+      <div className="min-h-screen bg-slate-50 py-12 px-4 font-sans flex items-center justify-center">
+        <div className="max-w-xl mx-auto bg-white rounded-xl p-8 border-t-4 border-rose-500 shadow-sm text-center">
+          <div className="inline-flex items-center justify-center p-3 bg-rose-50 rounded-full mb-4">
+            <Info className="w-8 h-8 text-rose-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-800 mb-4">Pemberitahuan</h2>
+          <p className="text-slate-600 mb-8 leading-relaxed">
+            Terima kasih atas partisipasi Anda. Survei ini ditujukan bagi Puskesmas yang memiliki dokter Sp.KKLP yang aktif berpraktik.
+          </p>
+          <button 
+            onClick={() => setEarlyExit(false)} 
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-lg font-medium transition-colors"
+          >
+            Kembali
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (isSubmitted) {
     return (
@@ -384,7 +411,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     </div>
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-slate-700 mb-3">Ketersediaan Dokter</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">Ketersediaan Dokter Praktek</label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {[
                         { name: 'docUmum', label: 'Dokter Umum' },
