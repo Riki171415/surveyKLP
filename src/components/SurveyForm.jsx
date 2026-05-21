@@ -261,12 +261,12 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto animate-fade-in">
       {/* Header Section */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-start justify-between gap-4">
+      <div className="mb-10 flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight leading-tight">
-            {isInterview ? 'Form Wawancara (Tim Survey)' : 'Survey optimalisasi program JKN di FPKTP dalam rangka Transformasi Layanan Primer'}
+          <h1 className="text-3xl md:text-4xl font-display font-bold text-slate-900 tracking-tight leading-tight">
+            {isInterview ? 'Form Wawancara (Tim Survey)' : 'Survey Optimalisasi Program JKN di FKTP'}
           </h1>
           {isInterview ? (
             <p className="text-slate-500 mt-2 text-sm max-w-2xl">
@@ -282,7 +282,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
         {!isInterview && (
           <button 
             onClick={() => navigate('/login')} 
-            className="shrink-0 bg-white border border-slate-200 text-slate-700 px-5 py-2.5 rounded-lg font-medium hover:bg-slate-50 transition-colors shadow-sm text-sm"
+            className="shrink-0 bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold hover:bg-slate-50 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm"
           >
             Login Petugas
           </button>
@@ -290,22 +290,27 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
       </div>
 
       {/* Enterprise Stepper */}
-      <div className="mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+      <div className="mb-10 bg-white/80 backdrop-blur-md p-6 rounded-3xl shadow-soft border border-white overflow-x-auto relative z-10">
+        <div className="flex items-center justify-between relative min-w-[600px] px-4">
+          <div className="absolute left-10 right-10 top-5 transform -translate-y-1/2 h-1 bg-slate-100 rounded-full -z-10"></div>
+          {/* Active Progress Line */}
+          <div 
+            className="absolute left-10 top-5 transform -translate-y-1/2 h-1 bg-gradient-to-r from-primary-500 to-indigo-500 rounded-full -z-10 transition-all duration-500 ease-in-out" 
+            style={{ width: `calc(${Math.max(0, (step - 1) / (totalSteps - 1)) * 100}% - 2.5rem)` }}
+          ></div>
 
-        <div className="flex items-center justify-between relative min-w-[600px]">
-          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-0.5 bg-slate-100 -z-10"></div>
           {STEPS.map((s) => (
-            <div key={s.id} className="flex flex-col items-center relative z-10 w-full">
-              <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm transition-all duration-300 shadow-sm ${
+            <div key={s.id} className="flex flex-col items-center relative z-10 w-full group">
+              <div className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm transition-all duration-500 shadow-sm ${
                 step > s.id 
-                  ? 'bg-primary-600 text-white ring-4 ring-primary-50' 
+                  ? 'bg-gradient-to-br from-primary-500 to-indigo-600 text-white shadow-primary-500/40 scale-100' 
                   : step === s.id 
-                    ? 'bg-slate-900 text-white ring-4 ring-slate-100'
+                    ? 'bg-slate-900 text-white ring-4 ring-slate-200 scale-110 shadow-xl'
                     : 'bg-white border-2 border-slate-200 text-slate-400'
               }`}>
-                {step > s.id ? <CheckCircle className="w-4 h-4" /> : s.id}
+                {step > s.id ? <CheckCircle className="w-5 h-5" /> : s.id}
               </div>
-              <span className={`mt-2 text-xs font-semibold ${step >= s.id ? 'text-slate-900' : 'text-slate-400'}`}>
+              <span className={`mt-3 text-sm font-semibold transition-colors duration-300 ${step === s.id ? 'text-primary-600' : step > s.id ? 'text-slate-800' : 'text-slate-400'}`}>
                 {s.title}
               </span>
             </div>
@@ -314,10 +319,12 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
       </div>
 
       {/* Main Form Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <form onSubmit={(e) => e.preventDefault()} className="animate-fade-in relative">
+      <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-soft-lg border border-white overflow-hidden relative z-0">
+        {/* Subtle decorative glow inside card */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary-100/50 rounded-full blur-[80px] pointer-events-none"></div>
+        <form onSubmit={(e) => e.preventDefault()} className="animate-fade-in relative z-10">
           
-          <div className="p-6 sm:p-8">
+          <div className="p-8 sm:p-12">
             {/* Step 1: Identitas */}
             {step === 1 && (
               <div className="space-y-6">
@@ -363,9 +370,16 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   )}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-slate-700 mb-3">Jabatan <span className="text-xs text-slate-400 font-normal ml-1">(Pilih salah satu)</span></label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Tenaga Kesehatan Fungsional (Dokter Gigi, Bidan, Perawat, Farmasi)'].map(role => (
-                        <label key={role} className={`flex items-center justify-center px-4 py-3 border rounded-lg cursor-pointer transition-all text-center leading-tight ${formData.role === role ? 'border-primary-600 bg-primary-50 text-primary-700 font-medium' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'}`}>
+                        <label key={role} className={`relative flex items-center justify-center px-4 py-4 border-2 rounded-2xl cursor-pointer transition-all duration-300 text-center leading-tight group ${
+                          formData.role === role 
+                            ? 'border-primary-500 bg-primary-50/50 text-primary-700 font-bold shadow-md shadow-primary-500/10 scale-[1.02]' 
+                            : 'border-slate-100 bg-white hover:border-primary-300 hover:bg-slate-50 text-slate-600'
+                        }`}>
+                          {formData.role === role && (
+                            <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary-500 animate-pulse"></div>
+                          )}
                           <input type="radio" name="role" value={role} checked={formData.role === role} onChange={handleInputChange} className="hidden" required />
                           <span className="text-xs sm:text-sm">{role}</span>
                         </label>
@@ -684,14 +698,14 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
           </div>
 
           {/* Footer Navigation */}
-          <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+          <div className="px-8 py-5 bg-slate-50/80 backdrop-blur-md border-t border-slate-100 flex justify-between items-center rounded-b-3xl">
             <button 
               type="button" 
               onClick={prevStep}
               disabled={step === 1}
-              className={`flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${step === 1 ? 'opacity-0 pointer-events-none' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 shadow-sm'}`}
+              className={`flex items-center px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${step === 1 ? 'opacity-0 pointer-events-none' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 shadow-sm hover:shadow active:scale-95'}`}
             >
-              <ChevronLeft className="w-4 h-4 mr-1.5" /> Sebelumnya
+              <ChevronLeft className="w-5 h-5 mr-1.5" /> Sebelumnya
             </button>
             
             {step < totalSteps ? (
@@ -699,19 +713,19 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                 type="button" 
                 onClick={nextStep}
                 disabled={!canProceed()}
-                className={`flex items-center px-6 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm ${!canProceed() ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
+                className={`flex items-center px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${!canProceed() ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' : 'bg-slate-900 text-white hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow-xl active:scale-95'}`}
               >
-                Selanjutnya <ChevronRight className="w-4 h-4 ml-1.5" />
+                Selanjutnya <ChevronRight className="w-5 h-5 ml-1.5" />
               </button>
             ) : (
               <button 
                 type="button" 
                 onClick={submitData}
                 disabled={isSubmitting || !canProceed()}
-                className={`flex items-center px-6 py-2 text-white rounded-lg font-medium text-sm transition-all shadow-sm ${isSubmitting || !canProceed() ? 'bg-slate-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'}`}
+                className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting || !canProceed() ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 hover:-translate-y-0.5 hover:shadow-primary-500/40 active:scale-95'}`}
               >
                 {isSubmitting ? 'Memproses...' : 'Simpan Data'}
-                {!isSubmitting && <Save className="w-4 h-4 ml-2" />}
+                {!isSubmitting && <Save className="w-5 h-5 ml-2" />}
               </button>
             )}
           </div>

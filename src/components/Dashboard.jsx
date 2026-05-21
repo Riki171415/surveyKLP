@@ -6,7 +6,7 @@ import {
 import { Users, Clock, Home, Activity, Loader2, Filter, LayoutDashboard, Stethoscope, Briefcase, FileText, Database, Download } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
-const COLORS = ['#0f172a', '#3b82f6', '#0ea5e9', '#94a3b8', '#10b981', '#f59e0b'];
+const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#6366f1'];
 
 const kompetensiLayanan = [
   "Manajemen pasien dengan multimorbiditas kompleks", "Pemeriksaan USG Dasar untuk penegakan diagnosis",
@@ -243,53 +243,56 @@ export default function Dashboard() {
       {/* Header & Filter Bar */}
       <div className="mb-6 flex flex-col xl:flex-row xl:items-end justify-between space-y-4 xl:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center">
-            <LayoutDashboard className="w-8 h-8 mr-3 text-primary-600" /> Executive Dashboard
+          <h1 className="text-3xl font-display font-bold text-slate-900 tracking-tight flex items-center">
+            <div className="p-2 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-xl shadow-lg shadow-primary-500/30 mr-4">
+              <LayoutDashboard className="w-6 h-6 text-white" />
+            </div>
+            Executive Dashboard
           </h1>
           <p className="text-slate-500 mt-2 text-sm">Monitoring & Evaluasi Optimalisasi JKN dan Sp.KKLP</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-lg shadow-sm border border-slate-200">
-          <div className="flex items-center text-sm font-semibold text-slate-600 mr-2">
-            <Filter className="w-4 h-4 mr-1.5" /> Filter:
+        <div className="flex flex-wrap items-center gap-3 bg-white/80 backdrop-blur-md p-3 rounded-2xl shadow-soft border border-white/60">
+          <div className="flex items-center text-sm font-semibold text-slate-600 mr-2 bg-slate-100 px-3 py-1.5 rounded-lg">
+            <Filter className="w-4 h-4 mr-1.5 text-primary-500" /> Filter:
           </div>
           <select 
             value={filterProvinsi} 
             onChange={(e) => setFilterProvinsi(e.target.value)}
-            className="text-sm border border-slate-200 rounded-md py-1.5 px-3 bg-slate-50 outline-none focus:ring-2 focus:ring-primary-500 max-w-[200px]"
+            className="text-sm border-none rounded-xl py-2 px-4 bg-slate-50 hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all shadow-sm max-w-[200px] cursor-pointer"
           >
-            {uniqueProvinsi.map(p => <option key={p} value={p}>{p === 'Semua' ? 'Semua Provinsi/Kota' : p}</option>)}
+            {uniqueProvinsi.map(p => <option key={p} value={p}>{p === 'Semua' ? 'Semua Provinsi' : p}</option>)}
           </select>
           <select 
             value={filterRole} 
             onChange={(e) => setFilterRole(e.target.value)}
-            className="text-sm border border-slate-200 rounded-md py-1.5 px-3 bg-slate-50 outline-none focus:ring-2 focus:ring-primary-500"
+            className="text-sm border-none rounded-xl py-2 px-4 bg-slate-50 hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all shadow-sm cursor-pointer"
           >
             {uniqueRoles.map(r => <option key={r} value={r}>{r === 'Semua' ? 'Semua Jabatan' : r}</option>)}
           </select>
           <select 
             value={filterKklp} 
             onChange={(e) => setFilterKklp(e.target.value)}
-            className="text-sm border border-slate-200 rounded-md py-1.5 px-3 bg-slate-50 outline-none focus:ring-2 focus:ring-primary-500"
+            className="text-sm border-none rounded-xl py-2 px-4 bg-slate-50 hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all shadow-sm cursor-pointer"
           >
             <option value="Semua">Sp.KKLP (Semua)</option>
             <option value="Ada">Ada Sp.KKLP</option>
             <option value="Tidak">Tidak Ada Sp.KKLP</option>
           </select>
           
-          <div className="hidden sm:block w-px h-6 bg-slate-200 mx-1"></div>
+          <div className="hidden sm:block w-px h-8 bg-slate-200 mx-2"></div>
           
           <button 
             onClick={exportToCSV}
-            className="flex items-center text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 px-4 rounded-md transition-colors shadow-sm ml-auto"
+            className="flex items-center text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white py-2 px-5 rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5 ml-auto"
           >
-            <Download className="w-4 h-4 mr-2" /> Download Excel
+            <Download className="w-4 h-4 mr-2" /> Export Excel
           </button>
         </div>
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex overflow-x-auto bg-white rounded-t-xl shadow-sm border-x border-t border-slate-200 hide-scrollbar">
+      <div className="flex overflow-x-auto bg-white/50 backdrop-blur p-2 rounded-2xl shadow-sm border border-white mb-6 hide-scrollbar gap-2">
         {[
           { id: 'ringkasan', label: 'Ringkasan Utama', icon: Activity },
           { id: 'kompetensi', label: 'Analisis Kompetensi', icon: Stethoscope },
@@ -300,18 +303,20 @@ export default function Dashboard() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
-              activeTab === tab.id ? 'border-primary-600 text-primary-700 bg-primary-50/50' : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+            className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
+              activeTab === tab.id 
+                ? 'bg-white text-primary-600 shadow-sm border border-slate-100 scale-105' 
+                : 'text-slate-500 hover:text-slate-800 hover:bg-white/60'
             }`}
           >
-            <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-primary-600' : 'text-slate-400'}`} />
+            <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-primary-500' : 'text-slate-400'}`} />
             <span>{tab.label}</span>
           </button>
         ))}
       </div>
 
       {/* Content Area */}
-      <div className="bg-white p-6 rounded-b-xl shadow-sm border border-slate-200 min-h-[500px]">
+      <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl shadow-soft border border-white min-h-[500px]">
         {totalResponden === 0 ? (
           <div className="py-20 text-center text-slate-500">Tidak ada data yang cocok dengan filter.</div>
         ) : (
@@ -321,23 +326,26 @@ export default function Dashboard() {
               <div className="space-y-8 animate-fade-in">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   {[
-                    { label: 'Total Responden', value: totalResponden, icon: Users, sub: 'Faskes tersaring' },
-                    { label: 'Avg Waktu Poli', value: `${avgPoli} Mnt`, icon: Clock, sub: 'Per pasien' },
-                    { label: 'Avg Home Visit', value: `${avgHome} Mnt`, icon: Home, sub: 'Per kunjungan' },
-                    { label: 'Ada Sp.KKLP', value: `${Math.round((ketersediaanDokter[2].Ada / totalResponden)*100)}%`, icon: Stethoscope, sub: `${ketersediaanDokter[2].Ada} dari ${totalResponden}` }
+                    { label: 'Total Responden', value: totalResponden, icon: Users, sub: 'Faskes tersaring', color: 'from-blue-500 to-indigo-500' },
+                    { label: 'Avg Waktu Poli', value: `${avgPoli} Mnt`, icon: Clock, sub: 'Per pasien', color: 'from-emerald-400 to-teal-500' },
+                    { label: 'Avg Home Visit', value: `${avgHome} Mnt`, icon: Home, sub: 'Per kunjungan', color: 'from-amber-400 to-orange-500' },
+                    { label: 'Ada Sp.KKLP', value: `${Math.round((ketersediaanDokter[2].Ada / totalResponden)*100)}%`, icon: Stethoscope, sub: `${ketersediaanDokter[2].Ada} dari ${totalResponden}`, color: 'from-pink-500 to-rose-500' }
                   ].map((s, i) => (
-                    <div key={i} className="p-5 bg-slate-50 rounded-xl border border-slate-100 flex flex-col">
-                      <div className="mb-3 p-2 bg-white rounded-lg self-start border border-slate-200 shadow-sm"><s.icon className="w-5 h-5 text-slate-700" /></div>
-                      <h3 className="text-2xl font-bold text-slate-900">{s.value}</h3>
-                      <p className="text-sm font-semibold text-slate-600">{s.label}</p>
-                      <p className="text-xs text-slate-400 mt-1">{s.sub}</p>
+                    <div key={i} className="relative overflow-hidden p-6 bg-white rounded-3xl border border-slate-100 shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 flex flex-col group">
+                      <div className={`absolute -right-10 -top-10 w-32 h-32 bg-gradient-to-br ${s.color} rounded-full opacity-10 group-hover:scale-150 transition-transform duration-700`}></div>
+                      <div className={`mb-4 p-3 bg-gradient-to-br ${s.color} rounded-2xl self-start shadow-lg text-white`}>
+                        <s.icon className="w-6 h-6" />
+                      </div>
+                      <h3 className="text-3xl font-display font-bold text-slate-900 mb-1">{s.value}</h3>
+                      <p className="text-sm font-bold text-slate-600">{s.label}</p>
+                      <p className="text-xs text-slate-400 mt-1 font-medium">{s.sub}</p>
                     </div>
                   ))}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="border border-slate-100 rounded-xl p-5">
-                    <h2 className="text-base font-bold text-slate-800 mb-6 text-center">Distribusi Jabatan Responden</h2>
+                  <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
+                    <h2 className="text-lg font-display font-bold text-slate-800 mb-6 text-center">Distribusi Jabatan Responden</h2>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -351,8 +359,8 @@ export default function Dashboard() {
                     </div>
                   </div>
                   
-                  <div className="border border-slate-100 rounded-xl p-5">
-                    <h2 className="text-base font-bold text-slate-800 mb-6 text-center">Ketersediaan Dokter di FKTP</h2>
+                  <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
+                    <h2 className="text-lg font-display font-bold text-slate-800 mb-6 text-center">Ketersediaan Dokter di FKTP</h2>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={ketersediaanDokter} layout="vertical" margin={{ left: 30 }}>

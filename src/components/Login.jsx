@@ -68,103 +68,135 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center items-center space-x-2 mb-6">
-          <Database className="w-10 h-10 text-primary-600" />
-          <span className="font-bold text-3xl text-slate-800 tracking-tight">Survey<span className="text-primary-600">KKLP</span></span>
-        </div>
-        <h2 className="text-center text-2xl font-bold text-slate-900 tracking-tight">Login ke Akun Anda</h2>
-        <p className="mt-2 text-center text-sm text-slate-500">
-          Gunakan kredensial yang telah diberikan oleh tim pusat.
-        </p>
-      </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-sm border border-slate-200 sm:rounded-xl sm:px-10">
-          {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-              {error}
+    <div className="min-h-screen bg-slate-50 flex overflow-hidden">
+      {/* Left Column: Form (Glassmorphism) */}
+      <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:flex-none lg:w-[480px] xl:w-[560px] relative z-10 bg-white shadow-2xl">
+        <div className="mx-auto w-full max-w-sm lg:w-[360px] xl:w-[400px]">
+          <div className="flex items-center space-x-3 mb-8 animate-fade-in">
+            <div className="p-2.5 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-xl shadow-lg shadow-primary-500/30">
+              <Database className="w-8 h-8 text-white" />
             </div>
-          )}
+            <span className="font-display font-bold text-3xl text-slate-800 tracking-tight">
+              Survey<span className="text-primary-600">KKLP</span>
+            </span>
+          </div>
           
-          <form className="space-y-6" onSubmit={handleLogin}>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Username</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-slate-400" />
+          <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <h2 className="text-3xl font-display font-bold text-slate-900 tracking-tight mb-2">Selamat Datang</h2>
+            <p className="text-sm text-slate-500 mb-8">
+              Silakan login menggunakan kredensial dari tim pusat untuk mengakses sistem.
+            </p>
+
+            {error && (
+              <div className="mb-6 bg-rose-50 border-l-4 border-rose-500 text-rose-700 p-4 rounded-r-lg text-sm flex items-start animate-fade-in">
+                <p>{error}</p>
+              </div>
+            )}
+            
+            <form className="space-y-5" onSubmit={handleLogin}>
+              <div className="group">
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5 group-focus-within:text-primary-600 transition-colors">Username</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-slate-400 group-focus-within:text-primary-500 transition-colors" />
+                  </div>
+                  <input
+                    required
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="block w-full pl-11 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 text-sm"
+                    placeholder="Masukkan username Anda"
+                  />
+                </div>
+              </div>
+
+              <div className="group">
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5 group-focus-within:text-primary-600 transition-colors">Password</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-primary-500 transition-colors" />
+                  </div>
+                  <input
+                    required
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="block w-full pl-11 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 text-sm tracking-widest font-mono"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Verifikasi Keamanan</label>
+                <div className="flex space-x-3 mb-3 items-center">
+                  <div className="flex-1 bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 rounded-xl flex items-center justify-center py-2.5 relative overflow-hidden shadow-inner">
+                    <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDBMOCA4Wk04IDBMMCA4WiIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiPjwvcGF0aD4KPC9zdmc+')]"></div>
+                    <span className="font-mono text-2xl tracking-[0.3em] font-bold text-slate-800 relative z-10 select-none line-through decoration-rose-400/70 decoration-[3px]">{captchaText}</span>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={refreshCaptcha}
+                    className="p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 text-slate-600 transition-all active:scale-95 shadow-sm"
+                    title="Ganti Kode Captcha"
+                  >
+                    <RefreshCw className="w-5 h-5 hover:rotate-180 transition-transform duration-500" />
+                  </button>
                 </div>
                 <input
                   required
                   type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full pl-10 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 text-sm"
-                  placeholder="Masukkan username"
+                  value={captchaInput}
+                  onChange={(e) => setCaptchaInput(e.target.value)}
+                  className="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 text-sm font-mono uppercase text-center tracking-[0.2em]"
+                  placeholder="KETIK KODE DI ATAS"
+                  maxLength={5}
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-400" />
-                </div>
-                <input
-                  required
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 text-sm"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Keamanan (Captcha)</label>
-              <div className="flex space-x-3 mb-2 items-center">
-                <div className="flex-1 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center py-2 relative overflow-hidden">
-                  <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDBMOCA4Wk04IDBMMCA4WiIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiPjwvcGF0aD4KPC9zdmc+')]"></div>
-                  <span className="font-mono text-2xl tracking-[0.3em] font-bold text-slate-800 relative z-10 select-none line-through decoration-slate-400 decoration-2">{captchaText}</span>
-                </div>
-                <button 
-                  type="button" 
-                  onClick={refreshCaptcha}
-                  className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
-                  title="Ganti Kode Captcha"
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full flex justify-center items-center py-3.5 px-4 rounded-xl shadow-lg text-sm font-bold text-white transition-all duration-300 transform ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 hover:-translate-y-0.5 hover:shadow-primary-500/30'}`}
                 >
-                  <RefreshCw className="w-5 h-5" />
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Memverifikasi...
+                    </>
+                  ) : 'Masuk ke Sistem'}
                 </button>
               </div>
-              <input
-                required
-                type="text"
-                value={captchaInput}
-                onChange={(e) => setCaptchaInput(e.target.value)}
-                className="block w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 text-sm font-mono uppercase"
-                placeholder="Ketik 5 kode di atas"
-                maxLength={5}
-              />
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all ${isSubmitting ? 'bg-slate-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'}`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Memproses...
-                  </>
-                ) : 'Login'}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
+      </div>
+
+      {/* Right Column: Decorative Background */}
+      <div className="hidden lg:block relative flex-1 bg-slate-900 overflow-hidden">
+        {/* Animated Gradient Mesh Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-primary-900"></div>
+        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-primary-600/30 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-indigo-500/30 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow" style={{ animationDelay: '1.5s' }}></div>
+        
+        {/* Content overlay */}
+        <div className="absolute inset-0 flex items-center justify-center p-12">
+          <div className="max-w-xl text-center z-10 glass-dark p-10 rounded-3xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-500/20 mb-6">
+              <Database className="w-8 h-8 text-primary-400" />
+            </div>
+            <h1 className="text-4xl font-display font-bold text-white tracking-tight mb-4 leading-tight">
+              Sistem Informasi Survei KKLP
+            </h1>
+            <p className="text-lg text-slate-300 leading-relaxed">
+              Platform pendataan dan evaluasi implementasi pelayanan dokter Sp.KKLP di Fasilitas Kesehatan Tingkat Pertama secara nasional.
+            </p>
+          </div>
+        </div>
+        
+        {/* Pattern overlay */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] [mask-image:linear-gradient(to_bottom,white,transparent)] opacity-50"></div>
       </div>
     </div>
   );
