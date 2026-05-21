@@ -1,0 +1,201 @@
+DI YOGYAKARTA (DIY)
+1.	Puskesmas Banguntapan 1
+2.	Puskesmas Bantul 2
+3.	Puskesmas Cangkring Purworejo
+4.	Puskesmas Danurejan 2 Kota Yogyakarta
+5.	Puskesmas Girisubo
+6.	Puskesmas Imogiri I
+7.	Puskesmas Jetis 2 Bantul
+8.	Puskesmas Karangmojo II
+9.	Puskesmas Kasihan II
+10.	Puskesmas Kretek
+11.	Puskesmas Lendah 1
+12.	Puskesmas Nglipar I
+13.	Puskesmas Pajangan
+14.	Puskesmas Paliyan Gunungkidul
+15.	Puskesmas Pandak I
+16.	Puskesmas Playen II
+17.	Puskesmas Pleret
+18.	Puskesmas Ponjong I
+19.	Puskesmas Ponjong II
+20.	Puskesmas Pundong
+21.	Puskesmas Sanden
+22.	Puskesmas Sedayu I
+23.	Puskesmas Sedayu II
+24.	Puskesmas Semin II
+25.	Puskesmas Tegalrejo
+26.	Puskesmas Temon 2 Kulon Progo
+27.	Puskesmas Tepus 2
+28.	Puskesmas Umbulharjo I
+29.	Puskesmas Wonosari
+30.	Puskesmas Wonosari II
+JAWA BARAT
+1.	Puskesmas Cibinong
+2.	Puskesmas Kiarapandak Sukajaya
+3.	Puskesmas Kopo Kota Bandung
+4.	Puskesmas Margahayu Raya Kota Bandung
+5.	Puskesmas Pagarsih Kota Bandung
+6.	Puskesmas Pasirkaliki Kota Bandung
+7.	Puskesmas Salam Kota Bandung
+8.	Puskesmas Sukarasa Kota Bandung
+9.	Puskesmas Talagabodas Kota Bandung
+JAWA TENGAH
+1.	Puskesmas Bagelen Purworejo
+2.	Puskesmas Banyuurip
+3.	Puskesmas Banyuputih
+4.	Puskesmas Bragolan
+5.	Puskesmas Mranti
+6.	Puskesmas Musuk Boyolali
+7.	Puskesmas Sruwohrejo
+8.	Puskesmas Todanan
+9.	Puskesmas Winong Kemiri
+JAWA TIMUR
+1.	PKM Menukan Kulon
+2.	Puskesmas Kauman Baru
+3.	Puskesmas Pakis
+DKI JAKARTA
+1.	Puskesmas Kalideres
+2.	Puskesmas Kecamatan Jagakarsa
+3.	Puskesmas Kecamatan Pasar Rebo
+4.	Puskesmas Kecamatan Penjaringan
+5.	Puskesmas Kecamatan Tambora
+6.	Puskesmas Kec. Ciracas
+7.	Puskesmas Kel. Rawa Badak Selatan
+8.	Puskesmas Kel. Kebon Bawang III
+9.	Puskesmas Kelapa Gading
+10.	Puskesmas Kelurahan Gedong
+11.	Puskesmas Kelurahan Jagakarsa I
+12.	Puskesmas Kelurahan Jagakarsa II
+13.	Puskesmas Kelurahan Kelapa Gading Timur II
+14.	Puskesmas Kelurahan Pekayon
+15.	Puskesmas Kelurahan Penjaringan I
+16.	Puskesmas Kelurahan Pinangsia
+17.	Puskesmas Kelurahan Taman Sari
+18.	Puskesmas Kelurahan Tebet Barat
+19.	Puskesmas Kelurahan Tugu Selatan
+KALIMANTAN BARAT
+1.	Puskesmas Tanjung Puri
+LAMPUNG
+1.	Puskesmas Bandar Agung
+2.	Puskesmas Bandar Jaya
+3.	Puskesmas Bakauheni
+4.	Puskesmas Banjar Agung
+5.	Puskesmas Baradatu
+6.	Puskesmas Batanghari
+7.	Puskesmas Banjit
+8.	Puskesmas Branti
+9.	Puskesmas Gunung Sugih
+10.	Puskesmas Hajimena
+11.	Puskesmas Iring Mulyo
+12.	Puskesmas Kalianda
+13.	Puskesmas Kalirejo
+14.	Puskesmas Karang Anyar
+15.	Puskesmas Kasui
+16.	Puskesmas Kotagajah
+17.	Puskesmas Margorejo
+18.	Puskesmas Merbau Mataram
+19.	Puskesmas Pekalongan
+20.	Puskesmas Rajabasa Lama
+21.	Puskesmas Rawat Inap Gedong Tataan
+22.	Puskesmas Rawat Inap Katibung
+23.	Puskesmas Rawat Inap Kedaton
+24.	Puskesmas Rawat Inap Pulau Panggung
+25.	Puskesmas Rawat Inap Semuli Raya
+26.	Puskesmas Rawat Inap Sriwijaya Mataram Lampung Tengah
+27.	Puskesmas Rawat Inap Tata Karya
+28.	Puskesmas Rawat Inap Tanjung Sari Natar
+29.	Puskesmas Sriwijaya Mataram
+30.	Puskesmas Sragi
+31.	Puskesmas Sribhawono
+32.	Puskesmas Sumber Jaya
+33.	Puskesmas Tambah Subur
+34.	Puskesmas Waymili
+35.	Puskesmas Way Panji
+36.	Puskesmas Wirabangun
+BANTEN
+1.	Puskesmas Walantaka Kota Serang
+SUMATERA BARAT
+1.	Puskesmas Batu Kambing
+2.	Puskesmas Gulai Bancah
+3.	Puskesmas IV Koto Agam
+4.	Puskesmas Kapau
+5.	Puskesmas Koto Katiak
+6.	Puskesmas Mandiangin
+7.	Puskesmas Muaro Bodi
+8.	Puskesmas Nan Balimo
+9.	Puskesmas Nanggalo
+10.	Puskesmas Naras
+11.	Puskesmas Pakan Kamis
+12.	Puskesmas Pauh
+13.	Puskesmas Pegang Biru
+14.	Puskesmas Rasimah Ahmad Bukittinggi
+15.	Puskesmas Rawang
+16.	Puskesmas Simp. Empat
+17.	Puskesmas Sitiung 1
+18.	Puskesmas Sukamenanti
+19.	Puskesmas Sungai Pua
+20.	Puskesmas Tigo Baleh
+BALI
+1.	Puskesmas 1 Dentim
+2.	Puskesmas Banjarangkan I
+3.	Puskesmas Baturiti 1
+4.	Puskesmas Blahbatuh II
+5.	Puskesmas Gianyar I
+6.	Puskesmas II Denpasar Barat
+7.	Puskesmas II Pekutatan
+8.	Puskesmas IV Denpasar Selatan
+9.	Puskesmas Selemadeg Barat
+10.	Puskesmas Seririt 1
+11.	Puskesmas Tabanan II
+12.	Puskesmas Tabanan III
+SUMATERA UTARA
+1.	Puskesmas Belawan
+2.	Puskesmas Darussalam
+3.	Puskesmas Desa Binjai
+4.	Puskesmas Dolat Rakyat
+5.	Puskesmas Galang
+6.	Puskesmas Hamparan Perak Kab. Deli Serdang
+7.	Puskesmas Martubung
+8.	Puskesmas Sering
+9.	Puskesmas Sinunukan
+10.	Puskesmas Sukaramai
+11.	Puskesmas Teladan
+JAMBI
+1.	Puskesmas Kuamang Kuning I
+2.	Puskesmas Meranti
+3.	Puskesmas Muara Tebo
+4.	Puskesmas Pintas Tuo
+5.	Puskesmas Rimbo Bujang IX
+6.	Puskesmas Tebing Tinggi Muara Tebo
+RIAU
+1.	Puskesmas Bandar Petalangan
+2.	Puskesmas Bandar Sei Kijang
+3.	Puskesmas Bengkalia
+4.	Puskesmas Kampar Kiri Hilir
+5.	Puskesmas Langgam
+6.	Puskesmas Pangkalan Kerinci 1
+7.	Puskesmas Perawang KM 6
+8.	Puskesmas Purnama
+9.	Puskesmas Puter
+10.	Puskesmas RI Sidomulyo Pekanbaru
+11.	Puskesmas RI Simpang Tiga Pekanbaru
+12.	Puskesmas Selat Baru
+13.	Puskesmas Tanjung Medang Kecamatan Rupat Utara
+14.	Puskesmas Ukui
+KEPULAUAN RIAU
+1.	Puskesmas Kabil Nongsa
+2.	Puskesmas Kawal Bintan
+SUMATERA SELATAN
+1.	Puskesmas 7 Ulu
+2.	Puskesmas Boom Baru
+3.	Puskesmas Lima Ilir
+4.	Puskesmas Merdeka
+5.	Puskesmas Multiwahana
+6.	Puskesmas Padang Selasa
+7.	Puskesmas Pakjo
+8.	Puskesmas Prabumulih
+ACEH
+1.	Puskesmas Batoh
+2.	Puskesmas Kuta Alam
+3.	Puskesmas Meuraxa
+4.	Puskesmas Ulee Kareng
