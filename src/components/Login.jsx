@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { Database, Lock, User, Loader2 } from 'lucide-react';
-
-// Ganti SCRIPT_URL jika diperlukan
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDiWEJm0LJwkjYmUDbrt5KLNx42uMERm7TtobhxoYs9ygRnz92cuT9Bwr_C-YJ9qTVwQ/exec';
+import { supabase } from '../supabaseClient';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -20,20 +18,23 @@ export default function Login() {
     setError('');
 
     try {
-      const response = await fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
-      const data = await response.json();
+      const { data, error: sbError } = await supabase
+        .from('app_users')
+        .select('*')
+        .eq('username', username)
+        .eq('password', password)
+        .single();
       
-      if (data.success) {
+      if (sbError || !data) {
+        setError('Login gagal. Periksa kembali Username dan Password Anda.');
+      } else {
         login({ username: data.username, role: data.role.toLowerCase() });
-        // Redirect based on role
         if (data.role.toLowerCase() === 'admin') navigate('/dashboard');
         else if (data.role.toLowerCase() === 'tim survey') navigate('/wawancara');
         else navigate('/'); // Puskesmas
-      } else {
-        setError(data.error || 'Login gagal. Periksa kembali Username dan Password Anda.');
       }
     } catch (err) {
-      setError('Terjadi kesalahan koneksi. Pastikan script URL valid dan memiliki CORS.');
+      setError('Terjadi kesalahan koneksi ke Supabase.');
     } finally {
       setIsSubmitting(false);
     }

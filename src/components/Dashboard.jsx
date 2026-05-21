@@ -3,17 +3,26 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
 } from 'recharts';
-import { Users, Clock, Home, Activity, Download, Loader2 } from 'lucide-react';
+import { Users, Clock, Home, Activity, Loader2 } from 'lucide-react';
+import { supabase } from '../supabaseClient';
 
 const COLORS = ['#0f172a', '#3b82f6', '#0ea5e9', '#94a3b8'];
+
+const nonOptimalServices = [
+  "Home care penyakit kronik terintegrasi", "Konsultasi keluarga dan family conference",
+  "Pelayanan lifestyle medicine", "Pelayanan wellness dan healthy aging",
+  "Konsultasi perjalanan/travel medicine", "Pelayanan paliatif komunitas",
+  "Manajemen pasien geriatri frailty", "Precision medicine/konseling genetik dasar",
+  "Monitoring pasien kronik berbasis komunitas", "Program edukasi kelompok kronik terstruktur",
+  "Telemonitoring pasien kronik", "Pelayanan transisi FKRTL-FKTP",
+  "Konseling kepatuhan pengobatan jangka panjang", "Deprescribing dan medication review",
+  "Layanan promotif berbasis keluarga"
+];
 
 export default function Dashboard() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Pastikan URL script sesuai dengan yang diberikan oleh user
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDiWEJm0LJwkjYmUDbrt5KLNx42uMERm7TtobhxoYs9ygRnz92cuT9Bwr_C-YJ9qTVwQ/exec';
 
   useEffect(() => {
     fetchData();
@@ -22,14 +31,15 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      // Fetch data dari Google Apps Script doGet()
-      const response = await fetch(SCRIPT_URL);
-      if (!response.ok) throw new Error("Gagal mengambil data");
-      const json = await response.json();
-      setData(json);
+      const { data: surveys, error: sbError } = await supabase
+        .from('surveys')
+        .select('*');
+        
+      if (sbError) throw sbError;
+      setData(surveys || []);
     } catch (err) {
       console.error(err);
-      setError("Terjadi kesalahan saat memuat data dari Spreadsheet. Pastikan URL Apps Script sudah benar.");
+      setError("Terjadi kesalahan saat memuat data dari Supabase.");
     } finally {
       setLoading(false);
     }
@@ -39,7 +49,7 @@ export default function Dashboard() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 text-primary-600 animate-spin mb-4" />
-        <p className="text-slate-500 font-medium">Memuat data dari Google Sheets...</p>
+        <p className="text-slate-500 font-medium">Memuat data dari Supabase...</p>
       </div>
     );
   }
@@ -55,24 +65,24 @@ export default function Dashboard() {
     );
   }
 
-  // --- MENGOLAH DATA NYATA ---
+  // --- MENGOLAH DATA NYATA SUPABASE ---
   
   // 1. Total Responden
   const totalResponden = data.length;
 
   // 2. Rata-rata Waktu Poli & Home Visit
   const avgPoli = totalResponden > 0 
-    ? Math.round(data.reduce((acc, row) => acc + (Number(row['Waktu Poli (mnt)']) || 0), 0) / totalResponden)
+    ? Math.round(data.reduce((acc, row) => acc + (Number(row.time_in_poli) || 0), 0) / totalResponden)
     : 0;
     
   const avgHome = totalResponden > 0 
-    ? Math.round(data.reduce((acc, row) => acc + (Number(row['Waktu Home Visit (mnt)']) || 0), 0) / totalResponden)
+    ? Math.round(data.reduce((acc, row) => acc + (Number(row.time_home_visit) || 0), 0) / totalResponden)
     : 0;
 
   // 3. Distribusi Jabatan
   const roleCount = {};
   data.forEach(row => {
-    const role = row['Jabatan'] || 'Tidak Diketahui';
+    const role = row.role || 'Tidak Diketahui';
     roleCount[role] = (roleCount[role] || 0) + 1;
   });
   const roleData = Object.keys(roleCount).map(key => ({
@@ -81,24 +91,20 @@ export default function Dashboard() {
   }));
 
   // 4. Kebutuhan Layanan Belum Optimal (Top 5)
-  // Menghitung rata-rata skala untuk setiap layanan 'NonOpt'
   const nonOptSkalaSum = {};
   const nonOptCount = {};
   
   if (totalResponden > 0) {
-    const headers = Object.keys(data[0]);
-    const nonOptHeaders = headers.filter(h => h.startsWith('[NonOpt') && h.includes('- Skala'));
-    
     data.forEach(row => {
-      nonOptHeaders.forEach(header => {
-        const val = Number(row[header]);
+      const nonOpt = row.non_optimal || {};
+      Object.keys(nonOpt).forEach(idx => {
+        const val = Number(nonOpt[idx]?.skala);
         if (val > 0) {
-          // Ekstrak nama layanan dari string header (Contoh: "[NonOpt 1] Home care - Skala (1-4)")
-          let namaLayanan = header.split('] ')[1];
-          namaLayanan = namaLayanan.split(' - Skala')[0];
-          
-          nonOptSkalaSum[namaLayanan] = (nonOptSkalaSum[namaLayanan] || 0) + val;
-          nonOptCount[namaLayanan] = (nonOptCount[namaLayanan] || 0) + 1;
+          const namaLayanan = nonOptimalServices[Number(idx)];
+          if (namaLayanan) {
+            nonOptSkalaSum[namaLayanan] = (nonOptSkalaSum[namaLayanan] || 0) + val;
+            nonOptCount[namaLayanan] = (nonOptCount[namaLayanan] || 0) + 1;
+          }
         }
       });
     });
@@ -109,7 +115,6 @@ export default function Dashboard() {
     rating: Number((nonOptSkalaSum[name] / nonOptCount[name]).toFixed(1))
   }));
   
-  // Sort descending and take top 5
   jknNeedsData.sort((a, b) => b.rating - a.rating);
   jknNeedsData = jknNeedsData.slice(0, 5);
   
@@ -117,10 +122,10 @@ export default function Dashboard() {
   let totalJknSkala = 0;
   let totalJknCount = 0;
   if (totalResponden > 0) {
-    const jknHeaders = Object.keys(data[0]).filter(h => h.startsWith('[JKN') && h.includes('- Skala'));
     data.forEach(row => {
-      jknHeaders.forEach(header => {
-        const val = Number(row[header]);
+      const jkn = row.jkn || {};
+      Object.keys(jkn).forEach(idx => {
+        const val = Number(jkn[idx]?.skala);
         if (val > 0) {
           totalJknSkala += val;
           totalJknCount++;
@@ -131,7 +136,7 @@ export default function Dashboard() {
   const avgJknSkala = totalJknCount > 0 ? (totalJknSkala / totalJknCount).toFixed(1) : 0;
 
   const stats = [
-    { label: 'Total Responden', value: totalResponden, icon: Users, trend: 'Dari Sheet' },
+    { label: 'Total Responden', value: totalResponden, icon: Users, trend: 'Dari Supabase' },
     { label: 'Avg Waktu Poli', value: `${avgPoli} Mnt`, icon: Clock, trend: 'Berdasarkan data' },
     { label: 'Avg Home Visit', value: `${avgHome} Mnt`, icon: Home, trend: 'Berdasarkan data' },
     { label: 'Skala JKN Umum', value: avgJknSkala, icon: Activity, trend: 'Skala 1-4' },
@@ -142,7 +147,7 @@ export default function Dashboard() {
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between space-y-4 sm:space-y-0">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Executive Dashboard</h1>
-          <p className="text-slate-500 mt-2 text-sm">Real-time data terhubung dengan Google Sheets</p>
+          <p className="text-slate-500 mt-2 text-sm">Real-time data terhubung dengan Supabase PostgreSQL</p>
         </div>
         <button 
           onClick={fetchData}
@@ -155,7 +160,7 @@ export default function Dashboard() {
 
       {totalResponden === 0 ? (
         <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 text-center">
-          <p className="text-slate-500">Belum ada data responden di Google Sheets. Silakan isi survey terlebih dahulu.</p>
+          <p className="text-slate-500">Belum ada data responden di Supabase. Silakan isi survey terlebih dahulu.</p>
         </div>
       ) : (
         <>

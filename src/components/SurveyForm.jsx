@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, ChevronLeft, Save, CheckCircle, Info } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDiWEJm0LJwkjYmUDbrt5KLNx42uMERm7TtobhxoYs9ygRnz92cuT9Bwr_C-YJ9qTVwQ/exec';
+import { supabase } from '../supabaseClient';
 
 const jknBenefits = [
   "Pengelolaan Diabetes Melitus tanpa komplikasi", "Penyusunan care plan jangka panjang pasien kronik",
@@ -60,7 +59,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const totalSteps = isInterview ? 5 : 4;
 
   const [formData, setFormData] = useState({
-    _rowIndex: null,
+    id: null,
     fktpName: '', city: '', role: '',
     docUmum: false, docGigi: false, docKklp: false,
     timeInPoli: '', timeHomeVisit: '', propInFktp: '', propOutFktp: '',
@@ -71,61 +70,26 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Parse data if coming from Interview List
+    // Parse data if coming from Interview List (Supabase format)
     if (isInterview && location.state?.surveyData) {
       const data = location.state.surveyData;
-      let parsed = {
-        _rowIndex: data._rowIndex,
-        fktpName: data['Nama FKTP'] || '',
-        city: data['Kabupaten/Kota'] || '',
-        role: data['Jabatan'] || '',
-        docUmum: data['Dokter Umum'] === 'Ada',
-        docGigi: data['Dokter Gigi'] === 'Ada',
-        docKklp: data['Dokter Sp.KKLP'] === 'Ada',
-        timeInPoli: data['Waktu Poli (mnt)'] || '',
-        timeHomeVisit: data['Waktu Home Visit (mnt)'] || '',
-        propInFktp: data['Proporsi Dalam (%)'] || '',
-        propOutFktp: data['Proporsi Luar (%)'] || '',
-        kompetensi: {}, jkn: {}, nonOptimal: {}, wawancara: {}
-      };
-
-      kompetensiLayanan.forEach((item, idx) => {
-        parsed.kompetensi[idx] = {
-          status: data[`[Komp ${idx+1}] ${item} - Status`] || '',
-          kendala: data[`[Komp ${idx+1}] ${item} - Kendala`] || ''
-        };
+      setFormData({
+        id: data.id,
+        fktpName: data.fktp_name || '',
+        city: data.city || '',
+        role: data.role || '',
+        docUmum: data.doc_umum || false,
+        docGigi: data.doc_gigi || false,
+        docKklp: data.doc_kklp || false,
+        timeInPoli: data.time_in_poli || '',
+        timeHomeVisit: data.time_home_visit || '',
+        propInFktp: data.prop_in_fktp || '',
+        propOutFktp: data.prop_out_fktp || '',
+        kompetensi: data.kompetensi || {},
+        jkn: data.jkn || {},
+        nonOptimal: data.non_optimal || {},
+        wawancara: data.wawancara || {}
       });
-
-      jknBenefits.forEach((item, idx) => {
-        parsed.jkn[idx] = {
-          skala: data[`[JKN ${idx+1}] ${item} - Skala (1-4)`]?.toString() || '',
-          catatan: data[`[JKN ${idx+1}] ${item} - Catatan`] || ''
-        };
-      });
-
-      nonOptimalServices.forEach((item, idx) => {
-        parsed.nonOptimal[idx] = {
-          masukJkn: data[`[NonOpt ${idx+1}] ${item} - Masuk JKN?`] || '',
-          skala: data[`[NonOpt ${idx+1}] ${item} - Skala (1-4)`]?.toString() || '',
-          catatan: data[`[NonOpt ${idx+1}] ${item} - Catatan`] || ''
-        };
-      });
-
-      // Parse Wawancara if already filled
-      const qHeaders = [
-        "[W1] Pendapat terkait layanan penyakit kronik (kapitasi)",
-        "[W2] Implementasi home visit/care (manfaat non-kapitasi)",
-        "[W3] Implementasi komunitas/edukasi kelompok",
-        "[W4] Paliatif primer masuk manfaat JKN?",
-        "[W5] Keterlibatan Sp.KKLP dalam PRB",
-        "[W6] Perubahan faskes dengan adanya Sp.KKLP",
-        "[W7] Apakah Sp.KKLP perlu insentif tambahan?"
-      ];
-      qHeaders.forEach((q, idx) => {
-        parsed.wawancara[idx] = data[q] || '';
-      });
-
-      setFormData(parsed);
     }
   }, [isInterview, location.state]);
 
@@ -193,21 +157,44 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
     
     try {
       const payload = {
-        action: isInterview ? 'updateSurveyWawancara' : 'submitSurvey',
-        data: formData
+        fktp_name: formData.fktpName,
+        city: formData.city,
+        role: formData.role,
+        doc_umum: formData.docUmum,
+        doc_gigi: formData.docGigi,
+        doc_kklp: formData.docKklp,
+        time_in_poli: formData.timeInPoli,
+        time_home_visit: formData.timeHomeVisit,
+        prop_in_fktp: formData.propInFktp,
+        prop_out_fktp: formData.propOutFktp,
+        kompetensi: formData.kompetensi,
+        jkn: formData.jkn,
+        non_optimal: formData.nonOptimal,
+        wawancara: formData.wawancara
       };
 
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      
+      let error;
+      if (isInterview && formData.id) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('surveys')
+          .update(payload)
+          .eq('id', formData.id);
+        error = updateError;
+      } else {
+        // Insert new record
+        const { error: insertError } = await supabase
+          .from('surveys')
+          .insert([payload]);
+        error = insertError;
+      }
+
+      if (error) throw error;
       setIsSubmitted(true);
+      
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
+      alert('Terjadi kesalahan saat menyimpan data ke Supabase. Silakan coba lagi.');
     } finally {
       setIsSubmitting(false);
     }
@@ -463,6 +450,20 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
                   <h2 className="text-xl font-bold text-slate-800">D. Layanan yang Belum Optimal / Tidak Terakomodasi</h2>
+                </div>
+
+                <div className="border border-blue-100 bg-blue-50/50 rounded-lg p-4 flex items-start space-x-3 mb-6">
+                  <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-blue-900">
+                    <span className="font-semibold block mb-1">Panduan Penilaian:</span>
+                    Pilih <strong>Ya/Tidak</strong> apakah layanan perlu diakomodasi ke JKN. Berikan nilai <strong>Skala (1-4)</strong> kompetensi:
+                    <ul className="list-decimal pl-5 mt-1 space-y-1">
+                      <li>Dapat optimal dilakukan dokter umum</li>
+                      <li>Dokter umum perlu pelatihan tambahan</li>
+                      <li>Lebih baik dengan supervisi/kolaborasi Sp.KKLP</li>
+                      <li>Kompetensi utama Sp.KKLP</li>
+                    </ul>
+                  </div>
                 </div>
 
                 <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">

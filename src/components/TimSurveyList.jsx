@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Search, ClipboardList, CheckCircle } from 'lucide-react';
-
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDiWEJm0LJwkjYmUDbrt5KLNx42uMERm7TtobhxoYs9ygRnz92cuT9Bwr_C-YJ9qTVwQ/exec';
+import { supabase } from '../supabaseClient';
 
 export default function TimSurveyList() {
   const [surveys, setSurveys] = useState([]);
@@ -17,22 +16,24 @@ export default function TimSurveyList() {
   const fetchSurveys = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${SCRIPT_URL}?action=getSurveys`);
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setSurveys(data);
-      }
+      const { data, error } = await supabase
+        .from('surveys')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      setSurveys(data || []);
     } catch (error) {
       console.error("Gagal memuat data:", error);
-      alert("Gagal memuat daftar Puskesmas.");
+      alert("Gagal memuat daftar Puskesmas dari Supabase.");
     } finally {
       setLoading(false);
     }
   };
 
   const filteredSurveys = surveys.filter(s => 
-    (s['Nama FKTP'] || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (s['Kabupaten/Kota'] || '').toLowerCase().includes(searchTerm.toLowerCase())
+    (s.fktp_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.city || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -86,14 +87,14 @@ export default function TimSurveyList() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredSurveys.map((row, idx) => {
-                  // Cek apakah pertanyaan wawancara 1 sudah diisi (asumsi: jika satu terisi, wawancara sudah dilakukan)
-                  const isWawancaraSelesai = !!row['[W1] Pendapat terkait layanan penyakit kronik (kapitasi)'];
+                  // Cek apakah pertanyaan wawancara 1 sudah diisi (asumsi: indeks 0)
+                  const isWawancaraSelesai = row.wawancara && row.wawancara['0'] && row.wawancara['0'].trim() !== '';
                   
                   return (
-                    <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-slate-900">{row['Nama FKTP']}</td>
-                      <td className="px-6 py-4 text-slate-600">{row['Kabupaten/Kota']}</td>
-                      <td className="px-6 py-4 text-slate-500">{new Date(row['Timestamp']).toLocaleDateString('id-ID')}</td>
+                    <tr key={row.id || idx} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-slate-900">{row.fktp_name}</td>
+                      <td className="px-6 py-4 text-slate-600">{row.city}</td>
+                      <td className="px-6 py-4 text-slate-500">{new Date(row.created_at).toLocaleDateString('id-ID')}</td>
                       <td className="px-6 py-4 text-center">
                         {isWawancaraSelesai ? (
                           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
