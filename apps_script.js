@@ -142,8 +142,40 @@ function doPost(e) {
   }
 }
 
-// Fungsi opsional untuk menguji Web App jika diakses via Browser (GET)
+// Fungsi doGet untuk mengembalikan data (JSON) agar bisa dibaca oleh Dashboard
 function doGet(e) {
-  return ContentService.createTextOutput("Web App Survey KKLP Aktif!")
-    .setMimeType(ContentService.MimeType.TEXT);
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+    if (!sheet) {
+      return ContentService.createTextOutput(JSON.stringify([]))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    if (data.length <= 1) {
+      return ContentService.createTextOutput(JSON.stringify([]))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const headers = data[0];
+    const rows = data.slice(1);
+    const result = rows.map(row => {
+      let obj = {};
+      headers.forEach((header, i) => {
+        // Konversi tipe Date menjadi ISO string agar valid di JSON
+        if (row[i] instanceof Date) {
+          obj[header] = row[i].toISOString();
+        } else {
+          obj[header] = row[i];
+        }
+      });
+      return obj;
+    });
+    
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ error: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }

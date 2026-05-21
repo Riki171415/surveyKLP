@@ -419,7 +419,13 @@ export default function SurveyForm({ isEdit = false }) {
                   <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-blue-900">
                     <span className="font-semibold block mb-1">Panduan Penilaian:</span>
-                    Pilih <strong>Ya/Tidak</strong> apakah layanan perlu diakomodasi ke JKN. Berikan nilai <strong>Skala (1-4)</strong> kompetensi seperti panduan di halaman sebelumnya.
+                    Pilih <strong>Ya/Tidak</strong> apakah layanan perlu diakomodasi ke JKN. Berikan nilai <strong>Skala (1-4)</strong> kompetensi:
+                    <ul className="list-decimal pl-5 mt-1 space-y-1">
+                      <li>Dapat optimal dilakukan dokter umum</li>
+                      <li>Dokter umum perlu pelatihan tambahan</li>
+                      <li>Lebih baik dengan supervisi/kolaborasi Sp.KKLP</li>
+                      <li>Kompetensi utama Sp.KKLP</li>
+                    </ul>
                   </div>
                 </div>
 
