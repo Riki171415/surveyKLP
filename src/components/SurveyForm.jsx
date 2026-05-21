@@ -1,82 +1,133 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronRight, ChevronLeft, Save, CheckCircle, Info } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDiWEJm0LJwkjYmUDbrt5KLNx42uMERm7TtobhxoYs9ygRnz92cuT9Bwr_C-YJ9qTVwQ/exec';
 
 const jknBenefits = [
-  "Pengelolaan Diabetes Melitus tanpa komplikasi",
-  "Penyusunan care plan jangka panjang pasien kronik",
-  "Manajemen pasien dengan multimorbiditas (DM + hipertensi + dislipidemia)",
-  "Pemantauan kepatuhan terapi pasien kronik (penyakit tidak menular)",
-  "Pemantauan kepatuhan terapi pasien AIDS, TB, Malaria",
-  "Pelaksanaan Program Rujuk Balik (PRB)",
-  "Pengelolaan Hipertensi tanpa komplikasi",
-  "Deprescribing/pengurangan obat pada pasien polifarmasi",
-  "Homecare pasien kronik stabil",
-  "Home care pasien dengan keterbatasan mobilitas",
-  "Discharge planning pasca rawat inap",
-  "Koordinasi rujuk balik FKRTL-FKTP",
-  "Pelayanan paliatif primer di rumah",
-  "Intervensi keluarga pada pasien kronik",
-  "Pembinaan Posbindu PTM",
-  "Edukasi kelompok pasien DM dan hipertensi",
-  "Monitoring komunitas risiko tinggi",
-  "Koordinasi lintas profesi dan kader kesehatan"
+  "Pengelolaan Diabetes Melitus tanpa komplikasi", "Penyusunan care plan jangka panjang pasien kronik",
+  "Manajemen pasien dengan multimorbiditas (DM + hipertensi + dislipidemia)", "Pemantauan kepatuhan terapi pasien kronik (penyakit tidak menular)",
+  "Pemantauan kepatuhan terapi pasien AIDS, TB, Malaria", "Pelaksanaan Program Rujuk Balik (PRB)",
+  "Pengelolaan Hipertensi tanpa komplikasi", "Deprescribing/pengurangan obat pada pasien polifarmasi",
+  "Homecare pasien kronik stabil", "Home care pasien dengan keterbatasan mobilitas",
+  "Discharge planning pasca rawat inap", "Koordinasi rujuk balik FKRTL-FKTP",
+  "Pelayanan paliatif primer di rumah", "Intervensi keluarga pada pasien kronik",
+  "Pembinaan Posbindu PTM", "Edukasi kelompok pasien DM dan hipertensi",
+  "Monitoring komunitas risiko tinggi", "Koordinasi lintas profesi dan kader kesehatan"
 ];
 
 const nonOptimalServices = [
-  "Home care penyakit kronik terintegrasi",
-  "Konsultasi keluarga dan family conference",
-  "Pelayanan lifestyle medicine",
-  "Pelayanan wellness dan healthy aging",
-  "Konsultasi perjalanan/travel medicine",
-  "Pelayanan paliatif komunitas",
-  "Manajemen pasien geriatri frailty",
-  "Precision medicine/konseling genetik dasar",
-  "Monitoring pasien kronik berbasis komunitas",
-  "Program edukasi kelompok kronik terstruktur",
-  "Telemonitoring pasien kronik",
-  "Pelayanan transisi FKRTL-FKTP",
-  "Konseling kepatuhan pengobatan jangka panjang",
-  "Deprescribing dan medication review",
+  "Home care penyakit kronik terintegrasi", "Konsultasi keluarga dan family conference",
+  "Pelayanan lifestyle medicine", "Pelayanan wellness dan healthy aging",
+  "Konsultasi perjalanan/travel medicine", "Pelayanan paliatif komunitas",
+  "Manajemen pasien geriatri frailty", "Precision medicine/konseling genetik dasar",
+  "Monitoring pasien kronik berbasis komunitas", "Program edukasi kelompok kronik terstruktur",
+  "Telemonitoring pasien kronik", "Pelayanan transisi FKRTL-FKTP",
+  "Konseling kepatuhan pengobatan jangka panjang", "Deprescribing dan medication review",
   "Layanan promotif berbasis keluarga"
 ];
 
 const kompetensiLayanan = [
-  "Manajemen pasien dengan multimorbiditas kompleks",
-  "Pemeriksaan USG Dasar untuk penegakan diagnosis",
-  "Deprescribing (pengurangan/rasionalisasi obat pasien kronis)",
-  "Family Conference (Konsultasi keluarga untuk penyelesaian masalah klinis/psikososial)",
-  "Home Care Klinis dengan intervensi medis komprehensif",
-  "Pelayanan Paliatif Primer (manajemen nyeri/akhir hayat) di rumah",
+  "Manajemen pasien dengan multimorbiditas kompleks", "Pemeriksaan USG Dasar untuk penegakan diagnosis",
+  "Deprescribing (pengurangan/rasionalisasi obat pasien kronis)", "Family Conference (Konsultasi keluarga untuk penyelesaian masalah klinis/psikososial)",
+  "Home Care Klinis dengan intervensi medis komprehensif", "Pelayanan Paliatif Primer (manajemen nyeri/akhir hayat) di rumah",
   "Pemeriksaan Xray untuk penegakan diagnosis"
 ];
 
-const STEPS = [
-  { id: 1, title: 'Identitas' },
-  { id: 2, title: 'Beban Kerja' },
-  { id: 3, title: 'Manfaat JKN' },
-  { id: 4, title: 'Layanan Ekstra' }
+const interviewQuestions = [
+  "1. Bagaimana pendapat anda terkait layanan penyakit kronik? (probing terkait apakah perlu mendapatkan kapitasi berbasis kinerja untuk kompetensi Sp.KKLP)",
+  "2. Bagaimana implementasi home visit dan home care saat ini? apakah perlu menjadi manfaat non-kapitasi JKN? Atau ada opsi fund channeling lain?",
+  "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini? apakah perlu menjadi manfaat non-kapitasi JKN? Atau ada opsi fund channeling lain? (probing: isi aktivitasnya apa saja)",
+  "4. Menurut anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN FKTP?",
+  "5. Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB dengan adanya sp.KKLP?",
+  "6. Menurut anda apakah ada perubahan yang dirasakan oleh faskes dengan adanya Sp.KKLP?",
+  "7. Menurut anda apakah FKTP dengan dokter Sp.KKLP perlu mendapatkan insentif tambahan? Jelaskan alasannya"
 ];
 
-export default function SurveyForm({ isEdit = false }) {
+export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const [step, setStep] = useState(1);
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const STEPS = [
+    { id: 1, title: 'Identitas' },
+    { id: 2, title: 'Beban Kerja' },
+    { id: 3, title: 'Manfaat JKN' },
+    { id: 4, title: 'Layanan Ekstra' },
+    ...(isInterview ? [{ id: 5, title: 'Wawancara' }] : [])
+  ];
+
+  const totalSteps = isInterview ? 5 : 4;
+
   const [formData, setFormData] = useState({
-    fktpName: '',
-    city: '',
-    role: '',
-    docUmum: false,
-    docGigi: false,
-    docKklp: false,
-    timeInPoli: '',
-    timeHomeVisit: '',
-    propInFktp: '',
-    propOutFktp: '',
-    kompetensi: {},
-    jkn: {},
-    nonOptimal: {}
+    _rowIndex: null,
+    fktpName: '', city: '', role: '',
+    docUmum: false, docGigi: false, docKklp: false,
+    timeInPoli: '', timeHomeVisit: '', propInFktp: '', propOutFktp: '',
+    kompetensi: {}, jkn: {}, nonOptimal: {}, wawancara: {}
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Parse data if coming from Interview List
+    if (isInterview && location.state?.surveyData) {
+      const data = location.state.surveyData;
+      let parsed = {
+        _rowIndex: data._rowIndex,
+        fktpName: data['Nama FKTP'] || '',
+        city: data['Kabupaten/Kota'] || '',
+        role: data['Jabatan'] || '',
+        docUmum: data['Dokter Umum'] === 'Ada',
+        docGigi: data['Dokter Gigi'] === 'Ada',
+        docKklp: data['Dokter Sp.KKLP'] === 'Ada',
+        timeInPoli: data['Waktu Poli (mnt)'] || '',
+        timeHomeVisit: data['Waktu Home Visit (mnt)'] || '',
+        propInFktp: data['Proporsi Dalam (%)'] || '',
+        propOutFktp: data['Proporsi Luar (%)'] || '',
+        kompetensi: {}, jkn: {}, nonOptimal: {}, wawancara: {}
+      };
+
+      kompetensiLayanan.forEach((item, idx) => {
+        parsed.kompetensi[idx] = {
+          status: data[`[Komp ${idx+1}] ${item} - Status`] || '',
+          kendala: data[`[Komp ${idx+1}] ${item} - Kendala`] || ''
+        };
+      });
+
+      jknBenefits.forEach((item, idx) => {
+        parsed.jkn[idx] = {
+          skala: data[`[JKN ${idx+1}] ${item} - Skala (1-4)`]?.toString() || '',
+          catatan: data[`[JKN ${idx+1}] ${item} - Catatan`] || ''
+        };
+      });
+
+      nonOptimalServices.forEach((item, idx) => {
+        parsed.nonOptimal[idx] = {
+          masukJkn: data[`[NonOpt ${idx+1}] ${item} - Masuk JKN?`] || '',
+          skala: data[`[NonOpt ${idx+1}] ${item} - Skala (1-4)`]?.toString() || '',
+          catatan: data[`[NonOpt ${idx+1}] ${item} - Catatan`] || ''
+        };
+      });
+
+      // Parse Wawancara if already filled
+      const qHeaders = [
+        "[W1] Pendapat terkait layanan penyakit kronik (kapitasi)",
+        "[W2] Implementasi home visit/care (manfaat non-kapitasi)",
+        "[W3] Implementasi komunitas/edukasi kelompok",
+        "[W4] Paliatif primer masuk manfaat JKN?",
+        "[W5] Keterlibatan Sp.KKLP dalam PRB",
+        "[W6] Perubahan faskes dengan adanya Sp.KKLP",
+        "[W7] Apakah Sp.KKLP perlu insentif tambahan?"
+      ];
+      qHeaders.forEach((q, idx) => {
+        parsed.wawancara[idx] = data[q] || '';
+      });
+
+      setFormData(parsed);
+    }
+  }, [isInterview, location.state]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -99,6 +150,16 @@ export default function SurveyForm({ isEdit = false }) {
     }));
   };
 
+  const handleWawancaraChange = (idx, value) => {
+    setFormData(prev => ({
+      ...prev,
+      wawancara: {
+        ...prev.wawancara,
+        [idx]: value
+      }
+    }));
+  };
+
   // Validasi Step
   const isStep1Valid = formData.fktpName.trim() !== '' && formData.city.trim() !== '' && formData.role !== '';
   const isStep2Valid = formData.timeInPoli !== '' && formData.timeHomeVisit !== '' && 
@@ -107,35 +168,40 @@ export default function SurveyForm({ isEdit = false }) {
                        kompetensiLayanan.every((_, idx) => formData.kompetensi[idx]?.status);
   const isStep3Valid = jknBenefits.every((_, idx) => formData.jkn[idx]?.skala);
   const isStep4Valid = nonOptimalServices.every((_, idx) => formData.nonOptimal[idx]?.masukJkn && formData.nonOptimal[idx]?.skala);
+  const isStep5Valid = interviewQuestions.every((_, idx) => formData.wawancara[idx]?.trim() !== '');
 
   const canProceed = () => {
     if (step === 1) return isStep1Valid;
     if (step === 2) return isStep2Valid;
     if (step === 3) return isStep3Valid;
     if (step === 4) return isStep4Valid;
+    if (step === 5) return isStep5Valid;
     return false;
   };
 
   const nextStep = () => {
-    if (canProceed()) setStep(prev => Math.min(prev + 1, 4));
+    if (canProceed()) setStep(prev => Math.min(prev + 1, totalSteps));
   };
   
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
   const submitData = async () => {
-    if (!isStep4Valid) return;
+    if (isInterview && !isStep5Valid) return;
+    if (!isInterview && !isStep4Valid) return;
+    
     setIsSubmitting(true);
     
     try {
-      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDiWEJm0LJwkjYmUDbrt5KLNx42uMERm7TtobhxoYs9ygRnz92cuT9Bwr_C-YJ9qTVwQ/exec';
-      
+      const payload = {
+        action: isInterview ? 'updateSurveyWawancara' : 'submitSurvey',
+        data: formData
+      };
+
       await fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
       
       setIsSubmitted(true);
@@ -152,12 +218,15 @@ export default function SurveyForm({ isEdit = false }) {
       <div className="max-w-2xl mx-auto p-12 bg-white rounded-xl shadow-sm border border-slate-200 text-center animate-fade-in mt-10">
         <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-6" />
         <h2 className="text-3xl font-bold text-slate-800 mb-3 tracking-tight">Data Berhasil Disimpan</h2>
-        <p className="text-slate-500 mb-8 text-lg">Terima kasih atas partisipasi Anda dalam Survey Optimalisasi JKN di FPKTP.</p>
+        <p className="text-slate-500 mb-8 text-lg">Terima kasih atas partisipasi Anda.</p>
         <button 
-          onClick={() => window.location.reload()}
+          onClick={() => {
+            if (isInterview) navigate('/wawancara');
+            else window.location.reload();
+          }}
           className="bg-slate-900 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-slate-800 transition-colors shadow-sm"
         >
-          Isi Survey Baru
+          {isInterview ? 'Kembali ke Daftar' : 'Isi Survey Baru'}
         </button>
       </div>
     );
@@ -168,19 +237,21 @@ export default function SurveyForm({ isEdit = false }) {
       {/* Header Section */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-          Formulir Survey JKN
+          {isInterview ? 'Form Wawancara (Tim Survey)' : 'Formulir Survey JKN'}
         </h1>
         <p className="text-slate-500 mt-2 text-sm max-w-2xl">
-          Survey optimalisasi program JKN di FPKTP dalam rangka Transformasi Layanan Primer & Peran Dokter Sp.KKLP.
+          {isInterview 
+            ? 'Anda sedang dalam mode Tim Survey. Anda dapat mengedit jawaban Puskesmas dan mengisi hasil wawancara di Tahap 5.' 
+            : 'Survey optimalisasi program JKN di FPKTP dalam rangka Transformasi Layanan Primer & Peran Dokter Sp.KKLP.'}
         </p>
       </div>
 
       {/* Enterprise Stepper */}
-      <div className="mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-        <div className="flex items-center justify-between relative">
+      <div className="mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <div className="flex items-center justify-between relative min-w-[600px]">
           <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-0.5 bg-slate-100 -z-10"></div>
-          {STEPS.map((s, idx) => (
-            <div key={s.id} className="flex flex-col items-center relative z-10 w-1/4">
+          {STEPS.map((s) => (
+            <div key={s.id} className="flex flex-col items-center relative z-10 w-full">
               <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm transition-all duration-300 shadow-sm ${
                 step > s.id 
                   ? 'bg-primary-600 text-white ring-4 ring-primary-50' 
@@ -280,14 +351,6 @@ export default function SurveyForm({ isEdit = false }) {
                   </div>
                 </div>
 
-                <div className="border border-blue-100 bg-blue-50/50 rounded-lg p-4 flex items-start space-x-3 mb-6">
-                  <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-blue-900">
-                    <span className="font-semibold block mb-1">Panduan Pengisian Status:</span>
-                    Pilih <strong>Sudah</strong> jika kompetensi layanan pernah/sedang dilakukan. Pilih <strong>Belum</strong> jika belum diterapkan, lalu isikan alasan di kolom kendala.
-                  </div>
-                </div>
-
                 <div className="border border-slate-200 rounded-lg overflow-hidden">
                   <table className="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
                     <thead className="bg-slate-50 border-b border-slate-200">
@@ -342,19 +405,6 @@ export default function SurveyForm({ isEdit = false }) {
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
                   <h2 className="text-xl font-bold text-slate-800">C. Paket Manfaat JKN Saat Ini</h2>
-                </div>
-                
-                <div className="border border-blue-100 bg-blue-50/50 rounded-lg p-4 flex items-start space-x-3 mb-6">
-                  <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-blue-900">
-                    <span className="font-semibold block mb-1">Skala Penilaian Kompetensi:</span>
-                    <ul className="list-decimal pl-5 space-y-1">
-                      <li>Dapat optimal dilakukan dokter umum</li>
-                      <li>Dokter umum perlu pelatihan tambahan</li>
-                      <li>Lebih baik dengan supervisi/kolaborasi Sp.KKLP</li>
-                      <li>Kompetensi utama Sp.KKLP</li>
-                    </ul>
-                  </div>
                 </div>
                 
                 <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
@@ -413,20 +463,6 @@ export default function SurveyForm({ isEdit = false }) {
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
                   <h2 className="text-xl font-bold text-slate-800">D. Layanan yang Belum Optimal / Tidak Terakomodasi</h2>
-                </div>
-
-                <div className="border border-blue-100 bg-blue-50/50 rounded-lg p-4 flex items-start space-x-3 mb-6">
-                  <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-blue-900">
-                    <span className="font-semibold block mb-1">Panduan Penilaian:</span>
-                    Pilih <strong>Ya/Tidak</strong> apakah layanan perlu diakomodasi ke JKN. Berikan nilai <strong>Skala (1-4)</strong> kompetensi:
-                    <ul className="list-decimal pl-5 mt-1 space-y-1">
-                      <li>Dapat optimal dilakukan dokter umum</li>
-                      <li>Dokter umum perlu pelatihan tambahan</li>
-                      <li>Lebih baik dengan supervisi/kolaborasi Sp.KKLP</li>
-                      <li>Kompetensi utama Sp.KKLP</li>
-                    </ul>
-                  </div>
                 </div>
 
                 <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
@@ -496,6 +532,42 @@ export default function SurveyForm({ isEdit = false }) {
                 </div>
               </div>
             )}
+
+            {/* Step 5: Wawancara (HANYA TIM SURVEY) */}
+            {isInterview && step === 5 && (
+              <div className="space-y-8 animate-fade-in">
+                <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
+                  <div className="w-1 h-6 bg-emerald-600 rounded-full"></div>
+                  <h2 className="text-xl font-bold text-slate-800">E. Rekomendasi Pembiayaan dan Kebijakan (Khusus Tim Survey)</h2>
+                </div>
+                
+                <div className="border border-emerald-100 bg-emerald-50/50 rounded-lg p-4 flex items-start space-x-3 mb-6">
+                  <Info className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-emerald-900">
+                    <span className="font-semibold block mb-1">Panduan Pewawancara:</span>
+                    Silakan gali informasi dari responden berdasarkan pertanyaan berikut. Tuliskan ringkasan jawaban/alasan dengan jelas dan komprehensif. Semua kolom wajib diisi.
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {interviewQuestions.map((question, idx) => (
+                    <div key={idx} className="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                      <label className="block text-sm font-semibold text-slate-800 mb-3 leading-relaxed">
+                        {question}
+                      </label>
+                      <textarea 
+                        rows={4}
+                        required
+                        placeholder="Tuliskan jawaban/alasan di sini..."
+                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y"
+                        value={formData.wawancara[idx] || ''}
+                        onChange={(e) => handleWawancaraChange(idx, e.target.value)}
+                      ></textarea>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Footer Navigation */}
@@ -509,7 +581,7 @@ export default function SurveyForm({ isEdit = false }) {
               <ChevronLeft className="w-4 h-4 mr-1.5" /> Sebelumnya
             </button>
             
-            {step < 4 ? (
+            {step < totalSteps ? (
               <button 
                 type="button" 
                 onClick={nextStep}
