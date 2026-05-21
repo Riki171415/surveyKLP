@@ -5,6 +5,7 @@ import Login from './components/Login';
 import SurveyForm from './components/SurveyForm';
 import Dashboard from './components/Dashboard';
 import TimSurveyList from './components/TimSurveyList';
+import UserManagement from './components/UserManagement';
 import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList } from 'lucide-react';
 
 function ProtectedRoute({ children, allowedRoles = [] }) {
@@ -62,7 +63,7 @@ function Sidebar() {
         {user.role === 'admin' && (
           <>
             <NavItem to="/dashboard" icon={LayoutDashboard}>Dashboard Laporan</NavItem>
-            {/* NavItem to="/users" icon={Users}>Kelola Akun</NavItem> */}
+            <NavItem to="/users" icon={Users}>Kelola Akun</NavItem>
           </>
         )}
       </div>
@@ -101,6 +102,7 @@ function AppContent() {
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<ProtectedRoute allowedRoles={['puskesmas', 'admin']}><SurveyForm /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Dashboard /></ProtectedRoute>} />
+            <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
             <Route path="/wawancara" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><TimSurveyList /></ProtectedRoute>} />
             <Route path="/wawancara/form" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><SurveyForm isEdit={true} isInterview={true} /></ProtectedRoute>} />
           </Routes>
