@@ -72,7 +72,6 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasExistingData, setHasExistingData] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
 
   const uniqueProvinces = [...new Set(Object.values(faskesMapping).map(f => f.provinsi))].sort();
@@ -103,34 +102,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
     }
   }, [isInterview, location.state]);
 
-  // Cek jika Puskesmas sudah submit (Opsi A)
-  useEffect(() => {
-    if (!isInterview && formData.fktpName) {
-      const checkExisting = async () => {
-        setLoadingData(true);
-        try {
-          const { data } = await supabase
-            .from('surveys')
-            .select('id')
-            .eq('fktp_name', formData.fktpName)
-            .single();
-            
-          if (data) {
-            setHasExistingData(true);
-          } else {
-            setHasExistingData(false);
-          }
-        } catch (err) {
-          setHasExistingData(false);
-        } finally {
-          setLoadingData(false);
-        }
-      };
-      checkExisting();
-    } else {
-      setHasExistingData(false);
-    }
-  }, [formData.fktpName, isInterview]);
+
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -166,7 +138,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const isRoleDoctor = formData.role === 'Dokter Umum' || formData.role === 'Dokter Sp.KKLP';
 
   // Validasi Step
-  const isStep1Valid = formData.fktpName.trim() !== '' && formData.city.trim() !== '' && formData.role !== '' && (!hasExistingData || isInterview);
+  const isStep1Valid = formData.fktpName.trim() !== '' && formData.city.trim() !== '' && formData.role !== '';
   const isStep2Valid = isRoleDoctor 
     ? (formData.timeInPoli !== '' && formData.timeHomeVisit !== '' && 
        formData.propInFktp !== '' && formData.propOutFktp !== '' &&
@@ -355,16 +327,6 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {hasExistingData && !isInterview && (
-                    <div className="md:col-span-2 mb-2 bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg flex items-start animate-fade-in">
-                      <Info className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0 text-red-600" />
-                      <div>
-                        <p className="font-bold text-sm">Akses Ditolak (Puskesmas Sudah Mengisi)</p>
-                        <p className="text-sm mt-1">Sistem mendeteksi bahwa <strong>{formData.fktpName}</strong> sudah pernah mengirimkan hasil survey ke dalam sistem. Anda tidak dapat mengisi dua kali. Harap hubungi Admin jika ini adalah kesalahan.</p>
-                      </div>
-                    </div>
-                  )}
-
                   {isInterview ? (
                     <>
                       <div>
@@ -745,11 +707,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
               <button 
                 type="button" 
                 onClick={submitData}
-                disabled={isSubmitting || !canProceed() || (hasExistingData && !isInterview)}
-                className={`flex items-center px-6 py-2 text-white rounded-lg font-medium text-sm transition-all shadow-sm ${isSubmitting || !canProceed() || (hasExistingData && !isInterview) ? 'bg-slate-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'}`}
+                disabled={isSubmitting || !canProceed()}
+                className={`flex items-center px-6 py-2 text-white rounded-lg font-medium text-sm transition-all shadow-sm ${isSubmitting || !canProceed() ? 'bg-slate-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'}`}
               >
-                {hasExistingData && !isInterview ? 'Data Sudah Disimpan' : isSubmitting ? 'Memproses...' : 'Simpan Data'}
-                {!isSubmitting && !(hasExistingData && !isInterview) && <Save className="w-4 h-4 ml-2" />}
+                {isSubmitting ? 'Memproses...' : 'Simpan Data'}
+                {!isSubmitting && <Save className="w-4 h-4 ml-2" />}
               </button>
             )}
           </div>
