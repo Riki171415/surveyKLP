@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LineChart, Line, ComposedChart
 } from 'recharts';
-import { Users, Clock, Home, Activity, Loader2, Filter, LayoutDashboard, Stethoscope, Briefcase, FileText, Database } from 'lucide-react';
+import { Users, Clock, Home, Activity, Loader2, Filter, LayoutDashboard, Stethoscope, Briefcase, FileText, Database, Download } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 const COLORS = ['#0f172a', '#3b82f6', '#0ea5e9', '#94a3b8', '#10b981', '#f59e0b'];
@@ -125,6 +125,56 @@ export default function Dashboard() {
 
   const totalResponden = filteredData.length;
 
+  const exportToCSV = () => {
+    const headers = [
+      "No", "Waktu Pengisian", "Provinsi/Kota", "Nama Faskes", "Jabatan",
+      "Dokter Umum", "Dokter Gigi", "Sp.KKLP",
+      "Waktu Poli (Mnt)", "Waktu Home Visit (Mnt)", "Beban Dalam Gedung (%)", "Beban Luar Gedung (%)"
+    ];
+    
+    kompetensiLayanan.forEach((k, i) => { headers.push(`[K${i+1}] Status`, `[K${i+1}] Kendala`); });
+    jknBenefits.forEach((j, i) => { headers.push(`[J${i+1}] Skala`, `[J${i+1}] Catatan`); });
+    nonOptimalServices.forEach((no, i) => { headers.push(`[NO${i+1}] Masuk JKN`, `[NO${i+1}] Skala`, `[NO${i+1}] Catatan`); });
+    interviewQuestions.forEach((w, i) => { headers.push(`[W${i+1}] Jawaban`); });
+
+    const rows = filteredData.map((row, index) => {
+      const rowData = [
+        index + 1,
+        new Date(row.created_at).toLocaleString('id-ID'),
+        row.city || '',
+        row.fktp_name || '',
+        row.role || '',
+        row.doc_umum ? 'Ada' : 'Tidak',
+        row.doc_gigi ? 'Ada' : 'Tidak',
+        row.doc_kklp ? 'Ada' : 'Tidak',
+        row.time_in_poli || '',
+        row.time_home_visit || '',
+        row.prop_in_fktp || '',
+        row.prop_out_fktp || ''
+      ];
+
+      kompetensiLayanan.forEach((_, i) => { rowData.push(row.kompetensi?.[i]?.status || '', row.kompetensi?.[i]?.kendala || ''); });
+      jknBenefits.forEach((_, i) => { rowData.push(row.jkn?.[i]?.skala || '', row.jkn?.[i]?.catatan || ''); });
+      nonOptimalServices.forEach((_, i) => { rowData.push(row.non_optimal?.[i]?.masukJkn || '', row.non_optimal?.[i]?.skala || '', row.non_optimal?.[i]?.catatan || ''); });
+      interviewQuestions.forEach((_, i) => { rowData.push(row.wawancara?.[i] || ''); });
+
+      return rowData.map(cell => {
+        const cellStr = String(cell).replace(/"/g, '""').replace(/\n/g, ' ');
+        return `"${cellStr}"`;
+      }).join(';'); // Menggunakan semicolon (;) agar rapi di Excel Indonesia
+    });
+
+    const csvContent = [headers.map(h => `"${h}"`).join(';'), ...rows].join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM untuk UTF-8 Excel
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Rekap_Survey_JKN_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // --- DATA PROCESSING UNTUK MASING-MASING TAB ---
 
   // 1. DATA RINGKASAN
@@ -226,6 +276,15 @@ export default function Dashboard() {
             <option value="Ada">Ada Sp.KKLP</option>
             <option value="Tidak">Tidak Ada Sp.KKLP</option>
           </select>
+          
+          <div className="hidden sm:block w-px h-6 bg-slate-200 mx-1"></div>
+          
+          <button 
+            onClick={exportToCSV}
+            className="flex items-center text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 px-4 rounded-md transition-colors shadow-sm ml-auto"
+          >
+            <Download className="w-4 h-4 mr-2" /> Download Excel
+          </button>
         </div>
       </div>
 
