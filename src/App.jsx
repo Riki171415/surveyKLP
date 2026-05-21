@@ -100,7 +100,9 @@ function AppContent() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<ProtectedRoute allowedRoles={['puskesmas', 'admin']}><SurveyForm /></ProtectedRoute>} />
+            {/* Form Terbuka untuk Publik */}
+            <Route path="/" element={<SurveyForm />} />
+            {/* Halaman Admin / Tim Survey (Dilindungi) */}
             <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Dashboard /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
             <Route path="/wawancara" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><TimSurveyList /></ProtectedRoute>} />

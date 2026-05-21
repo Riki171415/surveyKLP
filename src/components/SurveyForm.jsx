@@ -74,6 +74,9 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const [hasExistingData, setHasExistingData] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
 
+  const uniqueProvinces = [...new Set(Object.values(faskesMapping).map(f => f.provinsi))].sort();
+  const puskesmasList = formData.city ? Object.values(faskesMapping).filter(f => f.provinsi === formData.city).map(f => f.nama).sort() : [];
+
   useEffect(() => {
     // 1. Mode Wawancara (Tim Survey dari Halaman List)
     if (isInterview && location.state?.surveyData) {
@@ -97,65 +100,36 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
       });
       return;
     }
+  }, [isInterview, location.state]);
 
-    // 2. Mode Puskesmas (Auto-fill & Cek Data Lama)
-    if (!isInterview && user && user.role === 'puskesmas') {
-      const pkmInfo = faskesMapping[user.username];
-      
-      const checkExistingData = async (namaFaskes, provinsi) => {
+  // Cek jika Puskesmas sudah submit (Opsi A)
+  useEffect(() => {
+    if (!isInterview && formData.fktpName) {
+      const checkExisting = async () => {
         setLoadingData(true);
         try {
-          const { data, error } = await supabase
+          const { data } = await supabase
             .from('surveys')
-            .select('*')
-            .eq('fktp_name', namaFaskes)
+            .select('id')
+            .eq('fktp_name', formData.fktpName)
             .single();
-
+            
           if (data) {
-            // Data sudah ada, tampilkan isiannya
-            setFormData({
-              id: data.id,
-              fktpName: data.fktp_name || '',
-              city: data.city || '',
-              role: data.role || '',
-              docUmum: data.doc_umum || false,
-              docGigi: data.doc_gigi || false,
-              docKklp: data.doc_kklp || false,
-              timeInPoli: data.time_in_poli || '',
-              timeHomeVisit: data.time_home_visit || '',
-              propInFktp: data.prop_in_fktp || '',
-              propOutFktp: data.prop_out_fktp || '',
-              kompetensi: data.kompetensi || {},
-              jkn: data.jkn || {},
-              nonOptimal: data.non_optimal || {},
-              wawancara: data.wawancara || {}
-            });
             setHasExistingData(true);
           } else {
-            // Belum ada data, set nama dan provinsi dari mapping
-            setFormData(prev => ({
-              ...prev,
-              fktpName: namaFaskes,
-              city: provinsi
-            }));
+            setHasExistingData(false);
           }
         } catch (err) {
-          // Normal jika single() tidak menemukan data
-          setFormData(prev => ({
-            ...prev,
-            fktpName: namaFaskes,
-            city: provinsi
-          }));
+          setHasExistingData(false);
         } finally {
           setLoadingData(false);
         }
       };
-
-      if (pkmInfo) {
-        checkExistingData(pkmInfo.nama, pkmInfo.provinsi);
-      }
+      checkExisting();
+    } else {
+      setHasExistingData(false);
     }
-  }, [isInterview, location.state, user]);
+  }, [formData.fktpName, isInterview]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -188,12 +162,16 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
     }));
   };
 
+  const isRoleDoctor = formData.role === 'Dokter Umum' || formData.role === 'Dokter Sp.KKLP';
+
   // Validasi Step
-  const isStep1Valid = formData.fktpName.trim() !== '' && formData.city.trim() !== '' && formData.role !== '';
-  const isStep2Valid = formData.timeInPoli !== '' && formData.timeHomeVisit !== '' && 
-                       formData.propInFktp !== '' && formData.propOutFktp !== '' &&
-                       (Number(formData.propInFktp) + Number(formData.propOutFktp) === 100) &&
-                       kompetensiLayanan.every((_, idx) => formData.kompetensi[idx]?.status);
+  const isStep1Valid = formData.fktpName.trim() !== '' && formData.city.trim() !== '' && formData.role !== '' && (!hasExistingData || isInterview);
+  const isStep2Valid = isRoleDoctor 
+    ? (formData.timeInPoli !== '' && formData.timeHomeVisit !== '' && 
+       formData.propInFktp !== '' && formData.propOutFktp !== '' &&
+       (Number(formData.propInFktp) + Number(formData.propOutFktp) === 100) &&
+       kompetensiLayanan.every((_, idx) => formData.kompetensi[idx]?.status))
+    : true;
   const isStep3Valid = jknBenefits.every((_, idx) => formData.jkn[idx]?.skala);
   const isStep4Valid = nonOptimalServices.every((_, idx) => formData.nonOptimal[idx]?.masukJkn && formData.nonOptimal[idx]?.skala);
   const isStep5Valid = interviewQuestions.every((_, idx) => formData.wawancara[idx]?.trim() !== '');
@@ -286,28 +264,29 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   return (
     <div className="max-w-5xl mx-auto">
       {/* Header Section */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-          {isInterview ? 'Form Wawancara (Tim Survey)' : 'Formulir Survey JKN'}
-        </h1>
-        <p className="text-slate-500 mt-2 text-sm max-w-2xl">
-          {isInterview 
-            ? 'Anda sedang dalam mode Tim Survey. Anda dapat mengedit jawaban Puskesmas dan mengisi hasil wawancara di Tahap 5.' 
-            : 'Survey optimalisasi program JKN di FPKTP dalam rangka Transformasi Layanan Primer & Peran Dokter Sp.KKLP.'}
-        </p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+            {isInterview ? 'Form Wawancara (Tim Survey)' : 'Formulir Survey JKN'}
+          </h1>
+          <p className="text-slate-500 mt-2 text-sm max-w-2xl">
+            {isInterview 
+              ? 'Anda sedang dalam mode Tim Survey. Anda dapat mengedit jawaban Puskesmas dan mengisi hasil wawancara di Tahap 5.' 
+              : 'Survey optimalisasi program JKN di FPKTP dalam rangka Transformasi Layanan Primer & Peran Dokter Sp.KKLP.'}
+          </p>
+        </div>
+        {!isInterview && (
+          <button 
+            onClick={() => navigate('/login')} 
+            className="shrink-0 bg-white border border-slate-200 text-slate-700 px-5 py-2.5 rounded-lg font-medium hover:bg-slate-50 transition-colors shadow-sm text-sm"
+          >
+            Login Petugas
+          </button>
+        )}
       </div>
 
       {/* Enterprise Stepper */}
       <div className="mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-        {hasExistingData && !isInterview && (
-          <div className="mb-4 bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-lg flex items-start">
-            <Info className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0 text-amber-600" />
-            <div>
-              <p className="font-bold text-sm">Data Sudah Disubmit</p>
-              <p className="text-sm mt-1">Anda sudah mengisi survey ini sebelumnya. Data di bawah ini adalah hasil inputan Anda. Anda tidak dapat menyimpannya ulang.</p>
-            </div>
-          </div>
-        )}
 
         <div className="flex items-center justify-between relative min-w-[600px]">
           <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-0.5 bg-slate-100 -z-10"></div>
@@ -344,21 +323,57 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nama FKTP/Puskesmas</label>
-                    <input required type="text" name="fktpName" value={formData.fktpName} onChange={handleInputChange} readOnly={!isInterview && user?.role === 'puskesmas'} placeholder="Misal: Puskesmas Melati" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 disabled:opacity-70" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Provinsi / Kabupaten/Kota</label>
-                    <input required type="text" name="city" value={formData.city} onChange={handleInputChange} readOnly={!isInterview && user?.role === 'puskesmas'} placeholder="Misal: Kota Bandung" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 disabled:opacity-70" />
-                  </div>
+                  {hasExistingData && !isInterview && (
+                    <div className="md:col-span-2 mb-2 bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg flex items-start animate-fade-in">
+                      <Info className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0 text-red-600" />
+                      <div>
+                        <p className="font-bold text-sm">Akses Ditolak (Puskesmas Sudah Mengisi)</p>
+                        <p className="text-sm mt-1">Sistem mendeteksi bahwa <strong>{formData.fktpName}</strong> sudah pernah mengirimkan hasil survey ke dalam sistem. Anda tidak dapat mengisi dua kali. Harap hubungi Admin jika ini adalah kesalahan.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {isInterview ? (
+                    <>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nama FKTP/Puskesmas</label>
+                        <input type="text" value={formData.fktpName} readOnly className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Provinsi / Kabupaten/Kota</label>
+                        <input type="text" value={formData.city} readOnly className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 outline-none" />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Provinsi</label>
+                        <select required name="city" value={formData.city} onChange={(e) => { handleInputChange(e); setFormData(prev => ({...prev, fktpName: ''})); }} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all">
+                          <option value="">-- Pilih Provinsi --</option>
+                          {uniqueProvinces.map(prov => (
+                            <option key={prov} value={prov}>{prov}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nama FKTP/Puskesmas</label>
+                        <select required name="fktpName" value={formData.fktpName} onChange={handleInputChange} disabled={!formData.city} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all disabled:opacity-50">
+                          <option value="">-- Pilih Puskesmas --</option>
+                          {puskesmasList.map(pkm => (
+                            <option key={pkm} value={pkm}>{pkm}</option>
+                          ))}
+                        </select>
+                        {!formData.city && <p className="text-xs text-amber-600 mt-1">Pilih provinsi terlebih dahulu</p>}
+                      </div>
+                    </>
+                  )}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-slate-700 mb-3">Jabatan <span className="text-xs text-slate-400 font-normal ml-1">(Pilih salah satu)</span></label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Nakes Lainnya'].map(role => (
-                        <label key={role} className={`flex items-center justify-center px-4 py-3 border rounded-lg cursor-pointer transition-all ${formData.role === role ? 'border-primary-600 bg-primary-50 text-primary-700 font-medium' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'}`}>
+                      {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Tenaga Kesehatan Lainnya'].map(role => (
+                        <label key={role} className={`flex items-center justify-center px-4 py-3 border rounded-lg cursor-pointer transition-all text-center leading-tight ${formData.role === role ? 'border-primary-600 bg-primary-50 text-primary-700 font-medium' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'}`}>
                           <input type="radio" name="role" value={role} checked={formData.role === role} onChange={handleInputChange} className="hidden" required />
-                          <span className="text-sm">{role}</span>
+                          <span className="text-xs sm:text-sm">{role}</span>
                         </label>
                       ))}
                     </div>
@@ -393,70 +408,85 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   <h2 className="text-xl font-bold text-slate-800">B. Kompetensi Dokter & Beban Kerja</h2>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-5 bg-slate-50 border border-slate-100 rounded-xl mb-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Rata-rata waktu Poli (mnt/pasien)</label>
-                    <input type="number" name="timeInPoli" value={formData.timeInPoli} onChange={handleInputChange} placeholder="Contoh: 10" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
+                {!isRoleDoctor ? (
+                  <div className="text-center py-16 bg-slate-50 border border-slate-100 rounded-xl">
+                    <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Info className="w-8 h-8" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">Bagian Khusus Dokter</h3>
+                    <p className="text-slate-500 max-w-md mx-auto">
+                      Bagian Kompetensi Dokter dan Beban Kerja ini hanya diperuntukkan bagi responden <strong>Dokter Umum</strong> dan <strong>Dokter Sp.KKLP</strong>.
+                    </p>
+                    <p className="text-slate-500 mt-4 font-medium">Silakan klik "Selanjutnya" di bawah untuk melewati bagian ini.</p>
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Rata-rata waktu Home Visit (mnt/pasien)</label>
-                    <input type="number" name="timeHomeVisit" value={formData.timeHomeVisit} onChange={handleInputChange} placeholder="Contoh: 45" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Beban Dalam Gedung (%)</label>
-                    <input type="number" name="propInFktp" value={formData.propInFktp} onChange={handleInputChange} placeholder="Contoh: 70" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Beban Luar Gedung (%)</label>
-                    <input type="number" name="propOutFktp" value={formData.propOutFktp} onChange={handleInputChange} placeholder="Contoh: 30" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-5 bg-slate-50 border border-slate-100 rounded-xl mb-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Rata-rata waktu Poli (mnt/pasien)</label>
+                        <input type="number" name="timeInPoli" value={formData.timeInPoli} onChange={handleInputChange} placeholder="Contoh: 10" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Rata-rata waktu Home Visit (mnt/pasien)</label>
+                        <input type="number" name="timeHomeVisit" value={formData.timeHomeVisit} onChange={handleInputChange} placeholder="Contoh: 45" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Beban Dalam Gedung (%)</label>
+                        <input type="number" name="propInFktp" value={formData.propInFktp} onChange={handleInputChange} placeholder="Contoh: 70" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Beban Luar Gedung (%)</label>
+                        <input type="number" name="propOutFktp" value={formData.propOutFktp} onChange={handleInputChange} placeholder="Contoh: 30" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
+                      </div>
+                    </div>
 
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
-                    <thead className="bg-slate-50 border-b border-slate-200">
-                      <tr>
-                        <th className="px-4 py-3 font-semibold text-slate-700 w-1/2">Jenis Kompetensi / Layanan</th>
-                        <th className="px-4 py-3 font-semibold text-slate-700 text-center w-1/5">Status</th>
-                        <th className="px-4 py-3 font-semibold text-slate-700 w-3/10">Kendala Utama</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {kompetensiLayanan.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50 transition-colors group">
-                          <td className="px-4 py-3 text-slate-800 text-xs md:text-sm">{item}</td>
-                          <td className="px-4 py-3 text-center">
-                            <div className="flex justify-center gap-2">
-                              {['sudah', 'belum'].map(status => (
-                                <label key={status} className={`cursor-pointer px-3 py-1.5 rounded-md text-xs font-semibold border transition-all ${formData.kompetensi[idx]?.status === status ? 'bg-primary-600 text-white border-primary-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'}`}>
-                                  <input 
-                                    type="radio" 
-                                    className="hidden" 
-                                    name={`komp-${idx}`} 
-                                    value={status}
-                                    checked={formData.kompetensi[idx]?.status === status}
-                                    onChange={(e) => handleNestedChange('kompetensi', idx, 'status', e.target.value)}
-                                  />
-                                  {status === 'sudah' ? 'Sudah' : 'Belum'}
-                                </label>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <input 
-                              type="text" 
-                              placeholder="Kendala (jika belum)..." 
-                              className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md disabled:bg-slate-100 disabled:text-slate-400 focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300"
-                              disabled={formData.kompetensi[idx]?.status === 'sudah'}
-                              value={formData.kompetensi[idx]?.kendala || ''}
-                              onChange={(e) => handleNestedChange('kompetensi', idx, 'kendala', e.target.value)}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    <div className="border border-slate-200 rounded-lg overflow-hidden">
+                      <table className="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
+                        <thead className="bg-slate-50 border-b border-slate-200">
+                          <tr>
+                            <th className="px-4 py-3 font-semibold text-slate-700 w-1/2">Jenis Kompetensi / Layanan</th>
+                            <th className="px-4 py-3 font-semibold text-slate-700 text-center w-1/5">Status</th>
+                            <th className="px-4 py-3 font-semibold text-slate-700 w-3/10">Kendala Utama</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {kompetensiLayanan.map((item, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50 transition-colors group">
+                              <td className="px-4 py-3 text-slate-800 text-xs md:text-sm">{item}</td>
+                              <td className="px-4 py-3 text-center">
+                                <div className="flex justify-center gap-2">
+                                  {['sudah', 'belum'].map(status => (
+                                    <label key={status} className={`cursor-pointer px-3 py-1.5 rounded-md text-xs font-semibold border transition-all ${formData.kompetensi[idx]?.status === status ? 'bg-primary-600 text-white border-primary-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'}`}>
+                                      <input 
+                                        type="radio" 
+                                        className="hidden" 
+                                        name={`komp-${idx}`} 
+                                        value={status}
+                                        checked={formData.kompetensi[idx]?.status === status}
+                                        onChange={(e) => handleNestedChange('kompetensi', idx, 'status', e.target.value)}
+                                      />
+                                      {status === 'sudah' ? 'Sudah' : 'Belum'}
+                                    </label>
+                                  ))}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3">
+                                <input 
+                                  type="text" 
+                                  placeholder="Kendala (jika belum)..." 
+                                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md disabled:bg-slate-100 disabled:text-slate-400 focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300"
+                                  disabled={formData.kompetensi[idx]?.status === 'sudah'}
+                                  value={formData.kompetensi[idx]?.kendala || ''}
+                                  onChange={(e) => handleNestedChange('kompetensi', idx, 'kendala', e.target.value)}
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
