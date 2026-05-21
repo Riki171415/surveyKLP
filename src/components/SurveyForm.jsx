@@ -266,14 +266,19 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
       {/* Header Section */}
       <div className="mb-8 flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-            {isInterview ? 'Form Wawancara (Tim Survey)' : 'Formulir Survey JKN'}
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight leading-tight">
+            {isInterview ? 'Form Wawancara (Tim Survey)' : 'Survey optimalisasi program JKN di FPKTP dalam rangka Transformasi Layanan Primer'}
           </h1>
-          <p className="text-slate-500 mt-2 text-sm max-w-2xl">
-            {isInterview 
-              ? 'Anda sedang dalam mode Tim Survey. Anda dapat mengedit jawaban Puskesmas dan mengisi hasil wawancara di Tahap 5.' 
-              : 'Survey optimalisasi program JKN di FPKTP dalam rangka Transformasi Layanan Primer & Peran Dokter Sp.KKLP.'}
-          </p>
+          {isInterview ? (
+            <p className="text-slate-500 mt-2 text-sm max-w-2xl">
+              Anda sedang dalam mode Tim Survey. Anda dapat mengedit jawaban Puskesmas dan mengisi hasil wawancara di Tahap 5.
+            </p>
+          ) : (
+            <div className="mt-4 text-sm text-slate-600 max-w-4xl text-justify">
+              <span className="font-bold text-slate-800 mb-1 block">Latar Belakang:</span>
+              Survey ini bertujuan mengidentifikasi jenis layanan dalam paket manfaat JKN yang saat ini sudah tersedia maupun layanan yang belum terakomodasi dalam JKN, serta menilai apakah layanan tersebut lebih optimal dengan adanya PMK 19 tahun 2024 terkait penambahan jenis tenaga baru termasuk salah satunya dokter Spesialis Kedokteran Keluarga Layanan Primer (Sp.KKLP)
+            </div>
+          )}
         </div>
         {!isInterview && (
           <button 

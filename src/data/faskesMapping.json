@@ -1,178 +1,186 @@
 {
   "user_0": {
-    "nama": "Puskesmas Temon 2 Kulon Progo",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Banguntapan 1",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_1": {
-    "nama": "Puskesmas Lendah 1",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Bantul 2",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_2": {
-    "nama": "Puskesmas Kretek",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Cangkring Purworejo",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_3": {
-    "nama": "Puskesmas Bantul 2",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Danurejan 2 Kota Yogyakarta",
+    "provinsi": "DI YOGYAKARTA (DIY)"
+  },
+  "user_4": {
+    "nama": "Puskesmas Girisubo",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_5": {
-    "nama": "Puskesmas Jetis 2 Bantul",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Imogiri I",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_6": {
-    "nama": "Puskesmas Cangkring Purworejo",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Jetis 2 Bantul",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_7": {
-    "nama": "Puskesmas Girisubo",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Karangmojo II",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_8": {
-    "nama": "Puskesmas Imogiri I",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Kasihan II",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_9": {
-    "nama": "Puskesmas Karangmojo II",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Kretek",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_10": {
-    "nama": "Puskesmas Kasihan II",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Lendah 1",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_11": {
     "nama": "Puskesmas Nglipar I",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_12": {
     "nama": "Puskesmas Pajangan",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_13": {
-    "nama": "Puskesmas Paliyan",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Paliyan Gunungkidul",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_14": {
     "nama": "Puskesmas Pandak I",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_15": {
     "nama": "Puskesmas Playen II",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_16": {
     "nama": "Puskesmas Pleret",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_17": {
     "nama": "Puskesmas Ponjong I",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_18": {
     "nama": "Puskesmas Ponjong II",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_19": {
     "nama": "Puskesmas Pundong",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_20": {
     "nama": "Puskesmas Sanden",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_21": {
     "nama": "Puskesmas Sedayu I",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_22": {
     "nama": "Puskesmas Sedayu II",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_23": {
     "nama": "Puskesmas Semin II",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_24": {
-    "nama": "Puskesmas Tepus 2",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Tegalrejo",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_25": {
-    "nama": "Puskesmas Wonosari",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Temon 2 Kulon Progo",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_26": {
-    "nama": "Puskesmas Wonosari II",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Tepus 2",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_27": {
     "nama": "Puskesmas Umbulharjo I",
-    "provinsi": "DIY"
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_28": {
-    "nama": "Puskesmas Danurejan 2",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Wonosari",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_29": {
-    "nama": "Puskesmas Tegalrejo",
-    "provinsi": "DIY"
+    "nama": "Puskesmas Wonosari II",
+    "provinsi": "DI YOGYAKARTA (DIY)"
   },
   "user_30": {
-    "nama": "Puskesmas Banguntapan 1",
-    "provinsi": "DIY"
-  },
-  "user_32": {
-    "nama": "Puskesmas Pasirkaliki Kota Bandung",
-    "provinsi": "JAWA BARAT"
-  },
-  "user_33": {
-    "nama": "Puskesmas Sukarasa Kota Bandung",
-    "provinsi": "JAWA BARAT"
-  },
-  "user_34": {
-    "nama": "Puskesmas Margahayu Raya Kota Bandung",
-    "provinsi": "JAWA BARAT"
-  },
-  "user_35": {
-    "nama": "Puskesmas Kopo Kota Bandung",
-    "provinsi": "JAWA BARAT"
-  },
-  "user_36": {
-    "nama": "Puskesmas Pagarsih ,Kota Bandung",
-    "provinsi": "JAWA BARAT"
-  },
-  "user_37": {
-    "nama": "Puskesmas Talagabodas Kota Bandung",
-    "provinsi": "JAWA BARAT"
-  },
-  "user_38": {
-    "nama": "Puskesmas Salam Kota Bandung",
-    "provinsi": "JAWA BARAT"
-  },
-  "user_39": {
     "nama": "Puskesmas Cibinong",
     "provinsi": "JAWA BARAT"
   },
-  "user_40": {
-    "nama": "Puskesmas Kiarapandak, Sukajaya",
+  "user_31": {
+    "nama": "Puskesmas Kiarapandak Sukajaya",
     "provinsi": "JAWA BARAT"
   },
-  "user_41": {
-    "nama": "Puskesmas Musuk Boyolali",
-    "provinsi": "JAWA TENGAH"
+  "user_32": {
+    "nama": "Puskesmas Kopo Kota Bandung",
+    "provinsi": "JAWA BARAT"
   },
-  "user_42": {
+  "user_33": {
+    "nama": "Puskesmas Margahayu Raya Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "user_34": {
+    "nama": "Puskesmas Pagarsih Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "user_35": {
+    "nama": "Puskesmas Pasirkaliki Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "user_36": {
+    "nama": "Puskesmas Salam Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "user_37": {
+    "nama": "Puskesmas Sukarasa Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "user_38": {
+    "nama": "Puskesmas Talagabodas Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "user_39": {
     "nama": "Puskesmas Bagelen Purworejo",
     "provinsi": "JAWA TENGAH"
   },
-  "user_43": {
-    "nama": "Puskesmas Sruwohrejo",
+  "user_40": {
+    "nama": "Puskesmas Banyuurip",
     "provinsi": "JAWA TENGAH"
   },
-  "user_44": {
+  "user_41": {
+    "nama": "Puskesmas Banyuputih",
+    "provinsi": "JAWA TENGAH"
+  },
+  "user_42": {
+    "nama": "Puskesmas Bragolan",
+    "provinsi": "JAWA TENGAH"
+  },
+  "user_43": {
     "nama": "Puskesmas Mranti",
     "provinsi": "JAWA TENGAH"
   },
+  "user_44": {
+    "nama": "Puskesmas Musuk Boyolali",
+    "provinsi": "JAWA TENGAH"
+  },
   "user_45": {
-    "nama": "Puskesmas Bragolan",
+    "nama": "Puskesmas Sruwohrejo",
     "provinsi": "JAWA TENGAH"
   },
   "user_46": {
@@ -180,563 +188,559 @@
     "provinsi": "JAWA TENGAH"
   },
   "user_47": {
-    "nama": "Puskesmas Banyuurip",
-    "provinsi": "JAWA TENGAH"
-  },
-  "user_48": {
-    "nama": "Puskesmas Banyuputih",
-    "provinsi": "JAWA TENGAH"
-  },
-  "user_49": {
     "nama": "Puskesmas Winong Kemiri",
     "provinsi": "JAWA TENGAH"
   },
-  "user_50": {
-    "nama": "Puskesmas Kauman Baru",
-    "provinsi": "JAWA TIMUR"
-  },
-  "user_51": {
-    "nama": "Puskesmas Pakis",
-    "provinsi": "JAWA TIMUR"
-  },
-  "user_52": {
+  "user_48": {
     "nama": "PKM Menukan Kulon",
     "provinsi": "JAWA TIMUR"
   },
-  "user_53": {
-    "nama": "Puskesmas Kelurahan Kelapa Gading Timur II",
-    "provinsi": "DKI JAKARTA"
+  "user_49": {
+    "nama": "Puskesmas Kauman Baru",
+    "provinsi": "JAWA TIMUR"
   },
-  "user_54": {
+  "user_50": {
+    "nama": "Puskesmas Pakis",
+    "provinsi": "JAWA TIMUR"
+  },
+  "user_51": {
     "nama": "Puskesmas Kalideres",
     "provinsi": "DKI JAKARTA"
   },
-  "user_55": {
-    "nama": "Puskesmas Kelurahan Taman Sari",
-    "provinsi": "DKI JAKARTA"
-  },
-  "user_56": {
-    "nama": "Puskesmas Kelurahan Tugu Selatan",
-    "provinsi": "DKI JAKARTA"
-  },
-  "user_57": {
-    "nama": "Puskesmas Kelapa Gading",
-    "provinsi": "DKI JAKARTA"
-  },
-  "user_58": {
-    "nama": "Puskesmas Kelurahan Jagakarsa 2",
-    "provinsi": "DKI JAKARTA"
-  },
-  "user_59": {
-    "nama": "Puskesmas Kelurahan Gedong",
-    "provinsi": "DKI JAKARTA"
-  },
-  "user_60": {
-    "nama": "Puskesmas Kelurahan Tebet Barat",
-    "provinsi": "DKI JAKARTA"
-  },
-  "user_61": {
-    "nama": "Puskesmas Kecamatan Penjaringan",
-    "provinsi": "DKI JAKARTA"
-  },
-  "user_62": {
-    "nama": "Puskesmas Kecamatan Pasar Rebo",
-    "provinsi": "DKI JAKARTA"
-  },
-  "user_63": {
-    "nama": "Puskesmas Kecamatan Tambora",
-    "provinsi": "DKI JAKARTA"
-  },
-  "user_64": {
+  "user_52": {
     "nama": "Puskesmas Kecamatan Jagakarsa",
     "provinsi": "DKI JAKARTA"
   },
-  "user_65": {
-    "nama": "Puskesmas Kel.Rawa Badak Selatan",
+  "user_53": {
+    "nama": "Puskesmas Kecamatan Pasar Rebo",
     "provinsi": "DKI JAKARTA"
   },
-  "user_66": {
+  "user_54": {
+    "nama": "Puskesmas Kecamatan Penjaringan",
+    "provinsi": "DKI JAKARTA"
+  },
+  "user_55": {
+    "nama": "Puskesmas Kecamatan Tambora",
+    "provinsi": "DKI JAKARTA"
+  },
+  "user_56": {
     "nama": "Puskesmas Kec. Ciracas",
     "provinsi": "DKI JAKARTA"
   },
-  "user_67": {
-    "nama": "Puskesmas Kelurahan Pekayon",
+  "user_57": {
+    "nama": "Puskesmas Kel. Rawa Badak Selatan",
     "provinsi": "DKI JAKARTA"
   },
-  "user_68": {
-    "nama": "Puskesmas Kel.Kebon Bawang III",
+  "user_58": {
+    "nama": "Puskesmas Kel. Kebon Bawang III",
     "provinsi": "DKI JAKARTA"
   },
-  "user_69": {
-    "nama": "Puskesmas Kelurahan Penjaringan I",
+  "user_59": {
+    "nama": "Puskesmas Kelapa Gading",
     "provinsi": "DKI JAKARTA"
   },
-  "user_70": {
-    "nama": "Puskesmas Kelurahan Pinangsia",
+  "user_60": {
+    "nama": "Puskesmas Kelurahan Gedong",
     "provinsi": "DKI JAKARTA"
   },
-  "user_71": {
+  "user_61": {
     "nama": "Puskesmas Kelurahan Jagakarsa I",
     "provinsi": "DKI JAKARTA"
   },
-  "user_72": {
+  "user_62": {
+    "nama": "Puskesmas Kelurahan Jagakarsa II",
+    "provinsi": "DKI JAKARTA"
+  },
+  "user_63": {
+    "nama": "Puskesmas Kelurahan Kelapa Gading Timur II",
+    "provinsi": "DKI JAKARTA"
+  },
+  "user_64": {
+    "nama": "Puskesmas Kelurahan Pekayon",
+    "provinsi": "DKI JAKARTA"
+  },
+  "user_65": {
+    "nama": "Puskesmas Kelurahan Penjaringan I",
+    "provinsi": "DKI JAKARTA"
+  },
+  "user_66": {
+    "nama": "Puskesmas Kelurahan Pinangsia",
+    "provinsi": "DKI JAKARTA"
+  },
+  "user_67": {
+    "nama": "Puskesmas Kelurahan Taman Sari",
+    "provinsi": "DKI JAKARTA"
+  },
+  "user_68": {
+    "nama": "Puskesmas Kelurahan Tebet Barat",
+    "provinsi": "DKI JAKARTA"
+  },
+  "user_69": {
+    "nama": "Puskesmas Kelurahan Tugu Selatan",
+    "provinsi": "DKI JAKARTA"
+  },
+  "user_70": {
     "nama": "Puskesmas Tanjung Puri",
     "provinsi": "KALIMANTAN BARAT"
   },
-  "user_73": {
-    "nama": "Puskesmas Waymili",
+  "user_71": {
+    "nama": "Puskesmas Bandar Agung",
     "provinsi": "LAMPUNG"
   },
-  "user_74": {
-    "nama": "Puskesmas Pekalongan",
-    "provinsi": "LAMPUNG"
-  },
-  "user_75": {
-    "nama": "Puskesmas Batanghari",
-    "provinsi": "LAMPUNG"
-  },
-  "user_76": {
-    "nama": "Puskesmas Kotagajah",
-    "provinsi": "LAMPUNG"
-  },
-  "user_77": {
-    "nama": "Puskesmas Sribhawono",
-    "provinsi": "LAMPUNG"
-  },
-  "user_78": {
-    "nama": "Puskesmas Margorejo",
-    "provinsi": "LAMPUNG"
-  },
-  "user_79": {
-    "nama": "Puskesmas Sriwijaya Mataram",
-    "provinsi": "LAMPUNG"
-  },
-  "user_80": {
-    "nama": "Puskesmas Rawat Inap Pulau Panggung",
-    "provinsi": "LAMPUNG"
-  },
-  "user_81": {
-    "nama": "Puskesmas Banjar Agung",
-    "provinsi": "LAMPUNG"
-  },
-  "user_82": {
-    "nama": "Puskesmas Hajimena",
-    "provinsi": "LAMPUNG"
-  },
-  "user_83": {
-    "nama": "Puskesmas Merbau Mataram",
-    "provinsi": "LAMPUNG"
-  },
-  "user_84": {
-    "nama": "Puskesmas Gunung Sugih",
-    "provinsi": "LAMPUNG"
-  },
-  "user_85": {
-    "nama": "Puskesmas Baradatu",
-    "provinsi": "LAMPUNG"
-  },
-  "user_86": {
-    "nama": "Puskesmas Wirabangun",
-    "provinsi": "LAMPUNG"
-  },
-  "user_87": {
-    "nama": "Puskesmas Karang Anyar",
-    "provinsi": "LAMPUNG"
-  },
-  "user_88": {
-    "nama": "Puskesmas Rawat Inap Tanjung Sari Natar",
-    "provinsi": "LAMPUNG"
-  },
-  "user_89": {
-    "nama": "Puskesmas Rajabasa Lama",
-    "provinsi": "LAMPUNG"
-  },
-  "user_90": {
-    "nama": "Puskesmas Kalirejo",
-    "provinsi": "LAMPUNG"
-  },
-  "user_91": {
-    "nama": "Puskesmas Branti",
-    "provinsi": "LAMPUNG"
-  },
-  "user_92": {
+  "user_72": {
     "nama": "Puskesmas Bandar Jaya",
     "provinsi": "LAMPUNG"
   },
-  "user_93": {
-    "nama": "Puskesmas Banjit",
-    "provinsi": "LAMPUNG"
-  },
-  "user_94": {
-    "nama": "Puskesmas Rawat Inap Tata Karya",
-    "provinsi": "LAMPUNG"
-  },
-  "user_95": {
-    "nama": "Puskesmas Rawat Inap Gedong Tataan",
-    "provinsi": "LAMPUNG"
-  },
-  "user_97": {
-    "nama": "Puskesmas Rawat Inap Semuli Raya",
-    "provinsi": "LAMPUNG"
-  },
-  "user_98": {
-    "nama": "Puskesmas  Bandar Agung",
-    "provinsi": "LAMPUNG"
-  },
-  "user_100": {
-    "nama": "Puskesmas Sumber Jaya",
-    "provinsi": "LAMPUNG"
-  },
-  "user_101": {
-    "nama": "Puskesmas Tambah Subur",
-    "provinsi": "LAMPUNG"
-  },
-  "user_102": {
-    "nama": "Puskesmas Kasui",
-    "provinsi": "LAMPUNG"
-  },
-  "user_103": {
-    "nama": "Puskesmas Kalianda",
-    "provinsi": "LAMPUNG"
-  },
-  "user_104": {
-    "nama": "Puskesmas Iring Mulyo",
-    "provinsi": "LAMPUNG"
-  },
-  "user_105": {
-    "nama": "Puskesmas Rawat Inap Katibung",
-    "provinsi": "LAMPUNG"
-  },
-  "user_106": {
-    "nama": "Puskesmas Rawat Inap Kedaton",
-    "provinsi": "LAMPUNG"
-  },
-  "user_107": {
+  "user_73": {
     "nama": "Puskesmas Bakauheni",
     "provinsi": "LAMPUNG"
   },
-  "user_108": {
+  "user_74": {
+    "nama": "Puskesmas Banjar Agung",
+    "provinsi": "LAMPUNG"
+  },
+  "user_75": {
+    "nama": "Puskesmas Baradatu",
+    "provinsi": "LAMPUNG"
+  },
+  "user_76": {
+    "nama": "Puskesmas Batanghari",
+    "provinsi": "LAMPUNG"
+  },
+  "user_77": {
+    "nama": "Puskesmas Banjit",
+    "provinsi": "LAMPUNG"
+  },
+  "user_78": {
+    "nama": "Puskesmas Branti",
+    "provinsi": "LAMPUNG"
+  },
+  "user_79": {
+    "nama": "Puskesmas Gunung Sugih",
+    "provinsi": "LAMPUNG"
+  },
+  "user_80": {
+    "nama": "Puskesmas Hajimena",
+    "provinsi": "LAMPUNG"
+  },
+  "user_81": {
+    "nama": "Puskesmas Iring Mulyo",
+    "provinsi": "LAMPUNG"
+  },
+  "user_82": {
+    "nama": "Puskesmas Kalianda",
+    "provinsi": "LAMPUNG"
+  },
+  "user_83": {
+    "nama": "Puskesmas Kalirejo",
+    "provinsi": "LAMPUNG"
+  },
+  "user_84": {
+    "nama": "Puskesmas Karang Anyar",
+    "provinsi": "LAMPUNG"
+  },
+  "user_85": {
+    "nama": "Puskesmas Kasui",
+    "provinsi": "LAMPUNG"
+  },
+  "user_86": {
+    "nama": "Puskesmas Kotagajah",
+    "provinsi": "LAMPUNG"
+  },
+  "user_87": {
+    "nama": "Puskesmas Margorejo",
+    "provinsi": "LAMPUNG"
+  },
+  "user_88": {
+    "nama": "Puskesmas Merbau Mataram",
+    "provinsi": "LAMPUNG"
+  },
+  "user_89": {
+    "nama": "Puskesmas Pekalongan",
+    "provinsi": "LAMPUNG"
+  },
+  "user_90": {
+    "nama": "Puskesmas Rajabasa Lama",
+    "provinsi": "LAMPUNG"
+  },
+  "user_91": {
+    "nama": "Puskesmas Rawat Inap Gedong Tataan",
+    "provinsi": "LAMPUNG"
+  },
+  "user_92": {
+    "nama": "Puskesmas Rawat Inap Katibung",
+    "provinsi": "LAMPUNG"
+  },
+  "user_93": {
+    "nama": "Puskesmas Rawat Inap Kedaton",
+    "provinsi": "LAMPUNG"
+  },
+  "user_94": {
+    "nama": "Puskesmas Rawat Inap Pulau Panggung",
+    "provinsi": "LAMPUNG"
+  },
+  "user_95": {
+    "nama": "Puskesmas Rawat Inap Semuli Raya",
+    "provinsi": "LAMPUNG"
+  },
+  "user_96": {
+    "nama": "Puskesmas Rawat Inap Sriwijaya Mataram Lampung Tengah",
+    "provinsi": "LAMPUNG"
+  },
+  "user_97": {
+    "nama": "Puskesmas Rawat Inap Tata Karya",
+    "provinsi": "LAMPUNG"
+  },
+  "user_98": {
+    "nama": "Puskesmas Rawat Inap Tanjung Sari Natar",
+    "provinsi": "LAMPUNG"
+  },
+  "user_99": {
+    "nama": "Puskesmas Sriwijaya Mataram",
+    "provinsi": "LAMPUNG"
+  },
+  "user_100": {
     "nama": "Puskesmas Sragi",
     "provinsi": "LAMPUNG"
   },
-  "user_109": {
+  "user_101": {
+    "nama": "Puskesmas Sribhawono",
+    "provinsi": "LAMPUNG"
+  },
+  "user_102": {
+    "nama": "Puskesmas Sumber Jaya",
+    "provinsi": "LAMPUNG"
+  },
+  "user_103": {
+    "nama": "Puskesmas Tambah Subur",
+    "provinsi": "LAMPUNG"
+  },
+  "user_104": {
+    "nama": "Puskesmas Waymili",
+    "provinsi": "LAMPUNG"
+  },
+  "user_105": {
     "nama": "Puskesmas Way Panji",
     "provinsi": "LAMPUNG"
   },
-  "user_110": {
+  "user_106": {
+    "nama": "Puskesmas Wirabangun",
+    "provinsi": "LAMPUNG"
+  },
+  "user_107": {
     "nama": "Puskesmas Walantaka Kota Serang",
     "provinsi": "BANTEN"
   },
+  "user_108": {
+    "nama": "Praktik Mandiri",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "user_109": {
+    "nama": "Puskesmas Batu Kambing",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "user_110": {
+    "nama": "Puskesmas Gulai Bancah",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "user_111": {
+    "nama": "Puskesmas IV Koto Agam",
+    "provinsi": "SUMATERA BARAT"
+  },
   "user_112": {
-    "nama": "Pukesmas Sungai Pua",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_113": {
-    "nama": "Pukesmas Simp. Empat",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_114": {
-    "nama": "Pukesmas Pegang Biru",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_115": {
-    "nama": "Pukesmas Sukamenanti",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_116": {
-    "nama": "Pukesmas Nanggalo",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_117": {
-    "nama": "Pukesmas Naras",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_118": {
-    "nama": "Pukesmas Muaro Bodi",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_119": {
-    "nama": "Pukesmas IV koto Agam",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_120": {
-    "nama": "Pukesmas Pauh",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_121": {
-    "nama": "Praktek Mandiri",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_122": {
-    "nama": "Pukesmas Sitiung 1",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_123": {
-    "nama": "Pukesmas Koto Katiak",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_125": {
-    "nama": "Puskesmas Nan Balimo",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_126": {
-    "nama": "Pukesmas Gulai Bancah",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_127": {
-    "nama": "Pukesmas Rawang",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_128": {
-    "nama": "Pukesmas Mandiangin",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_129": {
-    "nama": "Pukesmas Rasimah Ahmad",
-    "provinsi": "SUMATERA BARAT"
-  },
-  "user_130": {
     "nama": "Puskesmas Kapau",
     "provinsi": "SUMATERA BARAT"
   },
-  "user_131": {
-    "nama": "Pukesmas Tigo baleh",
+  "user_113": {
+    "nama": "Puskesmas Koto Katiak",
     "provinsi": "SUMATERA BARAT"
   },
-  "user_132": {
-    "nama": "Pukesms Pakan Kamis",
+  "user_114": {
+    "nama": "Puskesmas Mandiangin",
     "provinsi": "SUMATERA BARAT"
   },
-  "user_133": {
-    "nama": "Pukesmas Batu Kambing",
+  "user_115": {
+    "nama": "Puskesmas Muaro Bodi",
     "provinsi": "SUMATERA BARAT"
   },
-  "user_134": {
-    "nama": "Puskesmas Tabanan II",
-    "provinsi": "BALI"
+  "user_116": {
+    "nama": "Puskesmas Nan Balimo",
+    "provinsi": "SUMATERA BARAT"
   },
-  "user_135": {
-    "nama": "Puskesmas Blahbatuh II",
-    "provinsi": "BALI"
+  "user_117": {
+    "nama": "Puskesmas Nanggalo",
+    "provinsi": "SUMATERA BARAT"
   },
-  "user_136": {
-    "nama": "Puskesmas Banjarangkan I",
-    "provinsi": "BALI"
+  "user_118": {
+    "nama": "Puskesmas Naras",
+    "provinsi": "SUMATERA BARAT"
   },
-  "user_137": {
-    "nama": "Puskesmas Gianyar I",
-    "provinsi": "BALI"
+  "user_119": {
+    "nama": "Puskesmas Pakan Kamis",
+    "provinsi": "SUMATERA BARAT"
   },
-  "user_138": {
-    "nama": "Puskesmas Tabanan III",
-    "provinsi": "BALI"
+  "user_120": {
+    "nama": "Puskesmas Pauh",
+    "provinsi": "SUMATERA BARAT"
   },
-  "user_139": {
-    "nama": "Puskesmas Seririt 1",
-    "provinsi": "BALI"
+  "user_121": {
+    "nama": "Puskesmas Pegang Biru",
+    "provinsi": "SUMATERA BARAT"
   },
-  "user_140": {
-    "nama": "Puskesmas II Denpasar Barat",
-    "provinsi": "BALI"
+  "user_122": {
+    "nama": "Puskesmas Rasimah Ahmad Bukittinggi",
+    "provinsi": "SUMATERA BARAT"
   },
-  "user_141": {
+  "user_123": {
+    "nama": "Puskesmas Rawang",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "user_124": {
+    "nama": "Puskesmas Simp. Empat",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "user_125": {
+    "nama": "Puskesmas Sitiung 1",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "user_126": {
+    "nama": "Puskesmas Sukamenanti",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "user_127": {
+    "nama": "Puskesmas Sungai Pua",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "user_128": {
+    "nama": "Puskesmas Tigo Baleh",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "user_129": {
     "nama": "Puskesmas 1 Dentim",
     "provinsi": "BALI"
   },
-  "user_142": {
-    "nama": "Puskesmas II Pekutatan",
+  "user_130": {
+    "nama": "Puskesmas Banjarangkan I",
     "provinsi": "BALI"
   },
-  "user_143": {
+  "user_131": {
     "nama": "Puskesmas Baturiti 1",
     "provinsi": "BALI"
   },
-  "user_144": {
-    "nama": "Puskesmas IV denpasar Selatan",
+  "user_132": {
+    "nama": "Puskesmas Blahbatuh II",
     "provinsi": "BALI"
   },
-  "user_145": {
+  "user_133": {
+    "nama": "Puskesmas Gianyar I",
+    "provinsi": "BALI"
+  },
+  "user_134": {
+    "nama": "Puskesmas II Denpasar Barat",
+    "provinsi": "BALI"
+  },
+  "user_135": {
+    "nama": "Puskesmas II Pekutatan",
+    "provinsi": "BALI"
+  },
+  "user_136": {
+    "nama": "Puskesmas IV Denpasar Selatan",
+    "provinsi": "BALI"
+  },
+  "user_137": {
     "nama": "Puskesmas Selemadeg Barat",
     "provinsi": "BALI"
   },
-  "user_146": {
+  "user_138": {
+    "nama": "Puskesmas Seririt 1",
+    "provinsi": "BALI"
+  },
+  "user_139": {
+    "nama": "Puskesmas Tabanan II",
+    "provinsi": "BALI"
+  },
+  "user_140": {
+    "nama": "Puskesmas Tabanan III",
+    "provinsi": "BALI"
+  },
+  "user_141": {
     "nama": "Puskesmas Belawan",
     "provinsi": "SUMATERA UTARA"
   },
-  "user_147": {
-    "nama": "Puskesmas Hamparan Perak kab. Deli Serdang",
-    "provinsi": "SUMATERA UTARA"
-  },
-  "user_148": {
+  "user_142": {
     "nama": "Puskesmas Darussalam",
     "provinsi": "SUMATERA UTARA"
   },
-  "user_149": {
-    "nama": "Puskesmas Dolat Rakyat",
-    "provinsi": "SUMATERA UTARA"
-  },
-  "user_150": {
-    "nama": "Puskesmas Sering",
-    "provinsi": "SUMATERA UTARA"
-  },
-  "user_151": {
-    "nama": "Puskesmas Sinunukan",
-    "provinsi": "SUMATERA UTARA"
-  },
-  "user_152": {
-    "nama": "Puskesmas Teladan",
-    "provinsi": "SUMATERA UTARA"
-  },
-  "user_153": {
-    "nama": "Puskesmas Martubung",
-    "provinsi": "SUMATERA UTARA"
-  },
-  "user_154": {
+  "user_143": {
     "nama": "Puskesmas Desa Binjai",
     "provinsi": "SUMATERA UTARA"
   },
-  "user_155": {
-    "nama": "Puskesmas Sukaramai",
+  "user_144": {
+    "nama": "Puskesmas Dolat Rakyat",
     "provinsi": "SUMATERA UTARA"
   },
-  "user_156": {
+  "user_145": {
     "nama": "Puskesmas Galang",
     "provinsi": "SUMATERA UTARA"
   },
-  "user_157": {
-    "nama": "Puskesmas Pintas Tuo",
-    "provinsi": "JAMBI"
+  "user_146": {
+    "nama": "Puskesmas Hamparan Perak Kab. Deli Serdang",
+    "provinsi": "SUMATERA UTARA"
   },
-  "user_158": {
-    "nama": "Puskesmas Tebing Tinggi, Muara Tebo",
-    "provinsi": "JAMBI"
+  "user_147": {
+    "nama": "Puskesmas Martubung",
+    "provinsi": "SUMATERA UTARA"
   },
-  "user_159": {
+  "user_148": {
+    "nama": "Puskesmas Sering",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "user_149": {
+    "nama": "Puskesmas Sinunukan",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "user_150": {
+    "nama": "Puskesmas Sukaramai",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "user_151": {
+    "nama": "Puskesmas Teladan",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "user_152": {
     "nama": "Puskesmas Kuamang Kuning I",
     "provinsi": "JAMBI"
   },
-  "user_160": {
+  "user_153": {
     "nama": "Puskesmas Meranti",
     "provinsi": "JAMBI"
   },
-  "user_162": {
+  "user_154": {
+    "nama": "Puskesmas Muara Tebo",
+    "provinsi": "JAMBI"
+  },
+  "user_155": {
+    "nama": "Puskesmas Pintas Tuo",
+    "provinsi": "JAMBI"
+  },
+  "user_156": {
     "nama": "Puskesmas Rimbo Bujang IX",
     "provinsi": "JAMBI"
   },
-  "user_163": {
-    "nama": "Puskesmas RI Sidomulyo Pekanbaru",
-    "provinsi": "RIAU"
+  "user_157": {
+    "nama": "Puskesmas Tebing Tinggi Muara Tebo",
+    "provinsi": "JAMBI"
   },
-  "user_164": {
-    "nama": "Puskesmas RI Simpang Tiga Pekanbaru",
-    "provinsi": "RIAU"
-  },
-  "user_165": {
-    "nama": "Puskesmas Bandar Sekijang",
-    "provinsi": "RIAU"
-  },
-  "user_166": {
-    "nama": "Puskesmas Langgam",
-    "provinsi": "RIAU"
-  },
-  "user_167": {
-    "nama": "Puskesmas Ukui",
-    "provinsi": "RIAU"
-  },
-  "user_168": {
+  "user_158": {
     "nama": "Puskesmas Bandar Petalangan",
     "provinsi": "RIAU"
   },
-  "user_170": {
-    "nama": "Puskesmas Bengkalia",
-    "provinsi": "RIAU"
-  },
-  "user_171": {
-    "nama": "Puskesmas Perawang Km 6",
-    "provinsi": "RIAU"
-  },
-  "user_172": {
-    "nama": "Puskesmas Pangkalan Kerinci 1",
-    "provinsi": "RIAU"
-  },
-  "user_173": {
-    "nama": "Puskesmas Puter",
-    "provinsi": "RIAU"
-  },
-  "user_174": {
-    "nama": "Puskesmas Purnama",
-    "provinsi": "RIAU"
-  },
-  "user_175": {
-    "nama": "Puskesmas Tanjung Medang",
-    "provinsi": "RIAU"
-  },
-  "user_176": {
+  "user_159": {
     "nama": "Puskesmas Bandar Sei Kijang",
     "provinsi": "RIAU"
   },
-  "user_177": {
-    "nama": "Puskesmas Selat Baru",
+  "user_160": {
+    "nama": "Puskesmas Bengkalia",
     "provinsi": "RIAU"
   },
-  "user_179": {
+  "user_161": {
     "nama": "Puskesmas Kampar Kiri Hilir",
     "provinsi": "RIAU"
   },
-  "user_180": {
+  "user_162": {
+    "nama": "Puskesmas Langgam",
+    "provinsi": "RIAU"
+  },
+  "user_163": {
+    "nama": "Puskesmas Pangkalan Kerinci 1",
+    "provinsi": "RIAU"
+  },
+  "user_164": {
+    "nama": "Puskesmas Perawang KM 6",
+    "provinsi": "RIAU"
+  },
+  "user_165": {
+    "nama": "Puskesmas Purnama",
+    "provinsi": "RIAU"
+  },
+  "user_166": {
+    "nama": "Puskesmas Puter",
+    "provinsi": "RIAU"
+  },
+  "user_167": {
+    "nama": "Puskesmas RI Sidomulyo Pekanbaru",
+    "provinsi": "RIAU"
+  },
+  "user_168": {
+    "nama": "Puskesmas RI Simpang Tiga Pekanbaru",
+    "provinsi": "RIAU"
+  },
+  "user_169": {
+    "nama": "Puskesmas Selat Baru",
+    "provinsi": "RIAU"
+  },
+  "user_170": {
+    "nama": "Puskesmas Tanjung Medang Kecamatan Rupat Utara",
+    "provinsi": "RIAU"
+  },
+  "user_171": {
+    "nama": "Puskesmas Ukui",
+    "provinsi": "RIAU"
+  },
+  "user_172": {
+    "nama": "Puskesmas Kabil Nongsa",
+    "provinsi": "KEPULAUAN RIAU"
+  },
+  "user_173": {
     "nama": "Puskesmas Kawal Bintan",
     "provinsi": "KEPULAUAN RIAU"
   },
-  "user_181": {
-    "nama": "Puskesmas Kabil, Nongsa",
-    "provinsi": "KEPULAUAN RIAU"
-  },
-  "user_182": {
-    "nama": "Puskesmas Multiwahana",
-    "provinsi": "SUMATERA SELATAN"
-  },
-  "user_183": {
-    "nama": "Puskesmas Merdeka",
-    "provinsi": "SUMATERA SELATAN"
-  },
-  "user_184": {
-    "nama": "Puskesmas Prabumulih",
-    "provinsi": "SUMATERA SELATAN"
-  },
-  "user_185": {
-    "nama": "Puskesmas Lima Ilir",
-    "provinsi": "SUMATERA SELATAN"
-  },
-  "user_186": {
+  "user_174": {
     "nama": "Puskesmas 7 Ulu",
     "provinsi": "SUMATERA SELATAN"
   },
-  "user_187": {
-    "nama": "Puskesmas Pakjo",
-    "provinsi": "SUMATERA SELATAN"
-  },
-  "user_188": {
+  "user_175": {
     "nama": "Puskesmas Boom Baru",
     "provinsi": "SUMATERA SELATAN"
   },
-  "user_189": {
+  "user_176": {
+    "nama": "Puskesmas Lima Ilir",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "user_177": {
+    "nama": "Puskesmas Merdeka",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "user_178": {
+    "nama": "Puskesmas Multiwahana",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "user_179": {
     "nama": "Puskesmas Padang Selasa",
     "provinsi": "SUMATERA SELATAN"
   },
-  "user_190": {
-    "nama": "Puskesmas Ulee Kareng",
+  "user_180": {
+    "nama": "Puskesmas Pakjo",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "user_181": {
+    "nama": "Puskesmas Prabumulih",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "user_182": {
+    "nama": "Puskesmas Batoh",
     "provinsi": "ACEH"
   },
-  "user_191": {
-    "nama": "Puskesmas Meuraxa",
-    "provinsi": "ACEH"
-  },
-  "user_192": {
+  "user_183": {
     "nama": "Puskesmas Kuta Alam",
     "provinsi": "ACEH"
   },
-  "user_193": {
-    "nama": "Puskesmas Batoh",
+  "user_184": {
+    "nama": "Puskesmas Meuraxa",
+    "provinsi": "ACEH"
+  },
+  "user_185": {
+    "nama": "Puskesmas Ulee Kareng",
     "provinsi": "ACEH"
   }
 }
