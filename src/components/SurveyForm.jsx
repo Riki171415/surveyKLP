@@ -364,7 +364,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-slate-700 mb-3">Jabatan <span className="text-xs text-slate-400 font-normal ml-1">(Pilih salah satu)</span></label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Tenaga Kesehatan Lainnya'].map(role => (
+                      {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Tenaga Kesehatan Fungsional (Dokter Gigi, Bidan, Perawat, Farmasi)'].map(role => (
                         <label key={role} className={`flex items-center justify-center px-4 py-3 border rounded-lg cursor-pointer transition-all text-center leading-tight ${formData.role === role ? 'border-primary-600 bg-primary-50 text-primary-700 font-medium' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'}`}>
                           <input type="radio" name="role" value={role} checked={formData.role === role} onChange={handleInputChange} className="hidden" required />
                           <span className="text-xs sm:text-sm">{role}</span>
