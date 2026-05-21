@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { ChevronRight, ChevronLeft, Save, CheckCircle, Info } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { useAuth } from './AuthContext';
+import faskesMapping from '../data/faskesMapping.json';
 
 const jknBenefits = [
   "Pengelolaan Diabetes Melitus tanpa komplikasi", "Penyusunan care plan jangka panjang pasien kronik",
@@ -58,6 +60,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
   const totalSteps = isInterview ? 5 : 4;
 
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     id: null,
     fktpName: '', city: '', role: '',
@@ -68,9 +71,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasExistingData, setHasExistingData] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
 
   useEffect(() => {
-    // Parse data if coming from Interview List (Supabase format)
+    // 1. Mode Wawancara (Tim Survey dari Halaman List)
     if (isInterview && location.state?.surveyData) {
       const data = location.state.surveyData;
       setFormData({
@@ -90,8 +95,67 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
         nonOptimal: data.non_optimal || {},
         wawancara: data.wawancara || {}
       });
+      return;
     }
-  }, [isInterview, location.state]);
+
+    // 2. Mode Puskesmas (Auto-fill & Cek Data Lama)
+    if (!isInterview && user && user.role === 'puskesmas') {
+      const pkmInfo = faskesMapping[user.username];
+      
+      const checkExistingData = async (namaFaskes, provinsi) => {
+        setLoadingData(true);
+        try {
+          const { data, error } = await supabase
+            .from('surveys')
+            .select('*')
+            .eq('fktp_name', namaFaskes)
+            .single();
+
+          if (data) {
+            // Data sudah ada, tampilkan isiannya
+            setFormData({
+              id: data.id,
+              fktpName: data.fktp_name || '',
+              city: data.city || '',
+              role: data.role || '',
+              docUmum: data.doc_umum || false,
+              docGigi: data.doc_gigi || false,
+              docKklp: data.doc_kklp || false,
+              timeInPoli: data.time_in_poli || '',
+              timeHomeVisit: data.time_home_visit || '',
+              propInFktp: data.prop_in_fktp || '',
+              propOutFktp: data.prop_out_fktp || '',
+              kompetensi: data.kompetensi || {},
+              jkn: data.jkn || {},
+              nonOptimal: data.non_optimal || {},
+              wawancara: data.wawancara || {}
+            });
+            setHasExistingData(true);
+          } else {
+            // Belum ada data, set nama dan provinsi dari mapping
+            setFormData(prev => ({
+              ...prev,
+              fktpName: namaFaskes,
+              city: provinsi
+            }));
+          }
+        } catch (err) {
+          // Normal jika single() tidak menemukan data
+          setFormData(prev => ({
+            ...prev,
+            fktpName: namaFaskes,
+            city: provinsi
+          }));
+        } finally {
+          setLoadingData(false);
+        }
+      };
+
+      if (pkmInfo) {
+        checkExistingData(pkmInfo.nama, pkmInfo.provinsi);
+      }
+    }
+  }, [isInterview, location.state, user]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -235,6 +299,16 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
       {/* Enterprise Stepper */}
       <div className="mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        {hasExistingData && !isInterview && (
+          <div className="mb-4 bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-lg flex items-start">
+            <Info className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0 text-amber-600" />
+            <div>
+              <p className="font-bold text-sm">Data Sudah Disubmit</p>
+              <p className="text-sm mt-1">Anda sudah mengisi survey ini sebelumnya. Data di bawah ini adalah hasil inputan Anda. Anda tidak dapat menyimpannya ulang.</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between relative min-w-[600px]">
           <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-0.5 bg-slate-100 -z-10"></div>
           {STEPS.map((s) => (
@@ -272,11 +346,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nama FKTP/Puskesmas</label>
-                    <input required type="text" name="fktpName" value={formData.fktpName} onChange={handleInputChange} placeholder="Misal: Puskesmas Melati" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400" />
+                    <input required type="text" name="fktpName" value={formData.fktpName} onChange={handleInputChange} readOnly={!isInterview && user?.role === 'puskesmas'} placeholder="Misal: Puskesmas Melati" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 disabled:opacity-70" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Kabupaten/Kota</label>
-                    <input required type="text" name="city" value={formData.city} onChange={handleInputChange} placeholder="Misal: Kota Bandung" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400" />
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Provinsi / Kabupaten/Kota</label>
+                    <input required type="text" name="city" value={formData.city} onChange={handleInputChange} readOnly={!isInterview && user?.role === 'puskesmas'} placeholder="Misal: Kota Bandung" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 disabled:opacity-70" />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-slate-700 mb-3">Jabatan <span className="text-xs text-slate-400 font-normal ml-1">(Pilih salah satu)</span></label>
@@ -595,11 +669,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
               <button 
                 type="button" 
                 onClick={submitData}
-                disabled={isSubmitting || !canProceed()}
-                className={`flex items-center px-6 py-2 text-white rounded-lg font-medium text-sm transition-all shadow-sm ${isSubmitting || !canProceed() ? 'bg-slate-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'}`}
+                disabled={isSubmitting || !canProceed() || (hasExistingData && !isInterview)}
+                className={`flex items-center px-6 py-2 text-white rounded-lg font-medium text-sm transition-all shadow-sm ${isSubmitting || !canProceed() || (hasExistingData && !isInterview) ? 'bg-slate-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'}`}
               >
-                {isSubmitting ? 'Memproses...' : 'Simpan Data'}
-                {!isSubmitting && <Save className="w-4 h-4 ml-2" />}
+                {hasExistingData && !isInterview ? 'Data Sudah Disimpan' : isSubmitting ? 'Memproses...' : 'Simpan Data'}
+                {!isSubmitting && !(hasExistingData && !isInterview) && <Save className="w-4 h-4 ml-2" />}
               </button>
             )}
           </div>

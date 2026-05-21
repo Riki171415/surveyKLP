@@ -1,0 +1,830 @@
+{
+  "puskesmas_temon_2_kulon_progo": {
+    "nama": "Puskesmas Temon 2 Kulon Progo",
+    "provinsi": "DIY"
+  },
+  "puskesmas_danurejan_2_kota_yogyakarta": {
+    "nama": "Puskesmas Danurejan 2 Kota Yogyakarta",
+    "provinsi": "DIY"
+  },
+  "puskesmas_lendah_1": {
+    "nama": "Puskesmas Lendah 1",
+    "provinsi": "DIY"
+  },
+  "puskesmas_kretek": {
+    "nama": "Puskesmas Kretek",
+    "provinsi": "DIY"
+  },
+  "puskesmas_bantul_2": {
+    "nama": "Puskesmas Bantul 2",
+    "provinsi": "DIY"
+  },
+  "puskesmas_tegalrejo": {
+    "nama": "Puskesmas Tegalrejo",
+    "provinsi": "DIY"
+  },
+  "puskesmas_paliyan_gunungkidul": {
+    "nama": "Puskesmas Paliyan Gunungkidul",
+    "provinsi": "DIY"
+  },
+  "puskesmas_jetis_2_bantul": {
+    "nama": "Puskesmas Jetis 2 Bantul",
+    "provinsi": "DIY"
+  },
+  "puskesmas_cangkring_purworejo": {
+    "nama": "Puskesmas Cangkring Purworejo",
+    "provinsi": "DIY"
+  },
+  "puskesmas_girisubo": {
+    "nama": "Puskesmas Girisubo",
+    "provinsi": "DIY"
+  },
+  "puskesmas_imogiri_i": {
+    "nama": "Puskesmas Imogiri I",
+    "provinsi": "DIY"
+  },
+  "puskesmas_karangmojo_ii": {
+    "nama": "Puskesmas Karangmojo Ii",
+    "provinsi": "DIY"
+  },
+  "puskesmas_kasihan_ii": {
+    "nama": "Puskesmas Kasihan Ii",
+    "provinsi": "DIY"
+  },
+  "puskesmas_nglipar_i": {
+    "nama": "Puskesmas Nglipar I",
+    "provinsi": "DIY"
+  },
+  "puskesmas_pajangan": {
+    "nama": "Puskesmas Pajangan",
+    "provinsi": "DIY"
+  },
+  "puskesmas_paliyan": {
+    "nama": "Puskesmas Paliyan",
+    "provinsi": "DIY"
+  },
+  "puskesmas_pandak_i": {
+    "nama": "Puskesmas Pandak I",
+    "provinsi": "DIY"
+  },
+  "puskesmas_playen_ii": {
+    "nama": "Puskesmas Playen Ii",
+    "provinsi": "DIY"
+  },
+  "puskesmas_pleret": {
+    "nama": "Puskesmas Pleret",
+    "provinsi": "DIY"
+  },
+  "puskesmas_ponjong_i": {
+    "nama": "Puskesmas Ponjong I",
+    "provinsi": "DIY"
+  },
+  "puskesmas_ponjong_ii": {
+    "nama": "Puskesmas Ponjong Ii",
+    "provinsi": "DIY"
+  },
+  "puskesmas_pundong": {
+    "nama": "Puskesmas Pundong",
+    "provinsi": "DIY"
+  },
+  "puskesmas_sanden": {
+    "nama": "Puskesmas Sanden",
+    "provinsi": "DIY"
+  },
+  "puskesmas_sedayu_i": {
+    "nama": "Puskesmas Sedayu I",
+    "provinsi": "DIY"
+  },
+  "puskesmas_sedayu_ii": {
+    "nama": "Puskesmas Sedayu Ii",
+    "provinsi": "DIY"
+  },
+  "puskesmas_semin_ii": {
+    "nama": "Puskesmas Semin Ii",
+    "provinsi": "DIY"
+  },
+  "puskesmas_tepus_2": {
+    "nama": "Puskesmas Tepus 2",
+    "provinsi": "DIY"
+  },
+  "puskesmas_umbulharjo_i": {
+    "nama": "Puskesmas Umbulharjo I",
+    "provinsi": "DIY"
+  },
+  "puskesmas_wonosari": {
+    "nama": "Puskesmas Wonosari",
+    "provinsi": "DIY"
+  },
+  "puskesmas_wonosari_ii": {
+    "nama": "Puskesmas Wonosari Ii",
+    "provinsi": "DIY"
+  },
+  "puskesmas_banguntapan_1": {
+    "nama": "Puskesmas Banguntapan 1",
+    "provinsi": "DIY"
+  },
+  "puskesmas_temon_2_kulon_progo_1": {
+    "nama": "Puskesmas Temon 2 Kulon Progo",
+    "provinsi": "DIY"
+  },
+  "puskesmas_danurejan_2_kota_yogyakarta_1": {
+    "nama": "Puskesmas Danurejan 2 Kota Yogyakarta",
+    "provinsi": "DIY"
+  },
+  "puskesmas_lendah_1_1": {
+    "nama": "Puskesmas Lendah 1",
+    "provinsi": "DIY"
+  },
+  "puskesmas_kretek_1": {
+    "nama": "Puskesmas Kretek",
+    "provinsi": "DIY"
+  },
+  "puskesmas_tegalrejo_1": {
+    "nama": "Puskesmas Tegalrejo",
+    "provinsi": "DIY"
+  },
+  "puskesmas_paliyan_gunungkidul_1": {
+    "nama": "Puskesmas Paliyan Gunungkidul",
+    "provinsi": "DIY"
+  },
+  "puskesmas_jetis_2_bantul_1": {
+    "nama": "Puskesmas Jetis 2 Bantul",
+    "provinsi": "DIY"
+  },
+  "puskesmas_pasirkaliki_kota_bandung": {
+    "nama": "Puskesmas Pasirkaliki Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "puskesmas_sukarasa_kota_bandung": {
+    "nama": "Puskesmas Sukarasa Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "puskesmas_margahayu_raya_kota_bandung": {
+    "nama": "Puskesmas Margahayu Raya Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "puskesmas_kopo_kota_bandung": {
+    "nama": "Puskesmas Kopo Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "puskesmas_pagarsih_kota_bandung": {
+    "nama": "Puskesmas Pagarsih ,Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "puskesmas_talagabodas_kota_bandung": {
+    "nama": "Puskesmas Talagabodas Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "puskesmas_salam_kota_bandung": {
+    "nama": "Puskesmas Salam Kota Bandung",
+    "provinsi": "JAWA BARAT"
+  },
+  "puskesmas_cibinong": {
+    "nama": "Puskesmas Cibinong",
+    "provinsi": "JAWA BARAT"
+  },
+  "puskesmas_kiarapandak_sukajaya": {
+    "nama": "Puskesmas Kiarapandak, Sukajaya",
+    "provinsi": "JAWA BARAT"
+  },
+  "puskesmas_musuk_boyolali": {
+    "nama": "Puskesmas Musuk Boyolali",
+    "provinsi": "JAWA TENGAH"
+  },
+  "puskesmas_bagelen_purworejo": {
+    "nama": "Puskesmas Bagelen Purworejo",
+    "provinsi": "JAWA TENGAH"
+  },
+  "puskesmas_sruwohrejo": {
+    "nama": "Puskesmas Sruwohrejo",
+    "provinsi": "JAWA TENGAH"
+  },
+  "puskesmas_mranti": {
+    "nama": "Puskesmas Mranti",
+    "provinsi": "JAWA TENGAH"
+  },
+  "puskesmas_bragolan": {
+    "nama": "Puskesmas Bragolan",
+    "provinsi": "JAWA TENGAH"
+  },
+  "puskesmas_todanan": {
+    "nama": "Puskesmas Todanan",
+    "provinsi": "JAWA TENGAH"
+  },
+  "puskesmas_banyuurip": {
+    "nama": "Puskesmas Banyuurip",
+    "provinsi": "JAWA TENGAH"
+  },
+  "puskesmas_banyuputih": {
+    "nama": "Puskesmas Banyuputih",
+    "provinsi": "JAWA TENGAH"
+  },
+  "puskesmas_winong_kemiri": {
+    "nama": "Puskesmas Winong Kemiri",
+    "provinsi": "JAWA TENGAH"
+  },
+  "puskesmas_kauman_baru": {
+    "nama": "Puskesmas Kauman Baru",
+    "provinsi": "JAWA TIMUR"
+  },
+  "puskesmas_pakis": {
+    "nama": "Puskesmas Pakis",
+    "provinsi": "JAWA TIMUR"
+  },
+  "puskesmas_kelurahan_kelapa_gading_timur_ii": {
+    "nama": "Puskesmas Kelurahan Kelapa Gading Timur II",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kalideres": {
+    "nama": "Puskesmas Kalideres",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kelurahan_taman_sari": {
+    "nama": "Puskesmas Kelurahan Taman Sari",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kelurahan_tugu_selatan": {
+    "nama": "Puskesmas Kelurahan Tugu Selatan",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kelapa_gading": {
+    "nama": "Puskesmas Kelapa Gading",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kelurahan_jagakarsa_2": {
+    "nama": "Puskesmas Kelurahan Jagakarsa 2",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kelurahan_gedong": {
+    "nama": "Puskesmas Kelurahan Gedong",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kelurahan_tebet_barat": {
+    "nama": "Puskesmas Kelurahan Tebet Barat",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kecamatan_penjaringan": {
+    "nama": "Puskesmas Kecamatan Penjaringan",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kecamatan_pasar_rebo": {
+    "nama": "Puskesmas Kecamatan Pasar Rebo",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kecamatan_tambora": {
+    "nama": "Puskesmas Kecamatan Tambora",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kecamatan_jagakarsa": {
+    "nama": "Puskesmas Kecamatan Jagakarsa",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kelrawa_badak_selatan": {
+    "nama": "Puskesmas Kel.Rawa Badak Selatan",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kec_ciracas": {
+    "nama": "Puskesmas Kec. Ciracas",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kelurahan_pekayon": {
+    "nama": "Puskesmas Kelurahan Pekayon",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kelkebon_bawang_iii": {
+    "nama": "Puskesmas Kel.Kebon Bawang III",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kelurahan_penjaringan_i": {
+    "nama": "Puskesmas Kelurahan Penjaringan I",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kelurahan_pinangsia": {
+    "nama": "Puskesmas Kelurahan Pinangsia",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kelurahan_jagakarsa_i": {
+    "nama": "Puskesmas Kelurahan Jagakarsa I",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_kecamatan_tambora_1": {
+    "nama": "Puskesmas Kecamatan Tambora",
+    "provinsi": "DKI JAKARTA"
+  },
+  "puskesmas_tanjung_puri": {
+    "nama": "Puskesmas Tanjung Puri",
+    "provinsi": "KALIMANTAN BARAT"
+  },
+  "puskesmas_waymili": {
+    "nama": "Puskesmas Waymili",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_pekalongan": {
+    "nama": "Puskesmas Pekalongan",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_batanghari": {
+    "nama": "Puskesmas Batanghari",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_kotagajah": {
+    "nama": "Puskesmas Kotagajah",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_sribhawono": {
+    "nama": "Puskesmas Sribhawono",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_margorejo": {
+    "nama": "Puskesmas Margorejo",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_sriwijaya_mataram": {
+    "nama": "Puskesmas Sriwijaya Mataram",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_rawat_inap_pulau_panggung": {
+    "nama": "Puskesmas Rawat Inap Pulau Panggung",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_banjar_agung": {
+    "nama": "Puskesmas Banjar Agung",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_hajimena": {
+    "nama": "Puskesmas Hajimena",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_merbau_matram": {
+    "nama": "Puskesmas Merbau Matram",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_gunung_sugih": {
+    "nama": "Puskesmas Gunung Sugih",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_kotagajah_1": {
+    "nama": "Puskesmas Kotagajah",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_baradatu": {
+    "nama": "Puskesmas Baradatu",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_wirabangun": {
+    "nama": "Puskesmas Wirabangun",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_karang_anyar": {
+    "nama": "Puskesmas Karang Anyar",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_rawat_inap_tanjung_sari_natar": {
+    "nama": "Puskesmas Rawat Inap Tanjung Sari Natar",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_rajabasa_lama": {
+    "nama": "Puskesmas Rajabasa Lama",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_kalirejo": {
+    "nama": "Puskesmas Kalirejo",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_branti": {
+    "nama": "Puskesmas Branti",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_bandar_jaya": {
+    "nama": "Puskesmas Bandar Jaya",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_banjit": {
+    "nama": "Puskesmas Banjit",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_rawat_inap_tata_karya": {
+    "nama": "Puskesmas Rawat Inap Tata Karya",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_rawat_inap_gedong_tataan": {
+    "nama": "Puskesmas Rawat Inap Gedong Tataan",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_rawat_inap_sriwijaya_mataram_lampung_tengah": {
+    "nama": "Puskesmas Rawat Inap Sriwijaya Mataram Lampung Tengah",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_rawat_inap_semuli_raya": {
+    "nama": "Puskesmas Rawat Inap Semuli Raya",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_bandar_agung": {
+    "nama": "Puskesmas  Bandar Agung",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_bandar_jaya_1": {
+    "nama": "Puskesmas  Bandar Jaya",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_sumber_jaya": {
+    "nama": "Puskesmas Sumber Jaya",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_tambah_subur": {
+    "nama": "Puskesmas Tambah Subur",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_rawat_inap_semuli_raya_1": {
+    "nama": "Puskesmas Rawat Inap Semuli Raya",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_kasui": {
+    "nama": "Puskesmas Kasui",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_kalianda": {
+    "nama": "Puskesmas Kalianda",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_iring_mulyo": {
+    "nama": "Puskesmas Iring Mulyo",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_rawat_inap_katibung": {
+    "nama": "Puskesmas Rawat Inap Katibung",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_rawat_inap_kedaton": {
+    "nama": "Puskesmas Rawat Inap Kedaton",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_bakauheni": {
+    "nama": "Puskesmas Bakauheni",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_sragi": {
+    "nama": "Puskesmas Sragi",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_way_panji": {
+    "nama": "Puskesmas Way Panji",
+    "provinsi": "LAMPUNG"
+  },
+  "puskesmas_walantaka_kota_serang": {
+    "nama": "Puskesmas Walantaka Kota Serang",
+    "provinsi": "BANTEN"
+  },
+  "puskesmas_rasimah_ahmad_bukittinggi": {
+    "nama": "Puskesmas Rasimah Ahmad  Bukittinggi",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_sungai_pua": {
+    "nama": "Pukesmas Sungai Pua",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_simp_empat": {
+    "nama": "Pukesmas Simp. Empat",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_pegang_biru": {
+    "nama": "Pukesmas Pegang Biru",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_sukamenanti": {
+    "nama": "Pukesmas Sukamenanti",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_nanggalo": {
+    "nama": "Pukesmas Nanggalo",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_naras": {
+    "nama": "Pukesmas Naras",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_muaro_bodi": {
+    "nama": "Pukesmas Muaro Bodi",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_iv_koto_agam": {
+    "nama": "Pukesmas IV koto Agam",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_pauh": {
+    "nama": "Pukesmas Pauh",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_sitiung_1": {
+    "nama": "Pukesmas Sitiung 1",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_koto_katiak": {
+    "nama": "Pukesmas Koto Katiak",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_muaro_bodi_1": {
+    "nama": "Pukesmas MUaro Bodi",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "puskesmas_nan_balimo": {
+    "nama": "Puskesmas Nan Balimo",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_gulai_bancah": {
+    "nama": "Pukesmas Gulai Bancah",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_rawang": {
+    "nama": "Pukesmas Rawang",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_mandiangin": {
+    "nama": "Pukesmas Mandiangin",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_rasimah_ahmad": {
+    "nama": "Pukesmas Rasimah Ahmad",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "puskesmas_kapau": {
+    "nama": "Puskesmas Kapau",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_tigo_baleh": {
+    "nama": "Pukesmas Tigo baleh",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesms_pakan_kamis": {
+    "nama": "Pukesms Pakan Kamis",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "pukesmas_batu_kambing": {
+    "nama": "Pukesmas Batu Kambing",
+    "provinsi": "SUMATERA BARAT"
+  },
+  "puskesmas_tabanan_ii": {
+    "nama": "Puskesmas Tabanan II",
+    "provinsi": "BALI"
+  },
+  "puskesmas_blahbatuh_ii": {
+    "nama": "Puskesmas Blahbatuh II",
+    "provinsi": "BALI"
+  },
+  "puskesmas_banjarangkan_i": {
+    "nama": "Puskesmas Banjarangkan I",
+    "provinsi": "BALI"
+  },
+  "puskesmas_gianyar_i": {
+    "nama": "Puskesmas Gianyar I",
+    "provinsi": "BALI"
+  },
+  "puskesmas_tabanan_iii": {
+    "nama": "Puskesmas Tabanan III",
+    "provinsi": "BALI"
+  },
+  "puskesmas_seririt_1": {
+    "nama": "Puskesmas Seririt 1",
+    "provinsi": "BALI"
+  },
+  "puskesmas_ii_denpasar_barat": {
+    "nama": "Puskesmas II Denpasar Barat",
+    "provinsi": "BALI"
+  },
+  "puskesmas_1_dentim": {
+    "nama": "Puskesmas 1 Dentim",
+    "provinsi": "BALI"
+  },
+  "puskesmas_ii_pekutatan": {
+    "nama": "Puskesmas II Pekutatan",
+    "provinsi": "BALI"
+  },
+  "puskesmas_baturiti_1": {
+    "nama": "Puskesmas Baturiti 1",
+    "provinsi": "BALI"
+  },
+  "puskesmas_iv_denpasar_selatan": {
+    "nama": "Puskesmas IV denpasar Selatan",
+    "provinsi": "BALI"
+  },
+  "puskesmas_selemadeg_barat": {
+    "nama": "Puskesmas Selemadeg Barat",
+    "provinsi": "BALI"
+  },
+  "puskesmas_belawan": {
+    "nama": "Puskesmas Belawan",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_hamparan_perak_kab_deli_serdang": {
+    "nama": "Puskesmas Hamparan Perak kab. Deli Serdang",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_darussalam": {
+    "nama": "Puskesmas Darussalam",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_dolat_rakyat": {
+    "nama": "Puskesmas Dolat Rakyat",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_sering": {
+    "nama": "Puskesmas Sering",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_sinunukan": {
+    "nama": "Puskesmas Sinunukan",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_teladan": {
+    "nama": "Puskesmas Teladan",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_darussalam_1": {
+    "nama": "Puskesmas Darussalam",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_sinunukan_1": {
+    "nama": "Puskesmas Sinunukan",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_martubung": {
+    "nama": "Puskesmas Martubung",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_desa_binjai": {
+    "nama": "Puskesmas Desa Binjai",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_sukaramai": {
+    "nama": "Puskesmas Sukaramai",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_galang": {
+    "nama": "Puskesmas Galang",
+    "provinsi": "SUMATERA UTARA"
+  },
+  "puskesmas_pintas_tuo": {
+    "nama": "Puskesmas Pintas Tuo",
+    "provinsi": "JAMBI"
+  },
+  "puskesmas_tebing_tinggi_muara_tebo": {
+    "nama": "Puskesmas Tebing Tinggi, Muara Tebo",
+    "provinsi": "JAMBI"
+  },
+  "puskesmas_kuamang_kuning_i": {
+    "nama": "Puskesmas Kuamang Kuning I",
+    "provinsi": "JAMBI"
+  },
+  "puskesmas_meranti": {
+    "nama": "Puskesmas Meranti",
+    "provinsi": "JAMBI"
+  },
+  "puskesmas_muara_tebo": {
+    "nama": "Puskesmas Muara Tebo",
+    "provinsi": "JAMBI"
+  },
+  "puskesmas_kuamang_kuning_i_1": {
+    "nama": "Puskesmas Kuamang Kuning I",
+    "provinsi": "JAMBI"
+  },
+  "puskesmas_rimbo_bujang_ix": {
+    "nama": "Puskesmas Rimbo Bujang IX",
+    "provinsi": "JAMBI"
+  },
+  "puskesmas_ri_sidomulyo_pekanbaru": {
+    "nama": "Puskesmas RI Sidomulyo Pekanbaru",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_ri_simpang_tiga_pekanbaru": {
+    "nama": "Puskesmas RI Simpang Tiga Pekanbaru",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_bandar_sekijang": {
+    "nama": "Puskesmas Bandar Sekijang",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_langgam": {
+    "nama": "Puskesmas Langgam",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_ukui": {
+    "nama": "Puskesmas Ukui",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_bandar_petalangan": {
+    "nama": "Puskesmas Bandar Petalangan",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_bandar_seikijang": {
+    "nama": "Puskesmas Bandar Seikijang",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_bengkalia": {
+    "nama": "Puskesmas Bengkalia",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_perawang_km_6": {
+    "nama": "Puskesmas Perawang Km 6",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_pangkalan_kerinci_1": {
+    "nama": "Puskesmas Pangkalan Kerinci 1",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_puter": {
+    "nama": "Puskesmas Puter",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_purnama": {
+    "nama": "Puskesmas Purnama",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_bandar_petalangan_1": {
+    "nama": "Puskesmas Bandar Petalangan",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_pangkalan_kerinci_1_1": {
+    "nama": "Puskesmas Pangkalan Kerinci 1",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_tanjung_medang": {
+    "nama": "Puskesmas Tanjung Medang",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_bandar_sei_kijang": {
+    "nama": "Puskesmas Bandar Sei Kijang",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_selat_baru": {
+    "nama": "Puskesmas Selat Baru",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_tanjung_medang_kecamatan_rupat_utara": {
+    "nama": "Puskesmas Tanjung Medang Kecamatan Rupat Utara",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_kampar_kiri_hilir": {
+    "nama": "Puskesmas Kampar Kiri Hilir",
+    "provinsi": "RIAU"
+  },
+  "puskesmas_kawal_bintan": {
+    "nama": "Puskesmas Kawal Bintan",
+    "provinsi": "KEPULAUAN RIAU"
+  },
+  "puskesmas_kabil_nongsa": {
+    "nama": "Puskesmas Kabil, Nongsa",
+    "provinsi": "KEPULAUAN RIAU"
+  },
+  "puskesmas_multiwahana": {
+    "nama": "Puskesmas Multiwahana",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "puskesmas_merdeka": {
+    "nama": "Puskesmas Merdeka",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "puskesmas_prabumulih": {
+    "nama": "Puskesmas Prabumulih",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "puskesmas_lima_ilir": {
+    "nama": "Puskesmas Lima Ilir",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "puskesmas_7_ulu": {
+    "nama": "Puskesmas 7 Ulu",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "puskesmas_pakjo": {
+    "nama": "Puskesmas Pakjo",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "puskesmas_boom_baru": {
+    "nama": "Puskesmas Boom Baru",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "puskesmas_padang_selasa": {
+    "nama": "Puskesmas Padang Selasa",
+    "provinsi": "SUMATERA SELATAN"
+  },
+  "puskesmas_ulee_kareng": {
+    "nama": "Puskesmas Ulee Kareng",
+    "provinsi": "ACEH"
+  },
+  "puskesmas_batoh": {
+    "nama": "Puskesmas Batoh",
+    "provinsi": "ACEH"
+  },
+  "puskesmas_meuraxa": {
+    "nama": "Puskesmas Meuraxa",
+    "provinsi": "ACEH"
+  },
+  "puskesmas_kuta_alam": {
+    "nama": "Puskesmas Kuta Alam",
+    "provinsi": "ACEH"
+  },
+  "puskesmas_batoh_1": {
+    "nama": "Puskesmas Batoh",
+    "provinsi": "ACEH"
+  }
+}
