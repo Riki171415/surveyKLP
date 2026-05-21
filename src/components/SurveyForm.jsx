@@ -172,14 +172,14 @@ export default function SurveyForm({ isEdit = false }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Nama FKTP/Puskesmas</label>
-                <input required type="text" name="fktpName" value={formData.fktpName} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition" />
+                <input required type="text" name="fktpName" value={formData.fktpName} onChange={handleInputChange} placeholder="Misal: Puskesmas Melati" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition placeholder:text-slate-300" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Kabupaten/Kota</label>
-                <input required type="text" name="city" value={formData.city} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition" />
+                <input required type="text" name="city" value={formData.city} onChange={handleInputChange} placeholder="Misal: Kota Bandung" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition placeholder:text-slate-300" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-2">Jabatan</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Jabatan <span className="text-xs text-slate-400 font-normal ml-1">(Pilih posisi Anda saat ini)</span></label>
                 <div className="flex gap-4 flex-wrap">
                   {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Tenaga Kesehatan Lainnya'].map(role => (
                     <label key={role} className="flex items-center space-x-2 cursor-pointer">
@@ -218,20 +218,29 @@ export default function SurveyForm({ isEdit = false }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-xl">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Rata-rata waktu Poli (Menit/pasien)</label>
-                <input type="number" name="timeInPoli" value={formData.timeInPoli} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" />
+                <input type="number" name="timeInPoli" value={formData.timeInPoli} onChange={handleInputChange} placeholder="Contoh: 10" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Rata-rata waktu Home Visit (Menit/pasien)</label>
-                <input type="number" name="timeHomeVisit" value={formData.timeHomeVisit} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" />
+                <input type="number" name="timeHomeVisit" value={formData.timeHomeVisit} onChange={handleInputChange} placeholder="Contoh: 45" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Proporsi Beban Dalam Gedung (%)</label>
-                <input type="number" name="propInFktp" value={formData.propInFktp} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" />
+                <input type="number" name="propInFktp" value={formData.propInFktp} onChange={handleInputChange} placeholder="Contoh: 70" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Proporsi Beban Luar Gedung (%)</label>
-                <input type="number" name="propOutFktp" value={formData.propOutFktp} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" />
+                <input type="number" name="propOutFktp" value={formData.propOutFktp} onChange={handleInputChange} placeholder="Contoh: 30" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
+                <p className="text-xs text-slate-500 mt-1">Total persentase dalam dan luar gedung harus 100%.</p>
               </div>
+            </div>
+
+            <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm mb-4">
+              <p className="font-semibold mb-1">Panduan Pengisian Status:</p>
+              <ul className="list-disc pl-5">
+                <li>Pilih <strong>"Sudah"</strong> jika kompetensi layanan pernah atau sedang dilakukan di fasilitas Anda.</li>
+                <li>Pilih <strong>"Belum"</strong> jika belum diterapkan, lalu isikan alasan di kolom kendala.</li>
+              </ul>
             </div>
 
             <div className="overflow-x-auto">
@@ -341,6 +350,13 @@ export default function SurveyForm({ isEdit = false }) {
         {step === 4 && (
           <div className="space-y-6">
             <h2 className="text-xl font-semibold border-b pb-2">D. Layanan yang Belum Optimal / Tidak Terakomodasi</h2>
+            <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm mb-4">
+              <p className="font-semibold mb-1">Panduan Penilaian:</p>
+              <ul className="list-disc pl-5">
+                <li><strong>Masuk JKN:</strong> Tentukan apakah layanan ini menurut Anda perlu diakomodasi ke dalam JKN (Ya/Tidak).</li>
+                <li><strong>Skala Kompetensi:</strong> Berikan nilai (1-4) seperti panduan pada langkah sebelumnya.</li>
+              </ul>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm mt-4">
                 <thead className="bg-slate-100 text-slate-700">
