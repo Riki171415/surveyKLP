@@ -73,6 +73,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
 
   const uniqueProvinces = [...new Set(Object.values(faskesMapping).map(f => f.provinsi))].sort();
   const puskesmasList = formData.city ? Object.values(faskesMapping).filter(f => f.provinsi === formData.city).map(f => f.nama).sort() : [];
@@ -164,7 +165,14 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
       setEarlyExit(true);
       return;
     }
-    if (canProceed()) setStep(prev => Math.min(prev + 1, totalSteps));
+    if (canProceed()) {
+      setShowErrors(false);
+      setStep(prev => Math.min(prev + 1, totalSteps));
+    } else {
+      setShowErrors(true);
+      // scroll ke atas form agar error terlihat
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
   
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
@@ -722,36 +730,84 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
           </div>
 
           {/* Footer Navigation */}
-          <div className="px-8 py-5 bg-slate-50/80 backdrop-blur-md border-t border-slate-100 flex justify-between items-center rounded-b-3xl">
-            <button 
-              type="button" 
-              onClick={prevStep}
-              disabled={step === 1}
-              className={`flex items-center px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${step === 1 ? 'opacity-0 pointer-events-none' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 shadow-sm hover:shadow active:scale-95'}`}
-            >
-              <ChevronLeft className="w-5 h-5 mr-1.5" /> Sebelumnya
-            </button>
-            
-            {step < totalSteps ? (
-              <button 
-                type="button" 
-                onClick={nextStep}
-                disabled={!canProceed()}
-                className={`flex items-center px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${!canProceed() ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' : 'bg-slate-900 text-white hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow-xl active:scale-95'}`}
-              >
-                Selanjutnya <ChevronRight className="w-5 h-5 ml-1.5" />
-              </button>
-            ) : (
-              <button 
-                type="button" 
-                onClick={submitData}
-                disabled={isSubmitting || !canProceed()}
-                className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting || !canProceed() ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 hover:-translate-y-0.5 hover:shadow-primary-500/40 active:scale-95'}`}
-              >
-                {isSubmitting ? 'Memproses...' : 'Simpan Data'}
-                {!isSubmitting && <Save className="w-5 h-5 ml-2" />}
-              </button>
+          <div className="px-8 py-5 bg-slate-50/80 backdrop-blur-md border-t border-slate-100 rounded-b-3xl">
+
+            {/* Error Summary — muncul setelah klik Selanjutnya jika ada yang belum diisi */}
+            {showErrors && !canProceed() && (
+              <div className="mb-4 p-4 bg-rose-50 border border-rose-200 rounded-xl">
+                <p className="text-sm font-bold text-rose-700 mb-2">⚠️ Harap lengkapi isian berikut sebelum melanjutkan:</p>
+                <ul className="text-sm text-rose-600 space-y-1 list-disc pl-5">
+                  {step === 1 && (
+                    <>
+                      {!formData.city && <li>Provinsi belum dipilih</li>}
+                      {!formData.fktpName && <li>Nama FKTP/Puskesmas belum dipilih</li>}
+                      {!formData.role && <li>Jabatan belum dipilih</li>}
+                    </>
+                  )}
+                  {step === 2 && isRoleDoctor && (
+                    <>
+                      {!formData.timeInPoli && <li>Waktu rata-rata poli belum diisi</li>}
+                      {!formData.timeHomeVisit && <li>Waktu rata-rata home visit belum diisi</li>}
+                      {(!formData.propInFktp || !formData.propOutFktp) && <li>Beban dalam/luar gedung belum diisi</li>}
+                      {formData.propInFktp && formData.propOutFktp && propTotal !== 100 && (
+                        <li>Total beban dalam + luar gedung harus 100% (saat ini: {propTotal}%)</li>
+                      )}
+                      {(() => {
+                        const belum = kompetensiLayanan.filter((_, idx) => !formData.kompetensi[idx]?.status).length;
+                        return belum > 0 ? <li>{belum} layanan kompetensi belum dipilih status-nya (Sudah/Belum) — scroll ke bawah untuk melihat tabel</li> : null;
+                      })()}
+                    </>
+                  )}
+                  {step === 3 && (
+                    <>
+                      {(() => {
+                        const belum = jknBenefits.filter((_, idx) => !formData.jkn[idx]?.skala).length;
+                        return belum > 0 ? <li>{belum} layanan JKN belum diberi nilai skala (1-4)</li> : null;
+                      })()}
+                    </>
+                  )}
+                  {step === 4 && (
+                    <>
+                      {(() => {
+                        const belum = nonOptimalServices.filter((_, idx) => !formData.nonOptimal[idx]?.masukJkn || !formData.nonOptimal[idx]?.skala).length;
+                        return belum > 0 ? <li>{belum} layanan belum diisi (Masuk JKN dan/atau Skala)</li> : null;
+                      })()}
+                    </>
+                  )}
+                </ul>
+              </div>
             )}
+
+            <div className="flex justify-between items-center">
+              <button 
+                type="button" 
+                onClick={prevStep}
+                disabled={step === 1}
+                className={`flex items-center px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${step === 1 ? 'opacity-0 pointer-events-none' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 shadow-sm hover:shadow active:scale-95'}`}
+              >
+                <ChevronLeft className="w-5 h-5 mr-1.5" /> Sebelumnya
+              </button>
+              
+              {step < totalSteps ? (
+                <button 
+                  type="button" 
+                  onClick={nextStep}
+                  className="flex items-center px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg bg-slate-900 text-white hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow-xl active:scale-95"
+                >
+                  Selanjutnya <ChevronRight className="w-5 h-5 ml-1.5" />
+                </button>
+              ) : (
+                <button 
+                  type="button" 
+                  onClick={submitData}
+                  disabled={isSubmitting}
+                  className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 hover:-translate-y-0.5 hover:shadow-primary-500/40 active:scale-95'}`}
+                >
+                  {isSubmitting ? 'Memproses...' : 'Simpan Data'}
+                  {!isSubmitting && <Save className="w-5 h-5 ml-2" />}
+                </button>
+              )}
+            </div>
           </div>
         </form>
       </div>
