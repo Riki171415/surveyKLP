@@ -140,10 +140,10 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   // Validasi Step
   const isStep1Valid = formData.fktpName.trim() !== '' && formData.city.trim() !== '' && formData.role !== '';
   const propTotal = Number(formData.propInFktp || 0) + Number(formData.propOutFktp || 0);
+  const isPropValid = formData.propInFktp !== '' && formData.propOutFktp !== '' && propTotal === 100;
   const isStep2Valid = isRoleDoctor 
     ? (formData.timeInPoli !== '' && formData.timeHomeVisit !== '' && 
-       formData.propInFktp !== '' && formData.propOutFktp !== '' &&
-       propTotal <= 100 &&
+       isPropValid &&
        kompetensiLayanan.every((_, idx) => formData.kompetensi[idx]?.status))
     : true;
   const isStep3Valid = jknBenefits.every((_, idx) => formData.jkn[idx]?.skala);
@@ -449,10 +449,12 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                       </div>
                       {(formData.propInFktp !== '' || formData.propOutFktp !== '') && (
                         <div className="md:col-span-2">
-                          {propTotal > 100 ? (
-                            <p className="text-xs text-rose-600 font-medium">⚠️ Total beban dalam + luar gedung melebihi 100% ({propTotal}%). Harap periksa kembali.</p>
+                          {propTotal === 100 ? (
+                            <p className="text-xs text-emerald-600 font-medium">✅ Total beban: {propTotal}% — sudah proporsional.</p>
+                          ) : propTotal > 100 ? (
+                            <p className="text-xs text-rose-600 font-medium">⚠️ Total melebihi 100% ({propTotal}%). Harap kurangi salah satu nilai.</p>
                           ) : (
-                            <p className="text-xs text-emerald-600 font-medium">Total beban: {propTotal}%</p>
+                            <p className="text-xs text-amber-600 font-medium">⚠️ Total beban: {propTotal}% — harus berjumlah tepat 100%.</p>
                           )}
                         </div>
                       )}
