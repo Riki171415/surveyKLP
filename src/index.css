@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,21 +6,24 @@
 @layer base {
   body {
     @apply bg-slate-50 text-slate-800 antialiased selection:bg-primary-500 selection:text-white;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
   }
 }
 
 @layer utilities {
+  /* Glassmorphism terang */
   .glass {
     @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-glass;
   }
-  
+
+  /* Sidebar dark hijau Kemenkes */
   .glass-dark {
-    @apply bg-slate-900/80 backdrop-blur-md border border-slate-700/50 shadow-glass;
+    background: linear-gradient(160deg, #004525 0%, #003019 60%, #001a0d 100%);
+    @apply backdrop-blur-md border border-green-900/50 shadow-glass;
   }
 
   .glass-panel {
@@ -28,35 +31,45 @@
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-gradientStart to-brand-gradientEnd;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-primary-700;
   }
+
+  /* Badge Kemenkes */
+  .badge-kemenkes {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-100 text-primary-700;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
-/* Custom Scrollbar for a premium feel */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Header strip merah-putih khas Kemenkes */
+.kemenkes-header-strip {
+  background: linear-gradient(90deg, #CE1126 50%, #ffffff 50%);
+  height: 4px;
+  width: 100%;
 }
 
-::-webkit-scrollbar-track {
-  @apply bg-slate-100 rounded-full;
-}
+/* Scrollbar custom hijau */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f0faf4; border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: #4ab882; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #00703C; }
 
-::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
-}
-
-/* Base custom animations for legacy support */
+/* Animasi */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
-}
+.animate-fade-in    { animation: fadeIn 0.4s ease-out forwards; }
+.animate-fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
 
-/* Form element enhancements */
+/* Hilangkan spinner input number */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;

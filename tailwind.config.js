@@ -7,26 +7,26 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans:    ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
         display: ['Outfit', 'system-ui', 'sans-serif'],
       },
       colors: {
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554',
+          50:  '#f0faf4',
+          100: '#d9f2e3',
+          200: '#b3e5c9',
+          300: '#7dd0a8',
+          400: '#4ab882',
+          500: '#00A651', // Hijau Kemenkes utama
+          600: '#00703C', // Hijau Kemenkes gelap
+          700: '#005a30',
+          800: '#004525',
+          900: '#003019',
+          950: '#001a0d',
         },
         brand: {
-          gradientStart: '#3b82f6',
-          gradientEnd: '#8b5cf6',
+          gradientStart: '#00A651',
+          gradientEnd:   '#005a30',
         }
       },
       animation: {

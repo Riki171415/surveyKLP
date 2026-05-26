@@ -50,31 +50,46 @@ function Sidebar() {
   if (!user) return null;
 
   return (
-    <div className="w-72 glass-dark min-h-screen hidden md:flex flex-col border-r border-slate-800/50 shadow-2xl relative z-10">
-      <div className="p-6 border-b border-slate-800/50">
+    <div className="w-72 glass-dark min-h-screen hidden md:flex flex-col shadow-2xl relative z-10">
+      {/* Strip Merah-Putih Kemenkes */}
+      <div className="flex h-1.5 shrink-0">
+        <div className="flex-1 bg-red-600" />
+        <div className="flex-1 bg-white" />
+      </div>
+
+      {/* Logo Kemenkes */}
+      <div className="px-5 py-5 border-b border-green-900/60">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-lg shadow-lg shadow-primary-500/30">
-            <Database className="w-6 h-6 text-white" />
+          {/* Lambang Palang */}
+          <div className="w-10 h-10 shrink-0 rounded-lg bg-white flex items-center justify-center shadow-lg">
+            <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+              <rect x="15" y="4" width="10" height="32" rx="2" fill="#00703C"/>
+              <rect x="4" y="15" width="32" height="10" rx="2" fill="#00703C"/>
+            </svg>
           </div>
-          <span className="font-display font-bold text-2xl text-white tracking-tight">
-            Survey<span className="text-primary-400">KKLP</span>
-          </span>
+          <div>
+            <p className="font-display font-bold text-white text-sm leading-tight">Kementerian Kesehatan</p>
+            <p className="text-primary-300 text-xs font-medium">Republik Indonesia</p>
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-green-900/40">
+          <p className="text-xs text-green-200/60 font-medium uppercase tracking-widest">Sistem Survey</p>
+          <p className="font-display font-bold text-primary-300 text-base tracking-tight">Optimalisasi JKN · Sp.KKLP</p>
         </div>
       </div>
-      <div className="p-4 space-y-2 flex-1 overflow-y-auto hide-scrollbar">
-        <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 px-4 mt-2">Menu Utama</div>
-        
-        {/* Menu Puskesmas */}
+
+      {/* Menu */}
+      <div className="p-4 space-y-1 flex-1 overflow-y-auto hide-scrollbar">
+        <div className="text-xs font-bold text-green-600/70 uppercase tracking-widest mb-3 px-4 mt-1">Menu Utama</div>
+
         {['puskesmas', 'admin'].includes(user.role) && (
           <NavItem to="/" icon={FileText}>Isi Survey</NavItem>
         )}
-        
-        {/* Menu Tim Survey */}
+
         {['tim survey', 'admin'].includes(user.role) && (
           <NavItem to="/wawancara" icon={ClipboardList}>Form Wawancara</NavItem>
         )}
 
-        {/* Menu Admin */}
         {user.role === 'admin' && (
           <>
             <NavItem to="/dashboard" icon={LayoutDashboard}>Dashboard Laporan</NavItem>
@@ -82,13 +97,15 @@ function Sidebar() {
           </>
         )}
       </div>
-      <div className="p-4 border-t border-slate-800/50 bg-slate-900/50">
-        <div className="mb-4 px-4">
-          <p className="text-xs text-slate-500 font-medium">Login sebagai:</p>
+
+      {/* Footer user */}
+      <div className="p-4 border-t border-green-900/50" style={{background:'rgba(0,26,13,0.6)'}}>
+        <div className="mb-3 px-2 py-2 rounded-lg bg-green-900/30">
+          <p className="text-xs text-green-400/70 font-medium">Login sebagai:</p>
           <p className="text-sm font-bold text-white capitalize mt-0.5">{user.username}</p>
           <p className="text-xs text-primary-400 font-medium capitalize">{user.role}</p>
         </div>
-        <button onClick={logout} className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-xl transition-all duration-300 font-medium text-sm group">
+        <button onClick={logout} className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-red-900/20 text-red-400 hover:bg-red-600 hover:text-white rounded-xl transition-all duration-300 font-medium text-sm group border border-red-900/30 hover:border-red-600">
           <LogOut className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
           <span>Keluar</span>
         </button>
@@ -110,12 +127,24 @@ function AppContent() {
       <Sidebar />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {user && (
-          <div className="md:hidden glass border-b border-white/20 p-4 flex justify-between items-center sticky top-0 z-20">
-            <div className="flex items-center space-x-2">
-              <Database className="w-6 h-6 text-primary-600" />
-              <span className="font-display font-bold text-lg text-slate-800">Survey<span className="text-primary-600">KKLP</span></span>
+          <div className="md:hidden border-b border-white/20 p-3 flex justify-between items-center sticky top-0 z-20 bg-primary-700 shadow-md">
+            {/* Strip merah-putih mobile */}
+            <div className="absolute top-0 left-0 right-0 h-1 flex">
+              <div className="flex-1 bg-red-600" />
+              <div className="flex-1 bg-white" />
             </div>
-            <button onClick={logout} className="text-sm font-medium px-3 py-2 bg-rose-50 text-rose-600 rounded-md hover:bg-rose-100 transition-colors"><LogOut className="w-4 h-4" /></button>
+            <div className="flex items-center space-x-2 mt-0.5">
+              <div className="w-7 h-7 bg-white rounded flex items-center justify-center">
+                <svg viewBox="0 0 40 40" className="w-5 h-5" fill="none">
+                  <rect x="15" y="4" width="10" height="32" rx="2" fill="#00703C"/>
+                  <rect x="4" y="15" width="32" height="10" rx="2" fill="#00703C"/>
+                </svg>
+              </div>
+              <span className="font-display font-bold text-base text-white">Survey <span className="text-primary-200">Sp.KKLP</span></span>
+            </div>
+            <button onClick={logout} className="text-sm font-medium px-3 py-1.5 bg-red-600/80 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-1">
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
         )}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto scroll-smooth">
