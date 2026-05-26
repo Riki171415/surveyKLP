@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { Database, Lock, User, Loader2, RefreshCw } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import logoKemenkes from '../assets/logo-kemenkes.png';
 
 const generateCaptcha = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Dibuang huruf/angka membingungkan spt O, 0, 1, I
@@ -75,7 +76,7 @@ export default function Login() {
           <div className="flex items-center space-x-3 mb-8 animate-fade-in">
             {/* Logo Kemenkes */}
             <div className="w-12 h-12 shrink-0 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-primary-500/30 p-1.5 border border-slate-100">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Logo_of_the_Ministry_of_Health_of_the_Republic_of_Indonesia.png" alt="Logo Kemenkes" className="w-full h-full object-contain" />
+              <img src={logoKemenkes} alt="Logo Kemenkes" className="w-full h-full object-contain" />
             </div>
             <div>
               <span className="font-display font-bold text-2xl text-slate-800 tracking-tight block leading-tight">
@@ -188,7 +189,7 @@ export default function Login() {
         <div className="absolute inset-0 flex items-center justify-center p-12">
           <div className="max-w-xl text-center z-10 glass-dark p-10 rounded-3xl animate-fade-in-up" style={{ animationDelay: '0.2s', background: 'rgba(0, 48, 25, 0.4)', borderColor: 'rgba(74, 184, 130, 0.2)' }}>
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white mb-6 shadow-lg shadow-white/10 p-2">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Logo_of_the_Ministry_of_Health_of_the_Republic_of_Indonesia.png" alt="Logo Kemenkes" className="w-full h-full object-contain" />
+              <img src={logoKemenkes} alt="Logo Kemenkes" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-4xl font-display font-bold text-white tracking-tight mb-4 leading-tight">
               Sistem Informasi Survei KKLP

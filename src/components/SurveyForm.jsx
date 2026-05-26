@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, ChevronLeft, Save, CheckCircle, Info } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Save, CheckCircle, Info, ArrowLeft } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useAuth } from './AuthContext';
 import faskesMapping from '../data/faskesMapping.json';
+import logoKemenkes from '../assets/logo-kemenkes.png';
 
 const jknBenefits = [
   "Pengelolaan Diabetes Melitus tanpa komplikasi", "Penyusunan care plan jangka panjang pasien kronik",
@@ -274,11 +275,16 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
     <div className="max-w-5xl mx-auto animate-fade-in">
       {/* Header Section */}
       <div className="mb-10 flex flex-col md:flex-row md:items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-display font-bold text-slate-900 tracking-tight leading-tight">
-            {isInterview ? 'Form Wawancara (Tim Survey)' : 'Survey Optimalisasi Program JKN di FKTP'}
-          </h1>
-          {isInterview ? (
+        <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-5">
+          {/* Logo Kemenkes Desktop - Mobile header sudah ada di App.jsx */}
+          <div className="hidden md:flex w-16 h-16 shrink-0 bg-white rounded-2xl items-center justify-center p-2 shadow-sm border border-slate-100 mt-1">
+            <img src={logoKemenkes} alt="Logo Kemenkes" className="w-full h-full object-contain" />
+          </div>
+          <div>
+            <h1 className="text-3xl md:text-4xl font-display font-bold text-slate-900 tracking-tight leading-tight">
+              {isInterview ? 'Form Wawancara (Tim Survey)' : 'Survey Optimalisasi Program JKN di FKTP'}
+            </h1>
+            {isInterview ? (
             <p className="text-slate-500 mt-2 text-sm max-w-2xl">
               Anda sedang dalam mode Tim Survey. Anda dapat mengedit jawaban Puskesmas dan mengisi hasil wawancara di Tahap 5.
             </p>
@@ -288,6 +294,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
               Survey ini bertujuan mengidentifikasi jenis layanan dalam paket manfaat JKN yang saat ini sudah tersedia maupun layanan yang belum terakomodasi dalam JKN, serta menilai apakah layanan tersebut lebih optimal dengan adanya PMK 19 tahun 2024 terkait penambahan jenis tenaga baru termasuk salah satunya dokter Spesialis Kedokteran Keluarga Layanan Primer (Sp.KKLP)
             </div>
           )}
+          </div>
         </div>
         {!isInterview && (
           <button 
