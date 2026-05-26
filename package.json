@@ -8,10 +8,11 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "predeploy": "cross-env VITE_BASE_URL=/surveyKLP/ vite build",
-    "deploy": "gh-pages -d dist",
-    "deploy:riki": "gh-pages -d dist --repo https://github.com/Riki171415/surveyKLP.git",
-    "deploy:all": "npm run predeploy && gh-pages -d dist && gh-pages -d dist --repo https://github.com/Riki171415/surveyKLP.git"
+    "predeploy:jamkesfktp": "cross-env VITE_BASE_URL=/ vite build",
+    "deploy:jamkesfktp": "npm run predeploy:jamkesfktp && echo jamkesfktp.web.id > dist/CNAME && gh-pages -d dist",
+    "predeploy:riki": "cross-env VITE_BASE_URL=/surveyKLP/ vite build",
+    "deploy:riki": "npm run predeploy:riki && gh-pages -d dist --repo https://github.com/Riki171415/surveyKLP.git",
+    "deploy:all": "npm run deploy:jamkesfktp && npm run deploy:riki"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.1",
