@@ -60,12 +60,9 @@ function Sidebar() {
       {/* Logo Kemenkes */}
       <div className="px-5 py-5 border-b border-green-900/60">
         <div className="flex items-center space-x-3">
-          {/* Lambang Palang */}
-          <div className="w-10 h-10 shrink-0 rounded-lg bg-white flex items-center justify-center shadow-lg">
-            <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
-              <rect x="15" y="4" width="10" height="32" rx="2" fill="#00703C"/>
-              <rect x="4" y="15" width="32" height="10" rx="2" fill="#00703C"/>
-            </svg>
+          {/* Lambang Kemenkes */}
+          <div className="w-10 h-10 shrink-0 bg-white rounded-lg flex items-center justify-center p-1 shadow-lg">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Logo_of_the_Ministry_of_Health_of_the_Republic_of_Indonesia.png" alt="Logo Kemenkes" className="w-full h-full object-contain" />
           </div>
           <div>
             <p className="font-display font-bold text-white text-sm leading-tight">Kementerian Kesehatan</p>
@@ -134,11 +131,8 @@ function AppContent() {
               <div className="flex-1 bg-white" />
             </div>
             <div className="flex items-center space-x-2 mt-0.5">
-              <div className="w-7 h-7 bg-white rounded flex items-center justify-center">
-                <svg viewBox="0 0 40 40" className="w-5 h-5" fill="none">
-                  <rect x="15" y="4" width="10" height="32" rx="2" fill="#00703C"/>
-                  <rect x="4" y="15" width="32" height="10" rx="2" fill="#00703C"/>
-                </svg>
+              <div className="w-7 h-7 bg-white rounded flex items-center justify-center p-0.5">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Logo_of_the_Ministry_of_Health_of_the_Republic_of_Indonesia.png" alt="Logo Kemenkes" className="w-full h-full object-contain" />
               </div>
               <span className="font-display font-bold text-base text-white">Survey <span className="text-primary-200">Sp.KKLP</span></span>
             </div>
