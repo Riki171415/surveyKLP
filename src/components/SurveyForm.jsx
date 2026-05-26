@@ -276,9 +276,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
       {/* Header Section */}
       <div className="mb-10 flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-5">
-          {/* Logo Kemenkes Desktop - Mobile header sudah ada di App.jsx */}
-          <div className="hidden md:flex w-16 h-16 shrink-0 bg-white rounded-2xl items-center justify-center p-2 shadow-sm border border-slate-100 mt-1">
-            <img src={logoKemenkes} alt="Logo Kemenkes" className="w-full h-full object-contain" />
+          <div className="hidden md:flex h-16 md:h-20 shrink-0 bg-white rounded-2xl items-center justify-center px-4 py-2.5 shadow-sm border border-slate-100 mt-1">
+            <img src={logoKemenkes} alt="Logo Kemenkes" className="h-full w-auto object-contain max-w-[200px]" />
           </div>
           <div>
             <h1 className="text-3xl md:text-4xl font-display font-bold text-slate-900 tracking-tight leading-tight">

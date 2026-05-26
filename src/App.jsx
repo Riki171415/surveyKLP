@@ -60,15 +60,8 @@ function Sidebar() {
 
       {/* Logo Kemenkes */}
       <div className="px-5 py-5 border-b border-green-900/60">
-        <div className="flex items-center space-x-3">
-          {/* Lambang Kemenkes */}
-          <div className="w-10 h-10 shrink-0 bg-white rounded-lg flex items-center justify-center p-1 shadow-lg">
-            <img src={logoKemenkes} alt="Logo Kemenkes" className="w-full h-full object-contain" />
-          </div>
-          <div>
-            <p className="font-display font-bold text-white text-sm leading-tight">Kementerian Kesehatan</p>
-            <p className="text-primary-300 text-xs font-medium">Republik Indonesia</p>
-          </div>
+        <div className="flex flex-col items-center justify-center bg-white rounded-xl py-3.5 px-4 shadow-inner border border-slate-100">
+          <img src={logoKemenkes} alt="Logo Kemenkes" className="h-10 w-auto object-contain" />
         </div>
         <div className="mt-3 pt-3 border-t border-green-900/40">
           <p className="text-xs text-green-200/60 font-medium uppercase tracking-widest">Sistem Survey</p>
@@ -132,10 +125,10 @@ function AppContent() {
               <div className="flex-1 bg-white" />
             </div>
             <div className="flex items-center space-x-2 mt-0.5">
-              <div className="w-7 h-7 bg-white rounded flex items-center justify-center p-0.5">
-                <img src={logoKemenkes} alt="Logo Kemenkes" className="w-full h-full object-contain" />
+              <div className="bg-white rounded-lg px-2.5 py-1 flex items-center justify-center">
+                <img src={logoKemenkes} alt="Logo Kemenkes" className="h-6 w-auto object-contain" />
               </div>
-              <span className="font-display font-bold text-base text-white">Survey <span className="text-primary-200">Sp.KKLP</span></span>
+              <span className="font-display font-bold text-sm text-white">Survey <span className="text-primary-200">Sp.KKLP</span></span>
             </div>
             <button onClick={logout} className="text-sm font-medium px-3 py-1.5 bg-red-600/80 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-1">
               <LogOut className="w-3.5 h-3.5" />

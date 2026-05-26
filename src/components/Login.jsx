@@ -73,16 +73,10 @@ export default function Login() {
       {/* Left Column: Form (Glassmorphism) */}
       <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:flex-none lg:w-[480px] xl:w-[560px] relative z-10 bg-white shadow-2xl">
         <div className="mx-auto w-full max-w-sm lg:w-[360px] xl:w-[400px]">
-          <div className="flex items-center space-x-3 mb-8 animate-fade-in">
+          <div className="flex justify-center sm:justify-start mb-10 animate-fade-in">
             {/* Logo Kemenkes */}
-            <div className="w-12 h-12 shrink-0 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-primary-500/30 p-1.5 border border-slate-100">
-              <img src={logoKemenkes} alt="Logo Kemenkes" className="w-full h-full object-contain" />
-            </div>
-            <div>
-              <span className="font-display font-bold text-2xl text-slate-800 tracking-tight block leading-tight">
-                Kementerian Kesehatan
-              </span>
-              <span className="text-primary-600 font-semibold text-sm tracking-wide uppercase">Republik Indonesia</span>
+            <div className="h-16 sm:h-20 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/10 px-6 py-3 border border-slate-100">
+              <img src={logoKemenkes} alt="Logo Kemenkes" className="h-full w-auto object-contain" />
             </div>
           </div>
           
@@ -188,8 +182,8 @@ export default function Login() {
         {/* Content overlay */}
         <div className="absolute inset-0 flex items-center justify-center p-12">
           <div className="max-w-xl text-center z-10 glass-dark p-10 rounded-3xl animate-fade-in-up" style={{ animationDelay: '0.2s', background: 'rgba(0, 48, 25, 0.4)', borderColor: 'rgba(74, 184, 130, 0.2)' }}>
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white mb-6 shadow-lg shadow-white/10 p-2">
-              <img src={logoKemenkes} alt="Logo Kemenkes" className="w-full h-full object-contain" />
+            <div className="inline-flex items-center justify-center h-20 bg-white rounded-2xl mb-8 shadow-lg shadow-white/10 px-8 py-4">
+              <img src={logoKemenkes} alt="Logo Kemenkes" className="h-full w-auto object-contain" />
             </div>
             <h1 className="text-4xl font-display font-bold text-white tracking-tight mb-4 leading-tight">
               Sistem Informasi Survei KKLP
