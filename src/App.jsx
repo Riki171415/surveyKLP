@@ -1,12 +1,21 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/AuthContext';
 import Login from './components/Login';
 import SurveyForm from './components/SurveyForm';
-import Dashboard from './components/Dashboard';
-import TimSurveyList from './components/TimSurveyList';
-import UserManagement from './components/UserManagement';
-import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList, Loader2 } from 'lucide-react';
+
+// Lazy load komponen berat — hanya di-download saat dibutuhkan
+const Dashboard     = lazy(() => import('./components/Dashboard'));
+const TimSurveyList = lazy(() => import('./components/TimSurveyList'));
+const UserManagement = lazy(() => import('./components/UserManagement'));
+
+const PageLoader = () => (
+  <div className="flex flex-col items-center justify-center min-h-[400px]">
+    <Loader2 className="w-8 h-8 text-primary-600 animate-spin mb-3" />
+    <p className="text-slate-500 text-sm font-medium">Memuat halaman...</p>
+  </div>
+);
 
 function ProtectedRoute({ children, allowedRoles = [] }) {
   const { user, loading } = useAuth();
@@ -111,16 +120,18 @@ function AppContent() {
         )}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto scroll-smooth">
           <div className="animate-fade-in-up h-full">
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              {/* Form Terbuka untuk Publik */}
-              <Route path="/" element={<SurveyForm />} />
-              {/* Halaman Admin / Tim Survey (Dilindungi) */}
-              <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Dashboard /></ProtectedRoute>} />
-              <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
-              <Route path="/wawancara" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><TimSurveyList /></ProtectedRoute>} />
-              <Route path="/wawancara/form" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><SurveyForm isEdit={true} isInterview={true} /></ProtectedRoute>} />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                {/* Form Terbuka untuk Publik */}
+                <Route path="/" element={<SurveyForm />} />
+                {/* Halaman Admin / Tim Survey (Dilindungi) */}
+                <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Dashboard /></ProtectedRoute>} />
+                <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
+                <Route path="/wawancara" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><TimSurveyList /></ProtectedRoute>} />
+                <Route path="/wawancara/form" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><SurveyForm isEdit={true} isInterview={true} /></ProtectedRoute>} />
+              </Routes>
+            </Suspense>
           </div>
         </main>
       </div>
