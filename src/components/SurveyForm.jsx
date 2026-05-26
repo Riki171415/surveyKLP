@@ -253,15 +253,16 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   if (isSubmitted) {
     return (
       <div className="max-w-2xl mx-auto p-12 bg-white rounded-xl shadow-sm border border-slate-200 text-center animate-fade-in mt-10">
-        <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-6" />
+        <CheckCircle className="w-16 h-16 text-primary-500 mx-auto mb-6" />
         <h2 className="text-3xl font-bold text-slate-800 mb-3 tracking-tight">Data Berhasil Disimpan</h2>
         <p className="text-slate-500 mb-8 text-lg">Terima kasih atas partisipasi Anda.</p>
         <button 
           onClick={() => {
+            setIsSubmitted(false);
             if (isInterview) navigate('/wawancara');
             else window.location.reload();
           }}
-          className="bg-slate-900 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-slate-800 transition-colors shadow-sm"
+          className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors shadow-sm"
         >
           {isInterview ? 'Kembali ke Daftar' : 'Isi Survey Baru'}
         </button>
@@ -291,7 +292,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
         {!isInterview && (
           <button 
             onClick={() => navigate('/login')} 
-            className="shrink-0 bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold hover:bg-slate-50 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm"
+            className="shrink-0 bg-white border border-primary-200 text-primary-700 px-6 py-3 rounded-xl font-bold hover:bg-primary-50 hover:border-primary-300 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm"
           >
             Login Petugas
           </button>
@@ -304,7 +305,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
           <div className="absolute left-10 right-10 top-5 transform -translate-y-1/2 h-1 bg-slate-100 rounded-full -z-10"></div>
           {/* Active Progress Line */}
           <div 
-            className="absolute left-10 top-5 transform -translate-y-1/2 h-1 bg-gradient-to-r from-primary-500 to-indigo-500 rounded-full -z-10 transition-all duration-500 ease-in-out" 
+            className="absolute left-10 top-5 transform -translate-y-1/2 h-1 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full -z-10 transition-all duration-500 ease-in-out" 
             style={{ width: `calc(${Math.max(0, (step - 1) / (totalSteps - 1)) * 100}% - 2.5rem)` }}
           ></div>
 
@@ -312,9 +313,9 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
             <div key={s.id} className="flex flex-col items-center relative z-10 w-full group">
               <div className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm transition-all duration-500 shadow-sm ${
                 step > s.id 
-                  ? 'bg-gradient-to-br from-primary-500 to-indigo-600 text-white shadow-primary-500/40 scale-100' 
+                  ? 'bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-primary-500/40 scale-100' 
                   : step === s.id 
-                    ? 'bg-slate-900 text-white ring-4 ring-slate-200 scale-110 shadow-xl'
+                    ? 'bg-primary-600 text-white ring-4 ring-primary-100 scale-110 shadow-xl'
                     : 'bg-white border-2 border-slate-200 text-slate-400'
               }`}>
                 {step > s.id ? <CheckCircle className="w-5 h-5" /> : s.id}
@@ -792,7 +793,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                 <button 
                   type="button" 
                   onClick={nextStep}
-                  className="flex items-center px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg bg-slate-900 text-white hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow-xl active:scale-95"
+                  className="flex items-center px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg bg-primary-600 text-white hover:bg-primary-700 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary-600/30 active:scale-95"
                 >
                   Selanjutnya <ChevronRight className="w-5 h-5 ml-1.5" />
                 </button>
@@ -801,7 +802,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   type="button" 
                   onClick={submitData}
                   disabled={isSubmitting}
-                  className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 hover:-translate-y-0.5 hover:shadow-primary-500/40 active:scale-95'}`}
+                  className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-primary-600 to-primary-800 hover:from-primary-500 hover:to-primary-700 hover:-translate-y-0.5 hover:shadow-primary-500/40 active:scale-95'}`}
                 >
                   {isSubmitting ? 'Memproses...' : 'Simpan Data'}
                   {!isSubmitting && <Save className="w-5 h-5 ml-2" />}

@@ -73,12 +73,19 @@ export default function Login() {
       <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:flex-none lg:w-[480px] xl:w-[560px] relative z-10 bg-white shadow-2xl">
         <div className="mx-auto w-full max-w-sm lg:w-[360px] xl:w-[400px]">
           <div className="flex items-center space-x-3 mb-8 animate-fade-in">
-            <div className="p-2.5 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-xl shadow-lg shadow-primary-500/30">
-              <Database className="w-8 h-8 text-white" />
+            {/* Logo Kemenkes */}
+            <div className="w-12 h-12 shrink-0 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/30 p-2.5">
+              <svg viewBox="0 0 40 40" className="w-full h-full" fill="none">
+                <rect x="15" y="4" width="10" height="32" rx="2" fill="white"/>
+                <rect x="4" y="15" width="32" height="10" rx="2" fill="white"/>
+              </svg>
             </div>
-            <span className="font-display font-bold text-3xl text-slate-800 tracking-tight">
-              Survey<span className="text-primary-600">KKLP</span>
-            </span>
+            <div>
+              <span className="font-display font-bold text-2xl text-slate-800 tracking-tight block leading-tight">
+                Kementerian Kesehatan
+              </span>
+              <span className="text-primary-600 font-semibold text-sm tracking-wide uppercase">Republik Indonesia</span>
+            </div>
           </div>
           
           <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
@@ -159,7 +166,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`w-full flex justify-center items-center py-3.5 px-4 rounded-xl shadow-lg text-sm font-bold text-white transition-all duration-300 transform ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 hover:-translate-y-0.5 hover:shadow-primary-500/30'}`}
+                  className={`w-full flex justify-center items-center py-3.5 px-4 rounded-xl shadow-lg text-sm font-bold text-white transition-all duration-300 transform ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-primary-600 to-primary-800 hover:from-primary-500 hover:to-primary-700 hover:-translate-y-0.5 hover:shadow-primary-500/30'}`}
                 >
                   {isSubmitting ? (
                     <>
@@ -174,22 +181,25 @@ export default function Login() {
       </div>
 
       {/* Right Column: Decorative Background */}
-      <div className="hidden lg:block relative flex-1 bg-slate-900 overflow-hidden">
+      <div className="hidden lg:block relative flex-1 bg-primary-950 overflow-hidden">
         {/* Animated Gradient Mesh Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-primary-900"></div>
-        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-primary-600/30 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-indigo-500/30 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-900 via-green-900 to-primary-950"></div>
+        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-primary-500/20 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-primary-400/20 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow" style={{ animationDelay: '1.5s' }}></div>
         
         {/* Content overlay */}
         <div className="absolute inset-0 flex items-center justify-center p-12">
-          <div className="max-w-xl text-center z-10 glass-dark p-10 rounded-3xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-500/20 mb-6">
-              <Database className="w-8 h-8 text-primary-400" />
+          <div className="max-w-xl text-center z-10 glass-dark p-10 rounded-3xl animate-fade-in-up" style={{ animationDelay: '0.2s', background: 'rgba(0, 48, 25, 0.4)', borderColor: 'rgba(74, 184, 130, 0.2)' }}>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white mb-6 shadow-lg shadow-white/10">
+              <svg viewBox="0 0 40 40" className="w-10 h-10" fill="none">
+                <rect x="15" y="4" width="10" height="32" rx="2" fill="#00703C"/>
+                <rect x="4" y="15" width="32" height="10" rx="2" fill="#00703C"/>
+              </svg>
             </div>
             <h1 className="text-4xl font-display font-bold text-white tracking-tight mb-4 leading-tight">
               Sistem Informasi Survei KKLP
             </h1>
-            <p className="text-lg text-slate-300 leading-relaxed">
+            <p className="text-lg text-green-100/80 leading-relaxed">
               Platform pendataan dan evaluasi implementasi pelayanan dokter Sp.KKLP di Fasilitas Kesehatan Tingkat Pertama secara nasional.
             </p>
           </div>

@@ -244,7 +244,7 @@ export default function Dashboard() {
       <div className="mb-6 flex flex-col xl:flex-row xl:items-end justify-between space-y-4 xl:space-y-0">
         <div>
           <h1 className="text-3xl font-display font-bold text-slate-900 tracking-tight flex items-center">
-            <div className="p-2 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-xl shadow-lg shadow-primary-500/30 mr-4">
+            <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl shadow-lg shadow-primary-500/30 mr-4">
               <LayoutDashboard className="w-6 h-6 text-white" />
             </div>
             Executive Dashboard
