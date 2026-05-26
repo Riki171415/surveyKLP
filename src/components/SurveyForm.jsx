@@ -139,10 +139,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
   // Validasi Step
   const isStep1Valid = formData.fktpName.trim() !== '' && formData.city.trim() !== '' && formData.role !== '';
+  const propTotal = Number(formData.propInFktp || 0) + Number(formData.propOutFktp || 0);
   const isStep2Valid = isRoleDoctor 
     ? (formData.timeInPoli !== '' && formData.timeHomeVisit !== '' && 
        formData.propInFktp !== '' && formData.propOutFktp !== '' &&
-       (Number(formData.propInFktp) + Number(formData.propOutFktp) === 100) &&
+       propTotal <= 100 &&
        kompetensiLayanan.every((_, idx) => formData.kompetensi[idx]?.status))
     : true;
   const isStep3Valid = jknBenefits.every((_, idx) => formData.jkn[idx]?.skala);
@@ -440,12 +441,21 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5">Beban Dalam Gedung (%)</label>
-                        <input type="number" name="propInFktp" value={formData.propInFktp} onChange={handleInputChange} placeholder="Contoh: 70" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
+                        <input type="number" name="propInFktp" value={formData.propInFktp} onChange={handleInputChange} placeholder="Contoh: 70" min="0" max="100" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5">Beban Luar Gedung (%)</label>
-                        <input type="number" name="propOutFktp" value={formData.propOutFktp} onChange={handleInputChange} placeholder="Contoh: 30" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
+                        <input type="number" name="propOutFktp" value={formData.propOutFktp} onChange={handleInputChange} placeholder="Contoh: 30" min="0" max="100" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
                       </div>
+                      {(formData.propInFktp !== '' || formData.propOutFktp !== '') && (
+                        <div className="md:col-span-2">
+                          {propTotal > 100 ? (
+                            <p className="text-xs text-rose-600 font-medium">⚠️ Total beban dalam + luar gedung melebihi 100% ({propTotal}%). Harap periksa kembali.</p>
+                          ) : (
+                            <p className="text-xs text-emerald-600 font-medium">Total beban: {propTotal}%</p>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     <div className="border border-slate-200 rounded-lg overflow-hidden">
@@ -493,6 +503,18 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         </tbody>
                       </table>
                     </div>
+
+                    {/* Helper: tampilkan berapa item kompetensi yang belum dipilih */}
+                    {(() => {
+                      const belumDipilih = kompetensiLayanan.filter((_, idx) => !formData.kompetensi[idx]?.status).length;
+                      return belumDipilih > 0 ? (
+                        <p className="text-xs text-amber-600 font-medium mt-3">
+                          ⚠️ Masih ada <strong>{belumDipilih} layanan</strong> yang belum dipilih status-nya (Sudah/Belum).
+                        </p>
+                      ) : (
+                        <p className="text-xs text-emerald-600 font-medium mt-3">✅ Semua status kompetensi sudah diisi.</p>
+                      );
+                    })()}
                   </>
                 )}
               </div>
