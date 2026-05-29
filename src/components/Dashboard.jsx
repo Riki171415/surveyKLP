@@ -263,8 +263,8 @@ export default function Dashboard() {
             <span className="text-xs font-semibold bg-blue-50 text-blue-600 px-3 py-1 rounded-full">Berdasarkan Tanggal</span>
           </div>
           <div className="h-64">
-            <ResponsiveContainer width={isPrinting ? 1000 : "100%"} height={isPrinting ? 250 : "100%"}>
-              <AreaChart data={trendChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <ResponsiveContainer width={isPrinting ? 500 : "100%"} height={isPrinting ? 250 : "100%"}>
+              <AreaChart data={trendChartData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#00857A" stopOpacity={0.3}/>
@@ -275,8 +275,8 @@ export default function Dashboard() {
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
                 <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
                 <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                <Area type="monotone" dataKey="Responden" stroke="#00857A" strokeWidth={3} fillOpacity={1} fill="url(#colorTrend)" activeDot={{ r: 6, strokeWidth: 0, fill: '#00A68A' }} isAnimationActive={!isPrinting}>
-                  <LabelList dataKey="Responden" position="top" style={{ fill: '#00857A', fontSize: 11, fontWeight: 700 }} />
+                <Area type="monotone" dataKey="Responden" stroke="#00857A" strokeWidth={3} fillOpacity={1} fill="url(#colorTrend)" dot={{ r: 4, strokeWidth: 2, fill: '#ffffff', stroke: '#00857A' }} activeDot={{ r: 6, strokeWidth: 0, fill: '#00A68A' }} isAnimationActive={!isPrinting}>
+                  <LabelList dataKey="Responden" position="top" offset={10} style={{ fill: '#00857A', fontSize: 11, fontWeight: 700 }} />
                 </Area>
               </AreaChart>
             </ResponsiveContainer>
@@ -287,9 +287,9 @@ export default function Dashboard() {
           <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Distribusi Responden</h2>
           <div className="h-64">
             <ResponsiveContainer width={isPrinting ? 500 : "100%"} height={isPrinting ? 250 : "100%"}>
-              <PieChart>
+              <PieChart margin={{ top: 30, bottom: 20, left: 20, right: 20 }}>
                 <Pie 
-                  data={roleChartData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={5} 
+                  data={roleChartData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={5} 
                   dataKey="value" stroke="none" isAnimationActive={!isPrinting}
                   label={({ name, percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}
                   labelLine={false}
