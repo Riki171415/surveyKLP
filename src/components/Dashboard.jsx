@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { Users, Clock, Home, Activity, Loader2, Filter, LayoutDashboard, Stethoscope, Briefcase, FileText, Database, Download } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import * as XLSX from 'xlsx';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#6366f1'];
 
@@ -125,7 +126,7 @@ export default function Dashboard() {
 
   const totalResponden = filteredData.length;
 
-  const exportToCSV = () => {
+  const exportToExcel = () => {
     const headers = [
       "No", "Waktu Pengisian", "Provinsi/Kota", "Nama Faskes", "Jabatan",
       "Dokter Umum", "Dokter Gigi", "Sp.KKLP",
@@ -158,21 +159,18 @@ export default function Dashboard() {
       nonOptimalServices.forEach((_, i) => { rowData.push(row.non_optimal?.[i]?.masukJkn || '', row.non_optimal?.[i]?.skala || '', row.non_optimal?.[i]?.catatan || ''); });
       interviewQuestions.forEach((_, i) => { rowData.push(row.wawancara?.[i] || ''); });
 
-      return rowData.map(cell => {
-        const cellStr = String(cell).replace(/"/g, '""').replace(/\n/g, ' ');
-        return `"${cellStr}"`;
-      }).join(';'); // Menggunakan semicolon (;) agar rapi di Excel Indonesia
+      return rowData;
     });
 
-    const csvContent = [headers.map(h => `"${h}"`).join(';'), ...rows].join('\n');
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM untuk UTF-8 Excel
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `Rekap_Survey_JKN_${new Date().getTime()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Survey");
+    
+    // Auto-adjust column widths based on headers
+    const colWidths = headers.map(h => ({ wch: Math.max(15, h.length) }));
+    worksheet['!cols'] = colWidths;
+
+    XLSX.writeFile(workbook, `Rekap_Survey_JKN_${new Date().getTime()}.xlsx`);
   };
 
   // --- DATA PROCESSING UNTUK MASING-MASING TAB ---
@@ -283,7 +281,7 @@ export default function Dashboard() {
           <div className="hidden sm:block w-px h-8 bg-slate-200 mx-2"></div>
           
           <button 
-            onClick={exportToCSV}
+            onClick={exportToExcel}
             className="flex items-center text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white py-2 px-5 rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5 ml-auto"
           >
             <Download className="w-4 h-4 mr-2" /> Export Excel
