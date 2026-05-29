@@ -73,6 +73,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPanduan, setShowPanduan] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
 
@@ -280,12 +281,20 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
           </div>
         </div>
         {!isInterview && (
-          <button 
-            onClick={() => navigate('/login')} 
-            className="shrink-0 bg-white border border-primary-200 text-primary-700 px-6 py-3 rounded-xl font-bold hover:bg-primary-50 hover:border-primary-300 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm"
-          >
-            Login Petugas
-          </button>
+          <div className="flex flex-col gap-2 shrink-0">
+            <button 
+              onClick={() => setShowPanduan(true)} 
+              className="bg-primary-600 border border-primary-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-primary-700 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm"
+            >
+              📖 Panduan Pengisian
+            </button>
+            <button 
+              onClick={() => navigate('/login')} 
+              className="bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm"
+            >
+              Login Petugas
+            </button>
+          </div>
         )}
       </div>
 
@@ -816,6 +825,92 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
           </div>
         </form>
       </div>
+
+      {/* Panduan Modal */}
+      {showPanduan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-slide-up">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h2 className="text-xl font-bold text-slate-800">📖 Panduan Pengisian Survey & Makna Skala Likert</h2>
+              <button onClick={() => setShowPanduan(false)} className="text-slate-400 hover:text-red-500 transition-colors">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto text-slate-700 space-y-6">
+              
+              <section>
+                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">1. Tahap Persiapan</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Pastikan Anda memilih <strong>Provinsi</strong> dan <strong>Nama Puskesmas</strong> dengan benar melalui menu pencarian (dropdown).</li>
+                  <li>Pilih <strong>Jabatan</strong> Anda saat ini, lalu isikan data <strong>Ketersediaan Dokter</strong> dan <strong>Estimasi Waktu Pelayanan</strong>.</li>
+                </ul>
+              </section>
+              
+              <section>
+                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">2. Tahap Pengisian Layanan JKN & Non-Optimal</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Baca dengan cermat setiap jenis layanan yang ditampilkan.</li>
+                  <li>Pada bagian layanan yang belum optimal, Anda akan diminta untuk menentukan apakah layanan tersebut seharusnya <strong>Masuk JKN</strong> (Ya / Tidak / Tidak Tahu).</li>
+                  <li>Setelah itu, berikan <strong>Penilaian (Skala) 1 sampai 4</strong>.</li>
+                </ul>
+              </section>
+
+              <section className="bg-amber-50 p-5 rounded-xl border border-amber-200">
+                <h3 className="font-bold text-lg text-amber-800 mb-3">Penjelasan Skala Likert 1-4</h3>
+                <p className="mb-4 text-amber-700 text-sm font-medium">Pemberian nilai skala 1 hingga 4 sangat penting untuk mengukur tingkat ketersediaan layanan atau persepsi Anda terhadap layanan tersebut. Berikut adalah detail penjelasannya:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-white p-4 rounded-lg border border-amber-100 shadow-sm flex items-start gap-4">
+                    <div className="bg-red-100 text-red-700 w-10 h-10 flex items-center justify-center rounded-lg font-black text-xl shrink-0">1</div>
+                    <div>
+                      <h4 className="font-bold text-slate-800">Sangat Kurang / Sangat Tidak Setuju</h4>
+                      <p className="text-sm text-slate-600 mt-1">Layanan sama sekali belum memadai, tidak berjalan, atau Anda sangat tidak setuju dengan pernyataan tersebut.</p>
+                    </div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-amber-100 shadow-sm flex items-start gap-4">
+                    <div className="bg-orange-100 text-orange-700 w-10 h-10 flex items-center justify-center rounded-lg font-black text-xl shrink-0">2</div>
+                    <div>
+                      <h4 className="font-bold text-slate-800">Kurang / Tidak Setuju</h4>
+                      <p className="text-sm text-slate-600 mt-1">Layanan ada namun masih jauh dari standar, sering terkendala, atau Anda cenderung tidak setuju.</p>
+                    </div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-amber-100 shadow-sm flex items-start gap-4">
+                    <div className="bg-blue-100 text-blue-700 w-10 h-10 flex items-center justify-center rounded-lg font-black text-xl shrink-0">3</div>
+                    <div>
+                      <h4 className="font-bold text-slate-800">Baik / Setuju</h4>
+                      <p className="text-sm text-slate-600 mt-1">Layanan sudah berjalan dengan baik secara umum meskipun mungkin ada sedikit kekurangan, atau Anda setuju.</p>
+                    </div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-amber-100 shadow-sm flex items-start gap-4">
+                    <div className="bg-emerald-100 text-emerald-700 w-10 h-10 flex items-center justify-center rounded-lg font-black text-xl shrink-0">4</div>
+                    <div>
+                      <h4 className="font-bold text-slate-800">Sangat Baik / Sangat Setuju</h4>
+                      <p className="text-sm text-slate-600 mt-1">Layanan sudah sangat optimal, memuaskan, konsisten, atau Anda sangat setuju dengan pernyataan tersebut.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">3. Penyelesaian & Pengiriman</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Anda wajib mengisi semua isian termasuk yang mensyaratkan pemilihan "Ya", "Tidak", "Tidak Tahu" beserta skalanya.</li>
+                  <li>Setelah semua tahapan tercentang hijau (Selesai), tombol <strong>Kirim Survey</strong> akan menyala di akhir halaman.</li>
+                  <li>Pastikan Anda telah mengisi kotak <strong>Masukan dan Saran</strong> (jika ada) di kolom catatan.</li>
+                </ul>
+              </section>
+
+            </div>
+            <div className="p-4 border-t border-slate-100 bg-slate-50 text-right">
+              <button 
+                onClick={() => setShowPanduan(false)}
+                className="bg-slate-800 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-slate-700 transition-colors shadow-sm"
+              >
+                Saya Mengerti, Tutup Panduan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
