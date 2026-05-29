@@ -5,6 +5,7 @@ import { supabase } from '../supabaseClient';
 import { useAuth } from './AuthContext';
 import faskesMapping from '../data/faskesMapping.json';
 import logoKemenkes from '../assets/logo-kemenkes.png';
+import SearchableSelect from './SearchableSelect';
 
 const jknBenefits = [
   "Pengelolaan Diabetes Melitus tanpa komplikasi", "Penyusunan care plan jangka panjang pasien kronik",
@@ -347,22 +348,28 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   ) : (
                     <>
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Provinsi</label>
-                        <select required name="city" value={formData.city} onChange={(e) => { handleInputChange(e); setFormData(prev => ({...prev, fktpName: ''})); }} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all">
-                          <option value="">-- Pilih Provinsi --</option>
-                          {uniqueProvinces.map(prov => (
-                            <option key={prov} value={prov}>{prov}</option>
-                          ))}
-                        </select>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Provinsi / Kabupaten/Kota</label>
+                        <SearchableSelect 
+                          name="city"
+                          options={uniqueProvinces}
+                          value={formData.city}
+                          onChange={(val) => {
+                             handleInputChange({ target: { name: 'city', value: val } });
+                             setFormData(prev => ({...prev, fktpName: ''}));
+                          }}
+                          placeholder="-- Ketik atau Pilih Provinsi --"
+                        />
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nama FKTP/Puskesmas</label>
-                        <select required name="fktpName" value={formData.fktpName} onChange={handleInputChange} disabled={!formData.city} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all disabled:opacity-50">
-                          <option value="">-- Pilih Puskesmas --</option>
-                          {puskesmasList.map(pkm => (
-                            <option key={pkm} value={pkm}>{pkm}</option>
-                          ))}
-                        </select>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Nama FKTP/Puskesmas</label>
+                        <SearchableSelect 
+                          name="fktpName"
+                          options={puskesmasList}
+                          value={formData.fktpName}
+                          onChange={(val) => handleInputChange({ target: { name: 'fktpName', value: val } })}
+                          disabled={!formData.city}
+                          placeholder="-- Ketik atau Pilih Puskesmas --"
+                        />
                         {!formData.city && <p className="text-xs text-amber-600 mt-1">Pilih provinsi terlebih dahulu</p>}
                       </div>
                     </>
