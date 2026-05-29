@@ -78,19 +78,30 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* Print Styles */
 @media print {
+  html, body, #root, .flex, .flex-1, .h-screen, .min-h-screen, main {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+  }
   body {
     background-color: white !important;
     background-image: none !important;
     color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   .no-print, .no-print * {
     display: none !important;
   }
   .print-page-break {
     page-break-before: always;
+    break-before: page;
   }
   .print-page-break-inside-avoid {
     page-break-inside: avoid;
+    break-inside: avoid;
   }
   /* Hapus shadow dan border tebal untuk print */
   * {
