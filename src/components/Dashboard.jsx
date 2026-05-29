@@ -263,7 +263,7 @@ export default function Dashboard() {
             <span className="text-xs font-semibold bg-blue-50 text-blue-600 px-3 py-1 rounded-full">Berdasarkan Tanggal</span>
           </div>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 250 : "100%"}>
               <AreaChart data={trendChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
@@ -284,7 +284,7 @@ export default function Dashboard() {
         <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:break-inside-avoid">
           <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Distribusi Responden</h2>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 250 : "100%"}>
               <PieChart>
                 <Pie data={roleChartData} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={5} dataKey="value" stroke="none" isAnimationActive={!isPrinting}>
                   {roleChartData.map((e, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
@@ -299,7 +299,7 @@ export default function Dashboard() {
         <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:break-inside-avoid">
           <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Distribusi Beban Kerja Faskes</h2>
           <div className="h-40">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 160 : "100%"}>
               <BarChart data={bebanKerjaData} layout="vertical" margin={{ left: -20, right: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
                 <XAxis type="number" domain={[0, 100]} axisLine={false} tickLine={false} hide />
@@ -317,7 +317,7 @@ export default function Dashboard() {
         <div className="xl:col-span-2 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:break-inside-avoid">
           <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Ketersediaan Dokter di FKTP</h2>
           <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 200 : "100%"}>
               <BarChart data={ketersediaanDokter} layout="vertical" margin={{ left: 10, right: 30 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
                 <XAxis type="number" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
@@ -349,7 +349,7 @@ export default function Dashboard() {
         <p className="text-sm text-slate-500 mt-1">Perbandingan faskes yang sudah mengimplementasikan kompetensi secara optimal.</p>
       </div>
       <div className="h-[450px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 450 : "100%"}>
           <BarChart data={kompetensiChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontWeight: 'bold'}} />
@@ -403,7 +403,7 @@ export default function Dashboard() {
         <p className="text-sm text-slate-500 mt-1">Berdasarkan skala Likert (1-4). Nilai mendekati 4 menandakan kompetensi spesifik Sp.KKLP.</p>
       </div>
       <div className="h-[700px] w-full bg-white rounded-3xl p-4 border border-slate-50 shadow-sm">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 700 : "100%"}>
           <BarChart data={jknChartData} layout="vertical" margin={{ left: 40, right: 40 }}>
             <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
             <XAxis type="number" domain={[0, 4]} axisLine={false} tickLine={false} ticks={[0, 1, 2, 3, 4]} />
@@ -455,7 +455,7 @@ export default function Dashboard() {
         <p className="text-sm text-slate-500 mt-1">Perbandingan Faskes yang merekomendasikan layanan non-optimal dimasukkan ke JKN beserta pembobotan skalanya.</p>
       </div>
       <div className="h-[550px] w-full bg-white rounded-3xl p-4 border border-slate-50 shadow-sm">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 550 : "100%"}>
           <ComposedChart data={nonOptChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontWeight: 'bold'}} />
