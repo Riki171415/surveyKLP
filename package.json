@@ -22,6 +22,8 @@
     "@vitejs/plugin-react": "^6.0.1",
     "autoprefixer": "^10.5.0",
     "clsx": "^2.1.1",
+    "date-fns": "^4.3.0",
+    "framer-motion": "^12.40.0",
     "lucide-react": "^1.16.0",
     "postcss": "^8.5.15",
     "react": "^19.2.6",

@@ -1,11 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend, LineChart, Line, ComposedChart
+  PieChart, Pie, Cell, Legend, LineChart, Line, ComposedChart, AreaChart, Area
 } from 'recharts';
-import { Users, Clock, Home, Activity, Loader2, Filter, LayoutDashboard, Stethoscope, Briefcase, FileText, Database, Download } from 'lucide-react';
+import { 
+  Users, Clock, Home, Activity, Loader2, Filter, LayoutDashboard, Stethoscope, Briefcase, 
+  FileText, Database, Download, Search, ChevronLeft, ChevronRight, TrendingUp, Sparkles 
+} from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
+import { motion, AnimatePresence } from 'framer-motion';
+import { format, parseISO } from 'date-fns';
+import { id as localeID } from 'date-fns/locale';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#6366f1'];
 
@@ -49,6 +55,21 @@ const interviewQuestions = [
   "[W7] Insentif tambahan untuk Sp.KKLP?"
 ];
 
+// --- FRAMER MOTION VARIANTS ---
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
+const tabVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
+  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } }
+};
+
 export default function Dashboard() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,6 +82,11 @@ export default function Dashboard() {
   const [filterProvinsi, setFilterProvinsi] = useState('Semua');
   const [filterRole, setFilterRole] = useState('Semua');
   const [filterKklp, setFilterKklp] = useState('Semua');
+
+  // Smart Table State
+  const [searchTable, setSearchTable] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchData();
@@ -83,7 +109,6 @@ export default function Dashboard() {
     }
   };
 
-  // Extract unique filter options
   const uniqueProvinsi = useMemo(() => {
     const provs = new Set(data.map(d => d.city).filter(Boolean));
     return ['Semua', ...Array.from(provs).sort()];
@@ -94,7 +119,6 @@ export default function Dashboard() {
     return ['Semua', ...Array.from(roles).sort()];
   }, [data]);
 
-  // Apply filters
   const filteredData = useMemo(() => {
     return data.filter(item => {
       const matchProv = filterProvinsi === 'Semua' || item.city === filterProvinsi;
@@ -103,26 +127,6 @@ export default function Dashboard() {
       return matchProv && matchRole && matchKklp;
     });
   }, [data, filterProvinsi, filterRole, filterKklp]);
-
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 text-primary-600 animate-spin mb-4" />
-        <p className="text-slate-500 font-medium">Memuat dan menganalisis data...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center max-w-lg mx-auto">
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          <p className="font-semibold mb-2">Error</p>
-          <p className="text-sm">{error}</p>
-        </div>
-      </div>
-    );
-  }
 
   const totalResponden = filteredData.length;
 
@@ -167,61 +171,103 @@ export default function Dashboard() {
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data Survey");
-    
-    // Auto-adjust column widths based on headers
     const colWidths = headers.map(h => ({ wch: Math.max(15, h.length) }));
     worksheet['!cols'] = colWidths;
-
     XLSX.writeFile(workbook, `Rekap_Survey_JKN_${new Date().getTime()}.xlsx`);
   };
 
-  // --- DATA PROCESSING UNTUK MASING-MASING TAB ---
+  // --- DATA PROCESSING (MEMOIZED) ---
 
-  // 1. DATA RINGKASAN
-  const avgPoli = totalResponden > 0 ? Math.round(filteredData.reduce((acc, row) => acc + (Number(row.time_in_poli) || 0), 0) / totalResponden) : 0;
-  const avgHome = totalResponden > 0 ? Math.round(filteredData.reduce((acc, row) => acc + (Number(row.time_home_visit) || 0), 0) / totalResponden) : 0;
-  
-  const roleCount = {};
-  filteredData.forEach(row => {
-    const role = row.role || 'Tidak Diketahui';
-    roleCount[role] = (roleCount[role] || 0) + 1;
-  });
-  const roleChartData = Object.keys(roleCount).map(key => ({ name: key, value: roleCount[key] }));
+  const summaryMetrics = useMemo(() => {
+    let sumPoli = 0, sumHome = 0, sumInFktp = 0, sumOutFktp = 0;
+    let kklpHome = 0, kklpCount = 0;
+    let nonKklpHome = 0, nonKklpCount = 0;
 
-  let ketersediaanDokter = [
-    { name: 'Dokter Umum', Ada: 0, Tidak: 0 },
-    { name: 'Dokter Gigi', Ada: 0, Tidak: 0 },
-    { name: 'Dokter Sp.KKLP', Ada: 0, Tidak: 0 }
-  ];
-  filteredData.forEach(row => {
-    row.doc_umum ? ketersediaanDokter[0].Ada++ : ketersediaanDokter[0].Tidak++;
-    row.doc_gigi ? ketersediaanDokter[1].Ada++ : ketersediaanDokter[1].Tidak++;
-    row.doc_kklp ? ketersediaanDokter[2].Ada++ : ketersediaanDokter[2].Tidak++;
-  });
+    filteredData.forEach(row => {
+      const poli = Number(row.time_in_poli) || 0;
+      const home = Number(row.time_home_visit) || 0;
+      sumPoli += poli;
+      sumHome += home;
+      sumInFktp += Number(row.prop_in_fktp) || 0;
+      sumOutFktp += Number(row.prop_out_fktp) || 0;
 
-  // 2. DATA KOMPETENSI
-  const kompetensiChartData = kompetensiLayanan.map((nama, idx) => {
+      if (row.doc_kklp) {
+        kklpHome += home;
+        kklpCount++;
+      } else {
+        nonKklpHome += home;
+        nonKklpCount++;
+      }
+    });
+
+    return {
+      avgPoli: totalResponden > 0 ? Math.round(sumPoli / totalResponden) : 0,
+      avgHome: totalResponden > 0 ? Math.round(sumHome / totalResponden) : 0,
+      avgInFktp: totalResponden > 0 ? Math.round(sumInFktp / totalResponden) : 0,
+      avgOutFktp: totalResponden > 0 ? Math.round(sumOutFktp / totalResponden) : 0,
+      kklpAvgHome: kklpCount > 0 ? Math.round(kklpHome / kklpCount) : 0,
+      nonKklpAvgHome: nonKklpCount > 0 ? Math.round(nonKklpHome / nonKklpCount) : 0,
+    };
+  }, [filteredData, totalResponden]);
+
+  const { roleChartData, ketersediaanDokter, trendChartData, bebanKerjaData } = useMemo(() => {
+    const roleCount = {};
+    const trendMap = {};
+    const docStats = [
+      { name: 'Dr Umum', Ada: 0, Tidak: 0 },
+      { name: 'Dr Gigi', Ada: 0, Tidak: 0 },
+      { name: 'Sp.KKLP', Ada: 0, Tidak: 0 }
+    ];
+
+    filteredData.forEach(row => {
+      const role = row.role || 'Lainnya';
+      roleCount[role] = (roleCount[role] || 0) + 1;
+      
+      row.doc_umum ? docStats[0].Ada++ : docStats[0].Tidak++;
+      row.doc_gigi ? docStats[1].Ada++ : docStats[1].Tidak++;
+      row.doc_kklp ? docStats[2].Ada++ : docStats[2].Tidak++;
+
+      // Trend by date
+      if (row.created_at) {
+        try {
+          const dateStr = format(parseISO(row.created_at), 'dd MMM yy', { locale: localeID });
+          trendMap[dateStr] = (trendMap[dateStr] || 0) + 1;
+        } catch(e) {}
+      }
+    });
+
+    const trendData = Object.keys(trendMap).map(k => ({ date: k, Responden: trendMap[k] }));
+    const bebanData = [
+      { name: 'Rata-Rata Beban Kerja', 'Dalam Gedung (%)': summaryMetrics.avgInFktp, 'Luar Gedung (%)': summaryMetrics.avgOutFktp }
+    ];
+
+    return {
+      roleChartData: Object.keys(roleCount).map(key => ({ name: key, value: roleCount[key] })),
+      ketersediaanDokter: docStats,
+      trendChartData: trendData,
+      bebanKerjaData: bebanData
+    };
+  }, [filteredData, summaryMetrics]);
+
+  const kompetensiChartData = useMemo(() => kompetensiLayanan.map((nama, idx) => {
     let sudah = 0, belum = 0;
     filteredData.forEach(row => {
       const status = row.kompetensi?.[idx]?.status;
-      if (status === 'sudah') sudah++;
-      else if (status === 'belum') belum++;
+      if (status === 'sudah') sudah++; else if (status === 'belum') belum++;
     });
     return { name: `K${idx+1}`, fullName: nama, Sudah: sudah, Belum: belum };
-  });
+  }), [filteredData]);
 
-  // 3. DATA MANFAAT JKN
-  const jknChartData = jknBenefits.map((nama, idx) => {
+  const jknChartData = useMemo(() => jknBenefits.map((nama, idx) => {
     let totalScore = 0, count = 0;
     filteredData.forEach(row => {
       const val = Number(row.jkn?.[idx]?.skala);
       if (val > 0) { totalScore += val; count++; }
     });
     return { name: `J${idx+1}`, fullName: nama, AvgSkala: count > 0 ? Number((totalScore / count).toFixed(1)) : 0 };
-  }).sort((a, b) => b.AvgSkala - a.AvgSkala); // Sort descending
+  }).sort((a, b) => b.AvgSkala - a.AvgSkala), [filteredData]);
 
-  // 4. DATA LAYANAN NON-OPTIMAL
-  const nonOptChartData = nonOptimalServices.map((nama, idx) => {
+  const nonOptChartData = useMemo(() => nonOptimalServices.map((nama, idx) => {
     let masukJknYa = 0, masukJknTidak = 0, masukJknTdkTahu = 0, totalScore = 0, countScore = 0;
     filteredData.forEach(row => {
       const ans = row.non_optimal?.[idx];
@@ -233,361 +279,540 @@ export default function Dashboard() {
       if (val > 0) { totalScore += val; countScore++; }
     });
     return { 
-      name: `NO${idx+1}`, fullName: nama, 
-      Ya: masukJknYa, Tidak: masukJknTidak, TdkTahu: masukJknTdkTahu,
+      name: `NO${idx+1}`, fullName: nama, Ya: masukJknYa, Tidak: masukJknTidak, TdkTahu: masukJknTdkTahu,
       AvgSkala: countScore > 0 ? Number((totalScore / countScore).toFixed(1)) : 0 
     };
-  }).sort((a, b) => b.Ya - a.Ya); // Sort by highest "Ya"
+  }).sort((a, b) => b.Ya - a.Ya), [filteredData]);
+
+  // Pagination & Search untuk Table
+  const tableDataFiltered = useMemo(() => {
+    if (!searchTable) return filteredData;
+    const lowerSearch = searchTable.toLowerCase();
+    return filteredData.filter(row => 
+      (row.fktp_name || '').toLowerCase().includes(lowerSearch) ||
+      (row.city || '').toLowerCase().includes(lowerSearch) ||
+      (row.wawancara?.pewawancara || '').toLowerCase().includes(lowerSearch)
+    );
+  }, [filteredData, searchTable]);
+
+  const totalPages = Math.ceil(tableDataFiltered.length / rowsPerPage) || 1;
+  const currentTableData = tableDataFiltered.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+  // Reset page when search or rowsPerPage changes
+  useEffect(() => setCurrentPage(1), [searchTable, rowsPerPage, filterProvinsi, filterRole, filterKklp]);
+
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
+          <Loader2 className="w-10 h-10 text-primary-600 mb-4" />
+        </motion.div>
+        <p className="text-slate-500 font-medium">Memuat dan menganalisis triliunan bit data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center max-w-lg mx-auto">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 shadow-lg">
+          <p className="font-semibold mb-2 flex items-center justify-center"><Activity className="mr-2" /> Error Memuat Data</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-7xl mx-auto animate-fade-in pb-12">
+    <motion.div initial="hidden" animate="show" variants={containerVariants} className="max-w-7xl mx-auto pb-12">
       {/* Header & Filter Bar */}
-      <div className="mb-6 flex flex-col xl:flex-row xl:items-end justify-between space-y-4 xl:space-y-0">
+      <motion.div variants={itemVariants} className="mb-6 flex flex-col xl:flex-row xl:items-end justify-between space-y-4 xl:space-y-0">
         <div>
           <h1 className="text-3xl font-display font-bold text-slate-900 tracking-tight flex items-center">
-            <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl shadow-lg shadow-primary-500/30 mr-4">
+            <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl shadow-lg shadow-primary-500/30 mr-4">
               <LayoutDashboard className="w-6 h-6 text-white" />
-            </div>
+            </motion.div>
             Executive Dashboard
           </h1>
-          <p className="text-slate-500 mt-2 text-sm">Monitoring & Evaluasi Optimalisasi JKN dan Sp.KKLP</p>
+          <p className="text-slate-500 mt-2 text-sm flex items-center">
+            <Sparkles className="w-4 h-4 text-amber-500 mr-1.5" /> Insight & Evaluasi Cerdas JKN Sp.KKLP
+          </p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3 bg-white/80 backdrop-blur-md p-3 rounded-2xl shadow-soft border border-white/60">
-          <div className="flex items-center text-sm font-semibold text-slate-600 mr-2 bg-slate-100 px-3 py-1.5 rounded-lg">
-            <Filter className="w-4 h-4 mr-1.5 text-primary-500" /> Filter:
+        <div className="flex flex-wrap items-center gap-3 bg-white/80 backdrop-blur-xl p-3 rounded-2xl shadow-soft border border-white/60">
+          <div className="flex items-center text-sm font-semibold text-slate-600 mr-2 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200/50">
+            <Filter className="w-4 h-4 mr-1.5 text-primary-500" /> Filter
           </div>
-          <select 
-            value={filterProvinsi} 
-            onChange={(e) => setFilterProvinsi(e.target.value)}
-            className="text-sm border-none rounded-xl py-2 px-4 bg-slate-50 hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all shadow-sm max-w-[200px] cursor-pointer"
-          >
+          <select value={filterProvinsi} onChange={(e) => setFilterProvinsi(e.target.value)} className="text-sm border-none rounded-xl py-2 px-4 bg-slate-50 hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all shadow-sm max-w-[150px] sm:max-w-[200px] cursor-pointer">
             {uniqueProvinsi.map(p => <option key={p} value={p}>{p === 'Semua' ? 'Semua Provinsi' : p}</option>)}
           </select>
-          <select 
-            value={filterRole} 
-            onChange={(e) => setFilterRole(e.target.value)}
-            className="text-sm border-none rounded-xl py-2 px-4 bg-slate-50 hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all shadow-sm cursor-pointer"
-          >
+          <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} className="text-sm border-none rounded-xl py-2 px-4 bg-slate-50 hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all shadow-sm cursor-pointer">
             {uniqueRoles.map(r => <option key={r} value={r}>{r === 'Semua' ? 'Semua Jabatan' : r}</option>)}
           </select>
-          <select 
-            value={filterKklp} 
-            onChange={(e) => setFilterKklp(e.target.value)}
-            className="text-sm border-none rounded-xl py-2 px-4 bg-slate-50 hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all shadow-sm cursor-pointer"
-          >
-            <option value="Semua">Sp.KKLP (Semua)</option>
-            <option value="Ada">Ada Sp.KKLP</option>
-            <option value="Tidak">Tidak Ada Sp.KKLP</option>
+          <select value={filterKklp} onChange={(e) => setFilterKklp(e.target.value)} className="text-sm border-none rounded-xl py-2 px-4 bg-slate-50 hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all shadow-sm cursor-pointer">
+            <option value="Semua">Dokter Sp.KKLP</option>
+            <option value="Ada">Tersedia Sp.KKLP</option>
+            <option value="Tidak">Tanpa Sp.KKLP</option>
           </select>
           
           <div className="hidden sm:block w-px h-8 bg-slate-200 mx-2"></div>
           
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
             onClick={exportToExcel}
-            className="flex items-center text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white py-2 px-5 rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5 ml-auto"
+            className="flex items-center text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-2 px-5 rounded-xl transition-all shadow-lg shadow-emerald-500/30 ml-auto"
           >
-            <Download className="w-4 h-4 mr-2" /> Export Excel
-          </button>
+            <Download className="w-4 h-4 mr-2" /> Export
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Comparative Insight Bar (AI-like) */}
+      <motion.div variants={itemVariants} className="mb-6 bg-gradient-to-r from-indigo-50 via-blue-50 to-emerald-50 rounded-2xl p-4 border border-blue-100/50 shadow-inner flex items-start gap-4">
+        <div className="bg-white p-2.5 rounded-xl shadow-sm text-blue-600 shrink-0"><TrendingUp className="w-5 h-5" /></div>
+        <div>
+          <h3 className="text-sm font-bold text-slate-800 mb-1">Insight Komparatif Otomatis</h3>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            Faskes <span className="font-semibold text-emerald-600">dengan Sp.KKLP</span> mencatat rata-rata Waktu Home Visit 
+            <span className="font-bold text-slate-900 mx-1">{summaryMetrics.kklpAvgHome} Menit</span>, 
+            dibandingkan <span className="font-semibold text-rose-500">Tanpa Sp.KKLP</span> sebesar 
+            <span className="font-bold text-slate-900 mx-1">{summaryMetrics.nonKklpAvgHome} Menit</span>. 
+            {(summaryMetrics.kklpAvgHome > summaryMetrics.nonKklpAvgHome) ? " Hal ini menunjukkan peranan Sp.KKLP meningkatkan durasi kualitas layanan komunitas." : ""}
+          </p>
+        </div>
+      </motion.div>
 
       {/* Tabs Navigation */}
-      <div className="flex overflow-x-auto bg-white/50 backdrop-blur p-2 rounded-2xl shadow-sm border border-white mb-6 hide-scrollbar gap-2">
+      <motion.div variants={itemVariants} className="flex overflow-x-auto bg-white/70 backdrop-blur-xl p-2 rounded-2xl shadow-sm border border-slate-100 mb-6 hide-scrollbar gap-2 relative">
         {[
-          { id: 'ringkasan', label: 'Ringkasan Utama', icon: Activity },
+          { id: 'ringkasan', label: 'Ringkasan Eksekutif', icon: Activity },
           { id: 'kompetensi', label: 'Analisis Kompetensi', icon: Stethoscope },
-          { id: 'jkn', label: 'Manfaat JKN', icon: Briefcase },
-          { id: 'nonopt', label: 'Layanan Ekstra', icon: FileText },
-          { id: 'data', label: 'Data & Wawancara', icon: Database },
+          { id: 'jkn', label: 'Evaluasi Manfaat JKN', icon: Briefcase },
+          { id: 'nonopt', label: 'Layanan Tambahan', icon: FileText },
+          { id: 'data', label: 'Smart Data Grid', icon: Database },
         ].map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
-              activeTab === tab.id 
-                ? 'bg-white text-primary-600 shadow-sm border border-slate-100 scale-105' 
-                : 'text-slate-500 hover:text-slate-800 hover:bg-white/60'
+            className={`relative flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap z-10 ${
+              activeTab === tab.id ? 'text-primary-700' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
             }`}
           >
+            {activeTab === tab.id && (
+              <motion.div layoutId="activeTabIndicator" className="absolute inset-0 bg-white shadow-sm border border-slate-200/60 rounded-xl -z-10" transition={{ type: "spring", stiffness: 300, damping: 30 }} />
+            )}
             <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-primary-500' : 'text-slate-400'}`} />
             <span>{tab.label}</span>
           </button>
         ))}
-      </div>
+      </motion.div>
 
       {/* Content Area */}
-      <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl shadow-soft border border-white min-h-[500px]">
+      <div className="bg-white/80 backdrop-blur-2xl p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white min-h-[500px]">
         {totalResponden === 0 ? (
-          <div className="py-20 text-center text-slate-500">Tidak ada data yang cocok dengan filter.</div>
+          <div className="py-24 text-center text-slate-400 font-medium">Data tidak ditemukan berdasarkan kriteria filter saat ini.</div>
         ) : (
-          <>
-            {/* TAB 1: RINGKASAN */}
-            {activeTab === 'ringkasan' && (
-              <div className="space-y-8 animate-fade-in">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                  {[
-                    { label: 'Total Responden', value: totalResponden, icon: Users, sub: 'Faskes tersaring', color: 'from-blue-500 to-indigo-500' },
-                    { label: 'Avg Waktu Poli', value: `${avgPoli} Mnt`, icon: Clock, sub: 'Per pasien', color: 'from-emerald-400 to-teal-500' },
-                    { label: 'Avg Home Visit', value: `${avgHome} Mnt`, icon: Home, sub: 'Per kunjungan', color: 'from-amber-400 to-orange-500' },
-                    { label: 'Ada Sp.KKLP', value: `${Math.round((ketersediaanDokter[2].Ada / totalResponden)*100)}%`, icon: Stethoscope, sub: `${ketersediaanDokter[2].Ada} dari ${totalResponden}`, color: 'from-pink-500 to-rose-500' }
-                  ].map((s, i) => (
-                    <div key={i} className="relative overflow-hidden p-6 bg-white rounded-3xl border border-slate-100 shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 flex flex-col group">
-                      <div className={`absolute -right-10 -top-10 w-32 h-32 bg-gradient-to-br ${s.color} rounded-full opacity-10 group-hover:scale-150 transition-transform duration-700`}></div>
-                      <div className={`mb-4 p-3 bg-gradient-to-br ${s.color} rounded-2xl self-start shadow-lg text-white`}>
-                        <s.icon className="w-6 h-6" />
+          <AnimatePresence mode="wait">
+            <motion.div key={activeTab} variants={tabVariants} initial="hidden" animate="show" exit="exit" className="h-full">
+              
+              {/* TAB 1: RINGKASAN */}
+              {activeTab === 'ringkasan' && (
+                <div className="space-y-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    {[
+                      { label: 'Total Faskes Terdata', value: totalResponden, icon: Users, sub: 'Responden tersaring', color: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/20' },
+                      { label: 'Rata-rata Waktu Poli', value: `${summaryMetrics.avgPoli} Mnt`, icon: Clock, sub: 'Durasi konsultasi rata-rata', color: 'from-emerald-400 to-teal-500', shadow: 'shadow-emerald-500/20' },
+                      { label: 'Rata-rata Home Visit', value: `${summaryMetrics.avgHome} Mnt`, icon: Home, sub: 'Kunjungan pasien', color: 'from-amber-400 to-orange-500', shadow: 'shadow-amber-500/20' },
+                      { label: 'Penempatan Sp.KKLP', value: `${Math.round((ketersediaanDokter[2].Ada / totalResponden)*100)}%`, icon: Stethoscope, sub: `${ketersediaanDokter[2].Ada} Faskes memiliki Sp.KKLP`, color: 'from-pink-500 to-rose-500', shadow: 'shadow-rose-500/20' }
+                    ].map((s, i) => (
+                      <motion.div key={i} whileHover={{ y: -5 }} className="relative overflow-hidden p-6 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group cursor-default">
+                        <div className={`absolute -right-12 -top-12 w-40 h-40 bg-gradient-to-br ${s.color} rounded-full opacity-[0.08] group-hover:scale-150 transition-transform duration-700 ease-out`}></div>
+                        <div className={`mb-4 p-3 bg-gradient-to-br ${s.color} rounded-2xl self-start shadow-lg text-white ${s.shadow}`}>
+                          <s.icon className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-4xl font-display font-extrabold text-slate-800 mb-1 tracking-tight">{s.value}</h3>
+                        <p className="text-sm font-bold text-slate-500">{s.label}</p>
+                        <p className="text-xs text-slate-400 mt-2 font-medium bg-slate-50 self-start px-2 py-1 rounded-md">{s.sub}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {/* Trend Chart */}
+                    <div className="xl:col-span-2 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-lg font-display font-bold text-slate-800">Tren Pengisian Survei</h2>
+                        <span className="text-xs font-semibold bg-blue-50 text-blue-600 px-3 py-1 rounded-full">Berdasarkan Tanggal</span>
                       </div>
-                      <h3 className="text-3xl font-display font-bold text-slate-900 mb-1">{s.value}</h3>
-                      <p className="text-sm font-bold text-slate-600">{s.label}</p>
-                      <p className="text-xs text-slate-400 mt-1 font-medium">{s.sub}</p>
+                      <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={trendChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
+                            <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
+                            <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                            <Area type="monotone" dataKey="Responden" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorTrend)" activeDot={{ r: 6, strokeWidth: 0, fill: '#2563eb' }} />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
                     </div>
-                  ))}
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
-                    <h2 className="text-lg font-display font-bold text-slate-800 mb-6 text-center">Distribusi Jabatan Responden</h2>
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie data={roleChartData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" stroke="none">
-                            {roleChartData.map((e, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                          </Pie>
-                          <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                          <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
-                        </PieChart>
-                      </ResponsiveContainer>
+                    <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                      <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Distribusi Responden</h2>
+                      <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie data={roleChartData} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={5} dataKey="value" stroke="none">
+                              {roleChartData.map((e, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                            </Pie>
+                            <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} itemStyle={{ fontWeight: 'bold' }} />
+                            <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '13px', fontWeight: 500 }} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                      <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Distribusi Beban Kerja Faskes</h2>
+                      <div className="h-40">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={bebanKerjaData} layout="vertical" margin={{ left: -20, right: 10 }}>
+                            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
+                            <XAxis type="number" domain={[0, 100]} axisLine={false} tickLine={false} hide />
+                            <YAxis dataKey="name" type="category" hide />
+                            <RechartsTooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                            <Legend verticalAlign="top" iconType="circle" wrapperStyle={{ fontSize: '12px', paddingBottom: '10px' }} />
+                            <Bar dataKey="Dalam Gedung (%)" stackId="a" fill="#8b5cf6" barSize={32} radius={[4, 0, 0, 4]} />
+                            <Bar dataKey="Luar Gedung (%)" stackId="a" fill="#fb923c" radius={[0, 4, 4, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <p className="text-xs text-center text-slate-500 mt-2">Berdasarkan persentase alokasi waktu pelayanan harian</p>
+                    </div>
+
+                    <div className="xl:col-span-2 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                      <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Ketersediaan Dokter di FKTP</h2>
+                      <div className="h-48">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={ketersediaanDokter} layout="vertical" margin={{ left: 10, right: 30 }}>
+                            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
+                            <XAxis type="number" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
+                            <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fontSize: 13, fontWeight: 600, fill: '#334155'}} />
+                            <RechartsTooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                            <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ fontSize: '12px', paddingBottom: '10px' }} />
+                            <Bar dataKey="Ada" stackId="a" fill="#10b981" barSize={28} />
+                            <Bar dataKey="Tidak" stackId="a" fill="#f43f5e" radius={[0, 6, 6, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
-                    <h2 className="text-lg font-display font-bold text-slate-800 mb-6 text-center">Ketersediaan Dokter di FKTP</h2>
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={ketersediaanDokter} layout="vertical" margin={{ left: 30 }}>
-                          <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
-                          <XAxis type="number" axisLine={false} tickLine={false} tick={{fontSize: 12}} />
-                          <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 500}} />
-                          <RechartsTooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '8px' }} />
-                          <Legend verticalAlign="top" iconType="circle" wrapperStyle={{ fontSize: '12px', paddingBottom: '10px' }} />
-                          <Bar dataKey="Ada" stackId="a" fill="#10b981" barSize={24} />
-                          <Bar dataKey="Tidak" stackId="a" fill="#f87171" radius={[0, 4, 4, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                </div>
+              )}
+
+              {/* TAB 2: KOMPETENSI */}
+              {activeTab === 'kompetensi' && (
+                <div className="space-y-6">
+                  <div className="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-100">
+                    <h2 className="text-xl font-bold text-slate-800">Status Implementasi 7 Kompetensi Utama Sp.KKLP</h2>
+                    <p className="text-sm text-slate-500 mt-1">Perbandingan faskes yang sudah mengimplementasikan kompetensi secara optimal.</p>
+                  </div>
+                  <div className="h-[450px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={kompetensiChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontWeight: 'bold'}} />
+                        <YAxis axisLine={false} tickLine={false} />
+                        <RechartsTooltip 
+                          cursor={{fill: '#f8fafc'}}
+                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const d = payload[0].payload;
+                              return (
+                                <div className="bg-white/95 backdrop-blur-sm p-4 shadow-xl rounded-xl border border-slate-100 max-w-sm">
+                                  <p className="font-bold text-slate-800 mb-2 pb-2 border-b border-slate-100">{d.name}: <span className="font-medium text-slate-600">{d.fullName}</span></p>
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="text-emerald-600 font-bold">Terimplementasi:</span>
+                                    <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold">{d.Sudah}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-amber-500 font-bold">Belum Optimal:</span>
+                                    <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold">{d.Belum}</span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Legend verticalAlign="top" height={50} iconType="circle" />
+                        <Bar dataKey="Sudah" stackId="a" fill="#10b981" barSize={48} radius={[0, 0, 0, 0]} />
+                        <Bar dataKey="Belum" stackId="a" fill="#fcd34d" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-6 border-t border-slate-100">
+                    {kompetensiChartData.map(c => (
+                      <div key={c.name} className="p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors">
+                        <div className="font-bold text-blue-600 mb-1">{c.name}</div>
+                        <div className="text-xs text-slate-600 font-medium leading-relaxed">{c.fullName}</div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* TAB 2: KOMPETENSI */}
-            {activeTab === 'kompetensi' && (
-              <div className="space-y-6 animate-fade-in">
-                <div className="text-center mb-4">
-                  <h2 className="text-lg font-bold text-slate-800">Status Implementasi 7 Kompetensi Sp.KKLP</h2>
-                  <p className="text-sm text-slate-500">Puskesmas yang sudah mengimplementasikan (Hijau) vs Belum (Kuning)</p>
+              {/* TAB 3: JKN */}
+              {activeTab === 'jkn' && (
+                <div className="space-y-6">
+                  <div className="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-100">
+                    <h2 className="text-xl font-bold text-slate-800">Evaluasi Manfaat JKN Berjalan</h2>
+                    <p className="text-sm text-slate-500 mt-1">Berdasarkan skala Likert (1-4). Nilai mendekati 4 menandakan kompetensi spesifik Sp.KKLP.</p>
+                  </div>
+                  <div className="h-[700px] w-full bg-white rounded-3xl p-4 border border-slate-50 shadow-sm">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={jknChartData} layout="vertical" margin={{ left: 40, right: 40 }}>
+                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
+                        <XAxis type="number" domain={[0, 4]} axisLine={false} tickLine={false} ticks={[0, 1, 2, 3, 4]} />
+                        <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fontWeight: 700, fill: '#475569'}} />
+                        <RechartsTooltip 
+                          cursor={{fill: '#f8fafc'}}
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const d = payload[0].payload;
+                              return (
+                                <div className="bg-slate-800 text-white p-3 shadow-xl rounded-xl max-w-sm">
+                                  <p className="font-medium mb-1 opacity-90">{d.fullName}</p>
+                                  <div className="flex items-center text-blue-400 font-bold text-lg">
+                                    Skala Rata-rata: <span className="ml-2 bg-blue-500/20 px-2 py-0.5 rounded">{d.AvgSkala}</span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Bar dataKey="AvgSkala" radius={[0, 6, 6, 0]} barSize={20}>
+                          {jknChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.AvgSkala >= 3.5 ? '#2563eb' : entry.AvgSkala >= 2.5 ? '#60a5fa' : '#cbd5e1'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-6 border-t border-slate-100">
+                    {jknChartData.map(c => (
+                      <div key={c.name} className="flex gap-3 text-sm p-2 hover:bg-slate-50 rounded-lg transition-colors">
+                        <span className="font-bold text-blue-500 shrink-0 bg-blue-50 w-8 h-8 flex items-center justify-center rounded-lg">{c.name}</span> 
+                        <span className="text-slate-600 font-medium self-center leading-tight">{c.fullName}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="h-96 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={kompetensiChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                      <YAxis axisLine={false} tickLine={false} />
-                      <RechartsTooltip 
-                        cursor={{fill: '#f8fafc'}}
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload;
-                            return (
-                              <div className="bg-white p-3 border border-slate-200 shadow-md rounded-lg max-w-xs text-sm">
-                                <p className="font-bold text-slate-800 mb-2 border-b pb-1">{data.name}: {data.fullName}</p>
-                                <p className="text-emerald-600 font-medium">Sudah: {data.Sudah} Faskes</p>
-                                <p className="text-amber-500 font-medium">Belum: {data.Belum} Faskes</p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Legend verticalAlign="top" height={40} iconType="circle" />
-                      <Bar dataKey="Sudah" stackId="a" fill="#10b981" barSize={40} />
-                      <Bar dataKey="Belum" stackId="a" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+              )}
+
+              {/* TAB 4: NON-OPTIMAL */}
+              {activeTab === 'nonopt' && (
+                <div className="space-y-6">
+                  <div className="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-100">
+                    <h2 className="text-xl font-bold text-slate-800">Analisis Rekomendasi Layanan Baru (Masuk JKN)</h2>
+                    <p className="text-sm text-slate-500 mt-1">Perbandingan Faskes yang merekomendasikan layanan non-optimal dimasukkan ke JKN beserta pembobotan skalanya.</p>
+                  </div>
+                  <div className="h-[550px] w-full bg-white rounded-3xl p-4 border border-slate-50 shadow-sm">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart data={nonOptChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontWeight: 'bold'}} />
+                        <YAxis yAxisId="left" axisLine={false} tickLine={false} />
+                        <YAxis yAxisId="right" orientation="right" domain={[0, 4]} axisLine={false} tickLine={false} />
+                        <RechartsTooltip 
+                          cursor={{fill: '#f8fafc'}}
+                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const d = payload[0].payload;
+                              return (
+                                <div className="bg-white/95 backdrop-blur-sm p-4 shadow-xl rounded-xl border border-slate-100 max-w-sm">
+                                  <p className="font-bold text-slate-800 mb-3 pb-2 border-b border-slate-100">{d.name}: {d.fullName}</p>
+                                  <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between"><span className="text-emerald-600 font-bold">Rekomendasi (Ya)</span><span className="font-black text-slate-800">{d.Ya}</span></div>
+                                    <div className="flex justify-between"><span className="text-slate-500 font-bold">Tidak</span><span className="font-black text-slate-800">{d.Tidak}</span></div>
+                                    <div className="flex justify-between"><span className="text-amber-500 font-bold">Ragu/Tidak Tahu</span><span className="font-black text-slate-800">{d.TdkTahu || 0}</span></div>
+                                  </div>
+                                  <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center bg-blue-50 p-2 rounded-lg">
+                                    <span className="font-bold text-blue-700">Rata-rata Skala</span>
+                                    <span className="font-black text-blue-700 text-lg">{d.AvgSkala}</span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Legend wrapperStyle={{ paddingTop: '20px', fontWeight: 500 }} />
+                        <Bar yAxisId="left" dataKey="Ya" name="Setuju Masuk JKN" fill="#10b981" barSize={32} stackId="a" radius={[0, 0, 0, 0]} />
+                        <Bar yAxisId="left" dataKey="TdkTahu" name="Tidak Tahu" fill="#fcd34d" barSize={32} stackId="a" />
+                        <Bar yAxisId="left" dataKey="Tidak" name="Tidak Setuju" fill="#cbd5e1" barSize={32} stackId="a" radius={[6, 6, 0, 0]} />
+                        <Line yAxisId="right" type="monotone" dataKey="AvgSkala" name="Rata-rata Skala Kebutuhan" stroke="#2563eb" strokeWidth={4} dot={{ r: 5, fill: '#fff', strokeWidth: 3 }} activeDot={{ r: 8 }} />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 pt-6 border-t border-slate-100">
+                    {nonOptChartData.map(c => (
+                      <div key={c.name} className="flex gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <span className="font-bold text-emerald-600 shrink-0">{c.name}</span> 
+                        <span className="text-slate-600 font-medium truncate" title={c.fullName}>{c.fullName}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-6 border-t border-slate-100">
-                  {kompetensiChartData.map(c => (
-                    <div key={c.name} className="text-xs text-slate-600 flex items-start">
-                      <span className="font-bold text-slate-900 mr-2">{c.name}:</span> {c.fullName}
+              )}
+
+              {/* TAB 5: SMART DATA GRID */}
+              {activeTab === 'data' && (
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <div>
+                      <h2 className="text-lg font-bold text-slate-800">Smart Data Grid</h2>
+                      <p className="text-xs text-slate-500 mt-1">Cari, sortir, dan jelajahi data mentah beserta rekam jejak kualitatif wawancara.</p>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* TAB 3: JKN */}
-            {activeTab === 'jkn' && (
-              <div className="space-y-6 animate-fade-in">
-                <div className="text-center mb-4">
-                  <h2 className="text-lg font-bold text-slate-800">Rata-rata Skala (1-4) Manfaat JKN Saat Ini</h2>
-                  <p className="text-sm text-slate-500">Nilai tertinggi menunjukkan layanan dinilai paling optimal/relevan (Diurutkan dari tertinggi)</p>
-                </div>
-                <div className="h-[600px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={jknChartData} layout="vertical" margin={{ left: 50, right: 30 }}>
-                      <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
-                      <XAxis type="number" domain={[0, 4]} axisLine={false} tickLine={false} />
-                      <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fontWeight: 600}} />
-                      <RechartsTooltip 
-                        cursor={{fill: '#f8fafc'}}
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload;
-                            return (
-                              <div className="bg-white p-3 border border-slate-200 shadow-md rounded-lg max-w-sm text-sm">
-                                <p className="font-bold text-slate-800 mb-1">{data.fullName}</p>
-                                <p className="text-primary-600 font-bold text-lg">Skala: {data.AvgSkala}</p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Bar dataKey="AvgSkala" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={16}>
-                        {jknChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.AvgSkala >= 3 ? '#3b82f6' : entry.AvgSkala >= 2 ? '#94a3b8' : '#cbd5e1'} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2 pt-6 border-t border-slate-100">
-                  {jknChartData.map(c => (
-                    <div key={c.name} className="text-xs text-slate-600 flex items-start">
-                      <span className="font-bold text-slate-900 mr-2 w-8 shrink-0">{c.name}:</span> 
-                      <span className="truncate" title={c.fullName}>{c.fullName}</span>
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      <div className="relative flex-1 sm:w-64">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input 
+                          type="text" 
+                          placeholder="Cari faskes, kota, atau pewawancara..." 
+                          value={searchTable}
+                          onChange={(e) => setSearchTable(e.target.value)}
+                          className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all shadow-sm"
+                        />
+                      </div>
+                      <select 
+                        value={rowsPerPage} 
+                        onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                        className="py-2 px-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer shadow-sm"
+                      >
+                        <option value={10}>10 Baris</option>
+                        <option value={25}>25 Baris</option>
+                        <option value={50}>50 Baris</option>
+                      </select>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                  </div>
 
-            {/* TAB 4: LAYANAN NON-OPTIMAL */}
-            {activeTab === 'nonopt' && (
-              <div className="space-y-6 animate-fade-in">
-                <div className="text-center mb-4">
-                  <h2 className="text-lg font-bold text-slate-800">Analisis Layanan Non-Optimal (Masuk JKN?)</h2>
-                  <p className="text-sm text-slate-500">Berapa banyak Faskes yang menjawab "Ya" vs "Tidak", dan rata-rata skor Skala (Garis Merah)</p>
-                </div>
-                <div className="h-[500px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={nonOptChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                      <YAxis yAxisId="left" axisLine={false} tickLine={false} />
-                      <YAxis yAxisId="right" orientation="right" domain={[0, 4]} axisLine={false} tickLine={false} />
-                      <RechartsTooltip 
-                        cursor={{fill: '#f8fafc'}}
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload;
-                            return (
-                              <div className="bg-white p-3 border border-slate-200 shadow-md rounded-lg max-w-sm text-sm">
-                                <p className="font-bold text-slate-800 mb-2 border-b pb-1">{data.fullName}</p>
-                                <p className="text-emerald-600 font-medium">Masuk JKN (Ya): {data.Ya}</p>
-                                <p className="text-slate-400 font-medium">Tidak: {data.Tidak}</p>
-                                <p className="text-amber-500 font-medium">Tidak Tahu: {data.TdkTahu || 0}</p>
-                                <p className="text-blue-600 font-bold mt-2">Avg Skala: {data.AvgSkala}</p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                      <Bar yAxisId="left" dataKey="Ya" fill="#10b981" barSize={25} stackId="a" />
-                      <Bar yAxisId="left" dataKey="Tidak" fill="#cbd5e1" barSize={25} stackId="a" />
-                      <Bar yAxisId="left" dataKey="TdkTahu" name="Tidak Tahu" fill="#f59e0b" barSize={25} stackId="a" />
-                      <Line yAxisId="right" type="monotone" dataKey="AvgSkala" name="Rata-rata Skala (1-4)" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2 pt-6 border-t border-slate-100">
-                  {nonOptChartData.map(c => (
-                    <div key={c.name} className="text-xs text-slate-600 flex items-start">
-                      <span className="font-bold text-slate-900 mr-2 w-10 shrink-0">{c.name}:</span> 
-                      <span className="truncate" title={c.fullName}>{c.fullName}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* TAB 5: DATA GRID */}
-            {activeTab === 'data' && (
-              <div className="space-y-4 animate-fade-in">
-                <p className="text-sm text-slate-500">Gulir ke kanan untuk melihat jawaban kualitatif (esai wawancara, kendala kompetensi, dan catatan).</p>
-                <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                  <table className="w-full text-left text-sm whitespace-nowrap">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-700">
-                      <tr>
-                        <th className="px-4 py-3 font-semibold min-w-[200px] sticky left-0 bg-slate-100 z-10 border-r border-slate-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Nama Faskes</th>
-                        <th className="px-4 py-3 font-semibold">Provinsi / Kota</th>
-                        <th className="px-4 py-3 font-semibold">Jabatan</th>
-                        <th className="px-4 py-3 font-semibold text-center border-r border-slate-200">Sp.KKLP</th>
-                        {/* Wawancara Headers */}
-                        <th className="px-4 py-3 font-semibold min-w-[150px] bg-emerald-50 border-r border-emerald-100">Pewawancara</th>
-                        {interviewQuestions.map((q, idx) => (
-                          <th key={`w-${idx}`} className="px-4 py-3 font-semibold min-w-[300px] bg-emerald-50 border-r border-emerald-100">{q}</th>
-                        ))}
-                        {/* Kendala Kompetensi */}
-                        {kompetensiLayanan.map((k, idx) => (
-                          <th key={`k-${idx}`} className="px-4 py-3 font-semibold min-w-[250px] bg-blue-50 border-r border-blue-100">[Komp] Kendala: {k.substring(0,25)}...</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200 bg-white">
-                      {filteredData.map((row, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3 font-medium text-slate-900 sticky left-0 bg-white z-10 border-r border-slate-200 group-hover:bg-slate-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">{row.fktp_name}</td>
-                          <td className="px-4 py-3">{row.city}</td>
-                          <td className="px-4 py-3">{row.role}</td>
-                          <td className="px-4 py-3 text-center border-r border-slate-200">
-                            {row.doc_kklp ? <span className="text-emerald-600 font-bold">Ada</span> : <span className="text-slate-400">Tidak</span>}
-                          </td>
-                          
-                          {/* Wawancara Data */}
-                          <td className="px-4 py-3 border-r border-slate-100">
-                            <div className="truncate max-w-[150px] text-slate-700 font-medium capitalize" title={row.wawancara?.pewawancara || '-'}>{row.wawancara?.pewawancara || '-'}</div>
-                          </td>
-                          {interviewQuestions.map((_, i) => {
-                            const val = row.wawancara?.[i];
-                            return (
-                              <td key={`w-ans-${i}`} className="px-4 py-3 border-r border-slate-100">
-                                <div className="truncate max-w-[300px] text-slate-700" title={val || '-'}>{val || '-'}</div>
-                              </td>
-                            );
-                          })}
-
-                          {/* Kendala Kompetensi Data */}
-                          {kompetensiLayanan.map((_, i) => {
-                            const val = row.kompetensi?.[i]?.kendala;
-                            return (
-                              <td key={`k-ans-${i}`} className="px-4 py-3 border-r border-slate-100">
-                                <div className="truncate max-w-[250px] text-slate-600 italic" title={val || '-'}>{val || '-'}</div>
-                              </td>
-                            );
-                          })}
+                  <div className="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-white custom-scrollbar">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead className="bg-slate-50/80 backdrop-blur text-slate-700">
+                        <tr>
+                          <th className="px-5 py-4 font-bold min-w-[220px] sticky left-0 bg-slate-100 z-10 border-r border-slate-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Nama Faskes</th>
+                          <th className="px-5 py-4 font-bold text-slate-600">Provinsi / Kota</th>
+                          <th className="px-5 py-4 font-bold text-slate-600">Jabatan</th>
+                          <th className="px-5 py-4 font-bold text-center border-r border-slate-200 text-slate-600">Sp.KKLP</th>
+                          {/* Wawancara Headers */}
+                          <th className="px-5 py-4 font-bold min-w-[150px] bg-emerald-50/80 border-r border-emerald-100/50 text-emerald-800">Tim Wawancara</th>
+                          {interviewQuestions.map((q, idx) => (
+                            <th key={`w-${idx}`} className="px-5 py-4 font-bold min-w-[320px] bg-emerald-50/50 border-r border-emerald-100/50 text-emerald-800">{q}</th>
+                          ))}
+                          {/* Kendala Kompetensi */}
+                          {kompetensiLayanan.map((k, idx) => (
+                            <th key={`k-${idx}`} className="px-5 py-4 font-bold min-w-[280px] bg-blue-50/50 border-r border-blue-100/50 text-blue-800">[Komp] Kendala: {k.substring(0,25)}...</th>
+                          ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {currentTableData.length > 0 ? currentTableData.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-blue-50/30 transition-colors group">
+                            <td className="px-5 py-3 font-semibold text-slate-800 sticky left-0 bg-white z-10 border-r border-slate-100 group-hover:bg-slate-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">{row.fktp_name}</td>
+                            <td className="px-5 py-3 text-slate-600">{row.city}</td>
+                            <td className="px-5 py-3 text-slate-600">{row.role}</td>
+                            <td className="px-5 py-3 text-center border-r border-slate-100">
+                              {row.doc_kklp ? <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md font-bold text-xs uppercase tracking-wide">Ada</span> : <span className="bg-slate-100 text-slate-500 px-2 py-1 rounded-md font-bold text-xs uppercase tracking-wide">Tidak</span>}
+                            </td>
+                            
+                            <td className="px-5 py-3 border-r border-slate-100 bg-emerald-50/10">
+                              <div className="truncate max-w-[150px] text-emerald-700 font-bold capitalize flex items-center gap-2" title={row.wawancara?.pewawancara || '-'}>
+                                {row.wawancara?.pewawancara ? <div className="w-6 h-6 rounded-full bg-emerald-200 flex items-center justify-center text-emerald-800 text-xs">{row.wawancara.pewawancara.charAt(0)}</div> : '-'}
+                                {row.wawancara?.pewawancara || ''}
+                              </div>
+                            </td>
+                            {interviewQuestions.map((_, i) => (
+                              <td key={`w-ans-${i}`} className="px-5 py-3 border-r border-slate-100">
+                                <div className="truncate max-w-[320px] text-slate-600" title={row.wawancara?.[i] || '-'}>{row.wawancara?.[i] || '-'}</div>
+                              </td>
+                            ))}
+
+                            {kompetensiLayanan.map((_, i) => (
+                              <td key={`k-ans-${i}`} className="px-5 py-3 border-r border-slate-100">
+                                <div className="truncate max-w-[280px] text-slate-500 italic" title={row.kompetensi?.[i]?.kendala || '-'}>{row.kompetensi?.[i]?.kendala || '-'}</div>
+                              </td>
+                            ))}
+                          </tr>
+                        )) : (
+                          <tr>
+                            <td colSpan={100} className="px-5 py-12 text-center text-slate-400 font-medium">Tidak ada data yang cocok dengan pencarian Anda.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                      <p className="text-sm text-slate-500 font-medium">
+                        Menampilkan <span className="font-bold text-slate-700">{((currentPage - 1) * rowsPerPage) + 1}</span> hingga <span className="font-bold text-slate-700">{Math.min(currentPage * rowsPerPage, tableDataFiltered.length)}</span> dari <span className="font-bold text-slate-700">{tableDataFiltered.length}</span> entri
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          disabled={currentPage === 1}
+                          className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <div className="flex items-center gap-1">
+                          {Array.from({length: Math.min(5, totalPages)}, (_, i) => {
+                            // Smart pagination logic to always show current page in middle when possible
+                            let pageNum = currentPage;
+                            if (totalPages <= 5) pageNum = i + 1;
+                            else if (currentPage <= 3) pageNum = i + 1;
+                            else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+                            else pageNum = currentPage - 2 + i;
+                            
+                            return (
+                              <button 
+                                key={pageNum}
+                                onClick={() => setCurrentPage(pageNum)}
+                                className={`w-8 h-8 rounded-lg text-sm font-bold transition-colors ${currentPage === pageNum ? 'bg-primary-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}`}
+                              >
+                                {pageNum}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <button 
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          disabled={currentPage === totalPages}
+                          className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-          </>
+              )}
+            </motion.div>
+          </AnimatePresence>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
