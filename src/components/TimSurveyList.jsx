@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Search, ClipboardList, CheckCircle } from 'lucide-react';
+import { Loader2, Search, ClipboardList, CheckCircle, Trash2 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { useAuth } from './AuthContext';
 
 export default function TimSurveyList() {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchSurveys();
@@ -28,6 +30,19 @@ export default function TimSurveyList() {
       alert("Gagal memuat daftar Puskesmas dari Supabase.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteSurvey = async (id, name) => {
+    if (window.confirm(`Apakah Anda yakin ingin menghapus data survey dari Puskesmas "${name}"? Tindakan ini tidak dapat dibatalkan.`)) {
+      try {
+        const { error } = await supabase.from('surveys').delete().eq('id', id);
+        if (error) throw error;
+        setSurveys(surveys.filter(s => s.id !== id));
+      } catch (error) {
+        console.error("Gagal menghapus data:", error);
+        alert("Gagal menghapus data dari Supabase.");
+      }
     }
   };
 
@@ -107,16 +122,26 @@ export default function TimSurveyList() {
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <button 
-                          onClick={() => {
-                            // Navigasi ke halaman form wawancara dengan state data
-                            navigate('/wawancara/form', { state: { surveyData: row } });
-                          }}
-                          className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-800 rounded-md text-xs font-medium transition-colors"
-                        >
-                          <ClipboardList className="w-3.5 h-3.5" />
-                          <span>{isWawancaraSelesai ? 'Edit Wawancara' : 'Mulai Wawancara'}</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => {
+                              navigate('/wawancara/form', { state: { surveyData: row } });
+                            }}
+                            className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-800 rounded-md text-xs font-medium transition-colors"
+                          >
+                            <ClipboardList className="w-3.5 h-3.5" />
+                            <span>{isWawancaraSelesai ? 'Edit Data' : 'Mulai Wawancara'}</span>
+                          </button>
+                          {user?.role === 'admin' && (
+                            <button
+                              onClick={() => deleteSurvey(row.id, row.fktp_name)}
+                              className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-600 text-white hover:bg-rose-700 rounded-md text-xs font-medium transition-colors"
+                              title="Hapus Data"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );

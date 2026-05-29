@@ -179,8 +179,16 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
   const submitData = async () => {
-    if (isInterview && !isStep5Valid) return;
-    if (!isInterview && !isStep4Valid) return;
+    if (isInterview && !isStep5Valid) {
+      setShowErrors(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (!isInterview && !isStep4Valid) {
+      setShowErrors(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     
     setIsSubmitting(true);
     
@@ -192,10 +200,10 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
         doc_umum: formData.docUmum,
         doc_gigi: formData.docGigi,
         doc_kklp: formData.docKklp,
-        time_in_poli: formData.timeInPoli,
-        time_home_visit: formData.timeHomeVisit,
-        prop_in_fktp: formData.propInFktp,
-        prop_out_fktp: formData.propOutFktp,
+        time_in_poli: formData.timeInPoli === '' ? null : Number(formData.timeInPoli),
+        time_home_visit: formData.timeHomeVisit === '' ? null : Number(formData.timeHomeVisit),
+        prop_in_fktp: formData.propInFktp === '' ? null : Number(formData.propInFktp),
+        prop_out_fktp: formData.propOutFktp === '' ? null : Number(formData.propOutFktp),
         kompetensi: formData.kompetensi,
         jkn: formData.jkn,
         non_optimal: formData.nonOptimal,
@@ -350,7 +358,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {isInterview ? (
+                  {isInterview && user?.role !== 'admin' ? (
                     <>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nama FKTP/Puskesmas</label>
@@ -778,6 +786,14 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                       {(() => {
                         const belum = nonOptimalServices.filter((_, idx) => !formData.nonOptimal[idx]?.masukJkn || !formData.nonOptimal[idx]?.skala).length;
                         return belum > 0 ? <li>{belum} layanan belum diisi (Masuk JKN dan/atau Skala)</li> : null;
+                      })()}
+                    </>
+                  )}
+                  {step === 5 && (
+                    <>
+                      {(() => {
+                        const belum = interviewQuestions.filter((_, idx) => !formData.wawancara[idx]?.trim()).length;
+                        return belum > 0 ? <li>Ada {belum} pertanyaan wawancara yang belum dijawab</li> : null;
                       })()}
                     </>
                   )}

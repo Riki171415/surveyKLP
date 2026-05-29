@@ -71,8 +71,8 @@ function Sidebar() {
 
       {/* Logo Kemenkes */}
       <div className={`px-4 py-5 border-b border-primary-500/50 flex flex-col items-center justify-center transition-all duration-300 ${isCollapsed ? 'min-h-[90px]' : ''}`}>
-        <div className={`bg-white rounded-xl flex items-center justify-center shadow-inner border border-slate-100 transition-all duration-300 overflow-hidden ${isCollapsed ? 'p-1.5 w-10 h-10' : 'py-3.5 px-4 w-full h-auto'}`}>
-          <img src={logoKemenkes} alt="Logo Kemenkes" className={`${isCollapsed ? 'h-8 w-8 object-cover object-left' : 'h-10 w-auto object-contain'}`} />
+        <div className={`bg-white rounded-xl flex items-center shadow-inner border border-slate-100 transition-all duration-300 overflow-hidden ${isCollapsed ? 'w-12 h-12 p-2 justify-start' : 'py-3.5 px-4 w-full h-auto justify-center'}`}>
+          <img src={logoKemenkes} alt="Logo Kemenkes" className={`${isCollapsed ? 'h-8 w-auto max-w-none shrink-0' : 'h-10 w-auto object-contain'}`} />
         </div>
         {!isCollapsed && (
           <div className="mt-3 pt-3 border-t border-primary-500/50 w-full text-center animate-fade-in">
