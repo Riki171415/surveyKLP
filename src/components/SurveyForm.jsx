@@ -148,12 +148,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
        kompetensiLayanan.every((_, idx) => formData.kompetensi[idx]?.status))
     : true;
   const isStep3Valid = jknBenefits.every((_, idx) => formData.jkn[idx]?.skala);
-  const isStep4Valid = nonOptimalServices.every((_, idx) => {
-    const masuk = formData.nonOptimal[idx]?.masukJkn;
-    if (!masuk) return false;
-    if (masuk === 'Tidak Tahu') return true;
-    return !!formData.nonOptimal[idx]?.skala;
-  });
+  const isStep4Valid = nonOptimalServices.every((_, idx) => formData.nonOptimal[idx]?.masukJkn && formData.nonOptimal[idx]?.skala);
   const isStep5Valid = interviewQuestions.every((_, idx) => formData.wawancara[idx]?.trim() !== '');
 
   const canProceed = () => {
@@ -643,12 +638,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                                     name={`masukJkn-${idx}`} 
                                     value={pilihan}
                                     checked={formData.nonOptimal[idx]?.masukJkn === pilihan}
-                                    onChange={(e) => {
-                                      handleNestedChange('nonOptimal', idx, 'masukJkn', e.target.value);
-                                      if (e.target.value === 'Tidak Tahu') {
-                                        handleNestedChange('nonOptimal', idx, 'skala', null);
-                                      }
-                                    }}
+                                    onChange={(e) => handleNestedChange('nonOptimal', idx, 'masukJkn', e.target.value)}
                                   />
                                   {pilihan}
                                 </label>
@@ -659,19 +649,14 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                             <div className="flex justify-center gap-1">
                               {[1,2,3,4].map(val => {
                                 const isSelected = formData.nonOptimal[idx]?.skala === val.toString();
-                                const isDisabled = formData.nonOptimal[idx]?.masukJkn === 'Tidak Tahu';
                                 return (
-                                  <label key={val} className={`cursor-pointer w-7 h-7 flex items-center justify-center rounded text-xs font-semibold border transition-all ${
-                                    isDisabled ? 'bg-slate-100 text-slate-300 border-slate-200 cursor-not-allowed' :
-                                    isSelected ? 'bg-primary-600 text-white border-primary-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'
-                                  }`}>
+                                  <label key={val} className={`cursor-pointer w-7 h-7 flex items-center justify-center rounded text-xs font-semibold border transition-all ${isSelected ? 'bg-primary-600 text-white border-primary-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'}`}>
                                     <input 
                                       type="radio" 
                                       className="hidden" 
                                       name={`nonopt-${idx}`} 
                                       value={val}
                                       checked={isSelected}
-                                      disabled={isDisabled}
                                       onChange={(e) => handleNestedChange('nonOptimal', idx, 'skala', e.target.value)}
                                     />
                                     {val}
