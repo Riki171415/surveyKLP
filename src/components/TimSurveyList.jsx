@@ -33,19 +33,6 @@ export default function TimSurveyList() {
     }
   };
 
-  const deleteSurvey = async (id, name) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus data survey dari Puskesmas "${name}"? Tindakan ini tidak dapat dibatalkan.`)) {
-      try {
-        const { error } = await supabase.from('surveys').delete().eq('id', id);
-        if (error) throw error;
-        setSurveys(surveys.filter(s => s.id !== id));
-      } catch (error) {
-        console.error("Gagal menghapus data:", error);
-        alert("Gagal menghapus data dari Supabase.");
-      }
-    }
-  };
-
   const filteredSurveys = surveys.filter(s => 
     (s.fktp_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (s.city || '').toLowerCase().includes(searchTerm.toLowerCase())
@@ -132,15 +119,6 @@ export default function TimSurveyList() {
                             <ClipboardList className="w-3.5 h-3.5" />
                             <span>{isWawancaraSelesai ? 'Edit Data' : 'Mulai Wawancara'}</span>
                           </button>
-                          {user?.role === 'admin' && (
-                            <button
-                              onClick={() => deleteSurvey(row.id, row.fktp_name)}
-                              className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-600 text-white hover:bg-rose-700 rounded-md text-xs font-medium transition-colors"
-                              title="Hapus Data"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
                         </div>
                       </td>
                     </tr>

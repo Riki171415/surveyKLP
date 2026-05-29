@@ -10,6 +10,7 @@ import logoKemenkes from './assets/logo-kemenkes.png';
 const Dashboard     = lazy(() => import('./components/Dashboard'));
 const TimSurveyList = lazy(() => import('./components/TimSurveyList'));
 const UserManagement = lazy(() => import('./components/UserManagement'));
+const DataManagement = lazy(() => import('./components/DataManagement'));
 
 const PageLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-[400px]">
@@ -96,6 +97,7 @@ function Sidebar() {
 
         {user.role === 'admin' && (
           <>
+            <NavItem to="/data" icon={Database} collapsed={isCollapsed}>Manajemen Data</NavItem>
             <NavItem to="/dashboard" icon={LayoutDashboard} collapsed={isCollapsed}>Dashboard Laporan</NavItem>
             <NavItem to="/users" icon={Users} collapsed={isCollapsed}>Kelola Akun</NavItem>
           </>
@@ -162,6 +164,7 @@ function AppContent() {
                 {/* Form Terbuka untuk Publik */}
                 <Route path="/" element={<SurveyForm />} />
                 {/* Halaman Admin / Tim Survey (Dilindungi) */}
+                <Route path="/data" element={<ProtectedRoute allowedRoles={['admin']}><DataManagement /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Dashboard /></ProtectedRoute>} />
                 <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
                 <Route path="/wawancara" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><TimSurveyList /></ProtectedRoute>} />
