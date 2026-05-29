@@ -856,35 +856,35 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
               </section>
 
               <section className="bg-amber-50 p-5 rounded-xl border border-amber-200">
-                <h3 className="font-bold text-lg text-amber-800 mb-3">Penjelasan Skala Likert 1-4</h3>
-                <p className="mb-4 text-amber-700 text-sm font-medium">Pemberian nilai skala 1 hingga 4 sangat penting untuk mengukur tingkat ketersediaan layanan atau persepsi Anda terhadap layanan tersebut. Berikut adalah detail penjelasannya:</p>
+                <h3 className="font-bold text-lg text-amber-800 mb-3">Panduan Penilaian Skala (1-4)</h3>
+                <p className="mb-4 text-amber-700 text-sm font-medium">Pilih nilai sesuai tingkat kebutuhan kompetensi Sp.KKLP pada layanan tersebut:</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="bg-white p-4 rounded-lg border border-amber-100 shadow-sm flex items-start gap-4">
                     <div className="bg-red-100 text-red-700 w-10 h-10 flex items-center justify-center rounded-lg font-black text-xl shrink-0">1</div>
                     <div>
-                      <h4 className="font-bold text-slate-800">Sangat Kurang / Sangat Tidak Setuju</h4>
-                      <p className="text-sm text-slate-600 mt-1">Layanan sama sekali belum memadai, tidak berjalan, atau Anda sangat tidak setuju dengan pernyataan tersebut.</p>
+                      <h4 className="font-bold text-slate-800">Skala 1</h4>
+                      <p className="text-sm text-slate-600 mt-1">Dapat optimal dilakukan dokter umum</p>
                     </div>
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-amber-100 shadow-sm flex items-start gap-4">
                     <div className="bg-orange-100 text-orange-700 w-10 h-10 flex items-center justify-center rounded-lg font-black text-xl shrink-0">2</div>
                     <div>
-                      <h4 className="font-bold text-slate-800">Kurang / Tidak Setuju</h4>
-                      <p className="text-sm text-slate-600 mt-1">Layanan ada namun masih jauh dari standar, sering terkendala, atau Anda cenderung tidak setuju.</p>
+                      <h4 className="font-bold text-slate-800">Skala 2</h4>
+                      <p className="text-sm text-slate-600 mt-1">Dokter umum perlu pelatihan tambahan</p>
                     </div>
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-amber-100 shadow-sm flex items-start gap-4">
                     <div className="bg-blue-100 text-blue-700 w-10 h-10 flex items-center justify-center rounded-lg font-black text-xl shrink-0">3</div>
                     <div>
-                      <h4 className="font-bold text-slate-800">Baik / Setuju</h4>
-                      <p className="text-sm text-slate-600 mt-1">Layanan sudah berjalan dengan baik secara umum meskipun mungkin ada sedikit kekurangan, atau Anda setuju.</p>
+                      <h4 className="font-bold text-slate-800">Skala 3</h4>
+                      <p className="text-sm text-slate-600 mt-1">Lebih baik dengan supervisi/kolaborasi Sp.KKLP</p>
                     </div>
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-amber-100 shadow-sm flex items-start gap-4">
                     <div className="bg-emerald-100 text-emerald-700 w-10 h-10 flex items-center justify-center rounded-lg font-black text-xl shrink-0">4</div>
                     <div>
-                      <h4 className="font-bold text-slate-800">Sangat Baik / Sangat Setuju</h4>
-                      <p className="text-sm text-slate-600 mt-1">Layanan sudah sangat optimal, memuaskan, konsisten, atau Anda sangat setuju dengan pernyataan tersebut.</p>
+                      <h4 className="font-bold text-slate-800">Skala 4</h4>
+                      <p className="text-sm text-slate-600 mt-1">Kompetensi utama Sp.KKLP</p>
                     </div>
                   </div>
                 </div>
