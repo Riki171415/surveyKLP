@@ -188,13 +188,21 @@ export default function DataManagement() {
               {selectedData.wawancara && Object.keys(selectedData.wawancara).length > 0 && (
                 <div>
                   <h4 className="font-bold text-slate-800 mb-3 border-b pb-2">E. Hasil Wawancara Tim Survey</h4>
+                  {selectedData.wawancara.pewawancara && (
+                    <div className="mb-4 text-sm text-slate-700 bg-emerald-50 border border-emerald-100 p-3 rounded-lg flex items-center">
+                      <span className="font-semibold text-emerald-800 mr-2">Diwawancarai oleh:</span> 
+                      <span className="capitalize">{selectedData.wawancara.pewawancara}</span>
+                    </div>
+                  )}
                   <div className="space-y-4 text-sm">
-                    {Object.entries(selectedData.wawancara).map(([idx, jawaban]) => (
+                    {Object.entries(selectedData.wawancara).map(([idx, jawaban]) => {
+                      if (idx === 'pewawancara') return null;
+                      return (
                       <div key={idx} className="bg-slate-50 p-3 rounded-lg border border-slate-100">
                         <p className="font-semibold text-slate-700 mb-1">Pertanyaan {parseInt(idx) + 1}</p>
                         <p className="text-slate-600 whitespace-pre-wrap">{jawaban}</p>
                       </div>
-                    ))}
+                    )})}
                   </div>
                 </div>
               )}

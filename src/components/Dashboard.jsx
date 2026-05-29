@@ -135,8 +135,9 @@ export default function Dashboard() {
     
     kompetensiLayanan.forEach((k, i) => { headers.push(`[K${i+1}] Status`, `[K${i+1}] Kendala`); });
     jknBenefits.forEach((j, i) => { headers.push(`[J${i+1}] Skala`, `[J${i+1}] Catatan`); });
-    nonOptimalServices.forEach((no, i) => { headers.push(`[NO${i+1}] Masuk JKN`, `[NO${i+1}] Skala`, `[NO${i+1}] Catatan`); });
-    interviewQuestions.forEach((w, i) => { headers.push(`[W${i+1}] Jawaban`); });
+    nonOptimalServices.forEach((n, i) => { headers.push(`[Non-Opt] Masuk JKN?: ${n}`, `[Non-Opt] Skala: ${n}`, `[Non-Opt] Catatan: ${n}`); });
+    headers.push(`[Wawancara] Pewawancara`);
+    interviewQuestions.forEach((q, i) => { headers.push(`[Wawancara] ${q}`); });
 
     const rows = filteredData.map((row, index) => {
       const rowData = [
@@ -157,6 +158,7 @@ export default function Dashboard() {
       kompetensiLayanan.forEach((_, i) => { rowData.push(row.kompetensi?.[i]?.status || '', row.kompetensi?.[i]?.kendala || ''); });
       jknBenefits.forEach((_, i) => { rowData.push(row.jkn?.[i]?.skala || '', row.jkn?.[i]?.catatan || ''); });
       nonOptimalServices.forEach((_, i) => { rowData.push(row.non_optimal?.[i]?.masukJkn || '', row.non_optimal?.[i]?.skala || '', row.non_optimal?.[i]?.catatan || ''); });
+      rowData.push(row.wawancara?.pewawancara || '');
       interviewQuestions.forEach((_, i) => { rowData.push(row.wawancara?.[i] || ''); });
 
       return rowData;
@@ -534,6 +536,7 @@ export default function Dashboard() {
                         <th className="px-4 py-3 font-semibold">Jabatan</th>
                         <th className="px-4 py-3 font-semibold text-center border-r border-slate-200">Sp.KKLP</th>
                         {/* Wawancara Headers */}
+                        <th className="px-4 py-3 font-semibold min-w-[150px] bg-emerald-50 border-r border-emerald-100">Pewawancara</th>
                         {interviewQuestions.map((q, idx) => (
                           <th key={`w-${idx}`} className="px-4 py-3 font-semibold min-w-[300px] bg-emerald-50 border-r border-emerald-100">{q}</th>
                         ))}
@@ -554,6 +557,9 @@ export default function Dashboard() {
                           </td>
                           
                           {/* Wawancara Data */}
+                          <td className="px-4 py-3 border-r border-slate-100">
+                            <div className="truncate max-w-[150px] text-slate-700 font-medium capitalize" title={row.wawancara?.pewawancara || '-'}>{row.wawancara?.pewawancara || '-'}</div>
+                          </td>
                           {interviewQuestions.map((_, i) => {
                             const val = row.wawancara?.[i];
                             return (

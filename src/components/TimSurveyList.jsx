@@ -99,9 +99,17 @@ export default function TimSurveyList() {
                       <td className="px-6 py-4 text-slate-500">{new Date(row.created_at).toLocaleDateString('id-ID')}</td>
                       <td className="px-6 py-4 text-center">
                         {isWawancaraSelesai ? (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
-                            <CheckCircle className="w-3.5 h-3.5 mr-1" /> Selesai
-                          </span>
+                          <div className="flex flex-col items-center">
+                            <span className="inline-flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold">
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              <span>Selesai</span>
+                            </span>
+                            {row.wawancara?.pewawancara && (
+                              <span className="text-[10px] mt-1 text-slate-500 font-medium capitalize">
+                                oleh: {row.wawancara.pewawancara}
+                              </span>
+                            )}
+                          </div>
                         ) : (
                           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
                             Belum

@@ -207,7 +207,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
         kompetensi: formData.kompetensi,
         jkn: formData.jkn,
         non_optimal: formData.nonOptimal,
-        wawancara: formData.wawancara
+        wawancara: isInterview && user ? { ...formData.wawancara, pewawancara: user.username } : formData.wawancara
       };
 
       let error;
