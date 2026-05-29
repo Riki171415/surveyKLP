@@ -78,6 +78,10 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* Print Styles */
 @media print {
+  @page {
+    size: landscape;
+    margin: 15mm;
+  }
   html, body, #root, .flex, .flex-1, .h-screen, .min-h-screen, main {
     height: auto !important;
     min-height: auto !important;

@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format, parseISO } from 'date-fns';
 import { id as localeID } from 'date-fns/locale';
 
-const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#6366f1'];
+const COLORS = ['#00857A', '#00A68A', '#45B669', '#00B4D5', '#F28322', '#D8C700', '#D5DF00'];
 
 const kompetensiLayanan = [
   "Manajemen pasien dengan multimorbiditas kompleks", "Pemeriksaan USG Dasar untuk penegakan diagnosis",
@@ -239,7 +239,7 @@ export default function Dashboard() {
   
   const renderRingkasan = () => (
     <div className="space-y-8 print-page-break-inside-avoid">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 print:grid-cols-2 print:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 print:grid-cols-4 print:gap-4">
         {[
           { label: 'Total Faskes Terdata', value: totalResponden, icon: Users, sub: 'Responden tersaring', color: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/20' },
           { label: 'Rata-rata Waktu Poli', value: `${summaryMetrics.avgPoli} Mnt`, icon: Clock, sub: 'Durasi konsultasi rata-rata', color: 'from-emerald-400 to-teal-500', shadow: 'shadow-emerald-500/20' },
@@ -256,27 +256,27 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 print:flex print:flex-col print:gap-8">
-        <div className="xl:col-span-2 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:break-inside-avoid">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 print:grid print:grid-cols-2 print:gap-6">
+        <div className="xl:col-span-2 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:col-span-1 print:break-inside-avoid">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-display font-bold text-slate-800">Tren Pengisian Survei</h2>
             <span className="text-xs font-semibold bg-blue-50 text-blue-600 px-3 py-1 rounded-full">Berdasarkan Tanggal</span>
           </div>
           <div className="h-64">
-            <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 250 : "100%"}>
+            <ResponsiveContainer width={isPrinting ? 1000 : "100%"} height={isPrinting ? 250 : "100%"}>
               <AreaChart data={trendChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#00857A" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#00857A" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
                 <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
                 <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                <Area type="monotone" dataKey="Responden" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorTrend)" activeDot={{ r: 6, strokeWidth: 0, fill: '#2563eb' }} isAnimationActive={!isPrinting}>
-                  <LabelList dataKey="Responden" position="top" style={{ fill: '#3b82f6', fontSize: 11, fontWeight: 700 }} />
+                <Area type="monotone" dataKey="Responden" stroke="#00857A" strokeWidth={3} fillOpacity={1} fill="url(#colorTrend)" activeDot={{ r: 6, strokeWidth: 0, fill: '#00A68A' }} isAnimationActive={!isPrinting}>
+                  <LabelList dataKey="Responden" position="top" style={{ fill: '#00857A', fontSize: 11, fontWeight: 700 }} />
                 </Area>
               </AreaChart>
             </ResponsiveContainer>
@@ -286,7 +286,7 @@ export default function Dashboard() {
         <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:break-inside-avoid">
           <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Distribusi Responden</h2>
           <div className="h-64">
-            <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 250 : "100%"}>
+            <ResponsiveContainer width={isPrinting ? 500 : "100%"} height={isPrinting ? 250 : "100%"}>
               <PieChart>
                 <Pie 
                   data={roleChartData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={5} 
@@ -306,17 +306,17 @@ export default function Dashboard() {
         <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:break-inside-avoid">
           <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Distribusi Beban Kerja Faskes</h2>
           <div className="h-40">
-            <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 160 : "100%"}>
+            <ResponsiveContainer width={isPrinting ? 500 : "100%"} height={isPrinting ? 160 : "100%"}>
               <BarChart data={bebanKerjaData} layout="vertical" margin={{ left: -20, right: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
                 <XAxis type="number" domain={[0, 100]} axisLine={false} tickLine={false} hide />
                 <YAxis dataKey="name" type="category" hide />
                 <RechartsTooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                 <Legend verticalAlign="top" iconType="circle" wrapperStyle={{ fontSize: '12px', paddingBottom: '10px' }} />
-                <Bar dataKey="Dalam Gedung (%)" stackId="a" fill="#8b5cf6" barSize={32} radius={[4, 0, 0, 4]} isAnimationActive={!isPrinting}>
+                <Bar dataKey="Dalam Gedung (%)" stackId="a" fill="#00857A" barSize={32} radius={[4, 0, 0, 4]} isAnimationActive={!isPrinting}>
                   <LabelList dataKey="Dalam Gedung (%)" position="inside" style={{ fill: '#ffffff', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 5 ? `${v}%` : ''} />
                 </Bar>
-                <Bar dataKey="Luar Gedung (%)" stackId="a" fill="#fb923c" radius={[0, 4, 4, 0]} isAnimationActive={!isPrinting}>
+                <Bar dataKey="Luar Gedung (%)" stackId="a" fill="#F28322" radius={[0, 4, 4, 0]} isAnimationActive={!isPrinting}>
                   <LabelList dataKey="Luar Gedung (%)" position="inside" style={{ fill: '#ffffff', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 5 ? `${v}%` : ''} />
                 </Bar>
               </BarChart>
@@ -325,20 +325,20 @@ export default function Dashboard() {
           <p className="text-xs text-center text-slate-500 mt-2">Berdasarkan persentase alokasi waktu pelayanan harian</p>
         </div>
 
-        <div className="xl:col-span-2 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:break-inside-avoid">
+        <div className="xl:col-span-2 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:col-span-1 print:break-inside-avoid">
           <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Ketersediaan Dokter di FKTP</h2>
           <div className="h-48">
-            <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 200 : "100%"}>
+            <ResponsiveContainer width={isPrinting ? 500 : "100%"} height={isPrinting ? 200 : "100%"}>
               <BarChart data={ketersediaanDokter} layout="vertical" margin={{ left: 10, right: 30 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
                 <XAxis type="number" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
                 <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fontSize: 13, fontWeight: 600, fill: '#334155'}} />
                 <RechartsTooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
                 <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ fontSize: '12px', paddingBottom: '10px' }} />
-                <Bar dataKey="Ada" stackId="a" fill="#10b981" barSize={28} isAnimationActive={!isPrinting}>
+                <Bar dataKey="Ada" stackId="a" fill="#45B669" barSize={28} isAnimationActive={!isPrinting}>
                   <LabelList dataKey="Ada" position="inside" style={{ fill: '#ffffff', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
                 </Bar>
-                <Bar dataKey="Tidak" stackId="a" fill="#f43f5e" radius={[0, 6, 6, 0]} isAnimationActive={!isPrinting}>
+                <Bar dataKey="Tidak" stackId="a" fill="#C00000" radius={[0, 6, 6, 0]} isAnimationActive={!isPrinting}>
                   <LabelList dataKey="Tidak" position="inside" style={{ fill: '#ffffff', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
                 </Bar>
               </BarChart>
@@ -364,7 +364,7 @@ export default function Dashboard() {
         <p className="text-sm text-slate-500 mt-1">Perbandingan faskes yang sudah mengimplementasikan kompetensi secara optimal.</p>
       </div>
       <div className="h-[450px] w-full">
-        <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 450 : "100%"}>
+        <ResponsiveContainer width={isPrinting ? 1000 : "100%"} height={isPrinting ? 450 : "100%"}>
           <BarChart data={kompetensiChartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontWeight: 'bold'}} />
@@ -387,11 +387,11 @@ export default function Dashboard() {
               }}
             />
             <Legend verticalAlign="top" height={50} iconType="circle" />
-            <Bar dataKey="Sudah" stackId="a" fill="#10b981" barSize={48} radius={[0, 0, 0, 0]} isAnimationActive={!isPrinting}>
+            <Bar dataKey="Sudah" stackId="a" fill="#00A68A" barSize={48} radius={[0, 0, 0, 0]} isAnimationActive={!isPrinting}>
               <LabelList dataKey="Sudah" position="inside" style={{ fill: '#ffffff', fontSize: 12, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
             </Bar>
-            <Bar dataKey="Belum" stackId="a" fill="#fcd34d" radius={[6, 6, 0, 0]} isAnimationActive={!isPrinting}>
-              <LabelList dataKey="Belum" position="inside" style={{ fill: '#854d0e', fontSize: 12, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
+            <Bar dataKey="Belum" stackId="a" fill="#F28322" radius={[6, 6, 0, 0]} isAnimationActive={!isPrinting}>
+              <LabelList dataKey="Belum" position="inside" style={{ fill: '#ffffff', fontSize: 12, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -422,7 +422,7 @@ export default function Dashboard() {
         <p className="text-sm text-slate-500 mt-1">Berdasarkan skala Likert (1-4). Nilai mendekati 4 menandakan kompetensi spesifik Sp.KKLP.</p>
       </div>
       <div className="h-[700px] w-full bg-white rounded-3xl p-4 border border-slate-50 shadow-sm">
-        <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 700 : "100%"}>
+        <ResponsiveContainer width={isPrinting ? 1000 : "100%"} height={isPrinting ? 700 : "100%"}>
           <BarChart data={jknChartData} layout="vertical" margin={{ left: 40, right: 40 }}>
             <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
             <XAxis type="number" domain={[0, 4]} axisLine={false} tickLine={false} ticks={[0, 1, 2, 3, 4]} />
@@ -443,7 +443,7 @@ export default function Dashboard() {
               }}
             />
             <Bar dataKey="AvgSkala" radius={[0, 6, 6, 0]} barSize={20} isAnimationActive={!isPrinting}>
-              {jknChartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.AvgSkala >= 3.5 ? '#2563eb' : entry.AvgSkala >= 2.5 ? '#60a5fa' : '#cbd5e1'} />))}
+              {jknChartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.AvgSkala >= 3.5 ? '#00857A' : entry.AvgSkala >= 2.5 ? '#00B4D5' : '#BFBFBF'} />))}
               <LabelList dataKey="AvgSkala" position="right" style={{ fill: '#475569', fontSize: 11, fontWeight: 700 }} />
             </Bar>
           </BarChart>
@@ -475,7 +475,7 @@ export default function Dashboard() {
         <p className="text-sm text-slate-500 mt-1">Perbandingan Faskes yang merekomendasikan layanan non-optimal dimasukkan ke JKN beserta pembobotan skalanya.</p>
       </div>
       <div className="h-[550px] w-full bg-white rounded-3xl p-4 border border-slate-50 shadow-sm">
-        <ResponsiveContainer width={isPrinting ? 700 : "100%"} height={isPrinting ? 550 : "100%"}>
+        <ResponsiveContainer width={isPrinting ? 1000 : "100%"} height={isPrinting ? 550 : "100%"}>
           <ComposedChart data={nonOptChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontWeight: 'bold'}} />
@@ -505,17 +505,17 @@ export default function Dashboard() {
               }}
             />
             <Legend wrapperStyle={{ paddingTop: '20px', fontWeight: 500 }} />
-            <Bar yAxisId="left" dataKey="Ya" name="Setuju Masuk JKN" fill="#10b981" barSize={32} stackId="a" radius={[0, 0, 0, 0]} isAnimationActive={!isPrinting}>
+            <Bar yAxisId="left" dataKey="Ya" name="Setuju Masuk JKN" fill="#45B669" barSize={32} stackId="a" radius={[0, 0, 0, 0]} isAnimationActive={!isPrinting}>
               <LabelList dataKey="Ya" position="inside" style={{ fill: '#ffffff', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
             </Bar>
-            <Bar yAxisId="left" dataKey="TdkTahu" name="Tidak Tahu" fill="#fcd34d" barSize={32} stackId="a" isAnimationActive={!isPrinting}>
-              <LabelList dataKey="TdkTahu" position="inside" style={{ fill: '#854d0e', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
+            <Bar yAxisId="left" dataKey="TdkTahu" name="Tidak Tahu" fill="#D8C700" barSize={32} stackId="a" isAnimationActive={!isPrinting}>
+              <LabelList dataKey="TdkTahu" position="inside" style={{ fill: '#ffffff', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
             </Bar>
-            <Bar yAxisId="left" dataKey="Tidak" name="Tidak Setuju" fill="#cbd5e1" barSize={32} stackId="a" radius={[6, 6, 0, 0]} isAnimationActive={!isPrinting}>
+            <Bar yAxisId="left" dataKey="Tidak" name="Tidak Setuju" fill="#BFBFBF" barSize={32} stackId="a" radius={[6, 6, 0, 0]} isAnimationActive={!isPrinting}>
               <LabelList dataKey="Tidak" position="inside" style={{ fill: '#334155', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
             </Bar>
-            <Line yAxisId="right" type="monotone" dataKey="AvgSkala" name="Rata-rata Skala Kebutuhan" stroke="#2563eb" strokeWidth={4} dot={{ r: 5, fill: '#fff', strokeWidth: 3 }} activeDot={{ r: 8 }} isAnimationActive={!isPrinting}>
-              <LabelList dataKey="AvgSkala" position="top" style={{ fill: '#2563eb', fontSize: 12, fontWeight: 800 }} />
+            <Line yAxisId="right" type="monotone" dataKey="AvgSkala" name="Rata-rata Skala Kebutuhan" stroke="#00857A" strokeWidth={4} dot={{ r: 5, fill: '#fff', strokeWidth: 3 }} activeDot={{ r: 8 }} isAnimationActive={!isPrinting}>
+              <LabelList dataKey="AvgSkala" position="top" style={{ fill: '#00857A', fontSize: 12, fontWeight: 800 }} />
             </Line>
           </ComposedChart>
         </ResponsiveContainer>
