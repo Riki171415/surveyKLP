@@ -107,7 +107,7 @@ export default function Dashboard() {
     setTimeout(() => {
       window.print();
       setIsPrinting(false);
-    }, 500);
+    }, 800);
   };
 
   const uniqueProvinsi = useMemo(() => {
@@ -239,7 +239,7 @@ export default function Dashboard() {
   
   const renderRingkasan = () => (
     <div className="space-y-8 print-page-break-inside-avoid">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 print:grid-cols-2 print:gap-4">
         {[
           { label: 'Total Faskes Terdata', value: totalResponden, icon: Users, sub: 'Responden tersaring', color: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/20' },
           { label: 'Rata-rata Waktu Poli', value: `${summaryMetrics.avgPoli} Mnt`, icon: Clock, sub: 'Durasi konsultasi rata-rata', color: 'from-emerald-400 to-teal-500', shadow: 'shadow-emerald-500/20' },
@@ -256,8 +256,8 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 print:flex print:flex-col print:gap-8">
+        <div className="xl:col-span-2 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:break-inside-avoid">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-display font-bold text-slate-800">Tren Pengisian Survei</h2>
             <span className="text-xs font-semibold bg-blue-50 text-blue-600 px-3 py-1 rounded-full">Berdasarkan Tanggal</span>
@@ -275,18 +275,18 @@ export default function Dashboard() {
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
                 <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
                 <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                <Area type="monotone" dataKey="Responden" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorTrend)" activeDot={{ r: 6, strokeWidth: 0, fill: '#2563eb' }} />
+                <Area type="monotone" dataKey="Responden" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorTrend)" activeDot={{ r: 6, strokeWidth: 0, fill: '#2563eb' }} isAnimationActive={!isPrinting} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
+        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:break-inside-avoid">
           <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Distribusi Responden</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={roleChartData} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={5} dataKey="value" stroke="none">
+                <Pie data={roleChartData} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={5} dataKey="value" stroke="none" isAnimationActive={!isPrinting}>
                   {roleChartData.map((e, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} itemStyle={{ fontWeight: 'bold' }} />
@@ -296,7 +296,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
+        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:break-inside-avoid">
           <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Distribusi Beban Kerja Faskes</h2>
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
@@ -306,15 +306,15 @@ export default function Dashboard() {
                 <YAxis dataKey="name" type="category" hide />
                 <RechartsTooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                 <Legend verticalAlign="top" iconType="circle" wrapperStyle={{ fontSize: '12px', paddingBottom: '10px' }} />
-                <Bar dataKey="Dalam Gedung (%)" stackId="a" fill="#8b5cf6" barSize={32} radius={[4, 0, 0, 4]} />
-                <Bar dataKey="Luar Gedung (%)" stackId="a" fill="#fb923c" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="Dalam Gedung (%)" stackId="a" fill="#8b5cf6" barSize={32} radius={[4, 0, 0, 4]} isAnimationActive={!isPrinting} />
+                <Bar dataKey="Luar Gedung (%)" stackId="a" fill="#fb923c" radius={[0, 4, 4, 0]} isAnimationActive={!isPrinting} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <p className="text-xs text-center text-slate-500 mt-2">Berdasarkan persentase alokasi waktu pelayanan harian</p>
         </div>
 
-        <div className="xl:col-span-2 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
+        <div className="xl:col-span-2 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm print:break-inside-avoid">
           <h2 className="text-lg font-display font-bold text-slate-800 mb-6">Ketersediaan Dokter di FKTP</h2>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
@@ -324,8 +324,8 @@ export default function Dashboard() {
                 <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fontSize: 13, fontWeight: 600, fill: '#334155'}} />
                 <RechartsTooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
                 <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ fontSize: '12px', paddingBottom: '10px' }} />
-                <Bar dataKey="Ada" stackId="a" fill="#10b981" barSize={28} />
-                <Bar dataKey="Tidak" stackId="a" fill="#f43f5e" radius={[0, 6, 6, 0]} />
+                <Bar dataKey="Ada" stackId="a" fill="#10b981" barSize={28} isAnimationActive={!isPrinting} />
+                <Bar dataKey="Tidak" stackId="a" fill="#f43f5e" radius={[0, 6, 6, 0]} isAnimationActive={!isPrinting} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -333,7 +333,7 @@ export default function Dashboard() {
       </div>
       
       {/* Narasi Ringkasan (Print & View) */}
-      <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 mt-4">
+      <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 mt-4 print:break-inside-avoid">
         <h4 className="font-bold text-blue-800 mb-2 flex items-center"><Sparkles className="w-4 h-4 mr-2" /> Narasi Eksekutif</h4>
         <p className="text-sm text-slate-600 leading-relaxed text-justify">
           Berdasarkan data {totalResponden} responden, terlihat bahwa mayoritas beban kerja faskes masih terpusat di dalam gedung ({summaryMetrics.avgInFktp}%), sedangkan pelayanan luar gedung (komunitas/kunjungan rumah) baru mencapai {summaryMetrics.avgOutFktp}%. Kehadiran Sp.KKLP (yang saat ini mencakup {Math.round((ketersediaanDokter[2].Ada / (totalResponden||1))*100)}% dari total sampel) terbukti memberikan korelasi positif terhadap peningkatan rata-rata durasi <i>Home Visit</i> dari {summaryMetrics.nonKklpAvgHome} menit menjadi {summaryMetrics.kklpAvgHome} menit per pasien. Hal ini mengindikasikan bahwa pemerataan Sp.KKLP berpotensi besar memperkuat upaya promotif, preventif, dan intervensi keluarga secara langsung di lapangan.
@@ -372,8 +372,8 @@ export default function Dashboard() {
               }}
             />
             <Legend verticalAlign="top" height={50} iconType="circle" />
-            <Bar dataKey="Sudah" stackId="a" fill="#10b981" barSize={48} radius={[0, 0, 0, 0]} />
-            <Bar dataKey="Belum" stackId="a" fill="#fcd34d" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="Sudah" stackId="a" fill="#10b981" barSize={48} radius={[0, 0, 0, 0]} isAnimationActive={!isPrinting} />
+            <Bar dataKey="Belum" stackId="a" fill="#fcd34d" radius={[6, 6, 0, 0]} isAnimationActive={!isPrinting} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -387,7 +387,7 @@ export default function Dashboard() {
       </div>
       
       {/* Narasi Kompetensi */}
-      <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100 mt-4">
+      <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100 mt-4 print:break-inside-avoid">
         <h4 className="font-bold text-emerald-800 mb-2 flex items-center"><Sparkles className="w-4 h-4 mr-2" /> Insight Implementasi Layanan Khusus</h4>
         <p className="text-sm text-slate-600 leading-relaxed text-justify">
           Grafik di atas memvisualisasikan tingkat ketercapaian 7 kompetensi inti Sp.KKLP di tingkat fasilitas kesehatan primer. Area berwarna kuning (Belum Optimal) menjadi titik kritis yang menunjukkan kesenjangan kapasitas medis saat ini. Kesenjangan ini menegaskan dua hal: (1) Perlunya pelatihan terstruktur (<i>capacity building</i>) secara kontinu bagi dokter umum yang bertugas, dan (2) Kebutuhan mendesak akan penempatan Sp.KKLP sebagai konsultan klinis untuk menjembatani prosedur medis yang belum tertangani secara adekuat di level primer.
@@ -423,7 +423,7 @@ export default function Dashboard() {
                 return null;
               }}
             />
-            <Bar dataKey="AvgSkala" radius={[0, 6, 6, 0]} barSize={20}>
+            <Bar dataKey="AvgSkala" radius={[0, 6, 6, 0]} barSize={20} isAnimationActive={!isPrinting}>
               {jknChartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.AvgSkala >= 3.5 ? '#2563eb' : entry.AvgSkala >= 2.5 ? '#60a5fa' : '#cbd5e1'} />))}
             </Bar>
           </BarChart>
@@ -439,7 +439,7 @@ export default function Dashboard() {
       </div>
       
       {/* Narasi JKN */}
-      <div className="bg-amber-50/50 p-5 rounded-2xl border border-amber-100 mt-4">
+      <div className="bg-amber-50/50 p-5 rounded-2xl border border-amber-100 mt-4 print:break-inside-avoid">
         <h4 className="font-bold text-amber-800 mb-2 flex items-center"><Sparkles className="w-4 h-4 mr-2" /> Kesimpulan Skala Manfaat JKN</h4>
         <p className="text-sm text-slate-600 leading-relaxed text-justify">
           Berdasarkan penilaian skala Likert (1-4), batang yang melewati skala 3,0 merepresentasikan jenis pelayanan yang secara absolut membutuhkan keahlian spesifik Sp.KKLP demi menjaga mutu dan luaran klinis yang optimal. Sementara itu, nilai yang berada di bawah skala 2,5 merupakan pelayanan ruting yang dapat terus dipercayakan kepada dokter umum. Hal ini menjadi justifikasi logis dalam memetakan standar kapitasi dan potensi pemberian insentif tambahan berbasis kompetensi bagi faskes yang memiliki Sp.KKLP dalam menangani kasus-kasus kompleks tanpa perlu merujuk ke rumah sakit.
@@ -485,10 +485,10 @@ export default function Dashboard() {
               }}
             />
             <Legend wrapperStyle={{ paddingTop: '20px', fontWeight: 500 }} />
-            <Bar yAxisId="left" dataKey="Ya" name="Setuju Masuk JKN" fill="#10b981" barSize={32} stackId="a" radius={[0, 0, 0, 0]} />
-            <Bar yAxisId="left" dataKey="TdkTahu" name="Tidak Tahu" fill="#fcd34d" barSize={32} stackId="a" />
-            <Bar yAxisId="left" dataKey="Tidak" name="Tidak Setuju" fill="#cbd5e1" barSize={32} stackId="a" radius={[6, 6, 0, 0]} />
-            <Line yAxisId="right" type="monotone" dataKey="AvgSkala" name="Rata-rata Skala Kebutuhan" stroke="#2563eb" strokeWidth={4} dot={{ r: 5, fill: '#fff', strokeWidth: 3 }} activeDot={{ r: 8 }} />
+            <Bar yAxisId="left" dataKey="Ya" name="Setuju Masuk JKN" fill="#10b981" barSize={32} stackId="a" radius={[0, 0, 0, 0]} isAnimationActive={!isPrinting} />
+            <Bar yAxisId="left" dataKey="TdkTahu" name="Tidak Tahu" fill="#fcd34d" barSize={32} stackId="a" isAnimationActive={!isPrinting} />
+            <Bar yAxisId="left" dataKey="Tidak" name="Tidak Setuju" fill="#cbd5e1" barSize={32} stackId="a" radius={[6, 6, 0, 0]} isAnimationActive={!isPrinting} />
+            <Line yAxisId="right" type="monotone" dataKey="AvgSkala" name="Rata-rata Skala Kebutuhan" stroke="#2563eb" strokeWidth={4} dot={{ r: 5, fill: '#fff', strokeWidth: 3 }} activeDot={{ r: 8 }} isAnimationActive={!isPrinting} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -501,7 +501,7 @@ export default function Dashboard() {
       </div>
       
       {/* Narasi Non-Optimal */}
-      <div className="bg-purple-50/50 p-5 rounded-2xl border border-purple-100 mt-4">
+      <div className="bg-purple-50/50 p-5 rounded-2xl border border-purple-100 mt-4 print:break-inside-avoid">
         <h4 className="font-bold text-purple-800 mb-2 flex items-center"><Sparkles className="w-4 h-4 mr-2" /> Analisis Rekomendasi JKN Masa Depan</h4>
         <p className="text-sm text-slate-600 leading-relaxed text-justify">
           Survei ini berhasil memotret layanan-layanan medis di luar jangkauan standar yang sebenarnya sangat dinantikan kehadirannya oleh masyarakat. Proporsi rekomendasi positif ("Setuju Masuk JKN" berwarna hijau) berjalan linier dengan tingginya garis rata-rata skala kebutuhan. Pelayanan seperti Home Care Terintegrasi, Layanan Paliatif Komunitas, dan Konseling Geriatri menduduki peringkat prioritas. Mengintegrasikan layanan-layanan ini ke dalam paket manfaat JKN akan merevolusi fungsi FKTP sebagai gerbang utama pelayanan kesehatan paripurna.
