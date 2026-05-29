@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install --legacy-peer-deps",
+  "installCommand": "NODE_OPTIONS=--max-old-space-size=4096 npm install --legacy-peer-deps --no-audit --no-fund",
   "buildCommand": "npm run build",
   "env": {
     "CI": "false"
