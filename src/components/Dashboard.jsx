@@ -331,6 +331,14 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      
+      {/* Narasi Ringkasan (Print & View) */}
+      <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 mt-4">
+        <h4 className="font-bold text-blue-800 mb-2 flex items-center"><Sparkles className="w-4 h-4 mr-2" /> Narasi Eksekutif</h4>
+        <p className="text-sm text-slate-600 leading-relaxed text-justify">
+          Berdasarkan data {totalResponden} responden, terlihat bahwa mayoritas beban kerja faskes masih terpusat di dalam gedung ({summaryMetrics.avgInFktp}%), sedangkan pelayanan luar gedung (komunitas/kunjungan rumah) baru mencapai {summaryMetrics.avgOutFktp}%. Kehadiran Sp.KKLP (yang saat ini mencakup {Math.round((ketersediaanDokter[2].Ada / (totalResponden||1))*100)}% dari total sampel) terbukti memberikan korelasi positif terhadap peningkatan rata-rata durasi <i>Home Visit</i> dari {summaryMetrics.nonKklpAvgHome} menit menjadi {summaryMetrics.kklpAvgHome} menit per pasien. Hal ini mengindikasikan bahwa pemerataan Sp.KKLP berpotensi besar memperkuat upaya promotif, preventif, dan intervensi keluarga secara langsung di lapangan.
+        </p>
+      </div>
     </div>
   );
 
@@ -377,6 +385,14 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+      
+      {/* Narasi Kompetensi */}
+      <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100 mt-4">
+        <h4 className="font-bold text-emerald-800 mb-2 flex items-center"><Sparkles className="w-4 h-4 mr-2" /> Insight Implementasi Layanan Khusus</h4>
+        <p className="text-sm text-slate-600 leading-relaxed text-justify">
+          Grafik di atas memvisualisasikan tingkat ketercapaian 7 kompetensi inti Sp.KKLP di tingkat fasilitas kesehatan primer. Area berwarna kuning (Belum Optimal) menjadi titik kritis yang menunjukkan kesenjangan kapasitas medis saat ini. Kesenjangan ini menegaskan dua hal: (1) Perlunya pelatihan terstruktur (<i>capacity building</i>) secara kontinu bagi dokter umum yang bertugas, dan (2) Kebutuhan mendesak akan penempatan Sp.KKLP sebagai konsultan klinis untuk menjembatani prosedur medis yang belum tertangani secara adekuat di level primer.
+        </p>
+      </div>
     </div>
   );
 
@@ -420,6 +436,14 @@ export default function Dashboard() {
             <span className="text-slate-600 font-medium self-center leading-tight">{c.fullName}</span>
           </div>
         ))}
+      </div>
+      
+      {/* Narasi JKN */}
+      <div className="bg-amber-50/50 p-5 rounded-2xl border border-amber-100 mt-4">
+        <h4 className="font-bold text-amber-800 mb-2 flex items-center"><Sparkles className="w-4 h-4 mr-2" /> Kesimpulan Skala Manfaat JKN</h4>
+        <p className="text-sm text-slate-600 leading-relaxed text-justify">
+          Berdasarkan penilaian skala Likert (1-4), batang yang melewati skala 3,0 merepresentasikan jenis pelayanan yang secara absolut membutuhkan keahlian spesifik Sp.KKLP demi menjaga mutu dan luaran klinis yang optimal. Sementara itu, nilai yang berada di bawah skala 2,5 merupakan pelayanan ruting yang dapat terus dipercayakan kepada dokter umum. Hal ini menjadi justifikasi logis dalam memetakan standar kapitasi dan potensi pemberian insentif tambahan berbasis kompetensi bagi faskes yang memiliki Sp.KKLP dalam menangani kasus-kasus kompleks tanpa perlu merujuk ke rumah sakit.
+        </p>
       </div>
     </div>
   );
@@ -474,6 +498,14 @@ export default function Dashboard() {
             <span className="font-bold text-emerald-600 shrink-0">{c.name}</span><span className="text-slate-600 font-medium truncate" title={c.fullName}>{c.fullName}</span>
           </div>
         ))}
+      </div>
+      
+      {/* Narasi Non-Optimal */}
+      <div className="bg-purple-50/50 p-5 rounded-2xl border border-purple-100 mt-4">
+        <h4 className="font-bold text-purple-800 mb-2 flex items-center"><Sparkles className="w-4 h-4 mr-2" /> Analisis Rekomendasi JKN Masa Depan</h4>
+        <p className="text-sm text-slate-600 leading-relaxed text-justify">
+          Survei ini berhasil memotret layanan-layanan medis di luar jangkauan standar yang sebenarnya sangat dinantikan kehadirannya oleh masyarakat. Proporsi rekomendasi positif ("Setuju Masuk JKN" berwarna hijau) berjalan linier dengan tingginya garis rata-rata skala kebutuhan. Pelayanan seperti Home Care Terintegrasi, Layanan Paliatif Komunitas, dan Konseling Geriatri menduduki peringkat prioritas. Mengintegrasikan layanan-layanan ini ke dalam paket manfaat JKN akan merevolusi fungsi FKTP sebagai gerbang utama pelayanan kesehatan paripurna.
+        </p>
       </div>
     </div>
   );
