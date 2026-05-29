@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronRight, ChevronLeft, Save, CheckCircle, Info, ArrowLeft } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
@@ -827,8 +828,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
       </div>
 
       {/* Panduan Modal */}
-      {showPanduan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+      {showPanduan && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-slide-up">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <h2 className="text-xl font-bold text-slate-800">📖 Panduan Pengisian Survey & Makna Skala Likert</h2>
@@ -910,7 +911,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
     </div>
   );
 }
