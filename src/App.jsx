@@ -55,7 +55,7 @@ function Sidebar() {
   if (!user) return null;
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-72'} bg-primary-600 min-h-screen hidden md:flex flex-col shadow-2xl relative z-20 transition-all duration-300`}>
+    <div className={`no-print ${isCollapsed ? 'w-20' : 'w-72'} bg-primary-600 min-h-screen hidden md:flex flex-col shadow-2xl relative z-20 transition-all duration-300`}>
       {/* Strip Merah-Putih Kemenkes */}
       <div className="flex h-1.5 shrink-0">
         <div className="flex-1 bg-red-600" />
@@ -139,7 +139,7 @@ function AppContent() {
       <Sidebar />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {user && (
-          <div className="md:hidden border-b border-white/20 p-3 flex justify-between items-center sticky top-0 z-20 bg-primary-700 shadow-md">
+          <div className="no-print md:hidden border-b border-white/20 p-3 flex justify-between items-center sticky top-0 z-20 bg-primary-700 shadow-md">
             {/* Strip merah-putih mobile */}
             <div className="absolute top-0 left-0 right-0 h-1 flex">
               <div className="flex-1 bg-red-600" />
