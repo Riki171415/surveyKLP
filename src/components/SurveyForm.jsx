@@ -48,7 +48,6 @@ const interviewQuestions = [
 
 export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const [step, setStep] = useState(1);
-  const [earlyExit, setEarlyExit] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -162,10 +161,6 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   };
 
   const nextStep = () => {
-    if (step === 1 && !formData.docKklp) {
-      setEarlyExit(true);
-      return;
-    }
     if (canProceed()) {
       setShowErrors(false);
       setStep(prev => Math.min(prev + 1, totalSteps));
@@ -237,27 +232,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
     }
   };
 
-  if (earlyExit) {
-    return (
-      <div className="min-h-screen bg-slate-50 py-12 px-4 font-sans flex items-center justify-center">
-        <div className="max-w-xl mx-auto bg-white rounded-xl p-8 border-t-4 border-rose-500 shadow-sm text-center">
-          <div className="inline-flex items-center justify-center p-3 bg-rose-50 rounded-full mb-4">
-            <Info className="w-8 h-8 text-rose-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-4">Pemberitahuan</h2>
-          <p className="text-slate-600 mb-8 leading-relaxed">
-            Terima kasih atas partisipasi Anda. Survei ini ditujukan bagi Puskesmas yang memiliki dokter Sp.KKLP yang aktif berpraktik.
-          </p>
-          <button 
-            onClick={() => setEarlyExit(false)} 
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-lg font-medium transition-colors"
-          >
-            Kembali
-          </button>
-        </div>
-      </div>
-    );
-  }
+
 
   if (isSubmitted) {
     return (
@@ -655,8 +630,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                           <td className="px-4 py-3 text-slate-800 text-xs md:text-sm">{item}</td>
                           <td className="px-4 py-3 text-center">
                             <div className="flex justify-center gap-2">
-                              {['Ya', 'Tidak'].map(pilihan => (
-                                <label key={pilihan} className={`cursor-pointer px-3 py-1.5 rounded-md text-xs font-semibold border transition-all ${formData.nonOptimal[idx]?.masukJkn === pilihan ? 'bg-primary-600 text-white border-primary-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'}`}>
+                              {['Ya', 'Tidak', 'Tidak Tahu'].map(pilihan => (
+                                <label key={pilihan} className={`cursor-pointer px-3 py-1.5 rounded-md text-xs font-semibold border transition-all text-center flex-1 ${formData.nonOptimal[idx]?.masukJkn === pilihan ? 'bg-primary-600 text-white border-primary-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'}`}>
                                   <input 
                                     type="radio" 
                                     className="hidden" 

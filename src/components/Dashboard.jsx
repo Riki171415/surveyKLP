@@ -220,18 +220,19 @@ export default function Dashboard() {
 
   // 4. DATA LAYANAN NON-OPTIMAL
   const nonOptChartData = nonOptimalServices.map((nama, idx) => {
-    let masukJknYa = 0, masukJknTidak = 0, totalScore = 0, countScore = 0;
+    let masukJknYa = 0, masukJknTidak = 0, masukJknTdkTahu = 0, totalScore = 0, countScore = 0;
     filteredData.forEach(row => {
       const ans = row.non_optimal?.[idx];
       if (ans?.masukJkn === 'Ya') masukJknYa++;
       else if (ans?.masukJkn === 'Tidak') masukJknTidak++;
+      else if (ans?.masukJkn === 'Tidak Tahu') masukJknTdkTahu++;
       
       const val = Number(ans?.skala);
       if (val > 0) { totalScore += val; countScore++; }
     });
     return { 
       name: `NO${idx+1}`, fullName: nama, 
-      Ya: masukJknYa, Tidak: masukJknTidak, 
+      Ya: masukJknYa, Tidak: masukJknTidak, TdkTahu: masukJknTdkTahu,
       AvgSkala: countScore > 0 ? Number((totalScore / countScore).toFixed(1)) : 0 
     };
   }).sort((a, b) => b.Ya - a.Ya); // Sort by highest "Ya"
@@ -492,18 +493,20 @@ export default function Dashboard() {
                               <div className="bg-white p-3 border border-slate-200 shadow-md rounded-lg max-w-sm text-sm">
                                 <p className="font-bold text-slate-800 mb-2 border-b pb-1">{data.fullName}</p>
                                 <p className="text-emerald-600 font-medium">Masuk JKN (Ya): {data.Ya}</p>
-                                <p className="text-slate-500 font-medium">Tidak: {data.Tidak}</p>
-                                <p className="text-rose-600 font-bold mt-2">Avg Skala: {data.AvgSkala}</p>
+                                <p className="text-slate-400 font-medium">Tidak: {data.Tidak}</p>
+                                <p className="text-amber-500 font-medium">Tidak Tahu: {data.TdkTahu || 0}</p>
+                                <p className="text-blue-600 font-bold mt-2">Avg Skala: {data.AvgSkala}</p>
                               </div>
                             );
                           }
                           return null;
                         }}
                       />
-                      <Legend verticalAlign="top" height={40} iconType="circle" />
-                      <Bar yAxisId="left" dataKey="Ya" fill="#10b981" barSize={30} />
-                      <Bar yAxisId="left" dataKey="Tidak" fill="#cbd5e1" barSize={30} />
-                      <Line yAxisId="right" type="monotone" dataKey="AvgSkala" name="Avg Skala (Kanan)" stroke="#e11d48" strokeWidth={3} dot={{r: 4}} />
+                      <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                      <Bar yAxisId="left" dataKey="Ya" fill="#10b981" barSize={25} stackId="a" />
+                      <Bar yAxisId="left" dataKey="Tidak" fill="#cbd5e1" barSize={25} stackId="a" />
+                      <Bar yAxisId="left" dataKey="TdkTahu" name="Tidak Tahu" fill="#f59e0b" barSize={25} stackId="a" />
+                      <Line yAxisId="right" type="monotone" dataKey="AvgSkala" name="Rata-rata Skala (1-4)" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
