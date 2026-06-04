@@ -359,27 +359,31 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     <>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Provinsi / Kabupaten/Kota</label>
-                        <SearchableSelect 
-                          name="city"
-                          options={uniqueProvinces}
-                          value={formData.city}
-                          onChange={(val) => {
-                             handleInputChange({ target: { name: 'city', value: val } });
-                             setFormData(prev => ({...prev, fktpName: ''}));
-                          }}
-                          placeholder="-- Ketik atau Pilih Provinsi --"
-                        />
+                        <div className={showErrors && !formData.city ? 'ring-2 ring-rose-500 rounded-lg shadow-sm' : ''}>
+                          <SearchableSelect 
+                            name="city"
+                            options={uniqueProvinces}
+                            value={formData.city}
+                            onChange={(val) => {
+                               handleInputChange({ target: { name: 'city', value: val } });
+                               setFormData(prev => ({...prev, fktpName: ''}));
+                            }}
+                            placeholder="-- Ketik atau Pilih Provinsi --"
+                          />
+                        </div>
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Nama FKTP/Puskesmas</label>
-                        <SearchableSelect 
-                          name="fktpName"
-                          options={puskesmasList}
-                          value={formData.fktpName}
-                          onChange={(val) => handleInputChange({ target: { name: 'fktpName', value: val } })}
-                          disabled={!formData.city}
-                          placeholder="-- Ketik atau Pilih Puskesmas --"
-                        />
+                        <div className={showErrors && !formData.fktpName ? 'ring-2 ring-rose-500 rounded-lg shadow-sm' : ''}>
+                          <SearchableSelect 
+                            name="fktpName"
+                            options={puskesmasList}
+                            value={formData.fktpName}
+                            onChange={(val) => handleInputChange({ target: { name: 'fktpName', value: val } })}
+                            disabled={!formData.city}
+                            placeholder="-- Ketik atau Pilih Puskesmas --"
+                          />
+                        </div>
                         {!formData.city && <p className="text-xs text-amber-600 mt-1">Pilih provinsi terlebih dahulu</p>}
                       </div>
                     </>
@@ -389,7 +393,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                       <label className="block text-sm font-semibold text-slate-700 mb-1">Jabatan <span className="text-xs text-slate-400 font-normal ml-1">(Pilih salah satu)</span></label>
                       <p className="text-xs text-slate-500 leading-relaxed text-justify">Jika Anda sebagai Kepala Puskesmas di survey ini, cukup memilih salah satu peran utama Anda: apakah Anda mengisi sebagai Kepala Puskesmas, atau sebagai Dokter Sp.KKLP, Dokter Umum, Dokter Gigi, atau Tenaga Kesehatan lainnya.</p>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 p-2 rounded-2xl ${showErrors && !formData.role ? 'ring-2 ring-rose-500 bg-rose-50/50' : ''}`}>
                       {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Tenaga Kesehatan Fungsional (Dokter Gigi, Bidan, Perawat, Farmasi)'].map(role => (
                         <label key={role} className={`relative flex items-center justify-center px-4 py-4 border-2 rounded-2xl cursor-pointer transition-all duration-300 text-center leading-tight group ${
                           formData.role === role 
@@ -458,19 +462,19 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-5 bg-slate-50 border border-slate-100 rounded-xl mb-6">
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5">Rata-rata waktu Poli (mnt/pasien)</label>
-                        <input type="number" name="timeInPoli" value={formData.timeInPoli} onChange={handleInputChange} placeholder="Contoh: 10" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
+                        <input type="number" name="timeInPoli" value={formData.timeInPoli} onChange={handleInputChange} placeholder="Contoh: 10" className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300 ${showErrors && !formData.timeInPoli ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} />
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5">Rata-rata waktu Home Visit (mnt/pasien)</label>
-                        <input type="number" name="timeHomeVisit" value={formData.timeHomeVisit} onChange={handleInputChange} placeholder="Contoh: 45" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
+                        <input type="number" name="timeHomeVisit" value={formData.timeHomeVisit} onChange={handleInputChange} placeholder="Contoh: 45" className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300 ${showErrors && !formData.timeHomeVisit ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} />
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5">Beban Dalam Gedung (%)</label>
-                        <input type="number" name="propInFktp" value={formData.propInFktp} onChange={handleInputChange} placeholder="Contoh: 70" min="0" max="100" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
+                        <input type="number" name="propInFktp" value={formData.propInFktp} onChange={handleInputChange} placeholder="Contoh: 70" min="0" max="100" className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300 ${showErrors && !formData.propInFktp ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} />
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5">Beban Luar Gedung (%)</label>
-                        <input type="number" name="propOutFktp" value={formData.propOutFktp} onChange={handleInputChange} placeholder="Contoh: 30" min="0" max="100" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300" />
+                        <input type="number" name="propOutFktp" value={formData.propOutFktp} onChange={handleInputChange} placeholder="Contoh: 30" min="0" max="100" className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary-500 outline-none placeholder:text-slate-300 ${showErrors && !formData.propOutFktp ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} />
                       </div>
                       {(formData.propInFktp !== '' || formData.propOutFktp !== '') && (
                         <div className="md:col-span-2">
@@ -496,7 +500,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                           {kompetensiLayanan.map((item, idx) => (
-                            <tr key={idx} className="hover:bg-slate-50 transition-colors group">
+                            <tr key={idx} className={`transition-colors group ${showErrors && !formData.kompetensi[idx]?.status ? 'bg-rose-50/50' : 'hover:bg-slate-50'}`}>
                               <td className="px-4 py-3 text-slate-800 text-xs md:text-sm">{item}</td>
                               <td className="px-4 py-3 text-center">
                                 <div className="flex justify-center gap-2">
@@ -580,7 +584,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {jknBenefits.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                        <tr key={idx} className={`transition-colors ${showErrors && !formData.jkn[idx]?.skala ? 'bg-rose-50/50' : 'hover:bg-slate-50'}`}>
                           <td className="px-4 py-3 text-slate-800 text-xs md:text-sm">{item}</td>
                           <td className="px-4 py-3">
                             <div className="flex justify-center gap-1.5">
@@ -653,7 +657,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {nonOptimalServices.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                        <tr key={idx} className={`transition-colors ${showErrors && (!formData.nonOptimal[idx]?.masukJkn || !formData.nonOptimal[idx]?.skala) ? 'bg-rose-50/50' : 'hover:bg-slate-50'}`}>
                           <td className="px-4 py-3 text-slate-800 text-xs md:text-sm">{item}</td>
                           <td className="px-4 py-3 text-center">
                             <div className="flex justify-center gap-2">
@@ -735,7 +739,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         rows={4}
                         required
                         placeholder="Tuliskan jawaban/alasan di sini..."
-                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y ${showErrors && !formData.wawancara[idx]?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`}
                         value={formData.wawancara[idx] || ''}
                         onChange={(e) => handleWawancaraChange(idx, e.target.value)}
                       ></textarea>
