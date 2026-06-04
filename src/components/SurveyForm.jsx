@@ -385,7 +385,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     </>
                   )}
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-slate-700 mb-3">Jabatan <span className="text-xs text-slate-400 font-normal ml-1">(Pilih salah satu)</span></label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">Jabatan <span className="text-xs text-slate-500 font-normal ml-1">(Pilih Salah satu) Jika Anda Sebagai Kepala Puskesmas disurvey ini cukup memilih satu saja apakah anda berperan sebagai Kepala Puskesmas atau dokter SPKLP, Dokter umum, Dokter Gigi atau Tenaga Kesehatan selain dokter</span></label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Tenaga Kesehatan Fungsional (Dokter Gigi, Bidan, Perawat, Farmasi)'].map(role => (
                         <label key={role} className={`relative flex items-center justify-center px-4 py-4 border-2 rounded-2xl cursor-pointer transition-all duration-300 text-center leading-tight group ${
@@ -403,19 +403,24 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     </div>
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-slate-700 mb-3">Ketersediaan Dokter Praktek</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">Ketersediaan Dokter</label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {[
-                        { name: 'docUmum', label: 'Dokter Umum' },
-                        { name: 'docGigi', label: 'Dokter Gigi' },
-                        { name: 'docKklp', label: 'Dokter Sp.KKLP' }
+                        { name: 'docUmum', label: 'Dokter Umum Praktek' },
+                        { name: 'docGigi', label: 'Dokter Gigi Praktek' },
+                        { name: 'docKklp', label: 'Dokter Sp.KKLP Praktek' }
                       ].map(doc => (
                         <label key={doc.name} className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-all ${formData[doc.name] ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:bg-slate-50'}`}>
                           <div className={`w-5 h-5 flex items-center justify-center rounded border ${formData[doc.name] ? 'bg-emerald-500 border-emerald-500' : 'bg-white border-slate-300'}`}>
                             {formData[doc.name] && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                           </div>
                           <input type="checkbox" name={doc.name} checked={formData[doc.name]} onChange={handleInputChange} className="hidden" />
-                          <span className={`text-sm font-medium ${formData[doc.name] ? 'text-emerald-800' : 'text-slate-600'}`}>{doc.label}</span>
+                          <span className={`text-sm font-medium flex items-center ${formData[doc.name] ? 'text-emerald-800' : 'text-slate-600'}`}>
+                            {doc.label} 
+                            <span className={`ml-2 px-2 py-0.5 rounded text-xs font-bold ${formData[doc.name] ? 'bg-emerald-200 text-emerald-900' : 'bg-slate-200 text-slate-500'}`}>
+                              {formData[doc.name] ? 'YA' : 'TIDAK'}
+                            </span>
+                          </span>
                         </label>
                       ))}
                     </div>
