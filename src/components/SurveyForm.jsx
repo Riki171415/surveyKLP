@@ -67,7 +67,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const [formData, setFormData] = useState({
     id: null,
     fktpName: '', city: '', role: '',
-    docUmum: false, docGigi: false, docKklp: false,
+    docUmum: '', docGigi: '', docKklp: '',
     timeInPoli: '', timeHomeVisit: '', propInFktp: '', propOutFktp: '',
     kompetensi: {}, jkn: {}, nonOptimal: {}, wawancara: {}
   });
@@ -90,9 +90,9 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
         fktpName: data.fktp_name || '',
         city: data.city || '',
         role: data.role || '',
-        docUmum: data.doc_umum || false,
-        docGigi: data.doc_gigi || false,
-        docKklp: data.doc_kklp || false,
+        docUmum: data.doc_umum || '',
+        docGigi: data.doc_gigi || '',
+        docKklp: data.doc_kklp || '',
         timeInPoli: data.time_in_poli || '',
         timeHomeVisit: data.time_home_visit || '',
         propInFktp: data.prop_in_fktp || '',
@@ -407,24 +407,26 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-slate-700 mb-3">Ketersediaan Dokter</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                       {[
-                        { name: 'docUmum', label: 'Dokter Umum Praktek' },
-                        { name: 'docGigi', label: 'Dokter Gigi Praktek' },
-                        { name: 'docKklp', label: 'Dokter Sp.KKLP Praktek' }
+                        { name: 'docUmum', label: 'Dokter Umum' },
+                        { name: 'docGigi', label: 'Dokter Gigi' },
+                        { name: 'docKklp', label: 'Dokter Sp.KKLP' }
                       ].map(doc => (
-                        <label key={doc.name} className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-all ${formData[doc.name] ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:bg-slate-50'}`}>
-                          <div className={`w-5 h-5 flex items-center justify-center rounded border ${formData[doc.name] ? 'bg-emerald-500 border-emerald-500' : 'bg-white border-slate-300'}`}>
-                            {formData[doc.name] && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                        <div key={doc.name} className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                          <p className="text-sm font-bold text-slate-800 mb-3 text-center">{doc.label}</p>
+                          <div className="flex flex-col gap-2">
+                            {['Ada & Praktek', 'Ada tapi Tidak Praktek', 'Tidak Ada'].map(opt => (
+                              <label key={opt} className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${formData[doc.name] === opt ? 'border-primary-500 bg-primary-50 text-primary-800 font-medium shadow-sm' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'}`}>
+                                <input type="radio" name={doc.name} value={opt} checked={formData[doc.name] === opt} onChange={handleInputChange} className="hidden" />
+                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center mr-3 flex-shrink-0 ${formData[doc.name] === opt ? 'border-primary-500' : 'border-slate-300'}`}>
+                                  {formData[doc.name] === opt && <div className="w-2 h-2 rounded-full bg-primary-500"></div>}
+                                </div>
+                                <span className="text-xs leading-tight">{opt}</span>
+                              </label>
+                            ))}
                           </div>
-                          <input type="checkbox" name={doc.name} checked={formData[doc.name]} onChange={handleInputChange} className="hidden" />
-                          <span className={`text-sm font-medium flex items-center ${formData[doc.name] ? 'text-emerald-800' : 'text-slate-600'}`}>
-                            {doc.label} 
-                            <span className={`ml-2 px-2 py-0.5 rounded text-xs font-bold ${formData[doc.name] ? 'bg-emerald-200 text-emerald-900' : 'bg-slate-200 text-slate-500'}`}>
-                              {formData[doc.name] ? 'YA' : 'TIDAK'}
-                            </span>
-                          </span>
-                        </label>
+                        </div>
                       ))}
                     </div>
                   </div>

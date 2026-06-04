@@ -167,7 +167,7 @@ export default function DataManagement() {
                   <div><span className="text-slate-500 block">Provinsi/Kota</span><span className="font-medium text-slate-900">{selectedData.city}</span></div>
                   <div><span className="text-slate-500 block">Nama FKTP</span><span className="font-medium text-slate-900">{selectedData.fktp_name}</span></div>
                   <div><span className="text-slate-500 block">Jabatan Pengisi</span><span className="font-medium text-slate-900">{selectedData.role}</span></div>
-                  <div><span className="text-slate-500 block">Dokter Umum / Gigi / Sp.KKLP</span><span className="font-medium text-slate-900">{selectedData.doc_umum ? 'Ada' : 'Tidak'} / {selectedData.doc_gigi ? 'Ada' : 'Tidak'} / {selectedData.doc_kklp ? 'Ada' : 'Tidak'}</span></div>
+                  <div><span className="text-slate-500 block">Dokter Umum / Gigi / Sp.KKLP</span><span className="font-medium text-slate-900">{selectedData.doc_umum || 'Tidak Ada'} / {selectedData.doc_gigi || 'Tidak Ada'} / {selectedData.doc_kklp || 'Tidak Ada'}</span></div>
                 </div>
               </div>
 
