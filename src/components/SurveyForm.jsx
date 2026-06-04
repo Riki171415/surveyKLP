@@ -142,7 +142,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const isRoleDoctor = formData.role === 'Dokter Umum' || formData.role === 'Dokter Sp.KKLP';
 
   // Validasi Step
-  const isStep1Valid = formData.fktpName.trim() !== '' && formData.city.trim() !== '' && formData.role !== '';
+  const isStep1Valid = formData.fktpName.trim() !== '' && formData.city.trim() !== '' && formData.role !== '' && formData.docUmum !== '' && formData.docGigi !== '' && formData.docKklp !== '';
   const propTotal = Number(formData.propInFktp || 0) + Number(formData.propOutFktp || 0);
   const isPropValid = formData.propInFktp !== '' && formData.propOutFktp !== '' && propTotal === 100;
   const isStep2Valid = isRoleDoctor 
@@ -417,7 +417,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         { name: 'docGigi', label: 'Dokter Gigi' },
                         { name: 'docKklp', label: 'Dokter Sp.KKLP' }
                       ].map(doc => (
-                        <div key={doc.name} className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <div key={doc.name} className={`border rounded-xl p-4 ${showErrors && !formData[doc.name] ? 'bg-rose-50/50 border-rose-500 ring-1 ring-rose-500 shadow-sm' : 'bg-slate-50 border-slate-200'}`}>
                           <p className="text-sm font-bold text-slate-800 mb-3 text-center">{doc.label}</p>
                           <div className="flex flex-col gap-2">
                             {['Ada & Praktek', 'Ada tapi Tidak Praktek', 'Tidak Ada'].map(opt => (
