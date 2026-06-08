@@ -391,7 +391,6 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   <div className="md:col-span-2">
                     <div className="mb-3">
                       <label className="block text-sm font-semibold text-slate-700 mb-1">Jabatan <span className="text-xs text-slate-400 font-normal ml-1">(Pilih salah satu)</span></label>
-                      <p className="text-xs text-slate-500 leading-relaxed text-justify">Jika Anda sebagai Kepala Puskesmas di survey ini, cukup memilih salah satu peran utama Anda: apakah Anda mengisi sebagai Kepala Puskesmas, atau sebagai Dokter Sp.KKLP, Dokter Umum, Dokter Gigi, atau Tenaga Kesehatan lainnya.</p>
                     </div>
                     <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 p-2 rounded-2xl ${showErrors && !formData.role ? 'ring-2 ring-rose-500 bg-rose-50/50' : ''}`}>
                       {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Tenaga Kesehatan Fungsional (Dokter Gigi, Bidan, Perawat, Farmasi)'].map(role => (
