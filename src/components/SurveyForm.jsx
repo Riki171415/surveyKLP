@@ -48,20 +48,58 @@ const interviewQuestions = [
   "7. Menurut anda apakah FKTP dengan dokter Sp.KKLP perlu mendapatkan insentif tambahan? Jelaskan alasannya"
 ];
 
+const interviewRecommendations = {
+  0: [
+    "Sangat perlu, karena penanganan pasien kronik butuh waktu dan pemantauan jangka panjang. Kapitasi kinerja untuk Sp.KKLP akan memotivasi peningkatan mutu layanan.",
+    "Perlu, namun dengan target indikator mutu yang jelas agar Sp.KKLP dapat fokus pada tata laksana komprehensif tanpa membebani keuangan JKN berlebih.",
+    "Cukup dengan kapitasi yang ada, namun perlu ada insentif khusus di luar kapitasi (non-kapitasi) untuk layanan spesifik penyakit kronik."
+  ],
+  1: [
+    "Perlu menjadi manfaat non-kapitasi karena home visit butuh biaya operasional transport dan waktu khusus yang tidak tercover kapitasi standar.",
+    "Bisa dengan mekanisme fund channeling bekerja sama dengan pihak ketiga atau BOK (Bantuan Operasional Kesehatan) Puskesmas.",
+    "Sebaiknya dianggarkan khusus bagi pasien dengan keterbatasan mobilitas tinggi, sehingga beban faskes tidak terlalu berat."
+  ],
+  2: [
+    "Sangat setuju dijadikan manfaat non-kapitasi. Aktivitas edukasi, penyuluhan, dan senam rutin butuh alokasi dana khusus untuk honor instruktur dan konsumsi.",
+    "Saat ini sudah berjalan lewat Prolanis, namun perlu diperluas cakupan penyakitnya dengan pendanaan yang lebih fleksibel.",
+    "Dapat diintegrasikan dengan BOK Puskesmas sehingga tidak membebani pembiayaan JKN sepenuhnya."
+  ],
+  3: [
+    "Ya, sangat perlu dimasukkan agar pasien terminal mendapatkan perawatan berkesinambungan di komunitas tanpa bolak-balik RS.",
+    "Perlu, namun harus ada standar kompetensi yang jelas bagi nakes di FKTP untuk memberikan layanan paliatif.",
+    "Mungkin cukup untuk kasus tertentu saja dengan kriteria yang ketat agar tidak terjadi over-utilization."
+  ],
+  4: [
+    "Perlu penambahan kewenangan agar Sp.KKLP bisa meresepkan obat PRB tanpa harus konsul ulang ke RS setiap bulan.",
+    "Kewenangan Sp.KKLP dalam PRB sangat membantu, bisa mengurai antrean di RS dan mendekatkan akses obat ke pasien.",
+    "Cukup mengikuti regulasi PRB saat ini namun dengan perluasan jenis obat yang bisa diresepkan di FKTP."
+  ],
+  5: [
+    "Sangat terasa, penanganan pasien lebih komprehensif, rujukan ke RS menurun, dan kualitas edukasi meningkat.",
+    "Ada perubahan positif terutama dalam tata laksana kasus dengan komorbiditas yang sebelumnya selalu dirujuk.",
+    "Belum terlalu signifikan karena masih terkendala ketersediaan sarana dan prasarana penunjang medis di FKTP."
+  ],
+  6: [
+    "Sangat perlu, untuk menghargai kompetensi spesialis di layanan primer dan memotivasi lebih banyak dokter mengambil spesialisasi ini.",
+    "Perlu, namun insentif harus berbasis kinerja (outcome kesehatan pasien), bukan sekadar insentif statis.",
+    "Bisa disesuaikan dengan kemampuan daerah, namun JKN sebaiknya memberikan standar insentif minimal."
+  ]
+};
+
 export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const [step, setStep] = useState(1);
   const location = useLocation();
   const navigate = useNavigate();
   
-  const STEPS = [
+const STEPS = [
     { id: 1, title: 'Identitas' },
     { id: 2, title: 'Beban Kerja' },
     { id: 3, title: 'Manfaat JKN' },
     { id: 4, title: 'Layanan Ekstra' },
-    ...(isInterview ? [{ id: 5, title: 'Wawancara' }] : [])
+    { id: 5, title: 'Wawancara' }
   ];
 
-  const totalSteps = isInterview ? 5 : 4;
+  const totalSteps = 5;
 
   const { user } = useAuth();
   const [formData, setFormData] = useState({
@@ -176,13 +214,13 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
-  const submitData = async () => {
-    if (isInterview && !isStep5Valid) {
+  const submitData = async (isIntermediate = false) => {
+    if (isIntermediate && !isStep4Valid) {
       setShowErrors(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    if (!isInterview && !isStep4Valid) {
+    if (!isIntermediate && !isStep5Valid) {
       setShowErrors(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
@@ -205,11 +243,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
         kompetensi: formData.kompetensi,
         jkn: formData.jkn,
         non_optimal: formData.nonOptimal,
-        wawancara: isInterview && user ? { ...formData.wawancara, pewawancara: user.username } : formData.wawancara
+        wawancara: user ? { ...formData.wawancara, pewawancara: user.username } : formData.wawancara
       };
 
       let error;
-      if (isInterview && formData.id) {
+      if (formData.id) {
         // Update existing record
         const { error: updateError } = await supabase
           .from('surveys')
@@ -217,15 +255,25 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
           .eq('id', formData.id);
         error = updateError;
       } else {
-        // Insert new record
-        const { error: insertError } = await supabase
+        // Insert new record and select to get ID
+        const { data, error: insertError } = await supabase
           .from('surveys')
-          .insert([payload]);
+          .insert([payload])
+          .select();
         error = insertError;
+        if (data && data.length > 0) {
+          setFormData(prev => ({ ...prev, id: data[0].id }));
+        }
       }
 
       if (error) throw error;
-      setIsSubmitted(true);
+      
+      if (isIntermediate) {
+        setStep(5);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        setIsSubmitted(true);
+      }
       
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -712,19 +760,19 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
               </div>
             )}
 
-            {/* Step 5: Wawancara (HANYA TIM SURVEY) */}
-            {isInterview && step === 5 && (
+            {/* Step 5: Wawancara */}
+            {step === 5 && (
               <div className="space-y-8 animate-fade-in">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-emerald-600 rounded-full"></div>
-                  <h2 className="text-xl font-bold text-slate-800">E. Rekomendasi Pembiayaan dan Kebijakan (Khusus Tim Survey)</h2>
+                  <h2 className="text-xl font-bold text-slate-800">E. Isian Wawancara & Rekomendasi</h2>
                 </div>
                 
                 <div className="border border-emerald-100 bg-emerald-50/50 rounded-lg p-4 flex items-start space-x-3 mb-6">
                   <Info className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-emerald-900">
-                    <span className="font-semibold block mb-1">Panduan Pewawancara:</span>
-                    Silakan gali informasi dari responden berdasarkan pertanyaan berikut. Tuliskan ringkasan jawaban/alasan dengan jelas dan komprehensif. Semua kolom wajib diisi.
+                    <span className="font-semibold block mb-1">Panduan Pengisian:</span>
+                    Silakan jawab pertanyaan wawancara di bawah ini. Anda dapat menuliskan jawaban sendiri atau memilih salah satu <strong>Rekomendasi Jawaban</strong> yang telah kami siapkan dengan mengklik pilihannya.
                   </div>
                 </div>
 
@@ -738,10 +786,27 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         rows={4}
                         required
                         placeholder="Tuliskan jawaban/alasan di sini..."
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y ${showErrors && !formData.wawancara[idx]?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y mb-3 ${showErrors && !formData.wawancara[idx]?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`}
                         value={formData.wawancara[idx] || ''}
                         onChange={(e) => handleWawancaraChange(idx, e.target.value)}
                       ></textarea>
+                      
+                      <div className="mt-3">
+                        <p className="text-xs font-bold text-slate-500 mb-2 flex items-center">
+                          <CheckCircle className="w-3 h-3 mr-1" /> Rekomendasi Jawaban (Klik untuk memilih):
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          {interviewRecommendations[idx].map((rek, rIdx) => (
+                            <div 
+                              key={rIdx} 
+                              onClick={() => handleWawancaraChange(idx, rek)}
+                              className={`cursor-pointer p-3 rounded-lg border text-xs leading-relaxed transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${formData.wawancara[idx] === rek ? 'bg-emerald-50 border-emerald-400 text-emerald-800 shadow-sm ring-1 ring-emerald-400 font-medium' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-300 hover:bg-emerald-50/50'}`}
+                            >
+                              {rek}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -816,7 +881,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                 <ChevronLeft className="w-5 h-5 mr-1.5" /> Sebelumnya
               </button>
               
-              {step < totalSteps ? (
+              {step < 4 ? (
                 <button 
                   type="button" 
                   onClick={nextStep}
@@ -824,14 +889,24 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                 >
                   Selanjutnya <ChevronRight className="w-5 h-5 ml-1.5" />
                 </button>
+              ) : step === 4 ? (
+                <button 
+                  type="button" 
+                  onClick={() => submitData(true)}
+                  disabled={isSubmitting}
+                  className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 hover:-translate-y-0.5 hover:shadow-amber-500/40 active:scale-95'}`}
+                >
+                  {isSubmitting ? 'Menyimpan...' : 'Simpan & Lanjut Wawancara'}
+                  {!isSubmitting && <ChevronRight className="w-5 h-5 ml-2" />}
+                </button>
               ) : (
                 <button 
                   type="button" 
-                  onClick={submitData}
+                  onClick={() => submitData(false)}
                   disabled={isSubmitting}
-                  className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-primary-600 to-primary-800 hover:from-primary-500 hover:to-primary-700 hover:-translate-y-0.5 hover:shadow-primary-500/40 active:scale-95'}`}
+                  className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 hover:-translate-y-0.5 hover:shadow-emerald-500/40 active:scale-95'}`}
                 >
-                  {isSubmitting ? 'Memproses...' : 'Simpan Data'}
+                  {isSubmitting ? 'Memproses...' : 'Simpan Selesai'}
                   {!isSubmitting && <Save className="w-5 h-5 ml-2" />}
                 </button>
               )}
