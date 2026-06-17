@@ -306,9 +306,9 @@ const STEPS = [
         <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
           <Info className="w-12 h-12" />
         </div>
-        <h2 className="text-3xl font-bold text-slate-800 mb-4 tracking-tight">Sesi Pertanyaan Terbuka</h2>
+        <h2 className="text-3xl font-bold text-slate-800 mb-4 tracking-tight">Sesi Wawancara Mendalam</h2>
         <p className="text-slate-600 mb-8 text-lg leading-relaxed max-w-2xl mx-auto">
-          Selanjutnya adalah sesi pertanyaan terbuka (Wawancara). Silakan diisi dengan <strong>Benar</strong> dan <strong>sesuai dengan kondisi real di lapangan</strong>. Anda juga dapat memilih rekomendasi jawaban yang kami sediakan.
+          Selanjutnya adalah sesi pertanyaan terbuka. Silakan diisi dengan <strong>jujur</strong> dan <strong>sesuai kondisi nyata di lapangan</strong>. Kami menyediakan <strong>5 Jawaban Tersering Berdasarkan Survey Sebelumnya</strong> sebagai referensi — Anda bisa memilih salah satunya atau menulis jawaban sendiri.
         </p>
         <button 
           onClick={() => {
@@ -804,14 +804,14 @@ const STEPS = [
               <div className="space-y-8 animate-fade-in">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-emerald-600 rounded-full"></div>
-                  <h2 className="text-xl font-bold text-slate-800">E. Isian Wawancara & Rekomendasi</h2>
+                  <h2 className="text-xl font-bold text-slate-800">E. Wawancara Mendalam</h2>
                 </div>
                 
                 <div className="border border-emerald-100 bg-emerald-50/50 rounded-lg p-4 flex items-start space-x-3 mb-6">
                   <Info className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-emerald-900">
                     <span className="font-semibold block mb-1">Panduan Pengisian:</span>
-                    Silakan jawab pertanyaan wawancara di bawah ini. Anda dapat menuliskan jawaban sendiri atau memilih salah satu <strong>Rekomendasi Jawaban</strong> yang telah kami siapkan dengan mengklik pilihannya.
+                    Jawab setiap pertanyaan sesuai kondisi nyata di FKTP Anda. Tersedia <strong>5 Jawaban Tersering Berdasarkan Survey Sebelumnya</strong> — klik salah satu untuk menggunakannya, atau ketik jawaban Anda sendiri di kolom teks.
                   </div>
                 </div>
 
@@ -832,7 +832,7 @@ const STEPS = [
                       
                       <div className="mt-3">
                         <p className="text-xs font-bold text-slate-500 mb-2 flex items-center">
-                          <CheckCircle className="w-3 h-3 mr-1" /> Rekomendasi Jawaban (Klik untuk memilih):
+                          <CheckCircle className="w-3 h-3 mr-1" /> 5 Jawaban Tersering Berdasarkan Survey Sebelumnya (klik untuk memilih):
                         </p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           {interviewRecommendations[idx].map((rek, rIdx) => (
@@ -959,71 +959,100 @@ const STEPS = [
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-slide-up">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h2 className="text-xl font-bold text-slate-800">📖 Panduan Pengisian Survey & Makna Skala Likert</h2>
+              <h2 className="text-xl font-bold text-slate-800">📖 Panduan Pengisian Survey</h2>
               <button onClick={() => setShowPanduan(false)} className="text-slate-400 hover:text-red-500 transition-colors">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
             <div className="p-6 overflow-y-auto text-slate-700 space-y-6">
-              
+
+              {/* Alur Umum */}
+              <div className="bg-primary-50 border border-primary-100 rounded-xl p-4 text-sm text-primary-800">
+                <span className="font-bold block mb-1">ℹ️ Tentang Survey Ini</span>
+                Survey ini bertujuan mengidentifikasi layanan JKN yang sudah berjalan dan yang belum optimal di FKTP, serta menilai peran dokter Spesialis Kedokteran Keluarga Layanan Primer (Sp.KKLP) berdasarkan kondisi nyata di lapangan. Pengisian dilakukan secara mandiri oleh Anda selaku responden.
+              </div>
+
+              {/* Step 1 */}
               <section>
-                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">1. Tahap Persiapan</h3>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li>Pastikan Anda memilih <strong>Provinsi</strong> dan <strong>Nama Puskesmas</strong> dengan benar melalui menu pencarian (dropdown).</li>
-                  <li>Pilih <strong>Jabatan</strong> Anda saat ini, lalu isikan data <strong>Ketersediaan Dokter</strong> dan <strong>Estimasi Waktu Pelayanan</strong>.</li>
-                </ul>
-              </section>
-              
-              <section>
-                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">2. Tahap Pengisian Layanan JKN & Non-Optimal</h3>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li>Baca dengan cermat setiap jenis layanan yang ditampilkan.</li>
-                  <li>Pada bagian layanan yang belum optimal, Anda akan diminta untuk menentukan apakah layanan tersebut seharusnya <strong>Masuk JKN</strong> (Ya / Tidak / Tidak Tahu).</li>
-                  <li>Setelah itu, berikan <strong>Penilaian (Skala) 1 sampai 4</strong>.</li>
+                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">📍 Tahap 1 — Identitas</h3>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  <li>Pilih <strong>Provinsi</strong> terlebih dahulu, lalu pilih <strong>Nama FKTP/Puskesmas</strong> dari daftar yang tersedia.</li>
+                  <li>Pilih <strong>Jabatan</strong> Anda saat ini (Kepala Puskesmas, Dokter Umum, Dokter Sp.KKLP, dll.).</li>
+                  <li>Isikan jumlah <strong>Dokter Umum, Dokter Gigi, dan Dokter Sp.KKLP</strong> yang bertugas di FKTP Anda.</li>
                 </ul>
               </section>
 
+              {/* Step 2 */}
+              <section>
+                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">⏱️ Tahap 2 — Beban Kerja Dokter</h3>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  <li>Isikan estimasi <strong>waktu rata-rata konsultasi</strong> per pasien di poli (dalam menit).</li>
+                  <li>Isikan estimasi <strong>waktu rata-rata home visit</strong> per pasien (dalam menit).</li>
+                  <li>Isikan <strong>proporsi beban kerja</strong> dalam gedung dan luar gedung — totalnya harus <strong>100%</strong>.</li>
+                  <li>Jika Anda adalah Dokter Umum atau Sp.KKLP, nilai juga <strong>kompetensi layanan</strong> Sp.KKLP menggunakan skala 1–4.</li>
+                </ul>
+              </section>
+
+              {/* Skala */}
               <section className="bg-amber-50 p-5 rounded-xl border border-amber-200">
-                <h3 className="font-bold text-lg text-amber-800 mb-3">Panduan Penilaian Skala (1-4)</h3>
-                <p className="mb-4 text-amber-700 text-sm font-medium">Pilih nilai sesuai tingkat kebutuhan kompetensi Sp.KKLP pada layanan tersebut:</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <h3 className="font-bold text-lg text-amber-800 mb-3">📊 Panduan Penilaian Skala (1–4)</h3>
+                <p className="mb-4 text-amber-700 text-sm font-medium">Pilih nilai sesuai kebutuhan kompetensi Sp.KKLP pada layanan tersebut:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="bg-white p-4 rounded-lg border border-amber-100 shadow-sm flex items-start gap-4">
                     <div className="bg-red-100 text-red-700 w-10 h-10 flex items-center justify-center rounded-lg font-black text-xl shrink-0">1</div>
-                    <div>
-                      <h4 className="font-bold text-slate-800">Skala 1</h4>
-                      <p className="text-sm text-slate-600 mt-1">Dapat optimal dilakukan dokter umum</p>
-                    </div>
+                    <div><h4 className="font-bold text-slate-800">Skala 1</h4><p className="text-sm text-slate-600 mt-1">Dapat optimal dilakukan dokter umum</p></div>
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-amber-100 shadow-sm flex items-start gap-4">
                     <div className="bg-orange-100 text-orange-700 w-10 h-10 flex items-center justify-center rounded-lg font-black text-xl shrink-0">2</div>
-                    <div>
-                      <h4 className="font-bold text-slate-800">Skala 2</h4>
-                      <p className="text-sm text-slate-600 mt-1">Dokter umum perlu pelatihan tambahan</p>
-                    </div>
+                    <div><h4 className="font-bold text-slate-800">Skala 2</h4><p className="text-sm text-slate-600 mt-1">Dokter umum perlu pelatihan tambahan</p></div>
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-amber-100 shadow-sm flex items-start gap-4">
                     <div className="bg-blue-100 text-blue-700 w-10 h-10 flex items-center justify-center rounded-lg font-black text-xl shrink-0">3</div>
-                    <div>
-                      <h4 className="font-bold text-slate-800">Skala 3</h4>
-                      <p className="text-sm text-slate-600 mt-1">Lebih baik dengan supervisi/kolaborasi Sp.KKLP</p>
-                    </div>
+                    <div><h4 className="font-bold text-slate-800">Skala 3</h4><p className="text-sm text-slate-600 mt-1">Lebih baik dengan supervisi/kolaborasi Sp.KKLP</p></div>
                   </div>
                   <div className="bg-white p-4 rounded-lg border border-amber-100 shadow-sm flex items-start gap-4">
                     <div className="bg-emerald-100 text-emerald-700 w-10 h-10 flex items-center justify-center rounded-lg font-black text-xl shrink-0">4</div>
-                    <div>
-                      <h4 className="font-bold text-slate-800">Skala 4</h4>
-                      <p className="text-sm text-slate-600 mt-1">Kompetensi utama Sp.KKLP</p>
-                    </div>
+                    <div><h4 className="font-bold text-slate-800">Skala 4</h4><p className="text-sm text-slate-600 mt-1">Kompetensi utama Sp.KKLP</p></div>
                   </div>
                 </div>
               </section>
 
+              {/* Step 3 */}
               <section>
-                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">3. Penyelesaian & Pengiriman</h3>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li>Anda wajib mengisi semua isian termasuk yang mensyaratkan pemilihan "Ya", "Tidak", "Tidak Tahu" beserta skalanya.</li>
-                  <li>Setelah semua tahapan tercentang hijau (Selesai), tombol <strong>Kirim Survey</strong> akan menyala di akhir halaman.</li>
-                  <li>Pastikan Anda telah mengisi kotak <strong>Masukan dan Saran</strong> (jika ada) di kolom catatan.</li>
+                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">🏥 Tahap 3 — Manfaat JKN</h3>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  <li>Baca daftar layanan JKN yang ditampilkan dan berikan penilaian <strong>skala 1–4</strong> untuk setiap layanan.</li>
+                  <li>Nilai menggambarkan seberapa optimal layanan tersebut dilaksanakan dengan keterlibatan Sp.KKLP di FKTP Anda.</li>
+                </ul>
+              </section>
+
+              {/* Step 4 */}
+              <section>
+                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">🔧 Tahap 4 — Layanan Ekstra (Belum Optimal)</h3>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  <li>Untuk setiap layanan yang belum optimal, pilih apakah layanan ini sebaiknya <strong>Masuk JKN</strong> (Ya / Tidak / Tidak Tahu).</li>
+                  <li>Kemudian berikan penilaian <strong>skala 1–4</strong> sesuai kebutuhan kompetensi Sp.KKLP.</li>
+                </ul>
+              </section>
+
+              {/* Step 5 */}
+              <section>
+                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">💬 Tahap 5 — Wawancara Mendalam</h3>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  <li>Jawab <strong>7 pertanyaan terbuka</strong> sesuai kondisi nyata di FKTP Anda.</li>
+                  <li>Tersedia <strong>5 Jawaban Tersering Berdasarkan Survey Sebelumnya</strong> di bawah setiap pertanyaan — klik salah satu untuk menggunakannya sebagai referensi.</li>
+                  <li>Anda tetap bisa <strong>mengedit atau menulis jawaban sendiri</strong> di kolom teks yang tersedia.</li>
+                  <li>Semua pertanyaan wajib diisi sebelum dapat mengirimkan survey.</li>
+                </ul>
+              </section>
+
+              {/* Kirim */}
+              <section>
+                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">✅ Pengiriman Data</h3>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  <li>Pastikan semua tahap sudah terisi (ditandai ikon ✓ hijau di progress bar).</li>
+                  <li>Klik tombol <strong>"Kirim Survey"</strong> di akhir Tahap 5 untuk menyimpan data Anda.</li>
+                  <li>Data akan langsung tersimpan ke sistem dan tidak dapat diubah oleh responden setelah dikirim.</li>
                 </ul>
               </section>
 
