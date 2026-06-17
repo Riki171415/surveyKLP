@@ -111,6 +111,7 @@ const STEPS = [
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showTransition, setShowTransition] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPanduan, setShowPanduan] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
@@ -269,7 +270,7 @@ const STEPS = [
       if (error) throw error;
       
       if (isIntermediate) {
-        setStep(5);
+        setShowTransition(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         setIsSubmitted(true);
@@ -284,6 +285,30 @@ const STEPS = [
   };
 
 
+
+  if (showTransition) {
+    return (
+      <div className="max-w-3xl mx-auto p-12 bg-white/90 backdrop-blur-md rounded-3xl shadow-soft-lg border border-emerald-100 text-center animate-fade-in mt-10">
+        <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+          <Info className="w-12 h-12" />
+        </div>
+        <h2 className="text-3xl font-bold text-slate-800 mb-4 tracking-tight">Sesi Pertanyaan Terbuka</h2>
+        <p className="text-slate-600 mb-8 text-lg leading-relaxed max-w-2xl mx-auto">
+          Selanjutnya adalah sesi pertanyaan terbuka (Wawancara). Silakan diisi dengan <strong>Benar</strong> dan <strong>sesuai dengan kondisi real di lapangan</strong>. Anda juga dapat memilih rekomendasi jawaban yang kami sediakan.
+        </p>
+        <button 
+          onClick={() => {
+            setShowTransition(false);
+            setStep(5);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="bg-emerald-600 text-white px-8 py-3.5 rounded-xl font-bold text-lg hover:bg-emerald-700 transition-all shadow-lg hover:shadow-emerald-500/40 hover:-translate-y-1 active:scale-95"
+        >
+          Lanjutkan ke Wawancara
+        </button>
+      </div>
+    );
+  }
 
   if (isSubmitted) {
     return (
