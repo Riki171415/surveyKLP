@@ -4,11 +4,21 @@ import { Loader2, Search, Edit, Trash2, Eye, X } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from './AuthContext';
 
+const interviewQuestions = [
+  "Bagaimana pelaksanaan layanan penyakit kronik di FKTP saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya? (adakah aspek yang masih perlu diperkuat?)",
+  "Bagaimana pelaksanaan home visit dan home care saat ini, serta dukungan yang diperlukan untuk optimalisasi layanan tersebut?",
+  "Bagaimana implementasi komunitas dan edukasi kelompok saat ini? apakah perlu menjadi manfaat non-kapitasi JKN? Atau ada opsi fund channeling lain? (bisa berikan contoh aktivitasnya apa saja yang biasanya dilakukan saat implementasi komunitas dan edukasi kelompok)",
+  "Menurut anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN FKTP?",
+  "Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB dengan adanya sp.KKLP?",
+  "Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di FKTP?",
+  "Menurut Anda, bentuk dukungan apa yang diperlukan agar FKTP yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?"
+];
+
 export default function DataManagement() {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedData, setSelectedData] = useState(null); // Untuk modal detail
+  const [selectedData, setSelectedData] = useState(null);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -23,7 +33,6 @@ export default function DataManagement() {
         .from('surveys')
         .select('*')
         .order('created_at', { ascending: false });
-        
       if (error) throw error;
       setSurveys(data || []);
     } catch (error) {
@@ -47,7 +56,7 @@ export default function DataManagement() {
     }
   };
 
-  const filteredSurveys = surveys.filter(s => 
+  const filteredSurveys = surveys.filter(s =>
     (s.fktp_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (s.city || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -72,9 +81,9 @@ export default function DataManagement() {
         <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div className="relative w-full max-w-md">
             <Search className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-            <input 
-              type="text" 
-              placeholder="Cari nama FKTP atau Kabupaten..." 
+            <input
+              type="text"
+              placeholder="Cari nama FKTP atau Kabupaten..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm"
@@ -86,9 +95,7 @@ export default function DataManagement() {
         </div>
 
         {filteredSurveys.length === 0 ? (
-          <div className="p-10 text-center text-slate-500">
-            Tidak ada data yang ditemukan.
-          </div>
+          <div className="p-10 text-center text-slate-500">Tidak ada data yang ditemukan.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm whitespace-nowrap">
@@ -104,20 +111,20 @@ export default function DataManagement() {
               <tbody className="divide-y divide-slate-100">
                 {filteredSurveys.map((row) => (
                   <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 text-slate-500">{new Date(row.created_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit'})}</td>
+                    <td className="px-6 py-4 text-slate-500">{new Date(row.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
                     <td className="px-6 py-4 font-medium text-slate-900">{row.fktp_name}</td>
                     <td className="px-6 py-4 text-slate-600">{row.city}</td>
                     <td className="px-6 py-4 text-slate-600">{row.role}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <button 
+                        <button
                           onClick={() => setSelectedData(row)}
                           className="flex items-center justify-center p-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg transition-colors"
                           title="Lihat Detail"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => navigate('/wawancara/form', { state: { surveyData: row } })}
                           className="flex items-center justify-center p-2 bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-lg transition-colors"
                           title="Edit Data"
@@ -141,85 +148,136 @@ export default function DataManagement() {
         )}
       </div>
 
-      {/* Modal Detail */}
+      {/* ===== MODAL DETAIL ===== */}
       {selectedData && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50">
+
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50 flex-shrink-0">
               <div>
                 <h3 className="text-xl font-bold text-slate-800">Detail Isian Survey</h3>
-                <p className="text-sm text-slate-500 mt-1">{selectedData.fktp_name} - {selectedData.city}</p>
+                <p className="text-sm text-slate-500 mt-1">{selectedData.fktp_name} — {selectedData.city}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedData(null)}
                 className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
-            <div className="p-6 overflow-y-auto space-y-6">
-              {/* Identitas */}
+
+            {/* Body */}
+            <div className="p-6 overflow-y-auto space-y-7">
+
+              {/* A. Identitas */}
               <div>
-                <h4 className="font-bold text-slate-800 mb-3 border-b pb-2">A. Identitas</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-slate-500 block">Waktu Submit</span><span className="font-medium text-slate-900">{new Date(selectedData.created_at).toLocaleString('id-ID')}</span></div>
-                  <div><span className="text-slate-500 block">Provinsi/Kota</span><span className="font-medium text-slate-900">{selectedData.city}</span></div>
-                  <div><span className="text-slate-500 block">Nama FKTP</span><span className="font-medium text-slate-900">{selectedData.fktp_name}</span></div>
-                  <div><span className="text-slate-500 block">Jabatan Pengisi</span><span className="font-medium text-slate-900">{selectedData.role}</span></div>
-                  <div><span className="text-slate-500 block">Dokter Umum / Gigi / Sp.KKLP</span><span className="font-medium text-slate-900">{selectedData.doc_umum || 'Tidak Ada'} / {selectedData.doc_gigi || 'Tidak Ada'} / {selectedData.doc_kklp || 'Tidak Ada'}</span></div>
+                <h4 className="font-bold text-slate-800 mb-3 pb-2 border-b border-slate-200 text-sm uppercase tracking-wide text-slate-500">A. Identitas</h4>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                  <div><span className="text-slate-400 block text-xs mb-0.5">Waktu Submit</span><span className="font-medium text-slate-900">{new Date(selectedData.created_at).toLocaleString('id-ID')}</span></div>
+                  <div><span className="text-slate-400 block text-xs mb-0.5">Provinsi / Kota</span><span className="font-medium text-slate-900">{selectedData.city || '-'}</span></div>
+                  <div><span className="text-slate-400 block text-xs mb-0.5">Nama FKTP</span><span className="font-medium text-slate-900">{selectedData.fktp_name || '-'}</span></div>
+                  <div><span className="text-slate-400 block text-xs mb-0.5">Jabatan Pengisi</span><span className="font-medium text-slate-900">{selectedData.role || '-'}</span></div>
+                  <div><span className="text-slate-400 block text-xs mb-0.5">Dokter Umum</span><span className="font-medium text-slate-900">{selectedData.doc_umum ?? '-'}</span></div>
+                  <div><span className="text-slate-400 block text-xs mb-0.5">Dokter Gigi</span><span className="font-medium text-slate-900">{selectedData.doc_gigi ?? '-'}</span></div>
+                  <div><span className="text-slate-400 block text-xs mb-0.5">Dokter Sp.KKLP</span><span className="font-medium text-slate-900">{selectedData.doc_kklp ?? '-'}</span></div>
                 </div>
               </div>
 
-              {/* Beban Kerja */}
-              {(selectedData.time_in_poli || selectedData.time_home_visit) && (
+              {/* B. Beban Kerja */}
+              <div>
+                <h4 className="font-bold text-slate-800 mb-3 pb-2 border-b border-slate-200 text-sm uppercase tracking-wide text-slate-500">B. Beban Kerja Dokter</h4>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                  <div><span className="text-slate-400 block text-xs mb-0.5">Waktu Konsultasi Poli (mnt/pasien)</span><span className="font-medium text-slate-900">{selectedData.time_in_poli ?? '-'}</span></div>
+                  <div><span className="text-slate-400 block text-xs mb-0.5">Waktu Home Visit (mnt/pasien)</span><span className="font-medium text-slate-900">{selectedData.time_home_visit ?? '-'}</span></div>
+                  <div><span className="text-slate-400 block text-xs mb-0.5">Proporsi Dalam Gedung (%)</span><span className="font-medium text-slate-900">{selectedData.prop_in_fktp != null ? `${selectedData.prop_in_fktp}%` : '-'}</span></div>
+                  <div><span className="text-slate-400 block text-xs mb-0.5">Proporsi Luar Gedung (%)</span><span className="font-medium text-slate-900">{selectedData.prop_out_fktp != null ? `${selectedData.prop_out_fktp}%` : '-'}</span></div>
+                </div>
+              </div>
+
+              {/* C. Kompetensi Layanan */}
+              {selectedData.kompetensi && selectedData.kompetensi.length > 0 && (
                 <div>
-                  <h4 className="font-bold text-slate-800 mb-3 border-b pb-2">B. Beban Kerja Dokter</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div><span className="text-slate-500 block">Waktu Poli (mnt/pasien)</span><span className="font-medium text-slate-900">{selectedData.time_in_poli}</span></div>
-                    <div><span className="text-slate-500 block">Waktu Home Visit (mnt/pasien)</span><span className="font-medium text-slate-900">{selectedData.time_home_visit}</span></div>
-                    <div><span className="text-slate-500 block">Beban Dalam Gedung (%)</span><span className="font-medium text-slate-900">{selectedData.prop_in_fktp}%</span></div>
-                    <div><span className="text-slate-500 block">Beban Luar Gedung (%)</span><span className="font-medium text-slate-900">{selectedData.prop_out_fktp}%</span></div>
+                  <h4 className="font-bold text-slate-800 mb-3 pb-2 border-b border-slate-200 text-sm uppercase tracking-wide text-slate-500">C. Kompetensi Layanan Sp.KKLP</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedData.kompetensi.map((item, i) => (
+                      <span key={i} className="bg-violet-50 text-violet-800 border border-violet-200 text-xs font-medium px-3 py-1 rounded-full">{item}</span>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* Wawancara (Hanya jika ada) */}
-              {selectedData.wawancara && Object.keys(selectedData.wawancara).length > 0 && (
+              {/* D. Manfaat JKN */}
+              {selectedData.jkn && selectedData.jkn.length > 0 && (
                 <div>
-                  <h4 className="font-bold text-slate-800 mb-3 border-b pb-2">E. Hasil Wawancara Tim Survey</h4>
+                  <h4 className="font-bold text-slate-800 mb-3 pb-2 border-b border-slate-200 text-sm uppercase tracking-wide text-slate-500">D. Layanan JKN yang Sudah Berjalan</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedData.jkn.map((item, i) => (
+                      <span key={i} className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-medium px-3 py-1 rounded-full">{item}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* E. Layanan Non-Optimal */}
+              {selectedData.non_optimal && selectedData.non_optimal.length > 0 && (
+                <div>
+                  <h4 className="font-bold text-slate-800 mb-3 pb-2 border-b border-slate-200 text-sm uppercase tracking-wide text-slate-500">E. Layanan Belum Optimal / Belum Tersedia</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedData.non_optimal.map((item, i) => (
+                      <span key={i} className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-medium px-3 py-1 rounded-full">{item}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* F. Hasil Wawancara */}
+              {selectedData.wawancara && Object.keys(selectedData.wawancara).some(k => k !== 'pewawancara') && (
+                <div>
+                  <h4 className="font-bold text-slate-800 mb-3 pb-2 border-b border-slate-200 text-sm uppercase tracking-wide text-slate-500">F. Hasil Wawancara Tim Survey</h4>
                   {selectedData.wawancara.pewawancara && (
-                    <div className="mb-4 text-sm text-slate-700 bg-emerald-50 border border-emerald-100 p-3 rounded-lg flex items-center">
-                      <span className="font-semibold text-emerald-800 mr-2">Diwawancarai oleh:</span> 
-                      <span className="capitalize">{selectedData.wawancara.pewawancara}</span>
+                    <div className="mb-4 text-sm bg-emerald-50 border border-emerald-100 p-3 rounded-lg flex items-center gap-2">
+                      <span className="font-semibold text-emerald-800">Diwawancarai oleh:</span>
+                      <span className="text-emerald-700 capitalize">{selectedData.wawancara.pewawancara}</span>
                     </div>
                   )}
-                  <div className="space-y-4 text-sm">
-                    {Object.entries(selectedData.wawancara).map(([idx, jawaban]) => {
-                      if (idx === 'pewawancara') return null;
+                  <div className="space-y-4">
+                    {interviewQuestions.map((question, idx) => {
+                      const jawaban = selectedData.wawancara[idx];
                       return (
-                      <div key={idx} className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                        <p className="font-semibold text-slate-700 mb-1">Pertanyaan {parseInt(idx) + 1}</p>
-                        <p className="text-slate-600 whitespace-pre-wrap">{jawaban}</p>
-                      </div>
-                    )})}
+                        <div key={idx} className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-sm">
+                          <p className="font-semibold text-slate-700 mb-2">
+                            <span className="inline-flex items-center justify-center w-5 h-5 bg-blue-600 text-white text-xs rounded-full mr-2 flex-shrink-0">{idx + 1}</span>
+                            {question}
+                          </p>
+                          <p className="text-slate-600 whitespace-pre-wrap leading-relaxed pl-7">
+                            {jawaban || <span className="text-slate-400 italic">Belum diisi</span>}
+                          </p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
-              <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm border border-blue-100">
-                <p><strong>Info:</strong> Untuk melihat detail seluruh data Kompetensi, Layanan JKN, dan Non-Optimal, silakan gunakan tombol <strong>"Edit Data"</strong> atau <strong>"Export Excel"</strong> di Dashboard.</p>
-              </div>
             </div>
-            
-            <div className="p-4 border-t border-slate-100 bg-slate-50 text-right">
-              <button 
+
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex-shrink-0 flex justify-end gap-3">
+              <button
+                onClick={() => navigate('/wawancara/form', { state: { surveyData: selectedData } })}
+                className="px-5 py-2 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors text-sm"
+              >
+                Edit Data
+              </button>
+              <button
                 onClick={() => setSelectedData(null)}
-                className="px-5 py-2 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition-colors"
+                className="px-5 py-2 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition-colors text-sm"
               >
                 Tutup
               </button>
             </div>
+
           </div>
         </div>
       )}
