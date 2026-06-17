@@ -39,50 +39,64 @@ const kompetensiLayanan = [
 ];
 
 const interviewQuestions = [
-  "1. Bagaimana pendapat anda terkait layanan penyakit kronik? (probing terkait apakah perlu mendapatkan kapitasi berbasis kinerja untuk kompetensi Sp.KKLP)",
-  "2. Bagaimana implementasi home visit dan home care saat ini? apakah perlu menjadi manfaat non-kapitasi JKN? Atau ada opsi fund channeling lain?",
-  "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini? apakah perlu menjadi manfaat non-kapitasi JKN? Atau ada opsi fund channeling lain? (probing: isi aktivitasnya apa saja)",
+  "1. Bagaimana pelaksanaan layanan penyakit kronik di FKTP saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya? (adakah aspek yang masih perlu diperkuat?)",
+  "2. Bagaimana pelaksanaan home visit dan home care saat ini, serta dukungan yang diperlukan untuk optimalisasi layanan tersebut?",
+  "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini? apakah perlu menjadi manfaat non-kapitasi JKN? Atau ada opsi fund channeling lain? (bisa berikan contoh aktivitasnya apa saja yang biasanya dilakukan saat implementasi komunitas dan edukasi kelompok)",
   "4. Menurut anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN FKTP?",
   "5. Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB dengan adanya sp.KKLP?",
-  "6. Menurut anda apakah ada perubahan yang dirasakan oleh faskes dengan adanya Sp.KKLP?",
-  "7. Menurut anda apakah FKTP dengan dokter Sp.KKLP perlu mendapatkan insentif tambahan? Jelaskan alasannya"
+  "6. Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di FKTP?",
+  "7. Menurut Anda, bentuk dukungan apa yang diperlukan agar FKTP yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?"
 ];
 
 const interviewRecommendations = {
   0: [
-    "Sangat perlu, karena penanganan pasien kronik butuh waktu dan pemantauan jangka panjang. Kapitasi kinerja untuk Sp.KKLP akan memotivasi peningkatan mutu layanan.",
-    "Perlu, namun dengan target indikator mutu yang jelas agar Sp.KKLP dapat fokus pada tata laksana komprehensif tanpa membebani keuangan JKN berlebih.",
-    "Cukup dengan kapitasi yang ada, namun perlu ada insentif khusus di luar kapitasi (non-kapitasi) untuk layanan spesifik penyakit kronik."
+    "Layanan penyakit kronik seperti DM dan hipertensi sudah berjalan baik melalui Prolanis. Idealnya Sp.KKLP difokuskan pada pasien dengan kompleksitas lebih tinggi, bukan alur yang sama dengan dokter umum. Perlu ada kompensasi tambahan (non-kapitasi atau jaspel) mengingat kompleksitas layanan yang diberikan.",
+    "Saat ini layanan kronik dilakukan oleh semua dokter yang shift, tidak dikhususkan ke Sp.KKLP. Untuk kapitasi berbasis kinerja perlu indikator yang jelas dan adil agar tidak menimbulkan ketidakmerataan di antara tenaga kesehatan lain yang juga berkontribusi.",
+    "Sp.KKLP idealnya berperan sebagai konsultan internal untuk pasien kronik dengan multimorbiditas dan faktor psikososial kompleks. Pendekatan holistik dan family-oriented yang dimiliki Sp.KKLP sangat mendukung pengelolaan kronik. Pembiayaan sebaiknya melalui skema non-kapitasi yang mencerminkan kompleksitas layanan.",
+    "Pelayanan penyakit kronik sudah cukup tertangani, namun Sp.KKLP dapat memperkuat aspek pemantauan jangka panjang dan edukasi pasien-keluarga. Kapitasi berbasis kinerja (KBK) perlu dipertimbangkan apabila indikator kinerja dirancang secara jelas dan terukur.",
+    "Belum ada pembedaan peran Sp.KKLP dalam layanan kronik. Semua dokter menangani pasien secara bergilir. Perlu ada kejelasan alur dan kewenangan Sp.KKLP agar kompetensinya dapat dimanfaatkan secara optimal untuk pasien kronik yang membutuhkan penanganan komprehensif."
   ],
   1: [
-    "Perlu menjadi manfaat non-kapitasi karena home visit butuh biaya operasional transport dan waktu khusus yang tidak tercover kapitasi standar.",
-    "Bisa dengan mekanisme fund channeling bekerja sama dengan pihak ketiga atau BOK (Bantuan Operasional Kesehatan) Puskesmas.",
-    "Sebaiknya dianggarkan khusus bagi pasien dengan keterbatasan mobilitas tinggi, sehingga beban faskes tidak terlalu berat."
+    "Home visit sudah dilaksanakan namun masih terbatas dan belum optimal. Perlu menjadi manfaat non-kapitasi karena membutuhkan biaya operasional transportasi dan waktu khusus yang tidak tercakup dalam kapitasi standar. BOK Puskesmas dapat menjadi salah satu sumber pembiayaan alternatif.",
+    "Pelaksanaan home visit belum berjalan optimal karena keterbatasan tenaga dan waktu. Sp.KKLP berpotensi memperkuat layanan home care terutama untuk pasien dengan keterbatasan mobilitas (lansia, pasca stroke, dll). Perlu dukungan pembiayaan khusus dan regulasi yang mendukung.",
+    "Home visit sudah ada dalam program Puskesmas namun frekuensinya terbatas. Agar dapat dioptimalkan, perlu ada mekanisme pembiayaan yang jelas, baik melalui non-kapitasi JKN maupun fund channeling melalui BOK atau Dana Desa untuk kunjungan ke pasien yang tidak mampu datang ke faskes.",
+    "Saat ini home care masih dilakukan secara terbatas dan umumnya oleh perawat atau bidan, bukan dokter. Keterlibatan Sp.KKLP dalam home care klinis dapat meningkatkan kualitas layanan. Diperlukan regulasi dan tarif non-kapitasi yang mendukung keterlibatan dokter dalam home visit.",
+    "Home visit dan home care sudah berjalan namun belum ada standar yang jelas. Untuk optimalisasi diperlukan dukungan berupa: penetapan target kunjungan, pembiayaan yang memadai (non-kapitasi), ketersediaan alat medis portabel, dan regulasi yang mengatur kewenangan Sp.KKLP dalam layanan di rumah."
   ],
   2: [
-    "Sangat setuju dijadikan manfaat non-kapitasi. Aktivitas edukasi, penyuluhan, dan senam rutin butuh alokasi dana khusus untuk honor instruktur dan konsumsi.",
-    "Saat ini sudah berjalan lewat Prolanis, namun perlu diperluas cakupan penyakitnya dengan pendanaan yang lebih fleksibel.",
-    "Dapat diintegrasikan dengan BOK Puskesmas sehingga tidak membebani pembiayaan JKN sepenuhnya."
+    "Edukasi kelompok sudah berjalan melalui Prolanis (senam, penyuluhan, pemeriksaan berkala) namun cakupannya perlu diperluas. Aktivitasnya meliputi senam kronik, edukasi gizi, pemeriksaan lab rutin, dan konsultasi kelompok. Perlu dijadikan manfaat non-kapitasi agar ada alokasi dana yang jelas.",
+    "Kegiatan komunitas dan edukasi kelompok sudah dilaksanakan (Posbindu, Posyandu Lansia, Prolanis) namun masih terbatas anggaran. Sebaiknya diintegrasikan dengan BOK Puskesmas atau fund channeling Dana Desa agar tidak membebani JKN sepenuhnya, namun tetap ada standar layanan yang harus dipenuhi.",
+    "Implementasi komunitas sudah ada namun belum optimal. Contoh aktivitas: penyuluhan kesehatan, senam bersama, kelas DM/HT, kunjungan rumah kelompok risiko tinggi. Perlu pembiayaan non-kapitasi agar kegiatan ini dapat dilaksanakan secara rutin dengan cakupan yang lebih luas.",
+    "Edukasi kelompok masih sangat terbatas karena tidak ada anggaran khusus. Saat ini mengandalkan BOK yang sering tidak mencukupi. Perlu ada manfaat non-kapitasi JKN untuk kegiatan komunitas agar faskes termotivasi melaksanakan promosi kesehatan dan pencegahan penyakit secara terstruktur.",
+    "Kegiatan komunitas berjalan namun belum melibatkan Sp.KKLP secara optimal. Sp.KKLP berpotensi memimpin edukasi kelompok kronik karena kompetensi holistiknya. Usulan: jadikan edukasi kelompok sebagai manfaat non-kapitasi dengan tarif yang mencakup honor fasilitator, materi, dan operasional kegiatan."
   ],
   3: [
-    "Ya, sangat perlu dimasukkan agar pasien terminal mendapatkan perawatan berkesinambungan di komunitas tanpa bolak-balik RS.",
-    "Perlu, namun harus ada standar kompetensi yang jelas bagi nakes di FKTP untuk memberikan layanan paliatif.",
-    "Mungkin cukup untuk kasus tertentu saja dengan kriteria yang ketat agar tidak terjadi over-utilization."
+    "Ya, sangat perlu dimasukkan ke manfaat JKN FKTP. Kebutuhan layanan paliatif di komunitas cukup besar, terutama untuk lansia dan pasien terminal. Tanpa manfaat JKN, layanan ini tidak akan berjalan karena tidak ada pembiayaan yang mendukung.",
+    "Perlu dimasukkan ke manfaat JKN, namun harus disertai standar kompetensi yang jelas bagi nakes di FKTP. Sp.KKLP memiliki kompetensi yang relevan untuk layanan paliatif primer. Perlu ada pelatihan dan sertifikasi khusus agar layanan paliatif di FKTP dapat dilaksanakan dengan baik.",
+    "Layanan paliatif primer perlu menjadi manfaat JKN FKTP mengingat semakin meningkatnya kebutuhan masyarakat. Fokus pada manajemen nyeri, pendampingan keluarga, dan perawatan akhir hayat di rumah. Ini sejalan dengan pendekatan family medicine yang menjadi keunggulan Sp.KKLP.",
+    "Perlu, namun dengan kriteria yang ketat dan bertahap. Tidak semua FKTP siap memberikan layanan paliatif. Perlu dimulai dengan FKTP yang memiliki Sp.KKLP dan infrastruktur yang memadai, dengan pembiayaan melalui tarif non-kapitasi yang mencerminkan beban kerja pelayanan paliatif.",
+    "Layanan paliatif di FKTP sangat dibutuhkan terutama untuk pasien long-term care seperti lansia, penyintas stroke, dan pasien kanker stadium lanjut. Memasukkannya ke manfaat JKN akan memastikan keberlangsungan layanan. Sp.KKLP dapat menjadi koordinator layanan paliatif berbasis keluarga di tingkat primer."
   ],
   4: [
-    "Perlu penambahan kewenangan agar Sp.KKLP bisa meresepkan obat PRB tanpa harus konsul ulang ke RS setiap bulan.",
-    "Kewenangan Sp.KKLP dalam PRB sangat membantu, bisa mengurai antrean di RS dan mendekatkan akses obat ke pasien.",
-    "Cukup mengikuti regulasi PRB saat ini namun dengan perluasan jenis obat yang bisa diresepkan di FKTP."
+    "Saat ini keterlibatan Sp.KKLP dalam PRB masih sangat terbatas atau tidak ada pembedaan peran. Semua dokter yang shift menangani pasien PRB. Perlu ada regulasi yang memperjelas peran Sp.KKLP dalam PRB agar kompetensinya dapat dimanfaatkan secara optimal untuk monitoring dan pengelolaan pasien PRB.",
+    "Sp.KKLP berpotensi menjadi penanggung jawab utama pasien PRB karena pendekatan holistik dan family-orientednya. Perlu penambahan kewenangan agar Sp.KKLP bisa meresepkan obat PRB secara mandiri tanpa konsultasi ulang ke RS, sehingga memudahkan akses pasien dan mengurangi beban RS.",
+    "Perluasan peran Sp.KKLP dalam PRB sangat diharapkan, terutama untuk monitoring pasien kronik secara komprehensif. Usulan: Sp.KKLP diberikan kewenangan untuk penyesuaian dosis obat PRB berdasarkan kondisi klinis pasien, dengan tetap berkoordinasi dengan dokter spesialis di RS jika diperlukan.",
+    "PRB saat ini masih dikelola oleh dokter yang bertugas tanpa pembedaan dengan Sp.KKLP. Untuk mengoptimalkan peran Sp.KKLP, perlu ada SK atau regulasi yang memberikan kewenangan khusus dalam PRB, disertai dengan standar pemantauan yang jelas dan mekanisme koordinasi dengan FKRTL.",
+    "Keterlibatan Sp.KKLP dalam PRB dapat menjadi jembatan yang efektif antara FKRTL dan FKTP. Sp.KKLP dapat berperan dalam skrining kelayakan PRB, pemantauan perkembangan pasien, dan koordinasi rujukan balik. Perlu penguatan regulasi dan penambahan jenis obat yang dapat diresepkan di FKTP."
   ],
   5: [
-    "Sangat terasa, penanganan pasien lebih komprehensif, rujukan ke RS menurun, dan kualitas edukasi meningkat.",
-    "Ada perubahan positif terutama dalam tata laksana kasus dengan komorbiditas yang sebelumnya selalu dirujuk.",
-    "Belum terlalu signifikan karena masih terkendala ketersediaan sarana dan prasarana penunjang medis di FKTP."
+    "Belum ada perubahan yang signifikan karena Sp.KKLP belum menjalankan peran sesuai kompetensinya. Sering kali Sp.KKLP menjalankan tugas yang sama dengan dokter umum. Untuk merasakan manfaatnya, perlu ada kejelasan alur layanan dan kewenangan yang membedakan peran Sp.KKLP dari dokter umum.",
+    "Ada perubahan positif meskipun belum optimal. Penanganan pasien kronik dengan multimorbiditas lebih terarah, dan ada upaya untuk meminimalisir rujukan yang tidak perlu. Kendala utama adalah Sp.KKLP merangkap jabatan (misal sebagai Kepala Puskesmas) sehingga waktu untuk layanan klinis terbatas.",
+    "Perubahan mulai dirasakan terutama dalam pengelolaan kasus kompleks dan pendekatan keluarga. Namun masih terkendala ketiadaan SK resmi, infrastruktur yang belum mendukung, dan sistem kompensasi yang belum membedakan Sp.KKLP dari dokter umum. Perlu pengakuan formal agar perubahan lebih optimal.",
+    "Belum ada perubahan karena Sp.KKLP baru hadir dan belum sepenuhnya aktif. Potensinya sangat besar untuk meningkatkan kualitas layanan, khususnya dalam pendekatan holistik dan manajemen pasien kronik. Diperlukan waktu, dukungan sistem, dan kejelasan regulasi agar dampaknya dapat dirasakan.",
+    "Terdapat peningkatan kapasitas faskes dalam menangani kasus yang sebelumnya dirujuk ke RS. Adanya Sp.KKLP meningkatkan kepercayaan diri tim dalam menangani kasus kompleks. Namun perlu ada mekanisme insentif dan pengakuan karier yang jelas agar Sp.KKLP termotivasi untuk terus mengembangkan layanan."
   ],
   6: [
-    "Sangat perlu, untuk menghargai kompetensi spesialis di layanan primer dan memotivasi lebih banyak dokter mengambil spesialisasi ini.",
-    "Perlu, namun insentif harus berbasis kinerja (outcome kesehatan pasien), bukan sekadar insentif statis.",
-    "Bisa disesuaikan dengan kemampuan daerah, namun JKN sebaiknya memberikan standar insentif minimal."
+    "Perlu ada insentif tambahan karena kompetensi Sp.KKLP lebih tinggi dari dokter umum. Namun insentif sebaiknya tidak hanya untuk Sp.KKLP, tetapi juga untuk tim nakes yang mendukung layanannya. Insentif dapat berupa tambahan jaspel atau perbedaan tarif layanan yang mencerminkan kompetensi.",
+    "Insentif tambahan perlu diberikan apabila Sp.KKLP menjalankan peran dan tanggung jawab yang lebih besar. Saat ini jika tugas dan beban kerjanya sama dengan dokter umum, pemberian insentif khusus tidak akan adil bagi tenaga kesehatan lain. Perlu ada kejelasan peran sebagai dasar pemberian insentif.",
+    "Perlu ada insentif berbasis kewenangan dan tanggung jawab. Usulan konkret: perbedaan tarif jaspel antara Sp.KKLP dan dokter umum (misal 50:25 dari kapitasi), atau tarif non-kapitasi untuk layanan spesifik yang hanya Sp.KKLP yang bisa lakukan. Ini penting untuk memotivasi dokter mengambil spesialisasi ini.",
+    "Insentif diperlukan sebagai bentuk penghargaan atas kompetensi dan peran yang lebih besar dalam memperkuat layanan primer. Tanpa insentif yang memadai, sulit menarik dokter untuk menekuni Sp.KKLP. Mekanisme insentif bisa melalui jenjang karier ASN, pembedaan jaspel, atau skema pembiayaan layanan spesifik.",
+    "Dukungan yang diperlukan tidak hanya berupa insentif finansial, tetapi juga pengakuan dalam jenjang karier, kejelasan regulasi kewenangan, infrastruktur yang memadai, dan sistem informasi yang mendukung. Insentif harus dikaitkan dengan kejelasan peran dan kontribusi nyata Sp.KKLP dalam meningkatkan mutu layanan FKTP."
   ]
 };
 
