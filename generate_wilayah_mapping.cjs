@@ -1,78 +1,153 @@
-// generate_wilayah_mapping.cjs
-// Generates a 3-level mapping: Provinsi -> Kab/Kota -> Puskesmas
-// from wilayah_administratif.csv and data puskesmas.csv
-
 const fs = require('fs');
 const path = require('path');
 
-function parseCSV(filePath) {
-  const content = fs.readFileSync(filePath, 'utf8');
-  const lines = content.split('\n').filter(l => l.trim());
-  const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
-  const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    const parts = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
-    if (parts.length < headers.length) continue;
-    const row = {};
-    headers.forEach((h, idx) => { row[h] = parts[idx] === 'NULL' ? null : parts[idx]; });
-    rows.push(row);
+// Read wilayah_administratif.csv first to get all Provinces and Kabupaten/Kota
+const csvPath = path.join(__dirname, 'wilayah_administratif.csv');
+const csvContent = fs.readFileSync(csvPath, 'utf8');
+
+const provinsiSet = new Set();
+
+// Parse CSV simple parser
+const lines = csvContent.split(/\r?\n/);
+// Skip header
+for (let i = 1; i < lines.length; i++) {
+  const line = lines[i].trim();
+  if (!line) continue;
+  
+  const parts = line.split(',').map(p => p.replace(/"/g, '').trim());
+  if (parts.length < 4) continue;
+  
+  const kProv = parts[0];
+  const kKab = parts[1];
+  const kKec = parts[2];
+  const nama = parts[3];
+  
+  const isProv = (!kKab || kKab === 'NULL') && (!kKec || kKec === 'NULL');
+  if (isProv) {
+    provinsiSet.add(nama);
   }
-  return rows;
 }
 
-const wilayahRaw = parseCSV(path.join(__dirname, 'wilayah_administratif.csv'));
-const puskesmasRaw = parseCSV(path.join(__dirname, 'data puskesmas.csv'));
+// Re-read to map Kab to Prov
+const provNamesByCode = {};
+for (let i = 1; i < lines.length; i++) {
+  const line = lines[i].trim();
+  if (!line) continue;
+  const parts = line.split(',').map(p => p.replace(/"/g, '').trim());
+  if (parts.length < 4) continue;
+  const kProv = parts[0];
+  const kKab = parts[1];
+  const kKec = parts[2];
+  const nama = parts[3];
+  
+  const isProv = (!kKab || kKab === 'NULL') && (!kKec || kKec === 'NULL');
+  if (isProv) {
+    provNamesByCode[kProv] = nama.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ').replace('Dki', 'DKI').replace('Diy', 'DIY').replace('Daerah Istimewa Yogyakarta', 'DI Yogyakarta');
+  }
+}
 
-// Build lookup: kode_kab -> nama_kab
-const kabLookup = {};
-// Build lookup: kode_prov -> nama_prov
-const provLookup = {};
-// Build lookup: kode_kab -> kode_prov
-const kabToProvLookup = {};
+// Format Provinsi and Kab Names nicely
+const getTitleCase = (str) => {
+  return str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+    .replace('Dki', 'DKI')
+    .replace('Diy', 'DIY')
+    .replace('Daerah Istimewa Yogyakarta', 'DI Yogyakarta');
+};
 
-wilayahRaw.forEach(row => {
-  if (!row.kode_kab && !row.kode_kec) {
-    // Provinsi row
-    provLookup[row.kode_prov] = row.nama_wilayah;
-  } else if (row.kode_kab && !row.kode_kec) {
-    // Kab/Kota row
-    kabLookup[row.kode_kab] = row.nama_wilayah;
-    kabToProvLookup[row.kode_kab] = row.kode_prov;
+const mapping = {};
+
+// Pre-fill mapping with provinces and kab/kota from CSV
+for (let i = 1; i < lines.length; i++) {
+  const line = lines[i].trim();
+  if (!line) continue;
+  const parts = line.split(',').map(p => p.replace(/"/g, '').trim());
+  if (parts.length < 4) continue;
+  const kProv = parts[0];
+  const kKab = parts[1];
+  const kKec = parts[2];
+  const nama = parts[3];
+  
+  const isKab = (kKab && kKab !== 'NULL') && (!kKec || kKec === 'NULL');
+  if (isKab) {
+    const provName = provNamesByCode[kProv];
+    if (provName) {
+      if (!mapping[provName]) {
+        mapping[provName] = {};
+      }
+      const kabName = getTitleCase(nama);
+      if (!mapping[provName][kabName]) {
+        mapping[provName][kabName] = [];
+      }
+    }
+  }
+}
+
+// Read parsed pdf data
+const parsedPdfPath = path.join(__dirname, 'pdf_parsed_puskesmas_full.json');
+const pdfPuskesmas = JSON.parse(fs.readFileSync(parsedPdfPath, 'utf8'));
+
+// Helper to normalize strings for robust mapping comparison
+const normalizeStr = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+// Map puskesmas from PDF into our mapping structure
+let mappedCount = 0;
+let unmatchedCount = 0;
+
+pdfPuskesmas.forEach(p => {
+  const pProv = p.provinsi;
+  const pKab = p.kab_kota;
+  const pNama = p.nama;
+  
+  // Find matching province in mapping keys (case-insensitive & relaxed)
+  let matchedProv = Object.keys(mapping).find(provKey => normalizeStr(provKey) === normalizeStr(pProv));
+  if (!matchedProv) {
+    // If not found, use the exact Title Case form
+    matchedProv = getTitleCase(pProv);
+    if (!mapping[matchedProv]) {
+      mapping[matchedProv] = {};
+    }
+  }
+  
+  // Find matching kab_kota inside the matched province
+  let matchedKab = Object.keys(mapping[matchedProv]).find(kabKey => normalizeStr(kabKey) === normalizeStr(pKab));
+  if (!matchedKab) {
+    matchedKab = getTitleCase(pKab);
+    if (!mapping[matchedProv][matchedKab]) {
+      mapping[matchedProv][matchedKab] = [];
+    }
+    unmatchedCount++;
+  } else {
+    mappedCount++;
+  }
+  
+  // Add puskesmas to list
+  if (!mapping[matchedProv][matchedKab].includes(pNama)) {
+    mapping[matchedProv][matchedKab].push(pNama);
   }
 });
 
-// Build 3-level mapping
-// Structure: { [provName]: { [kabName]: [puskesmasList] } }
-const wilayahMapping = {};
+console.log(`Puskesmas mapped to existing Kab/Kota: ${mappedCount}`);
+console.log(`Puskesmas created new Kab/Kota: ${unmatchedCount}`);
 
-puskesmasRaw.forEach(row => {
-  const kodeKab = row.kode_kab;
-  const namaPusk = row.unit_kerja;
-  const namaKab = kabLookup[kodeKab];
-  const kodeProv = kabToProvLookup[kodeKab];
-  const namaProv = provLookup[kodeProv];
-
-  if (!namaProv || !namaKab || !namaPusk) {
-    console.warn(`Skip: kode_kab=${kodeKab}, kode_prov=${kodeProv} => prov=${namaProv}, kab=${namaKab}`);
-    return;
-  }
-
-  if (!wilayahMapping[namaProv]) wilayahMapping[namaProv] = {};
-  if (!wilayahMapping[namaProv][namaKab]) wilayahMapping[namaProv][namaKab] = [];
-  wilayahMapping[namaProv][namaKab].push(namaPusk);
-});
-
-// Sort everything
-const sortedMapping = {};
-Object.keys(wilayahMapping).sort().forEach(prov => {
-  sortedMapping[prov] = {};
-  Object.keys(wilayahMapping[prov]).sort().forEach(kab => {
-    sortedMapping[prov][kab] = wilayahMapping[prov][kab].sort();
+// Sort all arrays alphabetically
+Object.keys(mapping).forEach(prov => {
+  // Sort kab_kota keys
+  const sortedKab = {};
+  Object.keys(mapping[prov]).sort().forEach(kab => {
+    // Sort puskesmas list
+    sortedKab[kab] = mapping[prov][kab].sort();
   });
+  mapping[prov] = sortedKab;
+});
+
+// Sort provinces keys
+const sortedMapping = {};
+Object.keys(mapping).sort().forEach(prov => {
+  sortedMapping[prov] = mapping[prov];
 });
 
 const outPath = path.join(__dirname, 'src', 'data', 'wilayahMapping.json');
-fs.writeFileSync(outPath, JSON.stringify(sortedMapping, null, 2));
+fs.writeFileSync(outPath, JSON.stringify(sortedMapping, null, 2), 'utf8');
 
 // Stats
 const totalProv = Object.keys(sortedMapping).length;
@@ -80,8 +155,9 @@ const totalKab = Object.values(sortedMapping).reduce((a, v) => a + Object.keys(v
 const totalPusk = Object.values(sortedMapping).reduce((a, v) => 
   a + Object.values(v).reduce((b, arr) => b + arr.length, 0), 0);
 
-console.log(`✅ Berhasil generate wilayahMapping.json`);
+console.log(`\n✅ Berhasil generate wilayahMapping.json`);
 console.log(`   Provinsi : ${totalProv}`);
 console.log(`   Kab/Kota : ${totalKab}`);
 console.log(`   Puskesmas: ${totalPusk}`);
 console.log(`   Output   : ${outPath}`);
+
