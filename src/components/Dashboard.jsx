@@ -111,7 +111,7 @@ export default function Dashboard() {
   };
 
   const uniqueProvinsi = useMemo(() => {
-    const provs = new Set(data.map(d => d.city).filter(Boolean));
+    const provs = new Set(data.map(d => d.provinsi || d.city).filter(Boolean));
     return ['Semua', ...Array.from(provs).sort()];
   }, [data]);
   
@@ -122,7 +122,7 @@ export default function Dashboard() {
 
   const filteredData = useMemo(() => {
     return data.filter(item => {
-      const matchProv = filterProvinsi === 'Semua' || item.city === filterProvinsi;
+      const matchProv = filterProvinsi === 'Semua' || (item.provinsi || item.city) === filterProvinsi;
       const matchRole = filterRole === 'Semua' || item.role === filterRole;
       const matchKklp = filterKklp === 'Semua' || (filterKklp === 'Ada' ? item.doc_kklp : !item.doc_kklp);
       return matchProv && matchRole && matchKklp;
@@ -134,7 +134,7 @@ export default function Dashboard() {
   // EXCEL EXPORT (Omitted details for brevity, keep unchanged)
   const exportToExcel = () => {
     const headers = [
-      "No", "Waktu Pengisian", "Provinsi/Kota", "Nama Faskes", "Jabatan",
+      "No", "Waktu Pengisian", "Provinsi", "Kab/Kota", "Nama Faskes", "Jabatan",
       "Dokter Umum", "Dokter Gigi", "Sp.KKLP",
       "Waktu Poli (Mnt)", "Waktu Home Visit (Mnt)", "Beban Dalam Gedung (%)", "Beban Luar Gedung (%)"
     ];
@@ -146,7 +146,7 @@ export default function Dashboard() {
 
     const rows = filteredData.map((row, index) => {
       const rowData = [
-        index + 1, new Date(row.created_at).toLocaleString('id-ID'), row.city || '', row.fktp_name || '', row.role || '',
+        index + 1, new Date(row.created_at).toLocaleString('id-ID'), row.provinsi || row.city || '', row.kab_kota || '', row.fktp_name || '', row.role || '',
         row.doc_umum || 'Tidak Ada', row.doc_gigi || 'Tidak Ada', row.doc_kklp || 'Tidak Ada',
         row.time_in_poli || '', row.time_home_visit || '', row.prop_in_fktp || '', row.prop_out_fktp || ''
       ];
@@ -236,7 +236,7 @@ export default function Dashboard() {
   const tableDataFiltered = useMemo(() => {
     if (!searchTable) return filteredData;
     const lowerSearch = searchTable.toLowerCase();
-    return filteredData.filter(row => (row.fktp_name || '').toLowerCase().includes(lowerSearch) || (row.city || '').toLowerCase().includes(lowerSearch) || (row.wawancara?.pewawancara || '').toLowerCase().includes(lowerSearch));
+    return filteredData.filter(row => (row.fktp_name || '').toLowerCase().includes(lowerSearch) || (row.provinsi || row.city || '').toLowerCase().includes(lowerSearch) || (row.kab_kota || '').toLowerCase().includes(lowerSearch) || (row.wawancara?.pewawancara || '').toLowerCase().includes(lowerSearch));
   }, [filteredData, searchTable]);
 
   const totalPages = Math.ceil(tableDataFiltered.length / rowsPerPage) || 1;
@@ -584,7 +584,7 @@ export default function Dashboard() {
             {currentTableData.length > 0 ? currentTableData.map((row, idx) => (
               <tr key={idx} className="hover:bg-blue-50/30 transition-colors group">
                 <td className="px-5 py-3 font-semibold text-slate-800 sticky left-0 bg-white z-10 border-r border-slate-100 group-hover:bg-slate-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">{row.fktp_name}</td>
-                <td className="px-5 py-3 text-slate-600">{row.city}</td><td className="px-5 py-3 text-slate-600">{row.role}</td>
+                <td className="px-5 py-3 text-slate-600">{row.provinsi || row.city}</td><td className="px-5 py-3 text-slate-600">{row.role}</td>
                 <td className="px-5 py-3 text-center border-r border-slate-100">{row.doc_kklp ? <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md font-bold text-xs uppercase tracking-wide">Ada</span> : <span className="bg-slate-100 text-slate-500 px-2 py-1 rounded-md font-bold text-xs uppercase tracking-wide">Tidak</span>}</td>
                 <td className="px-5 py-3 border-r border-slate-100 bg-emerald-50/10">
                   <div className="truncate max-w-[150px] text-emerald-700 font-bold capitalize flex items-center gap-2" title={row.wawancara?.pewawancara || '-'}>

@@ -113,7 +113,8 @@ export default function DataManagement() {
 
   const filtered = surveys.filter(s =>
     (s.fktp_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (s.city || '').toLowerCase().includes(searchTerm.toLowerCase())
+    (s.provinsi || s.city || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.kab_kota || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) return (
@@ -161,7 +162,7 @@ export default function DataManagement() {
                   >
                     <div className="flex-1 min-w-0">
                       <p className={`font-semibold text-sm truncate ${selected?.id === row.id ? 'text-primary-700' : 'text-slate-800'}`}>{row.fktp_name}</p>
-                      <p className="text-xs text-slate-400 truncate">{row.city}</p>
+                      <p className="text-xs text-slate-400 truncate">{row.kab_kota || row.city || '-'}</p>
                       <div className="flex gap-2 mt-1">
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${roleBadge(row.role)}`}>{row.role}</span>
                         <span className="text-[10px] text-slate-400">{new Date(row.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
@@ -187,7 +188,7 @@ export default function DataManagement() {
               <div className="min-w-0">
                 <p className="text-xs text-primary-200 mb-0.5">Detail Isian Survey</p>
                 <h3 className="font-bold text-base leading-tight">{selected.fktp_name}</h3>
-                <p className="text-xs text-primary-200 mt-0.5">{selected.city}</p>
+                <p className="text-xs text-primary-200 mt-0.5">{selected.provinsi || selected.city} {selected.kab_kota ? `· ${selected.kab_kota}` : ''}</p>
               </div>
               <button onClick={() => setSelected(null)} className="p-1.5 text-white/70 hover:text-white hover:bg-white/20 rounded-full shrink-0">
                 <X className="w-4 h-4" />
@@ -202,7 +203,8 @@ export default function DataManagement() {
                 <SectionHeader label="A. Identitas" />
                 <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                   <Field label="Waktu Submit" value={new Date(selected.created_at).toLocaleString('id-ID')} />
-                  <Field label="Provinsi / Kota" value={selected.city} />
+                  <Field label="Provinsi" value={selected.provinsi || selected.city} />
+                  <Field label="Kabupaten/Kota" value={selected.kab_kota || '-'} />
                   <Field label="Nama FKTP" value={selected.fktp_name} />
                   <div>
                     <span className="text-[11px] text-slate-400 block mb-0.5">Jabatan Pengisi</span>

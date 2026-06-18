@@ -35,7 +35,8 @@ export default function TimSurveyList() {
 
   const filteredSurveys = surveys.filter(s => 
     (s.fktp_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (s.city || '').toLowerCase().includes(searchTerm.toLowerCase())
+    (s.provinsi || s.city || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.kab_kota || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -95,7 +96,7 @@ export default function TimSurveyList() {
                   return (
                     <tr key={row.id || idx} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4 font-medium text-slate-900">{row.fktp_name}</td>
-                      <td className="px-6 py-4 text-slate-600">{row.city}</td>
+                      <td className="px-6 py-4 text-slate-600">{row.provinsi || row.city}</td>
                       <td className="px-6 py-4 text-slate-500">{new Date(row.created_at).toLocaleDateString('id-ID')}</td>
                       <td className="px-6 py-4 text-center">
                         {isWawancaraSelesai ? (

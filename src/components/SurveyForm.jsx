@@ -4,7 +4,7 @@ import { ChevronRight, ChevronLeft, Save, CheckCircle, Info, ArrowLeft } from 'l
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useAuth } from './AuthContext';
-import faskesMapping from '../data/faskesMapping.json';
+import wilayahMapping from '../data/wilayahMapping.json';
 import logoKemenkes from '../assets/logo-kemenkes.png';
 import SearchableSelect from './SearchableSelect';
 
@@ -118,7 +118,7 @@ const STEPS = [
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     id: null,
-    fktpName: '', city: '', role: '',
+    fktpName: '', provinsi: '', kabKota: '', city: '', role: '',
     docUmum: '', docGigi: '', docKklp: '',
     timeInPoli: '', timeHomeVisit: '', propInFktp: '', propOutFktp: '',
     kompetensi: {}, jkn: {}, nonOptimal: {}, wawancara: {}
@@ -131,16 +131,32 @@ const STEPS = [
   const [loadingData, setLoadingData] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
 
-  const uniqueProvinces = [...new Set(Object.values(faskesMapping).map(f => f.provinsi))].sort();
-  const puskesmasList = formData.city ? Object.values(faskesMapping).filter(f => f.provinsi === formData.city).map(f => f.nama).sort() : [];
+  const provinsiList = Object.keys(wilayahMapping).sort();
+  const kabKotaList = formData.provinsi && wilayahMapping[formData.provinsi]
+    ? Object.keys(wilayahMapping[formData.provinsi]).sort()
+    : [];
+  const puskesmasList = formData.provinsi && formData.kabKota && wilayahMapping[formData.provinsi]?.[formData.kabKota]
+    ? wilayahMapping[formData.provinsi][formData.kabKota]
+    : [];
 
   useEffect(() => {
     // 1. Mode Wawancara (Tim Survey dari Halaman List)
     if (isInterview && location.state?.surveyData) {
       const data = location.state.surveyData;
+      // Try to resolve provinsi & kabKota from stored city field (for backward compat)
+      let resolvedProvinsi = data.provinsi || '';
+      let resolvedKabKota = data.kab_kota || '';
+      // If old data only has city (which was provinsi before), try to match
+      if (!resolvedProvinsi && data.city) {
+        if (wilayahMapping[data.city]) {
+          resolvedProvinsi = data.city;
+        }
+      }
       setFormData({
         id: data.id,
         fktpName: data.fktp_name || '',
+        provinsi: resolvedProvinsi,
+        kabKota: resolvedKabKota,
         city: data.city || '',
         role: data.role || '',
         docUmum: data.doc_umum || '',
@@ -195,7 +211,7 @@ const STEPS = [
   const isRoleDoctor = formData.role === 'Dokter Umum' || formData.role === 'Dokter Sp.KKLP';
 
   // Validasi Step
-  const isStep1Valid = formData.fktpName.trim() !== '' && formData.city.trim() !== '' && formData.role !== '' && formData.docUmum !== '' && formData.docGigi !== '' && formData.docKklp !== '';
+  const isStep1Valid = formData.fktpName.trim() !== '' && formData.provinsi.trim() !== '' && formData.kabKota.trim() !== '' && formData.role !== '' && formData.docUmum !== '' && formData.docGigi !== '' && formData.docKklp !== '';
   const propTotal = Number(formData.propInFktp || 0) + Number(formData.propOutFktp || 0);
   const isPropValid = formData.propInFktp !== '' && formData.propOutFktp !== '' && propTotal === 100;
   const isStep2Valid = isRoleDoctor 
@@ -246,7 +262,9 @@ const STEPS = [
     try {
       const payload = {
         fktp_name: formData.fktpName,
-        city: formData.city,
+        provinsi: formData.provinsi,
+        kab_kota: formData.kabKota,
+        city: formData.provinsi, // keep city for backward compat, store provinsi
         role: formData.role,
         doc_umum: formData.docUmum,
         doc_gigi: formData.docGigi,
@@ -438,40 +456,77 @@ const STEPS = [
                         <input type="text" value={formData.fktpName} readOnly className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 outline-none" />
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Provinsi / Kabupaten/Kota</label>
-                        <input type="text" value={formData.city} readOnly className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 outline-none" />
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Provinsi</label>
+                        <input type="text" value={formData.provinsi} readOnly className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Kabupaten/Kota</label>
+                        <input type="text" value={formData.kabKota} readOnly className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 outline-none" />
                       </div>
                     </>
                   ) : (
                     <>
+                      {/* Provinsi */}
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Provinsi / Kabupaten/Kota</label>
-                        <div className={showErrors && !formData.city ? 'ring-2 ring-rose-500 rounded-lg shadow-sm' : ''}>
-                          <SearchableSelect 
-                            name="city"
-                            options={uniqueProvinces}
-                            value={formData.city}
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Provinsi</label>
+                        <div className={showErrors && !formData.provinsi ? 'ring-2 ring-rose-500 rounded-lg shadow-sm' : ''}>
+                          <SearchableSelect
+                            name="provinsi"
+                            options={provinsiList}
+                            value={formData.provinsi}
                             onChange={(val) => {
-                               handleInputChange({ target: { name: 'city', value: val } });
-                               setFormData(prev => ({...prev, fktpName: ''}));
+                              setFormData(prev => ({ ...prev, provinsi: val, kabKota: '', fktpName: '' }));
                             }}
-                            placeholder="-- Ketik atau Pilih Provinsi --"
+                            placeholder="-- Pilih Provinsi --"
                           />
                         </div>
+                        {showErrors && !formData.provinsi && <p className="text-xs text-rose-500 mt-1">Provinsi wajib dipilih</p>}
                       </div>
+
+                      {/* Kabupaten/Kota */}
                       <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Kabupaten/Kota</label>
+                        <div className={showErrors && !formData.kabKota ? 'ring-2 ring-rose-500 rounded-lg shadow-sm' : ''}>
+                          <SearchableSelect
+                            name="kabKota"
+                            options={kabKotaList}
+                            value={formData.kabKota}
+                            onChange={(val) => {
+                              setFormData(prev => ({ ...prev, kabKota: val, fktpName: '' }));
+                            }}
+                            disabled={!formData.provinsi}
+                            placeholder="-- Pilih Kab/Kota --"
+                            allowManual={true}
+                          />
+                        </div>
+                        {!formData.provinsi
+                          ? <p className="text-xs text-amber-600 mt-1">Pilih provinsi terlebih dahulu</p>
+                          : showErrors && !formData.kabKota
+                            ? <p className="text-xs text-rose-500 mt-1">Kab/Kota wajib diisi</p>
+                            : null
+                        }
+                      </div>
+
+                      {/* Nama Puskesmas */}
+                      <div className="md:col-span-2">
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Nama FKTP/Puskesmas</label>
                         <div className={showErrors && !formData.fktpName ? 'ring-2 ring-rose-500 rounded-lg shadow-sm' : ''}>
-                          <SearchableSelect 
+                          <SearchableSelect
                             name="fktpName"
                             options={puskesmasList}
                             value={formData.fktpName}
                             onChange={(val) => handleInputChange({ target: { name: 'fktpName', value: val } })}
-                            disabled={!formData.city}
-                            placeholder="-- Ketik atau Pilih Puskesmas --"
+                            disabled={!formData.kabKota}
+                            placeholder="-- Pilih atau Ketik Puskesmas --"
+                            allowManual={true}
                           />
                         </div>
-                        {!formData.city && <p className="text-xs text-amber-600 mt-1">Pilih provinsi terlebih dahulu</p>}
+                        {!formData.kabKota
+                          ? <p className="text-xs text-amber-600 mt-1">Pilih Kab/Kota terlebih dahulu</p>
+                          : showErrors && !formData.fktpName
+                            ? <p className="text-xs text-rose-500 mt-1">Nama Puskesmas wajib diisi</p>
+                            : null
+                        }
                       </div>
                     </>
                   )}
