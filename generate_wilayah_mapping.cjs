@@ -86,7 +86,15 @@ for (let i = 1; i < lines.length; i++) {
 const parsedPdfPath = path.join(__dirname, 'pdf_parsed_puskesmas_full.json');
 const pdfPuskesmas = JSON.parse(fs.readFileSync(parsedPdfPath, 'utf8'));
 
-// Helper to normalize strings for robust mapping comparison
+// Tambahkan 4 provinsi DOB Papua baru (2022) yang belum ada di wilayah_administratif.csv lama
+const newPapuaProvinces = {
+  'Papua Barat Daya': { 'Kota Sorong': [], 'Sorong': [], 'Sorong Selatan': [], 'Raja Ampat': [], 'Tambrauw': [], 'Maybrat': [] },
+  'Papua Pegunungan': { 'Jayawijaya': [], 'Keerom': [], 'Lanny Jaya': [], 'Mamberamo Raya': [], 'Mamberamo Tengah': [], 'Nduga': [], 'Pegunungan Bintang': [], 'Sarmi': [], 'Supiori': [], 'Tolikara': [], 'Waropen': [], 'Yahukimo': [], 'Yalimo': [] },
+  'Papua Selatan': { 'Asmat': [], 'Boven Digoel': [], 'Mappi': [], 'Merauke': [] },
+  'Papua Tengah': { 'Deiyai': [], 'Dogiyai': [], 'Intan Jaya': [], 'Mimika': [], 'Nabire': [], 'Paniai': [], 'Puncak': [], 'Puncak Jaya': [] }
+};
+Object.assign(mapping, newPapuaProvinces);
+
 const normalizeStr = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 // Map puskesmas from PDF into our mapping structure
