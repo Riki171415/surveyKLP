@@ -26,23 +26,13 @@ const jknBenefits = [
   "Pengelolaan Diabetes Melitus tanpa komplikasi", "Penyusunan care plan jangka panjang pasien kronik",
   "Manajemen pasien dengan multimorbiditas (DM + hipertensi + dislipidemia)", "Pemantauan kepatuhan terapi pasien kronik (penyakit tidak menular)",
   "Pemantauan kepatuhan terapi pasien AIDS, TB, Malaria", "Pelaksanaan Program Rujuk Balik (PRB)",
-  "Pengelolaan Hipertensi tanpa komplikasi", "Deprescribing/pengurangan obat pada pasien polifarmasi",
-  "Homecare pasien kronik stabil", "Home care pasien dengan keterbatasan mobilitas",
-  "Discharge planning pasca rawat inap", "Koordinasi rujuk balik FKRTL-FKTP",
-  "Pelayanan paliatif primer di rumah", "Intervensi keluarga pada pasien kronik",
-  "Pembinaan Posbindu PTM", "Edukasi kelompok pasien DM dan hipertensi",
-  "Monitoring komunitas risiko tinggi", "Koordinasi lintas profesi dan kader kesehatan"
+  "Pengelolaan Hipertensi tanpa komplikasi", "Deprescribing/pengurangan obat pada pasien polifarmasi"
 ];
 
 const nonOptimalServices = [
-  "Home care penyakit kronik terintegrasi", "Konsultasi keluarga dan family conference",
   "Pelayanan lifestyle medicine", "Pelayanan wellness dan healthy aging",
-  "Konsultasi perjalanan/travel medicine", "Pelayanan paliatif komunitas",
-  "Manajemen pasien geriatri frailty", "Precision medicine/konseling genetik dasar",
-  "Monitoring pasien kronik berbasis komunitas", "Program edukasi kelompok kronik terstruktur",
-  "Telemonitoring pasien kronik", "Pelayanan transisi FKRTL-FKTP",
-  "Konseling kepatuhan pengobatan jangka panjang", "Deprescribing dan medication review",
-  "Layanan promotif berbasis keluarga"
+  "Konsultasi perjalanan/travel medicine", "Manajemen pasien geriatri frailty", 
+  "Precision medicine/konseling genetik dasar", "Layanan promotif berbasis keluarga"
 ];
 
 const interviewQuestions = [
@@ -140,6 +130,10 @@ export default function Dashboard() {
     ];
     kompetensiLayanan.forEach((k, i) => { headers.push(`[K${i+1}] Status`, `[K${i+1}] Kendala`); });
     jknBenefits.forEach((j, i) => { headers.push(`[J${i+1}] Skala`, `[J${i+1}] Catatan`); });
+    headers.push(
+      "[HC] Screening", "[HC] Tenaga", "[HC] Diagnosis", "[HC] Kondisi", "[HC] Kondisi Lainnya", "[HC] Jenis Layanan", "[HC] Jenis Layanan Lainnya", "[HC] Jumlah Kunjungan", "[HC] Kolaborasi", "[HC] Bentuk Kolaborasi", "[HC] Kepatuhan", "[HC] Perbaikan", "[HC] Bentuk Perbaikan",
+      "[PL] Screening", "[PL] Tenaga", "[PL] Diagnosis", "[PL] Kondisi", "[PL] Kondisi Lainnya", "[PL] Tujuan", "[PL] Tujuan Lainnya", "[PL] Terapi", "[PL] Kolaborasi", "[PL] Bentuk Kolaborasi", "[PL] Kepatuhan", "[PL] Perbaikan", "[PL] Bentuk Perbaikan"
+    );
     nonOptimalServices.forEach((n, i) => { headers.push(`[Non-Opt] Masuk JKN?: ${n}`, `[Non-Opt] Skala: ${n}`, `[Non-Opt] Catatan: ${n}`); });
     headers.push(`[Wawancara] Pewawancara`);
     interviewQuestions.forEach((q, i) => { headers.push(`[Wawancara] ${q}`); });
@@ -152,6 +146,23 @@ export default function Dashboard() {
       ];
       kompetensiLayanan.forEach((_, i) => { rowData.push(row.kompetensi?.[i]?.status || '', row.kompetensi?.[i]?.kendala || ''); });
       jknBenefits.forEach((_, i) => { rowData.push(row.jkn?.[i]?.skala || '', row.jkn?.[i]?.catatan || ''); });
+      
+      const hc = row.home_care || {};
+      rowData.push(
+        hc.screening || '', hc.tenaga || '', hc.diagnosis || '',
+        hc.kondisi ? Object.keys(hc.kondisi).filter(k => hc.kondisi[k]).join(', ') : '', hc.kondisiLainnya || '',
+        hc.jenisLayanan ? Object.keys(hc.jenisLayanan).filter(k => hc.jenisLayanan[k]).join(', ') : '', hc.jenisLayananLainnya || '',
+        hc.jumlahKunjungan || '', hc.kolaborasi || '', hc.bentukKolaborasi || '', hc.kepatuhan || '', hc.perbaikan || '', hc.bentukPerbaikan || ''
+      );
+
+      const pl = row.paliatif || {};
+      rowData.push(
+        pl.screening || '', pl.tenaga || '', pl.diagnosis || '',
+        pl.kondisi ? Object.keys(pl.kondisi).filter(k => pl.kondisi[k]).join(', ') : '', pl.kondisiLainnya || '',
+        pl.tujuan ? Object.keys(pl.tujuan).filter(k => pl.tujuan[k]).join(', ') : '', pl.tujuanLainnya || '',
+        pl.terapi || '', pl.kolaborasi || '', pl.bentukKolaborasi || '', pl.kepatuhan || '', pl.perbaikan || '', pl.bentukPerbaikan || ''
+      );
+
       nonOptimalServices.forEach((_, i) => { rowData.push(row.non_optimal?.[i]?.masukJkn || '', row.non_optimal?.[i]?.skala || '', row.non_optimal?.[i]?.catatan || ''); });
       rowData.push(row.wawancara?.pewawancara || '');
       interviewQuestions.forEach((_, i) => { rowData.push(row.wawancara?.[i] || ''); });

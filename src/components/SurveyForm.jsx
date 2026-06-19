@@ -12,23 +12,13 @@ const jknBenefits = [
   "Pengelolaan Diabetes Melitus tanpa komplikasi", "Penyusunan care plan jangka panjang pasien kronik",
   "Manajemen pasien dengan multimorbiditas (DM + hipertensi + dislipidemia)", "Pemantauan kepatuhan terapi pasien kronik (penyakit tidak menular)",
   "Pemantauan kepatuhan terapi pasien AIDS, TB, Malaria", "Pelaksanaan Program Rujuk Balik (PRB)",
-  "Pengelolaan Hipertensi tanpa komplikasi", "Deprescribing/pengurangan obat pada pasien polifarmasi",
-  "Homecare pasien kronik stabil", "Home care pasien dengan keterbatasan mobilitas",
-  "Discharge planning pasca rawat inap", "Koordinasi rujuk balik FKRTL-FKTP",
-  "Pelayanan paliatif primer di rumah", "Intervensi keluarga pada pasien kronik",
-  "Pembinaan Posbindu PTM", "Edukasi kelompok pasien DM dan hipertensi",
-  "Monitoring komunitas risiko tinggi", "Koordinasi lintas profesi dan kader kesehatan"
+  "Pengelolaan Hipertensi tanpa komplikasi", "Deprescribing/pengurangan obat pada pasien polifarmasi"
 ];
 
 const nonOptimalServices = [
-  "Home care penyakit kronik terintegrasi", "Konsultasi keluarga dan family conference",
   "Pelayanan lifestyle medicine", "Pelayanan wellness dan healthy aging",
-  "Konsultasi perjalanan/travel medicine", "Pelayanan paliatif komunitas",
-  "Manajemen pasien geriatri frailty", "Precision medicine/konseling genetik dasar",
-  "Monitoring pasien kronik berbasis komunitas", "Program edukasi kelompok kronik terstruktur",
-  "Telemonitoring pasien kronik", "Pelayanan transisi FKRTL-FKTP",
-  "Konseling kepatuhan pengobatan jangka panjang", "Deprescribing dan medication review",
-  "Layanan promotif berbasis keluarga"
+  "Konsultasi perjalanan/travel medicine", "Manajemen pasien geriatri frailty", 
+  "Precision medicine/konseling genetik dasar", "Layanan promotif berbasis keluarga"
 ];
 
 const kompetensiLayanan = [
@@ -121,7 +111,8 @@ const STEPS = [
     fktpName: '', provinsi: '', kabKota: '', city: '', role: '',
     docUmum: '', docGigi: '', docKklp: '',
     timeInPoli: '', timeHomeVisit: '', propInFktp: '', propOutFktp: '',
-    kompetensi: {}, jkn: {}, nonOptimal: {}, wawancara: {}
+    kompetensi: {}, jkn: {}, nonOptimal: {}, wawancara: {},
+    homeCare: {}, paliatif: {}
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -169,7 +160,9 @@ const STEPS = [
         kompetensi: data.kompetensi || {},
         jkn: data.jkn || {},
         nonOptimal: data.non_optimal || {},
-        wawancara: data.wawancara || {}
+        wawancara: data.wawancara || {},
+        homeCare: data.home_care || {},
+        paliatif: data.paliatif || {}
       });
       return;
     }
@@ -276,6 +269,8 @@ const STEPS = [
         kompetensi: formData.kompetensi,
         jkn: formData.jkn,
         non_optimal: formData.nonOptimal,
+        home_care: formData.homeCare,
+        paliatif: formData.paliatif,
         wawancara: user ? { ...formData.wawancara, pewawancara: user.username } : formData.wawancara
       };
 
@@ -859,14 +854,14 @@ const STEPS = [
               <div className="space-y-8 animate-fade-in">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-emerald-600 rounded-full"></div>
-                  <h2 className="text-xl font-bold text-slate-800">E. Wawancara Mendalam</h2>
+                  <h2 className="text-xl font-bold text-slate-800">E. Pendalaman Kualitatif</h2>
                 </div>
                 
                 <div className="border border-emerald-100 bg-emerald-50/50 rounded-lg p-4 flex items-start space-x-3 mb-6">
                   <Info className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-emerald-900">
                     <span className="font-semibold block mb-1">Panduan Pengisian:</span>
-                    Jawab setiap pertanyaan sesuai kondisi nyata di FKTP Anda. Tersedia <strong>5 Jawaban Tersering Berdasarkan Survey Sebelumnya</strong> — klik salah satu untuk menggunakannya, atau ketik jawaban Anda sendiri di kolom teks.
+                    Ceritakan dan tuliskan komponen-komponen yang relevan secara komprehensif agar jawabannya lebih organik dan merepresentasikan kondisi di fasilitas kesehatan Bapak/Ibu.
                   </div>
                 </div>
 
@@ -877,30 +872,13 @@ const STEPS = [
                         {question}
                       </label>
                       <textarea 
-                        rows={4}
+                        rows={6}
                         required
                         placeholder="Tuliskan jawaban/alasan di sini..."
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y mb-3 ${showErrors && !formData.wawancara[idx]?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y ${showErrors && !formData.wawancara[idx]?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`}
                         value={formData.wawancara[idx] || ''}
                         onChange={(e) => handleWawancaraChange(idx, e.target.value)}
                       ></textarea>
-                      
-                      <div className="mt-3">
-                        <p className="text-xs font-bold text-slate-500 mb-2 flex items-center">
-                          <CheckCircle className="w-3 h-3 mr-1" /> 5 Jawaban Tersering Berdasarkan Survey Sebelumnya (klik untuk memilih):
-                        </p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          {interviewRecommendations[idx].map((rek, rIdx) => (
-                            <div 
-                              key={rIdx} 
-                              onClick={() => handleWawancaraChange(idx, rek)}
-                              className={`cursor-pointer p-3 rounded-lg border text-xs leading-relaxed transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${formData.wawancara[idx] === rek ? 'bg-emerald-50 border-emerald-400 text-emerald-800 shadow-sm ring-1 ring-emerald-400 font-medium' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-300 hover:bg-emerald-50/50'}`}
-                            >
-                              {rek}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -1092,10 +1070,9 @@ const STEPS = [
 
               {/* Step 5 */}
               <section>
-                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">💬 Tahap 5 — Wawancara Mendalam</h3>
+                <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">💬 Tahap 5 — Pendalaman Kualitatif</h3>
                 <ul className="list-disc pl-5 space-y-1 text-sm">
                   <li>Jawab <strong>7 pertanyaan terbuka</strong> sesuai kondisi nyata di FKTP Anda.</li>
-                  <li>Tersedia <strong>5 Jawaban Tersering Berdasarkan Survey Sebelumnya</strong> di bawah setiap pertanyaan — klik salah satu untuk menggunakannya sebagai referensi.</li>
                   <li>Anda tetap bisa <strong>mengedit atau menulis jawaban sendiri</strong> di kolom teks yang tersedia.</li>
                   <li>Semua pertanyaan wajib diisi sebelum dapat mengirimkan survey.</li>
                 </ul>
