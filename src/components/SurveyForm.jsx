@@ -447,7 +447,7 @@ const STEPS = [
                   {isInterview && user?.role !== 'admin' ? (
                     <>
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nama FKTP/Puskesmas</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nama Puskesmas / Klinik</label>
                         <input type="text" value={formData.fktpName} readOnly className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 outline-none" />
                       </div>
                       <div>
@@ -504,7 +504,7 @@ const STEPS = [
 
                       {/* Nama Puskesmas */}
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Nama FKTP/Puskesmas</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Nama Puskesmas / Klinik</label>
                         <div className={showErrors && !formData.fktpName ? 'ring-2 ring-rose-500 rounded-lg shadow-sm' : ''}>
                           <SearchableSelect
                             name="fktpName"
@@ -897,7 +897,7 @@ const STEPS = [
                   {step === 1 && (
                     <>
                       {!formData.city && <li>Provinsi belum dipilih</li>}
-                      {!formData.fktpName && <li>Nama FKTP/Puskesmas belum dipilih</li>}
+                      {!formData.fktpName && <li>Nama Puskesmas / Klinik belum dipilih</li>}
                       {!formData.role && <li>Jabatan belum dipilih</li>}
                     </>
                   )}
@@ -1009,7 +1009,7 @@ const STEPS = [
               <section>
                 <h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">📍 Tahap 1 — Identitas</h3>
                 <ul className="list-disc pl-5 space-y-1 text-sm">
-                  <li>Pilih <strong>Provinsi</strong> terlebih dahulu, lalu pilih <strong>Nama FKTP/Puskesmas</strong> dari daftar yang tersedia.</li>
+                  <li>Pilih <strong>Provinsi</strong> terlebih dahulu, lalu pilih <strong>Nama Puskesmas / Klinik</strong> dari daftar yang tersedia.</li>
                   <li>Pilih <strong>Jabatan</strong> Anda saat ini (Kepala Puskesmas, Dokter Umum, Dokter Sp.KKLP, dll.).</li>
                   <li>Isikan jumlah <strong>Dokter Umum, Dokter Gigi, dan Dokter Sp.KKLP</strong> yang bertugas di FKTP Anda.</li>
                 </ul>

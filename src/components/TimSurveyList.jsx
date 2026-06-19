@@ -61,7 +61,7 @@ export default function TimSurveyList() {
             <Search className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input 
               type="text" 
-              placeholder="Cari nama FKTP atau Kabupaten..." 
+              placeholder="Cari nama Puskesmas / Klinik atau Kabupaten..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm"
@@ -81,7 +81,7 @@ export default function TimSurveyList() {
             <table className="w-full text-left text-sm">
               <thead className="bg-white border-b border-slate-200">
                 <tr>
-                  <th className="px-6 py-4 font-semibold text-slate-700">Nama FKTP</th>
+                  <th className="px-6 py-4 font-semibold text-slate-700">Nama Puskesmas / Klinik</th>
                   <th className="px-6 py-4 font-semibold text-slate-700">Kabupaten/Kota</th>
                   <th className="px-6 py-4 font-semibold text-slate-700">Waktu Submit</th>
                   <th className="px-6 py-4 font-semibold text-slate-700 text-center">Status Wawancara</th>

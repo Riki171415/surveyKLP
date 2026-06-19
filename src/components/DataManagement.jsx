@@ -195,7 +195,7 @@ export default function DataManagement() {
                   <Field label="Waktu Submit" value={new Date(selected.created_at).toLocaleString('id-ID')} />
                   <Field label="Provinsi" value={selected.provinsi || selected.city} />
                   <Field label="Kabupaten/Kota" value={selected.kab_kota || '-'} />
-                  <Field label="Nama FKTP" value={selected.fktp_name} />
+                  <Field label="Nama Puskesmas / Klinik" value={selected.fktp_name} />
                   <div>
                     <span className="text-[11px] text-slate-400 block mb-0.5">Jabatan Pengisi</span>
                     <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${roleBadge(selected.role)}`}>{selected.role || '-'}</span>

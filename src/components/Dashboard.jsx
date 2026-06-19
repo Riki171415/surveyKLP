@@ -124,7 +124,7 @@ export default function Dashboard() {
   // EXCEL EXPORT (Omitted details for brevity, keep unchanged)
   const exportToExcel = () => {
     const headers = [
-      "No", "Waktu Pengisian", "Provinsi", "Kab/Kota", "Nama Faskes", "Jabatan",
+      "No", "Waktu Pengisian", "Provinsi", "Kab/Kota", "Nama Puskesmas / Klinik", "Jabatan",
       "Dokter Umum", "Dokter Gigi", "Sp.KKLP",
       "Waktu Poli (Mnt)", "Waktu Home Visit (Mnt)", "Beban Dalam Gedung (%)", "Beban Luar Gedung (%)"
     ];
@@ -582,7 +582,7 @@ export default function Dashboard() {
         <table className="w-full text-left text-sm whitespace-nowrap">
           <thead className="bg-slate-50/80 backdrop-blur text-slate-700">
             <tr>
-              <th className="px-5 py-4 font-bold min-w-[220px] sticky left-0 bg-slate-100 z-10 border-r border-slate-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Nama Faskes</th>
+              <th className="px-5 py-4 font-bold min-w-[220px] sticky left-0 bg-slate-100 z-10 border-r border-slate-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Nama Puskesmas / Klinik</th>
               <th className="px-5 py-4 font-bold text-slate-600">Provinsi / Kota</th>
               <th className="px-5 py-4 font-bold text-slate-600">Jabatan</th>
               <th className="px-5 py-4 font-bold text-center border-r border-slate-200 text-slate-600">Sp.KKLP</th>
