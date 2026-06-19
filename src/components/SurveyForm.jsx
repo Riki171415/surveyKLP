@@ -208,7 +208,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const isRoleSpKklp = formData.role === 'Dokter Sp.KKLP';
 
   // Validasi per Step
-  const isStep1Valid = formData.fktpName.trim() !== '' && formData.provinsi.trim() !== '' && formData.kabKota.trim() !== '' && formData.role !== '' && formData.docKklp !== '';
+  const isStep1Valid = formData.fktpName.trim() !== '' && formData.provinsi.trim() !== '' && formData.kabKota.trim() !== '' && formData.role !== '' && formData.docKklp !== '' && formData.kodeFaskes.trim() !== '' && formData.namaResponden.trim() !== '';
   const propTotal = Number(formData.propInFktp || 0) + Number(formData.propOutFktp || 0);
   const isPropValid = formData.propInFktp !== '' && formData.propOutFktp !== '' && propTotal === 100;
   const isStep2Valid = isRoleDoctor
@@ -450,12 +450,14 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         {!formData.kabKota ? <p className="text-xs text-amber-600 mt-1">Pilih Kab/Kota terlebih dahulu</p> : showErrors && !formData.fktpName ? <p className="text-xs text-rose-500 mt-1">Nama Puskesmas wajib diisi</p> : null}
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Kode Faskes BPJS <span className="text-xs text-slate-400 font-normal">(opsional)</span></label>
-                        <input type="text" name="kodeFaskes" value={formData.kodeFaskes} onChange={handleInputChange} placeholder="Contoh: 0101G00001" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300" />
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Kode Faskes BPJS</label>
+                        <input type="text" name="kodeFaskes" value={formData.kodeFaskes} onChange={handleInputChange} placeholder="Contoh: 0101G00001" className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300 ${showErrors && !formData.kodeFaskes ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} />
+                        {showErrors && !formData.kodeFaskes && <p className="text-xs text-rose-500 mt-1">Kode Faskes wajib diisi</p>}
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Nama Responden <span className="text-xs text-slate-400 font-normal">(opsional)</span></label>
-                        <input type="text" name="namaResponden" value={formData.namaResponden} onChange={handleInputChange} placeholder="Nama lengkap responden" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300" />
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Nama Responden</label>
+                        <input type="text" name="namaResponden" value={formData.namaResponden} onChange={handleInputChange} placeholder="Nama lengkap responden" className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300 ${showErrors && !formData.namaResponden ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} />
+                        {showErrors && !formData.namaResponden && <p className="text-xs text-rose-500 mt-1">Nama Responden wajib diisi</p>}
                       </div>
                     </>
                   )}
@@ -1087,6 +1089,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   {step === 1 && (<>
                     {!formData.provinsi && <li>Provinsi belum dipilih</li>}
                     {!formData.fktpName && <li>Nama Puskesmas / Klinik belum dipilih</li>}
+                    {!formData.kodeFaskes && <li>Kode Faskes belum diisi</li>}
+                    {!formData.namaResponden && <li>Nama Responden belum diisi</li>}
                     {!formData.role && <li>Jabatan belum dipilih</li>}
                     {!formData.docKklp && <li>Status kepemilikan Sp.KKLP belum dipilih</li>}
                   </>)}
