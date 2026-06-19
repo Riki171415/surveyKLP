@@ -112,8 +112,13 @@ const addFaskes = (pProv, pKab, pNama, type) => {
   let matchedKab = Object.keys(mapping[matchedProv]).find(kabKey => normalizeForCompare(kabKey) === normalizeForCompare(pKab));
   if (!matchedKab) return false;
 
-  if (!mapping[matchedProv][matchedKab].includes(pNama)) {
-    mapping[matchedProv][matchedKab].push(pNama);
+  let finalNama = pNama;
+  if (type === 'puskesmas' && !finalNama.toLowerCase().startsWith('puskesmas')) {
+    finalNama = 'Puskesmas ' + finalNama;
+  }
+
+  if (!mapping[matchedProv][matchedKab].includes(finalNama)) {
+    mapping[matchedProv][matchedKab].push(finalNama);
     if (type === 'puskesmas') mappedPuskCount++;
     if (type === 'klinik') mappedKlinikCount++;
   }
