@@ -22,9 +22,9 @@ const nonOptimalServices = [
 ];
 
 const kompetensiLayanan = [
-  "Manajemen pasien dengan multimorbiditas kompleks", "Pemeriksaan USG Dasar untuk penegakan diagnosis",
-  "Deprescribing (pengurangan/rasionalisasi obat pasien kronis)", "Family Conference (Konsultasi keluarga untuk penyelesaian masalah klinis/psikososial)",
-  "Home Care Klinis dengan intervensi medis komprehensif", "Pelayanan Paliatif Primer (manajemen nyeri/akhir hayat) di rumah",
+  "Pemeriksaan USG Dasar untuk penegakan diagnosis",
+  "Deprescribing (pengurangan/rasionalisasi obat pasien kronis)",
+  "Family Conference (Konsultasi keluarga untuk penyelesaian masalah klinis/psikososial)",
   "Pemeriksaan Xray untuk penegakan diagnosis"
 ];
 
@@ -38,57 +38,7 @@ const interviewQuestions = [
   "7. Menurut Anda, bentuk dukungan apa yang diperlukan agar FKTP yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?"
 ];
 
-const interviewRecommendations = {
-  0: [
-    "Layanan penyakit kronik seperti DM dan hipertensi sudah berjalan baik melalui Prolanis. Idealnya Sp.KKLP difokuskan pada pasien dengan kompleksitas lebih tinggi, bukan alur yang sama dengan dokter umum. Perlu ada kompensasi tambahan (non-kapitasi atau jaspel) mengingat kompleksitas layanan yang diberikan.",
-    "Saat ini layanan kronik dilakukan oleh semua dokter yang shift, tidak dikhususkan ke Sp.KKLP. Untuk kapitasi berbasis kinerja perlu indikator yang jelas dan adil agar tidak menimbulkan ketidakmerataan di antara tenaga kesehatan lain yang juga berkontribusi.",
-    "Sp.KKLP idealnya berperan sebagai konsultan internal untuk pasien kronik dengan multimorbiditas dan faktor psikososial kompleks. Pendekatan holistik dan family-oriented yang dimiliki Sp.KKLP sangat mendukung pengelolaan kronik. Pembiayaan sebaiknya melalui skema non-kapitasi yang mencerminkan kompleksitas layanan.",
-    "Pelayanan penyakit kronik sudah cukup tertangani, namun Sp.KKLP dapat memperkuat aspek pemantauan jangka panjang dan edukasi pasien-keluarga. Kapitasi berbasis kinerja (KBK) perlu dipertimbangkan apabila indikator kinerja dirancang secara jelas dan terukur.",
-    "Belum ada pembedaan peran Sp.KKLP dalam layanan kronik. Semua dokter menangani pasien secara bergilir. Perlu ada kejelasan alur dan kewenangan Sp.KKLP agar kompetensinya dapat dimanfaatkan secara optimal untuk pasien kronik yang membutuhkan penanganan komprehensif."
-  ],
-  1: [
-    "Home visit sudah dilaksanakan namun masih terbatas dan belum optimal. Perlu menjadi manfaat non-kapitasi karena membutuhkan biaya operasional transportasi dan waktu khusus yang tidak tercakup dalam kapitasi standar. BOK Puskesmas dapat menjadi salah satu sumber pembiayaan alternatif.",
-    "Pelaksanaan home visit belum berjalan optimal karena keterbatasan tenaga dan waktu. Sp.KKLP berpotensi memperkuat layanan home care terutama untuk pasien dengan keterbatasan mobilitas (lansia, pasca stroke, dll). Perlu dukungan pembiayaan khusus dan regulasi yang mendukung.",
-    "Home visit sudah ada dalam program Puskesmas namun frekuensinya terbatas. Agar dapat dioptimalkan, perlu ada mekanisme pembiayaan yang jelas, baik melalui non-kapitasi JKN maupun fund channeling melalui BOK atau Dana Desa untuk kunjungan ke pasien yang tidak mampu datang ke faskes.",
-    "Saat ini home care masih dilakukan secara terbatas dan umumnya oleh perawat atau bidan, bukan dokter. Keterlibatan Sp.KKLP dalam home care klinis dapat meningkatkan kualitas layanan. Diperlukan regulasi dan tarif non-kapitasi yang mendukung keterlibatan dokter dalam home visit.",
-    "Home visit dan home care sudah berjalan namun belum ada standar yang jelas. Untuk optimalisasi diperlukan dukungan berupa: penetapan target kunjungan, pembiayaan yang memadai (non-kapitasi), ketersediaan alat medis portabel, dan regulasi yang mengatur kewenangan Sp.KKLP dalam layanan di rumah."
-  ],
-  2: [
-    "Edukasi kelompok sudah berjalan melalui Prolanis (senam, penyuluhan, pemeriksaan berkala) namun cakupannya perlu diperluas. Aktivitasnya meliputi senam kronik, edukasi gizi, pemeriksaan lab rutin, dan konsultasi kelompok. Perlu dijadikan manfaat non-kapitasi agar ada alokasi dana yang jelas.",
-    "Kegiatan komunitas dan edukasi kelompok sudah dilaksanakan (Posbindu, Posyandu Lansia, Prolanis) namun masih terbatas anggaran. Sebaiknya diintegrasikan dengan BOK Puskesmas atau fund channeling Dana Desa agar tidak membebani JKN sepenuhnya, namun tetap ada standar layanan yang harus dipenuhi.",
-    "Implementasi komunitas sudah ada namun belum optimal. Contoh aktivitas: penyuluhan kesehatan, senam bersama, kelas DM/HT, kunjungan rumah kelompok risiko tinggi. Perlu pembiayaan non-kapitasi agar kegiatan ini dapat dilaksanakan secara rutin dengan cakupan yang lebih luas.",
-    "Edukasi kelompok masih sangat terbatas karena tidak ada anggaran khusus. Saat ini mengandalkan BOK yang sering tidak mencukupi. Perlu ada manfaat non-kapitasi JKN untuk kegiatan komunitas agar faskes termotivasi melaksanakan promosi kesehatan dan pencegahan penyakit secara terstruktur.",
-    "Kegiatan komunitas berjalan namun belum melibatkan Sp.KKLP secara optimal. Sp.KKLP berpotensi memimpin edukasi kelompok kronik karena kompetensi holistiknya. Usulan: jadikan edukasi kelompok sebagai manfaat non-kapitasi dengan tarif yang mencakup honor fasilitator, materi, dan operasional kegiatan."
-  ],
-  3: [
-    "Ya, sangat perlu dimasukkan ke manfaat JKN FKTP. Kebutuhan layanan paliatif di komunitas cukup besar, terutama untuk lansia dan pasien terminal. Tanpa manfaat JKN, layanan ini tidak akan berjalan karena tidak ada pembiayaan yang mendukung.",
-    "Perlu dimasukkan ke manfaat JKN, namun harus disertai standar kompetensi yang jelas bagi nakes di FKTP. Sp.KKLP memiliki kompetensi yang relevan untuk layanan paliatif primer. Perlu ada pelatihan dan sertifikasi khusus agar layanan paliatif di FKTP dapat dilaksanakan dengan baik.",
-    "Layanan paliatif primer perlu menjadi manfaat JKN FKTP mengingat semakin meningkatnya kebutuhan masyarakat. Fokus pada manajemen nyeri, pendampingan keluarga, dan perawatan akhir hayat di rumah. Ini sejalan dengan pendekatan family medicine yang menjadi keunggulan Sp.KKLP.",
-    "Perlu, namun dengan kriteria yang ketat dan bertahap. Tidak semua FKTP siap memberikan layanan paliatif. Perlu dimulai dengan FKTP yang memiliki Sp.KKLP dan infrastruktur yang memadai, dengan pembiayaan melalui tarif non-kapitasi yang mencerminkan beban kerja pelayanan paliatif.",
-    "Layanan paliatif di FKTP sangat dibutuhkan terutama untuk pasien long-term care seperti lansia, penyintas stroke, dan pasien kanker stadium lanjut. Memasukkannya ke manfaat JKN akan memastikan keberlangsungan layanan. Sp.KKLP dapat menjadi koordinator layanan paliatif berbasis keluarga di tingkat primer."
-  ],
-  4: [
-    "Saat ini keterlibatan Sp.KKLP dalam PRB masih sangat terbatas atau tidak ada pembedaan peran. Semua dokter yang shift menangani pasien PRB. Perlu ada regulasi yang memperjelas peran Sp.KKLP dalam PRB agar kompetensinya dapat dimanfaatkan secara optimal untuk monitoring dan pengelolaan pasien PRB.",
-    "Sp.KKLP berpotensi menjadi penanggung jawab utama pasien PRB karena pendekatan holistik dan family-orientednya. Perlu penambahan kewenangan agar Sp.KKLP bisa meresepkan obat PRB secara mandiri tanpa konsultasi ulang ke RS, sehingga memudahkan akses pasien dan mengurangi beban RS.",
-    "Perluasan peran Sp.KKLP dalam PRB sangat diharapkan, terutama untuk monitoring pasien kronik secara komprehensif. Usulan: Sp.KKLP diberikan kewenangan untuk penyesuaian dosis obat PRB berdasarkan kondisi klinis pasien, dengan tetap berkoordinasi dengan dokter spesialis di RS jika diperlukan.",
-    "PRB saat ini masih dikelola oleh dokter yang bertugas tanpa pembedaan dengan Sp.KKLP. Untuk mengoptimalkan peran Sp.KKLP, perlu ada SK atau regulasi yang memberikan kewenangan khusus dalam PRB, disertai dengan standar pemantauan yang jelas dan mekanisme koordinasi dengan FKRTL.",
-    "Keterlibatan Sp.KKLP dalam PRB dapat menjadi jembatan yang efektif antara FKRTL dan FKTP. Sp.KKLP dapat berperan dalam skrining kelayakan PRB, pemantauan perkembangan pasien, dan koordinasi rujukan balik. Perlu penguatan regulasi dan penambahan jenis obat yang dapat diresepkan di FKTP."
-  ],
-  5: [
-    "Belum ada perubahan yang signifikan karena Sp.KKLP belum menjalankan peran sesuai kompetensinya. Sering kali Sp.KKLP menjalankan tugas yang sama dengan dokter umum. Untuk merasakan manfaatnya, perlu ada kejelasan alur layanan dan kewenangan yang membedakan peran Sp.KKLP dari dokter umum.",
-    "Ada perubahan positif meskipun belum optimal. Penanganan pasien kronik dengan multimorbiditas lebih terarah, dan ada upaya untuk meminimalisir rujukan yang tidak perlu. Kendala utama adalah Sp.KKLP merangkap jabatan (misal sebagai Kepala Puskesmas) sehingga waktu untuk layanan klinis terbatas.",
-    "Perubahan mulai dirasakan terutama dalam pengelolaan kasus kompleks dan pendekatan keluarga. Namun masih terkendala ketiadaan SK resmi, infrastruktur yang belum mendukung, dan sistem kompensasi yang belum membedakan Sp.KKLP dari dokter umum. Perlu pengakuan formal agar perubahan lebih optimal.",
-    "Belum ada perubahan karena Sp.KKLP baru hadir dan belum sepenuhnya aktif. Potensinya sangat besar untuk meningkatkan kualitas layanan, khususnya dalam pendekatan holistik dan manajemen pasien kronik. Diperlukan waktu, dukungan sistem, dan kejelasan regulasi agar dampaknya dapat dirasakan.",
-    "Terdapat peningkatan kapasitas faskes dalam menangani kasus yang sebelumnya dirujuk ke RS. Adanya Sp.KKLP meningkatkan kepercayaan diri tim dalam menangani kasus kompleks. Namun perlu ada mekanisme insentif dan pengakuan karier yang jelas agar Sp.KKLP termotivasi untuk terus mengembangkan layanan."
-  ],
-  6: [
-    "Perlu ada insentif tambahan karena kompetensi Sp.KKLP lebih tinggi dari dokter umum. Namun insentif sebaiknya tidak hanya untuk Sp.KKLP, tetapi juga untuk tim nakes yang mendukung layanannya. Insentif dapat berupa tambahan jaspel atau perbedaan tarif layanan yang mencerminkan kompetensi.",
-    "Insentif tambahan perlu diberikan apabila Sp.KKLP menjalankan peran dan tanggung jawab yang lebih besar. Saat ini jika tugas dan beban kerjanya sama dengan dokter umum, pemberian insentif khusus tidak akan adil bagi tenaga kesehatan lain. Perlu ada kejelasan peran sebagai dasar pemberian insentif.",
-    "Perlu ada insentif berbasis kewenangan dan tanggung jawab. Usulan konkret: perbedaan tarif jaspel antara Sp.KKLP dan dokter umum (misal 50:25 dari kapitasi), atau tarif non-kapitasi untuk layanan spesifik yang hanya Sp.KKLP yang bisa lakukan. Ini penting untuk memotivasi dokter mengambil spesialisasi ini.",
-    "Insentif diperlukan sebagai bentuk penghargaan atas kompetensi dan peran yang lebih besar dalam memperkuat layanan primer. Tanpa insentif yang memadai, sulit menarik dokter untuk menekuni Sp.KKLP. Mekanisme insentif bisa melalui jenjang karier ASN, pembedaan jaspel, atau skema pembiayaan layanan spesifik.",
-    "Dukungan yang diperlukan tidak hanya berupa insentif finansial, tetapi juga pengakuan dalam jenjang karier, kejelasan regulasi kewenangan, infrastruktur yang memadai, dan sistem informasi yang mendukung. Insentif harus dikaitkan dengan kejelasan peran dan kontribusi nyata Sp.KKLP dalam meningkatkan mutu layanan FKTP."
-  ]
-};
+
 
 export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const [step, setStep] = useState(1);
@@ -100,7 +50,7 @@ const STEPS = [
     { id: 2, title: 'Beban Kerja' },
     { id: 3, title: 'Manfaat JKN' },
     { id: 4, title: 'Layanan Ekstra' },
-    { id: 5, title: 'Wawancara' }
+    { id: 5, title: 'Pendalaman' }
   ];
 
   const totalSteps = 5;
@@ -109,6 +59,7 @@ const STEPS = [
   const [formData, setFormData] = useState({
     id: null,
     fktpName: '', provinsi: '', kabKota: '', city: '', role: '',
+    kodeFaskes: '', namaResponden: '',
     docUmum: '', docGigi: '', docKklp: '',
     timeInPoli: '', timeHomeVisit: '', propInFktp: '', propOutFktp: '',
     kompetensi: {}, jkn: {}, nonOptimal: {}, wawancara: {},
@@ -162,7 +113,9 @@ const STEPS = [
         nonOptimal: data.non_optimal || {},
         wawancara: data.wawancara || {},
         homeCare: data.home_care || {},
-        paliatif: data.paliatif || {}
+        paliatif: data.paliatif || {},
+        kodeFaskes: data.kode_faskes || '',
+        namaResponden: data.nama_responden || ''
       });
       return;
     }
@@ -204,7 +157,7 @@ const STEPS = [
   const isRoleDoctor = formData.role === 'Dokter Umum' || formData.role === 'Dokter Sp.KKLP';
 
   // Validasi Step
-  const isStep1Valid = formData.fktpName.trim() !== '' && formData.provinsi.trim() !== '' && formData.kabKota.trim() !== '' && formData.role !== '' && formData.docUmum !== '' && formData.docGigi !== '' && formData.docKklp !== '';
+  const isStep1Valid = formData.fktpName.trim() !== '' && formData.provinsi.trim() !== '' && formData.kabKota.trim() !== '' && formData.role !== '' && formData.docKklp !== '';
   const propTotal = Number(formData.propInFktp || 0) + Number(formData.propOutFktp || 0);
   const isPropValid = formData.propInFktp !== '' && formData.propOutFktp !== '' && propTotal === 100;
   const isStep2Valid = isRoleDoctor 
@@ -266,6 +219,8 @@ const STEPS = [
         time_home_visit: formData.timeHomeVisit === '' ? null : Number(formData.timeHomeVisit),
         prop_in_fktp: formData.propInFktp === '' ? null : Number(formData.propInFktp),
         prop_out_fktp: formData.propOutFktp === '' ? null : Number(formData.propOutFktp),
+        kode_faskes: formData.kodeFaskes,
+        nama_responden: formData.namaResponden,
         kompetensi: formData.kompetensi,
         jkn: formData.jkn,
         non_optimal: formData.nonOptimal,
@@ -523,6 +478,32 @@ const STEPS = [
                             : null
                         }
                       </div>
+
+                      {/* Kode Faskes BPJS */}
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Kode Faskes BPJS <span className="text-xs text-slate-400 font-normal">(opsional)</span></label>
+                        <input
+                          type="text"
+                          name="kodeFaskes"
+                          value={formData.kodeFaskes}
+                          onChange={handleInputChange}
+                          placeholder="Contoh: 0101G00001"
+                          className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300"
+                        />
+                      </div>
+
+                      {/* Nama Responden */}
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Nama Responden <span className="text-xs text-slate-400 font-normal">(opsional)</span></label>
+                        <input
+                          type="text"
+                          name="namaResponden"
+                          value={formData.namaResponden}
+                          onChange={handleInputChange}
+                          placeholder="Nama lengkap responden"
+                          className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300"
+                        />
+                      </div>
                     </>
                   )}
                   <div className="md:col-span-2">
@@ -546,29 +527,26 @@ const STEPS = [
                     </div>
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-slate-700 mb-3">Ketersediaan Dokter</label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                      {[
-                        { name: 'docUmum', label: 'Dokter Umum' },
-                        { name: 'docGigi', label: 'Dokter Gigi' },
-                        { name: 'docKklp', label: 'Dokter Sp.KKLP' }
-                      ].map(doc => (
-                        <div key={doc.name} className={`border rounded-xl p-4 ${showErrors && !formData[doc.name] ? 'bg-rose-50/50 border-rose-500 ring-1 ring-rose-500 shadow-sm' : 'bg-slate-50 border-slate-200'}`}>
-                          <p className="text-sm font-bold text-slate-800 mb-3 text-center">{doc.label}</p>
-                          <div className="flex flex-col gap-2">
-                            {['Ada & Praktek', 'Ada tapi Tidak Praktek', 'Tidak Ada'].map(opt => (
-                              <label key={opt} className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${formData[doc.name] === opt ? 'border-primary-500 bg-primary-50 text-primary-800 font-medium shadow-sm' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'}`}>
-                                <input type="radio" name={doc.name} value={opt} checked={formData[doc.name] === opt} onChange={handleInputChange} className="hidden" />
-                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center mr-3 flex-shrink-0 ${formData[doc.name] === opt ? 'border-primary-500' : 'border-slate-300'}`}>
-                                  {formData[doc.name] === opt && <div className="w-2 h-2 rounded-full bg-primary-500"></div>}
-                                </div>
-                                <span className="text-xs leading-tight">{opt}</span>
-                              </label>
-                            ))}
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">
+                      Apakah FKTP memiliki Dokter Sp.KKLP?
+                      <span className="block text-xs text-slate-400 font-normal mt-0.5">(baik Berpraktik maupun tidak berpraktik sebagai Sp.KKLP)</span>
+                    </label>
+                    <div className={`flex gap-4 ${showErrors && !formData.docKklp ? 'p-2 ring-2 ring-rose-500 rounded-xl bg-rose-50/50' : ''}`}>
+                      {['Ya', 'Tidak'].map(opt => (
+                        <label key={opt} className={`flex items-center gap-3 px-6 py-4 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${
+                          formData.docKklp === opt
+                            ? 'border-primary-500 bg-primary-50/50 text-primary-700 font-bold shadow-md shadow-primary-500/10'
+                            : 'border-slate-100 bg-white hover:border-primary-300 hover:bg-slate-50 text-slate-600'
+                        }`}>
+                          <input type="radio" name="docKklp" value={opt} checked={formData.docKklp === opt} onChange={handleInputChange} className="hidden" />
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${formData.docKklp === opt ? 'border-primary-500' : 'border-slate-300'}`}>
+                            {formData.docKklp === opt && <div className="w-2.5 h-2.5 rounded-full bg-primary-500"></div>}
                           </div>
-                        </div>
+                          <span className="text-sm">{opt}</span>
+                        </label>
                       ))}
                     </div>
+                    {showErrors && !formData.docKklp && <p className="text-xs text-rose-500 mt-1">Wajib dipilih</p>}
                   </div>
                 </div>
               </div>

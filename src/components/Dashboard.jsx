@@ -124,7 +124,7 @@ export default function Dashboard() {
   // EXCEL EXPORT (Omitted details for brevity, keep unchanged)
   const exportToExcel = () => {
     const headers = [
-      "No", "Waktu Pengisian", "Provinsi", "Kab/Kota", "Nama Puskesmas / Klinik", "Jabatan",
+      "No", "Waktu Pengisian", "Provinsi", "Kab/Kota", "Nama Puskesmas / Klinik", "Kode Faskes BPJS", "Nama Responden", "Jabatan",
       "Dokter Umum", "Dokter Gigi", "Sp.KKLP",
       "Waktu Poli (Mnt)", "Waktu Home Visit (Mnt)", "Beban Dalam Gedung (%)", "Beban Luar Gedung (%)"
     ];
@@ -140,7 +140,7 @@ export default function Dashboard() {
 
     const rows = filteredData.map((row, index) => {
       const rowData = [
-        index + 1, new Date(row.created_at).toLocaleString('id-ID'), row.provinsi || row.city || '', row.kab_kota || '', row.fktp_name || '', row.role || '',
+        index + 1, new Date(row.created_at).toLocaleString('id-ID'), row.provinsi || row.city || '', row.kab_kota || '', row.fktp_name || '', row.kode_faskes || '', row.nama_responden || '', row.role || '',
         row.doc_umum || 'Tidak Ada', row.doc_gigi || 'Tidak Ada', row.doc_kklp || 'Tidak Ada',
         row.time_in_poli || '', row.time_home_visit || '', row.prop_in_fktp || '', row.prop_out_fktp || ''
       ];
