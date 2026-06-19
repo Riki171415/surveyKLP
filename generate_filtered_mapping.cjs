@@ -116,6 +116,9 @@ const addFaskes = (pProv, pKab, pNama, type) => {
   if (type === 'puskesmas' && !finalNama.toLowerCase().startsWith('puskesmas')) {
     finalNama = 'Puskesmas ' + finalNama;
   }
+  if (type === 'klinik' && !finalNama.toLowerCase().startsWith('klinik')) {
+    finalNama = 'Klinik ' + finalNama;
+  }
 
   if (!mapping[matchedProv][matchedKab].includes(finalNama)) {
     mapping[matchedProv][matchedKab].push(finalNama);
