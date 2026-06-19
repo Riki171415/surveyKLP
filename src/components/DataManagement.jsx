@@ -34,6 +34,12 @@ const interviewQuestions = [
   "Menurut Anda, bentuk dukungan apa yang diperlukan agar FKTP yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?"
 ];
 
+const relevansiItems = [
+  "Peran sebagai dokter di poli umum", "Poli / Layanan khusus penyakit tidak menular (PTM)",
+  "Poli / layanan khusus Geriatri", "Poli / Layanan khusus Anak/MTBS",
+  "Kegiatan Home Visit / Home Care", "Kepala Puskesmas / Klinik", "Penanggung Jawab Mutu / UKP"
+];
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 const scaleBadge = (s) => {
   const n = Number(s);
@@ -47,6 +53,12 @@ const scaleBadge = (s) => {
 const jknBadge = (val) => {
   if (val === 'Ya') return 'bg-emerald-100 text-emerald-700';
   if (val === 'Tidak') return 'bg-rose-100 text-rose-700';
+  return 'bg-slate-100 text-slate-500';
+};
+
+const statusBadge = (s) => {
+  if (s === 'sudah') return 'bg-emerald-100 text-emerald-700';
+  if (s === 'belum') return 'bg-amber-100 text-amber-700';
   return 'bg-slate-100 text-slate-500';
 };
 
@@ -202,15 +214,63 @@ export default function DataManagement() {
                     <span className="text-[11px] text-slate-400 block mb-0.5">Jabatan Pengisi</span>
                     <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${roleBadge(selected.role)}`}>{selected.role || '-'}</span>
                   </div>
-                  <Field label="Dokter Umum" value={selected.doc_umum} />
-                  <Field label="Dokter Gigi" value={selected.doc_gigi} />
-                  <Field label="Dokter Sp.KKLP" value={selected.doc_kklp} />
+                  <Field label="Dokter Sp.KKLP" value={selected.doc_kklp || 'Tidak'} />
                 </div>
               </div>
 
-              {/* ── B. Beban Kerja ── */}
+              {/* ── B. Detail Khusus Sp.KKLP & Perspektif ── */}
+              {selected.role === 'Dokter Sp.KKLP' && (
+                <div>
+                  <SectionHeader label="B. Detail Khusus Sp.KKLP & Perspektif" />
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Field label="Berpraktik sbg Sp.KKLP?" value={selected.spkklp_berpraktik} />
+                      <Field label="Poli Tempat Praktik" value={selected.spkklp_poli ? Object.keys(selected.spkklp_poli).filter(k => selected.spkklp_poli[k]).join(', ') : '-'} />
+                      <Field label="Kendala Praktik" value={selected.spkklp_kendala ? Object.keys(selected.spkklp_kendala).filter(k => selected.spkklp_kendala[k]).join(', ') : '-'} />
+                    </div>
+                    {selected.relevansi_spkklp && Object.keys(selected.relevansi_spkklp).length > 0 && (
+                      <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Skala Relevansi Sp.KKLP (1-4):</p>
+                        {Object.entries(selected.relevansi_spkklp).map(([idx, val]) => (
+                          <div key={idx} className="flex justify-between items-center py-1.5 text-xs border-b border-slate-200/50 last:border-0">
+                            <span className="text-slate-600 mr-2">{relevansiItems[idx]}</span>
+                            <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shrink-0">{val}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ── C. Program Rujuk Balik (PRB) ── */}
+              {selected.prb && Object.keys(selected.prb).length > 0 && (
+                <div>
+                  <SectionHeader label="C. Program Rujuk Balik (PRB)" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                    <Field label="Diagnosis PRB" value={selected.prb.diagnosis_ditangani ? Object.keys(selected.prb.diagnosis_ditangani).filter(k => selected.prb.diagnosis_ditangani[k]).join(', ') : '-'} />
+                    <Field label="Pendaftaran PRB oleh" value={selected.prb.pendaftaran_prb ? Object.keys(selected.prb.pendaftaran_prb).filter(k => selected.prb.pendaftaran_prb[k]).join(', ') : '-'} />
+                    <Field label="Peresepan obat PRB oleh" value={selected.prb.peresepan_obat_prb ? Object.keys(selected.prb.peresepan_obat_prb).filter(k => selected.prb.peresepan_obat_prb[k]).join(', ') : '-'} />
+                    <Field label="Ketersediaan Obat PRB" value={selected.prb.ketersediaan_obat_prb ? Object.keys(selected.prb.ketersediaan_obat_prb).filter(k => selected.prb.ketersediaan_obat_prb[k]).join(', ') : '-'} />
+                    <Field label="Koordinasi Faskes Rujukan" value={selected.prb.faskes_rujukan ? Object.keys(selected.prb.faskes_rujukan).filter(k => selected.prb.faskes_rujukan[k]).join(', ') : '-'} />
+                  </div>
+                </div>
+              )}
+
+              {/* ── D. Layanan Dirujuk / Belum Optimal ── */}
+              {(selected.layanan_dirujuk || selected.layanan_belum_berjalan) && (
+                <div>
+                  <SectionHeader label="D. Layanan yang Dirujuk / Belum Optimal" />
+                  <div className="grid grid-cols-1 gap-y-3 text-sm">
+                    <Field label="Layanan yang Masih Sering Dirujuk" value={selected.layanan_dirujuk ? Object.keys(selected.layanan_dirujuk).filter(k => selected.layanan_dirujuk[k]).join(', ') : '-'} />
+                    <Field label="Layanan yang Belum Berjalan Optimal" value={selected.layanan_belum_berjalan ? Object.keys(selected.layanan_belum_berjalan).filter(k => selected.layanan_belum_berjalan[k]).join(', ') : '-'} />
+                  </div>
+                </div>
+              )}
+
+              {/* ── E. Beban Kerja ── */}
               <div>
-                <SectionHeader label="B. Beban Kerja Dokter" />
+                <SectionHeader label="E. Beban Kerja Dokter" />
                 <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                   <Field label="Waktu Konsultasi Poli (mnt/pasien)" value={selected.time_in_poli} />
                   <Field label="Waktu Home Visit (mnt/pasien)" value={selected.time_home_visit} />
@@ -222,7 +282,7 @@ export default function DataManagement() {
               {/* ── C. Kompetensi Layanan ── */}
               {selected.kompetensi && Object.keys(selected.kompetensi).length > 0 && (
                 <div>
-                  <SectionHeader label="C. Penilaian Kompetensi Sp.KKLP" />
+                  <SectionHeader label="F. Penilaian Kompetensi Sp.KKLP" />
                   <div className="space-y-2">
                     {kompetensiLayanan.map((nama, idx) => {
                       const item = selected.kompetensi[idx];
@@ -230,8 +290,8 @@ export default function DataManagement() {
                       return (
                         <div key={idx} className="flex items-center justify-between gap-3 py-2 border-b border-slate-50 last:border-0">
                           <span className="text-xs text-slate-700 flex-1">{nama}</span>
-                          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 ${scaleBadge(item.status)}`}>
-                            Skala {item.status}
+                          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 ${statusBadge(item.status)}`}>
+                            Status {item.status === 'sudah' ? 'Sudah' : item.status === 'belum' ? 'Belum' : '-'}
                           </span>
                         </div>
                       );
@@ -243,7 +303,7 @@ export default function DataManagement() {
               {/* ── D. Manfaat JKN ── */}
               {selected.jkn && Object.keys(selected.jkn).length > 0 && (
                 <div>
-                  <SectionHeader label="D. Penilaian Layanan JKN yang Sudah Berjalan" />
+                  <SectionHeader label="G. Penilaian Layanan JKN yang Sudah Berjalan" />
                   <div className="space-y-2">
                     {jknBenefits.map((nama, idx) => {
                       const item = selected.jkn[idx];
@@ -265,7 +325,7 @@ export default function DataManagement() {
               {/* ── Home Care ── */}
               {selected.home_care && selected.home_care.screening === 'ya' && (
                 <div>
-                  <SectionHeader label="Pelayanan Home Care" />
+                  <SectionHeader label="H. Pelayanan Home Care" />
                   <div className="space-y-2 text-xs">
                     <p><span className="font-semibold">Tenaga:</span> {selected.home_care.tenaga}</p>
                     <p><span className="font-semibold">Diagnosis:</span> {selected.home_care.diagnosis}</p>
@@ -282,7 +342,7 @@ export default function DataManagement() {
               {/* ── Paliatif ── */}
               {selected.paliatif && selected.paliatif.screening === 'ya' && (
                 <div>
-                  <SectionHeader label="Pelayanan Paliatif" />
+                  <SectionHeader label="I. Pelayanan Paliatif" />
                   <div className="space-y-2 text-xs">
                     <p><span className="font-semibold">Tenaga:</span> {selected.paliatif.tenaga}</p>
                     <p><span className="font-semibold">Diagnosis:</span> {selected.paliatif.diagnosis}</p>
@@ -298,7 +358,7 @@ export default function DataManagement() {
 \n              {/* ── E. Layanan Non-Optimal ── */}
               {selected.non_optimal && Object.keys(selected.non_optimal).length > 0 && (
                 <div>
-                  <SectionHeader label="E. Layanan Belum Optimal / Belum Tersedia" />
+                  <SectionHeader label="J. Layanan Belum Optimal / Belum Tersedia" />
                   <div className="space-y-2">
                     {nonOptimalServices.map((nama, idx) => {
                       const item = selected.non_optimal[idx];
@@ -324,7 +384,7 @@ export default function DataManagement() {
               {/* ── F. Wawancara ── */}
               {selected.wawancara && Object.keys(selected.wawancara).some(k => k !== 'pewawancara') && (
                 <div>
-                  <SectionHeader label="F. Hasil Wawancara" />
+                  <SectionHeader label="K. Hasil Wawancara" />
                   {selected.wawancara.pewawancara && (
                     <div className="mb-3 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-lg text-xs flex gap-2">
                       <span className="font-semibold text-emerald-800">Diwawancarai oleh:</span>

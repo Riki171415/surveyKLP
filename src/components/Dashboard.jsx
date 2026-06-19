@@ -45,6 +45,12 @@ const interviewQuestions = [
   "[W7] Insentif tambahan untuk Sp.KKLP?"
 ];
 
+const relevansiItems = [
+  "Peran sebagai dokter di poli umum", "Poli / Layanan khusus penyakit tidak menular (PTM)",
+  "Poli / layanan khusus Geriatri", "Poli / Layanan khusus Anak/MTBS",
+  "Kegiatan Home Visit / Home Care", "Kepala Puskesmas / Klinik", "Penanggung Jawab Mutu / UKP"
+];
+
 const containerVariants = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.1 } }
@@ -125,11 +131,16 @@ export default function Dashboard() {
   const exportToExcel = () => {
     const headers = [
       "No", "Waktu Pengisian", "Provinsi", "Kab/Kota", "Nama Puskesmas / Klinik", "Kode Faskes BPJS", "Nama Responden", "Jabatan",
-      "Dokter Umum", "Dokter Gigi", "Sp.KKLP",
+      "Ada Dokter Sp.KKLP?", "Sp.KKLP Berpraktik?", "Poli Tempat Praktik", "Kendala Praktik",
       "Waktu Poli (Mnt)", "Waktu Home Visit (Mnt)", "Beban Dalam Gedung (%)", "Beban Luar Gedung (%)"
     ];
+    relevansiItems.forEach((r, i) => { headers.push(`[Relevansi] ${r}`); });
+    headers.push("Layanan Yang Masih Sering Dirujuk", "Layanan Yang Belum Berjalan Optimal");
     kompetensiLayanan.forEach((k, i) => { headers.push(`[K${i+1}] Status`, `[K${i+1}] Kendala`); });
     jknBenefits.forEach((j, i) => { headers.push(`[J${i+1}] Skala`, `[J${i+1}] Catatan`); });
+    headers.push(
+      "[PRB] Diagnosis Ditangani", "[PRB] Pendaftaran PRB", "[PRB] Peresepan Obat PRB", "[PRB] Ketersediaan Obat PRB", "[PRB] Faskes Rujukan"
+    );
     headers.push(
       "[HC] Screening", "[HC] Tenaga", "[HC] Diagnosis", "[HC] Kondisi", "[HC] Kondisi Lainnya", "[HC] Jenis Layanan", "[HC] Jenis Layanan Lainnya", "[HC] Jumlah Kunjungan", "[HC] Kolaborasi", "[HC] Bentuk Kolaborasi", "[HC] Kepatuhan", "[HC] Perbaikan", "[HC] Bentuk Perbaikan",
       "[PL] Screening", "[PL] Tenaga", "[PL] Diagnosis", "[PL] Kondisi", "[PL] Kondisi Lainnya", "[PL] Tujuan", "[PL] Tujuan Lainnya", "[PL] Terapi", "[PL] Kolaborasi", "[PL] Bentuk Kolaborasi", "[PL] Kepatuhan", "[PL] Perbaikan", "[PL] Bentuk Perbaikan"
@@ -141,12 +152,30 @@ export default function Dashboard() {
     const rows = filteredData.map((row, index) => {
       const rowData = [
         index + 1, new Date(row.created_at).toLocaleString('id-ID'), row.provinsi || row.city || '', row.kab_kota || '', row.fktp_name || '', row.kode_faskes || '', row.nama_responden || '', row.role || '',
-        row.doc_umum || 'Tidak Ada', row.doc_gigi || 'Tidak Ada', row.doc_kklp || 'Tidak Ada',
+        row.doc_kklp || 'Tidak', row.spkklp_berpraktik || '', 
+        row.spkklp_poli ? Object.keys(row.spkklp_poli).filter(k => row.spkklp_poli[k]).join(', ') : '', 
+        row.spkklp_kendala ? Object.keys(row.spkklp_kendala).filter(k => row.spkklp_kendala[k]).join(', ') : '',
         row.time_in_poli || '', row.time_home_visit || '', row.prop_in_fktp || '', row.prop_out_fktp || ''
       ];
+
+      relevansiItems.forEach((_, i) => { rowData.push(row.relevansi_spkklp?.[i] || ''); });
+      rowData.push(
+        row.layanan_dirujuk ? Object.keys(row.layanan_dirujuk).filter(k => row.layanan_dirujuk[k]).join(', ') : '',
+        row.layanan_belum_berjalan ? Object.keys(row.layanan_belum_berjalan).filter(k => row.layanan_belum_berjalan[k]).join(', ') : ''
+      );
+
       kompetensiLayanan.forEach((_, i) => { rowData.push(row.kompetensi?.[i]?.status || '', row.kompetensi?.[i]?.kendala || ''); });
       jknBenefits.forEach((_, i) => { rowData.push(row.jkn?.[i]?.skala || '', row.jkn?.[i]?.catatan || ''); });
       
+      const prb = row.prb || {};
+      rowData.push(
+        prb.diagnosis_ditangani ? Object.keys(prb.diagnosis_ditangani).filter(k => prb.diagnosis_ditangani[k]).join(', ') : '',
+        prb.pendaftaran_prb ? Object.keys(prb.pendaftaran_prb).filter(k => prb.pendaftaran_prb[k]).join(', ') : '',
+        prb.peresepan_obat_prb ? Object.keys(prb.peresepan_obat_prb).filter(k => prb.peresepan_obat_prb[k]).join(', ') : '',
+        prb.ketersediaan_obat_prb ? Object.keys(prb.ketersediaan_obat_prb).filter(k => prb.ketersediaan_obat_prb[k]).join(', ') : '',
+        prb.faskes_rujukan ? Object.keys(prb.faskes_rujukan).filter(k => prb.faskes_rujukan[k]).join(', ') : ''
+      );
+
       const hc = row.home_care || {};
       rowData.push(
         hc.screening || '', hc.tenaga || '', hc.diagnosis || '',
@@ -185,7 +214,7 @@ export default function Dashboard() {
       const home = Number(row.time_home_visit) || 0;
       sumPoli += poli; sumHome += home;
       sumInFktp += Number(row.prop_in_fktp) || 0; sumOutFktp += Number(row.prop_out_fktp) || 0;
-      if (row.doc_kklp === 'Ada & Praktek') { kklpHome += home; kklpCount++; } else { nonKklpHome += home; nonKklpCount++; }
+      if (row.doc_kklp === 'Ya') { kklpHome += home; kklpCount++; } else { nonKklpHome += home; nonKklpCount++; }
     });
     return {
       avgPoli: totalResponden > 0 ? Math.round(sumPoli / totalResponden) : 0,
@@ -200,18 +229,12 @@ export default function Dashboard() {
   const { roleChartData, ketersediaanDokter, trendChartData, bebanKerjaData } = useMemo(() => {
     const roleCount = {}; const trendMap = {};
     const docStats = [
-      { name: 'Dr Umum', 'Ada & Praktek': 0, 'Ada tapi Tidak Praktek': 0, 'Tidak Ada': 0 }, 
-      { name: 'Dr Gigi', 'Ada & Praktek': 0, 'Ada tapi Tidak Praktek': 0, 'Tidak Ada': 0 }, 
-      { name: 'Sp.KKLP', 'Ada & Praktek': 0, 'Ada tapi Tidak Praktek': 0, 'Tidak Ada': 0 }
+      { name: 'Sp.KKLP', 'Ya': 0, 'Tidak': 0 }
     ];
     filteredData.forEach(row => {
       const role = row.role || 'Lainnya'; roleCount[role] = (roleCount[role] || 0) + 1;
-      const stUmum = row.doc_umum || 'Tidak Ada';
-      if (stUmum === 'Ada & Praktek') docStats[0]['Ada & Praktek']++; else if (stUmum === 'Ada tapi Tidak Praktek') docStats[0]['Ada tapi Tidak Praktek']++; else docStats[0]['Tidak Ada']++;
-      const stGigi = row.doc_gigi || 'Tidak Ada';
-      if (stGigi === 'Ada & Praktek') docStats[1]['Ada & Praktek']++; else if (stGigi === 'Ada tapi Tidak Praktek') docStats[1]['Ada tapi Tidak Praktek']++; else docStats[1]['Tidak Ada']++;
-      const stKklp = row.doc_kklp || 'Tidak Ada';
-      if (stKklp === 'Ada & Praktek') docStats[2]['Ada & Praktek']++; else if (stKklp === 'Ada tapi Tidak Praktek') docStats[2]['Ada tapi Tidak Praktek']++; else docStats[2]['Tidak Ada']++;
+      const stKklp = row.doc_kklp || 'Tidak';
+      if (stKklp === 'Ya') docStats[0]['Ya']++; else docStats[0]['Tidak']++;
       if (row.created_at) { try { const dateStr = format(parseISO(row.created_at), 'dd MMM yy', { locale: localeID }); trendMap[dateStr] = (trendMap[dateStr] || 0) + 1; } catch(e) {} }
     });
     return {
@@ -264,7 +287,7 @@ export default function Dashboard() {
           { label: 'Total Faskes Terdata', value: totalResponden, icon: Users, sub: 'Responden tersaring', color: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/20' },
           { label: 'Rata-rata Waktu Poli', value: `${summaryMetrics.avgPoli} Mnt`, icon: Clock, sub: 'Durasi konsultasi rata-rata', color: 'from-emerald-400 to-teal-500', shadow: 'shadow-emerald-500/20' },
           { label: 'Rata-rata Home Visit', value: `${summaryMetrics.avgHome} Mnt`, icon: Home, sub: 'Kunjungan pasien', color: 'from-amber-400 to-orange-500', shadow: 'shadow-amber-500/20' },
-          { label: 'Penempatan Sp.KKLP', value: `${Math.round((ketersediaanDokter[2]['Ada & Praktek'] / (totalResponden||1))*100)}%`, icon: Stethoscope, sub: `${ketersediaanDokter[2]['Ada & Praktek']} Faskes memiliki Sp.KKLP`, color: 'from-pink-500 to-rose-500', shadow: 'shadow-rose-500/20' }
+          { label: 'Penempatan Sp.KKLP', value: `${Math.round((ketersediaanDokter[0]['Ya'] / (totalResponden||1))*100)}%`, icon: Stethoscope, sub: `${ketersediaanDokter[0]['Ya']} Faskes memiliki Sp.KKLP`, color: 'from-pink-500 to-rose-500', shadow: 'shadow-rose-500/20' }
         ].map((s, i) => (
           <div key={i} className="relative overflow-hidden p-6 bg-white rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 flex flex-col group cursor-default">
             <div className={`absolute -right-12 -top-12 w-40 h-40 bg-gradient-to-br ${s.color} rounded-full opacity-[0.08] transition-transform duration-700 ease-out`}></div>
@@ -355,14 +378,11 @@ export default function Dashboard() {
                 <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fontSize: 13, fontWeight: 600, fill: '#334155'}} />
                 <RechartsTooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
                 <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ fontSize: '12px', paddingBottom: '10px' }} />
-                <Bar dataKey="Ada & Praktek" stackId="a" fill="#00A68A" barSize={28} isAnimationActive={!isPrinting}>
-                  <LabelList dataKey="Ada & Praktek" position="inside" style={{ fill: '#ffffff', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
+                <Bar dataKey="Ya" stackId="a" fill="#00A68A" barSize={36} radius={[0, 0, 0, 0]} isAnimationActive={!isPrinting}>
+                  <LabelList dataKey="Ya" position="inside" style={{ fill: '#ffffff', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
                 </Bar>
-                <Bar dataKey="Ada tapi Tidak Praktek" stackId="a" fill="#F28322" isAnimationActive={!isPrinting}>
-                  <LabelList dataKey="Ada tapi Tidak Praktek" position="inside" style={{ fill: '#ffffff', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
-                </Bar>
-                <Bar dataKey="Tidak Ada" stackId="a" fill="#e2e8f0" radius={[0, 6, 6, 0]} isAnimationActive={!isPrinting}>
-                  <LabelList dataKey="Tidak Ada" position="inside" style={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
+                <Bar dataKey="Tidak" stackId="a" fill="#e2e8f0" radius={[0, 6, 6, 0]} isAnimationActive={!isPrinting}>
+                  <LabelList dataKey="Tidak" position="inside" style={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }} formatter={(v) => v > 0 ? v : ''} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -374,7 +394,7 @@ export default function Dashboard() {
       <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 mt-4 print:break-inside-avoid">
         <h4 className="font-bold text-blue-800 mb-2 flex items-center"><Sparkles className="w-4 h-4 mr-2" /> Narasi Eksekutif</h4>
         <p className="text-sm text-slate-600 leading-relaxed text-justify">
-          Berdasarkan data {totalResponden} responden, terlihat bahwa mayoritas beban kerja faskes masih terpusat di dalam gedung ({summaryMetrics.avgInFktp}%), sedangkan pelayanan luar gedung (komunitas/kunjungan rumah) baru mencapai {summaryMetrics.avgOutFktp}%. Kehadiran Sp.KKLP (yang saat ini mencakup {Math.round((ketersediaanDokter[2]['Ada & Praktek'] / (totalResponden||1))*100)}% dari total sampel) terbukti memberikan korelasi positif terhadap peningkatan rata-rata durasi <i>Home Visit</i> dari {summaryMetrics.nonKklpAvgHome} menit menjadi {summaryMetrics.kklpAvgHome} menit per pasien. Hal ini mengindikasikan bahwa pemerataan Sp.KKLP berpotensi besar memperkuat upaya promotif, preventif, dan intervensi keluarga secara langsung di lapangan.
+          Berdasarkan data {totalResponden} responden, terlihat bahwa mayoritas beban kerja faskes masih terpusat di dalam gedung ({summaryMetrics.avgInFktp}%), sedangkan pelayanan luar gedung (komunitas/kunjungan rumah) baru mencapai {summaryMetrics.avgOutFktp}%. Kehadiran Sp.KKLP (yang saat ini mencakup {Math.round((ketersediaanDokter[0]['Ya'] / (totalResponden||1))*100)}% dari total sampel) terbukti memberikan korelasi positif terhadap peningkatan rata-rata durasi <i>Home Visit</i> dari {summaryMetrics.nonKklpAvgHome} menit menjadi {summaryMetrics.kklpAvgHome} menit per pasien. Hal ini mengindikasikan bahwa pemerataan Sp.KKLP berpotensi besar memperkuat upaya promotif, preventif, dan intervensi keluarga secara langsung di lapangan.
         </p>
       </div>
     </div>
