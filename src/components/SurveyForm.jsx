@@ -708,13 +708,21 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                           <tr key={idx} className={`transition-colors ${showErrors && !formData.relevansiSpkklp[idx] ? 'bg-rose-50/50' : 'hover:bg-slate-50'}`}>
                             <td className="px-4 py-3 text-slate-800 text-xs md:text-sm">{item}</td>
                             <td className="px-4 py-3">
-                              <div className="flex justify-center gap-1.5">
-                                {[1,2,3,4].map(val => {
-                                  const isSelected = formData.relevansiSpkklp[idx] === val.toString();
+                              <div className="flex flex-col gap-2">
+                                {[
+                                  { val: 1, label: 'Sangat Tidak Setuju' },
+                                  { val: 2, label: 'Tidak Setuju' },
+                                  { val: 3, label: 'Setuju' },
+                                  { val: 4, label: 'Sangat Setuju' }
+                                ].map(opt => {
+                                  const isSelected = formData.relevansiSpkklp[idx] === opt.val.toString();
                                   return (
-                                    <label key={val} className={`cursor-pointer w-8 h-8 flex items-center justify-center rounded text-xs font-semibold border transition-all ${isSelected ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'}`}>
-                                      <input type="radio" className="hidden" name={`rel-${idx}`} value={val} checked={isSelected} onChange={(e) => setFormData(prev => ({ ...prev, relevansiSpkklp: { ...prev.relevansiSpkklp, [idx]: e.target.value } }))} />
-                                      {val}
+                                    <label key={opt.val} className={`flex items-center gap-2 cursor-pointer transition-all ${isSelected ? 'text-indigo-700 font-semibold' : 'text-slate-600 hover:text-indigo-600'}`}>
+                                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? 'border-indigo-600' : 'border-slate-300'}`}>
+                                        {isSelected && <div className="w-2 h-2 rounded-full bg-indigo-600"></div>}
+                                      </div>
+                                      <input type="radio" className="hidden" name={`rel-${idx}`} value={opt.val} checked={isSelected} onChange={(e) => setFormData(prev => ({ ...prev, relevansiSpkklp: { ...prev.relevansiSpkklp, [idx]: e.target.value } }))} />
+                                      <span className="text-xs whitespace-nowrap">{opt.val} - {opt.label}</span>
                                     </label>
                                   );
                                 })}
@@ -819,13 +827,21 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         <tr key={idx} className={`transition-colors ${showErrors && !formData.jkn[idx]?.skala ? 'bg-rose-50/50' : 'hover:bg-slate-50'}`}>
                           <td className="px-4 py-3 text-slate-800 text-xs md:text-sm">{item}</td>
                           <td className="px-4 py-3">
-                            <div className="flex justify-center gap-1.5">
-                              {[1,2,3,4].map(val => {
-                                const isSelected = formData.jkn[idx]?.skala === val.toString();
+                            <div className="flex flex-col gap-2">
+                              {[
+                                { val: 1, label: 'Sangat Tidak Setuju' },
+                                { val: 2, label: 'Tidak Setuju' },
+                                { val: 3, label: 'Setuju' },
+                                { val: 4, label: 'Sangat Setuju' }
+                              ].map(opt => {
+                                const isSelected = formData.jkn[idx]?.skala === opt.val.toString();
                                 return (
-                                  <label key={val} className={`cursor-pointer w-8 h-8 flex items-center justify-center rounded text-xs font-semibold border transition-all ${isSelected ? 'bg-primary-600 text-white border-primary-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'}`}>
-                                    <input type="radio" className="hidden" name={`jkn-${idx}`} value={val} checked={isSelected} onChange={(e) => handleNestedChange('jkn', idx, 'skala', e.target.value)} />
-                                    {val}
+                                  <label key={opt.val} className={`flex items-center gap-2 cursor-pointer transition-all ${isSelected ? 'text-primary-700 font-semibold' : 'text-slate-600 hover:text-primary-600'}`}>
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? 'border-primary-600' : 'border-slate-300'}`}>
+                                      {isSelected && <div className="w-2 h-2 rounded-full bg-primary-600"></div>}
+                                    </div>
+                                    <input type="radio" className="hidden" name={`jkn-${idx}`} value={opt.val} checked={isSelected} onChange={(e) => handleNestedChange('jkn', idx, 'skala', e.target.value)} />
+                                    <span className="text-xs whitespace-nowrap">{opt.val} - {opt.label}</span>
                                   </label>
                                 );
                               })}
@@ -1000,13 +1016,21 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="flex justify-center gap-1">
-                              {[1,2,3,4].map(val => {
-                                const isSelected = formData.nonOptimal[idx]?.skala === val.toString();
+                            <div className="flex flex-col gap-2">
+                              {[
+                                { val: 1, label: 'Sangat Tidak Setuju' },
+                                { val: 2, label: 'Tidak Setuju' },
+                                { val: 3, label: 'Setuju' },
+                                { val: 4, label: 'Sangat Setuju' }
+                              ].map(opt => {
+                                const isSelected = formData.nonOptimal[idx]?.skala === opt.val.toString();
                                 return (
-                                  <label key={val} className={`cursor-pointer w-7 h-7 flex items-center justify-center rounded text-xs font-semibold border transition-all ${isSelected ? 'bg-primary-600 text-white border-primary-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'}`}>
-                                    <input type="radio" className="hidden" name={`nonopt-${idx}`} value={val} checked={isSelected} onChange={(e) => handleNestedChange('nonOptimal', idx, 'skala', e.target.value)} />
-                                    {val}
+                                  <label key={opt.val} className={`flex items-center gap-2 cursor-pointer transition-all ${isSelected ? 'text-primary-700 font-semibold' : 'text-slate-600 hover:text-primary-600'}`}>
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? 'border-primary-600' : 'border-slate-300'}`}>
+                                      {isSelected && <div className="w-2 h-2 rounded-full bg-primary-600"></div>}
+                                    </div>
+                                    <input type="radio" className="hidden" name={`nonopt-${idx}`} value={opt.val} checked={isSelected} onChange={(e) => handleNestedChange('nonOptimal', idx, 'skala', e.target.value)} />
+                                    <span className="text-xs whitespace-nowrap">{opt.val} - {opt.label}</span>
                                   </label>
                                 );
                               })}
