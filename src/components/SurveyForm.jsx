@@ -122,7 +122,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
   const STEPS = isRoleDpm ? [
     { id: 1, title: 'Identitas' },
-    { id: 2, title: 'Survei DPM' }
+    { id: 2, title: 'Survei DPM' },
+    { id: 3, title: 'Pendalaman' }
   ] : [
     { id: 1, title: 'Identitas' },
     { id: 2, title: 'Kompetensi' },
@@ -285,9 +286,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
          }
          // Diagnosis and Tindakan are now required for both Ya and Tidak
          if (!formData.spkklpPoli.diagnosis?.trim() || !formData.spkklpPoli.tindakan?.trim()) return false;
-         if (formData.spkklpPoli['luaran_Rujukan ke FKRTL']) {
-           if (!formData.spkklpPoli.alasanRujukan?.trim()) return false;
-         }
+         if (!formData.spkklpPoli.alasanRujukan?.trim()) return false;
          if (!formData.spkklpKendala?.hasKendala) return false;
          if (formData.spkklpKendala?.hasKendala === 'Ya') {
            if (!formData.spkklpKendala.diagnosis?.trim() || !formData.spkklpKendala.tindakan?.trim()) return false;
@@ -334,7 +333,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const canProceed = () => {
     if (step === 1) return isStep1Valid;
     if (step === 2) return isStep2Valid;
-    if (isRoleDpm) return false; // DPM only has 2 steps!
+    if (isRoleDpm && step === 3) return isStep6Valid;
+    if (isRoleDpm) return false; // DPM only has 3 steps
     if (step === 3) return isStep3Valid;
     if (step === 4) return isStep4Valid;
     if (step === 5) return isStep5Valid;
@@ -356,7 +356,12 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
   const submitData = async (isIntermediate = false) => {
     if (isRoleDpm) {
-      if (!isStep2Valid) {
+      if (isIntermediate && !isStep2Valid) {
+        setShowErrors(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (!isIntermediate && !isStep6Valid) {
         setShowErrors(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
@@ -451,7 +456,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
           Selanjutnya adalah sesi pertanyaan terbuka. Silakan diisi dengan <strong>jujur</strong> dan <strong>sesuai kondisi nyata di lapangan</strong>. Ceritakan secara komprehensif dan organik.
         </p>
         <button
-          onClick={() => { setShowTransition(false); setStep(6); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          onClick={() => { setShowTransition(false); setStep(isRoleDpm ? 3 : 6); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
           className="bg-emerald-600 text-white px-8 py-3.5 rounded-xl font-bold text-lg hover:bg-emerald-700 transition-all shadow-lg hover:shadow-emerald-500/40 hover:-translate-y-1 active:scale-95"
         >
           Lanjutkan ke Pendalaman Kualitatif
@@ -804,12 +809,10 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                                 <label key={l} className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" checked={formData.spkklpPoli?.[`luaran_${l}`] || false} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, [`luaran_${l}`]: e.target.checked } }))} className="rounded" />{l}</label>
                               ))}</div>
                             </div>
-                            {formData.spkklpPoli?.['luaran_Rujukan ke FKRTL'] && (
                               <div className="md:col-span-2 mt-2 pt-3 border-t border-slate-100">
                                 <label className="block text-xs font-semibold text-slate-700 mb-1">Apabila pasien di rujuk, Apa indikasi atau alasan rujukan tersebut? <span className="text-rose-500">*</span></label>
                                 <textarea rows={2} placeholder="Jelaskan indikasi atau alasan rujukan..." className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.alasanRujukan?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.alasanRujukan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, alasanRujukan: e.target.value } }))} />
                               </div>
-                            )}
                           </div>
                         )}
 
@@ -1233,8 +1236,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
               </div>
             )}
 
-            {/* ===== STEP 6: PENDALAMAN KUALITATIF ===== */}
-            {step === 6 && (
+            {/* ===== PENDALAMAN KUALITATIF ===== */}
+            {((isRoleDpm && step === 3) || (!isRoleDpm && step === 6)) && (
               <div className="space-y-8 animate-fade-in">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-emerald-600 rounded-full"></div>
@@ -1305,7 +1308,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   {step === 5 && (<>
                     {(() => { const b = nonOptimalServices.filter((_, i) => !formData.nonOptimal[i]?.masukJkn || !formData.nonOptimal[i]?.skala).length; return b > 0 ? <li>{b} layanan non-optimal belum diisi lengkap</li> : null; })()}
                   </>)}
-                  {step === 6 && (<>
+                  {((isRoleDpm && step === 3) || (!isRoleDpm && step === 6)) && (<>
                     {(() => { const b = interviewQuestions.filter((_, i) => (formData.wawancara[i]?.trim() || '').length < 10).length; return b > 0 ? <li>Ada {b} pertanyaan pendalaman kualitatif yang belum dijawab</li> : null; })()}
                   </>)}
                 </ul>
@@ -1320,7 +1323,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   {isSubmitting ? 'Memproses...' : 'Simpan Selesai'}
                   {!isSubmitting && <Save className="w-5 h-5 ml-2" />}
                 </button>
-              ) : step === totalSteps - 1 && !isRoleDpm ? (
+              ) : step === totalSteps - 1 ? (
                 <button type="button" onClick={() => submitData(true)} disabled={isSubmitting} className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 hover:-translate-y-0.5 hover:shadow-amber-500/40 active:scale-95'}`}>
                   {isSubmitting ? 'Menyimpan...' : 'Simpan & Lanjut Pendalaman'}
                   {!isSubmitting && <ChevronRight className="w-5 h-5 ml-2" />}
