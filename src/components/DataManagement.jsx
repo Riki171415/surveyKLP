@@ -25,13 +25,13 @@ const kompetensiLayanan = [
 ];
 
 const interviewQuestions = [
-  "Bagaimana pelaksanaan layanan penyakit kronik di FKTP saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya?",
+  "Bagaimana pelaksanaan layanan penyakit kronik di Puskesmas / Klinik saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya?",
   "Bagaimana pelaksanaan home visit dan home care saat ini, serta dukungan yang diperlukan untuk optimalisasi layanan tersebut?",
   "Bagaimana implementasi komunitas dan edukasi kelompok saat ini? apakah perlu menjadi manfaat non-kapitasi JKN?",
-  "Menurut anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN FKTP?",
+  "Menurut anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN Puskesmas / Klinik?",
   "Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB?",
-  "Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di FKTP?",
-  "Menurut Anda, bentuk dukungan apa yang diperlukan agar FKTP yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?"
+  "Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di Puskesmas / Klinik?",
+  "Menurut Anda, bentuk dukungan apa yang diperlukan agar Puskesmas / Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?"
 ];
 
 const relevansiItems = [
@@ -142,7 +142,7 @@ export default function DataManagement() {
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Cari FKTP atau Kota..."
+                placeholder="Cari Puskesmas / Klinik atau Kota..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-xs"

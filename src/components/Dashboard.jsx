@@ -71,7 +71,7 @@ export default function Dashboard() {
 
   const exportToExcel = () => {
     const headers = [
-      "No", "Tanggal Pengisian", "Provinsi", "Kabupaten/Kota", "Nama FKTP", "Kode Faskes", "Nama Responden", "Jabatan", "Ada Sp.KKLP?",
+      "No", "Tanggal Pengisian", "Provinsi", "Kabupaten/Kota", "Nama Puskesmas / Klinik", "Kode Faskes", "Nama Responden", "Jabatan", "Ada Sp.KKLP?",
       "Total Dokter Umum", "Total Dokter Gigi", "Waktu Poli (jam)", "Waktu Home Visit (jam)", "Beban Dalam Gedung (%)", "Beban Luar Gedung (%)",
       "Kepatuhan PRB", "Kolaborasi Homecare", "Kolaborasi Paliatif"
     ];
@@ -169,7 +169,7 @@ export default function Dashboard() {
           <h3 className="text-xl font-bold text-slate-800 flex items-center"><Database className="w-6 h-6 mr-2 text-primary-600" /> Data Grid</h3>
           <div className="relative w-full sm:w-64">
             <Search className="w-5 h-5 absolute left-3 top-2.5 text-slate-400" />
-            <input type="text" placeholder="Cari FKTP/Provinsi..." className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none" value={searchTable} onChange={(e) => setSearchTable(e.target.value)} />
+            <input type="text" placeholder="Cari Puskesmas / Klinik/Provinsi..." className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none" value={searchTable} onChange={(e) => setSearchTable(e.target.value)} />
           </div>
         </div>
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
@@ -177,7 +177,7 @@ export default function Dashboard() {
             <table className="w-full text-left text-sm whitespace-nowrap">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4 font-bold text-slate-700">FKTP</th>
+                  <th className="px-6 py-4 font-bold text-slate-700">Puskesmas / Klinik</th>
                   <th className="px-6 py-4 font-bold text-slate-700">Provinsi</th>
                   <th className="px-6 py-4 font-bold text-slate-700">Jabatan</th>
                   <th className="px-6 py-4 font-bold text-slate-700 text-center">Sp.KKLP</th>
@@ -216,12 +216,12 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <div className="inline-flex items-center space-x-2 px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-sm font-bold tracking-wide mb-3 border border-primary-100 shadow-sm"><Activity className="w-4 h-4" /><span>DASHBOARD ANALITIK</span></div>
-            <h1 className="text-4xl font-black text-slate-800 tracking-tight leading-tight">Analisis Data <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-teal-500">Kesiapan FKTP</span></h1>
+            <h1 className="text-4xl font-black text-slate-800 tracking-tight leading-tight">Analisis Data <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-teal-500">Kesiapan Puskesmas / Klinik</span></h1>
             <p className="text-slate-500 mt-2 text-lg font-medium">Monitoring capaian dan evaluasi implementasi Sp.KKLP</p>
           </div>
           <div className="flex gap-3">
             <button onClick={handlePrint} className="flex items-center px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 hover:text-primary-600 transition shadow-sm hover:shadow-md hover:border-primary-200 active:scale-95"><Printer className="w-5 h-5 mr-2" /> Cetak</button>
-            <button onClick={exportToExcel} className="flex items-center px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95"><Download className="w-5 h-5 mr-2" /> Data FKTP</button>
+            <button onClick={exportToExcel} className="flex items-center px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95"><Download className="w-5 h-5 mr-2" /> Data Puskesmas / Klinik</button>
             <button onClick={exportDpmToExcel} className="flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-bold hover:from-blue-400 hover:to-indigo-500 transition shadow-md hover:shadow-lg hover:shadow-blue-500/30 active:scale-95"><Download className="w-5 h-5 mr-2" /> Data DPM</button>
           </div>
         </div>

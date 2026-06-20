@@ -53,7 +53,7 @@ const layananDirujukItems = [
   "Deprescribing atau evaluasi rasionalisasi obat pada pasien polifarmasi",
   "Konseling dan tata laksana pasien geriatri frailty",
   "Discharge planning dan tindak lanjut pasien pasca rawat inap",
-  "Koordinasi rujuk balik FKRTL\u2013FKTP untuk pasien kronis"
+  "Koordinasi rujuk balik FKRTL\u2013Puskesmas / Klinik untuk pasien kronis"
 ];
 
 const layananBelumBerjalanItems = [
@@ -68,17 +68,17 @@ const layananBelumBerjalanItems = [
   "Monitoring komunitas risiko tinggi penyakit kronis",
   "Koordinasi lintas profesi dan kader kesehatan",
   "Discharge planning dan tindak lanjut pasien pasca rawat inap",
-  "Koordinasi rujuk balik FKRTL\u2013FKTP"
+  "Koordinasi rujuk balik FKRTL\u2013Puskesmas / Klinik"
 ];
 
 const interviewQuestions = [
-  "1. Bagaimana pelaksanaan layanan penyakit kronik di FKTP saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya? (adakah aspek yang masih perlu diperkuat?)",
+  "1. Bagaimana pelaksanaan layanan penyakit kronik di Puskesmas / Klinik saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya? (adakah aspek yang masih perlu diperkuat?)",
   "2. Bagaimana pelaksanaan home visit dan home care saat ini, serta dukungan yang diperlukan untuk optimalisasi layanan tersebut?",
   "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini? apakah perlu menjadi manfaat non-kapitasi JKN? Atau ada opsi fund channeling lain? (bisa berikan contoh aktivitasnya apa saja yang biasanya dilakukan saat implementasi komunitas dan edukasi kelompok)",
-  "4. Menurut anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN FKTP?",
+  "4. Menurut anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN Puskesmas / Klinik?",
   "5. Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB dengan adanya sp.KKLP?",
-  "6. Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di FKTP?",
-  "7. Menurut Anda, bentuk dukungan apa yang diperlukan agar FKTP yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?"
+  "6. Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di Puskesmas / Klinik?",
+  "7. Menurut Anda, bentuk dukungan apa yang diperlukan agar Puskesmas / Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?"
 ];
 
 export default function SurveyForm({ isEdit = false, isInterview = false }) {
@@ -457,7 +457,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
           </div>
           <div>
             <h1 className="text-3xl md:text-4xl font-display font-bold text-slate-900 tracking-tight leading-tight">
-              {isInterview ? 'Form Wawancara (Tim Survey)' : 'Survey Optimalisasi Program JKN di FKTP'}
+              {isInterview ? 'Form Wawancara (Tim Survey)' : 'Survey Optimalisasi Program JKN di Puskesmas / Klinik'}
             </h1>
             {isInterview ? (
               <p className="text-slate-500 mt-2 text-sm max-w-2xl">Anda sedang dalam mode Tim Survey. Anda dapat mengedit jawaban Puskesmas dan mengisi hasil wawancara di Tahap 6.</p>
@@ -601,7 +601,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-slate-700 mb-3">
-                      Apakah FKTP memiliki Dokter Sp.KKLP?
+                      Apakah Puskesmas / Klinik memiliki Dokter Sp.KKLP?
                       <span className="block text-xs text-slate-400 font-normal mt-0.5">(baik Berpraktik maupun tidak berpraktik sebagai Sp.KKLP)</span>
                     </label>
                     <div className={`flex gap-4 ${showErrors && !formData.docKklp ? 'p-2 ring-2 ring-rose-500 rounded-xl bg-rose-50/50' : ''}`}>
@@ -766,7 +766,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                             <div className="md:col-span-2"><label className="block text-xs font-semibold text-slate-700 mb-1">Nama diagnosis yang ditangani Sp.KKLP (cantumkan Kode ICD-10) <span className="text-rose-500">*</span></label><textarea rows={2} placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.diagnosis?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.diagnosis || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, diagnosis: e.target.value } }))} /></div>
                             <div><label className="block text-xs font-semibold text-slate-700 mb-1">Tindakan/Prosedur yang dilakukan <span className="text-rose-500">*</span></label><textarea rows={2} placeholder="Jelaskan..." className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.tindakan?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.tindakan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, tindakan: e.target.value } }))} /></div>
                             <div><label className="block text-xs font-semibold text-slate-700 mb-1">Luaran pelayanan (centang semua yang sesuai)</label>
-                              <div className="flex flex-col gap-1">{['Selesai di FKTP', 'Kontrol berkala di FKTP', 'Home care', 'Paliatif', 'PRB', 'Rujukan ke FKRTL', 'Lainnya'].map(l => (
+                              <div className="flex flex-col gap-1">{['Selesai di Puskesmas / Klinik', 'Kontrol berkala di Puskesmas / Klinik', 'Home care', 'Paliatif', 'PRB', 'Rujukan ke FKRTL', 'Lainnya'].map(l => (
                                 <label key={l} className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" checked={formData.spkklpPoli?.[`luaran_${l}`] || false} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, [`luaran_${l}`]: e.target.checked } }))} className="rounded" />{l}</label>
                               ))}</div>
                             </div>
@@ -775,7 +775,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
                         {/* Apakah ada kasus yang belum bisa dilakukan */}
                         <div>
-                          <label className="block text-sm font-semibold text-slate-700 mb-3">Apakah terdapat kasus yang secara kompetensi dapat ditangani Sp.KKLP namun belum dapat dilaksanakan di FKTP? <span className="text-rose-500">*</span></label>
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">Apakah terdapat kasus yang secara kompetensi dapat ditangani Sp.KKLP namun belum dapat dilaksanakan di Puskesmas / Klinik? <span className="text-rose-500">*</span></label>
                           <div className={`flex gap-4 ${showErrors && !formData.spkklpKendala?.hasKendala ? 'p-2 ring-2 ring-rose-500 rounded-xl bg-rose-50/50' : ''}`}>
                             {['Ya', 'Tidak'].map(opt => (
                               <label key={opt} className={`flex items-center gap-3 px-5 py-3 border-2 rounded-xl cursor-pointer transition-all ${
@@ -813,7 +813,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
               <div className="space-y-8">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-indigo-600 rounded-full"></div>
-                  <h2 className="text-xl font-bold text-slate-800">C. Perspektif terhadap Sp.KKLP di FKTP</h2>
+                  <h2 className="text-xl font-bold text-slate-800">C. Perspektif terhadap Sp.KKLP di Puskesmas / Klinik</h2>
                 </div>
 
                 {/* Relevansi SpKKLP */}
@@ -827,7 +827,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                       </ul>
                     </div>
                   </div>
-                  <p className="text-sm font-semibold text-slate-800 mb-3">Menurut Anda, seberapa relevan kegiatan berikut untuk didukung oleh kompetensi dokter Sp.KKLP di FKTP?</p>
+                  <p className="text-sm font-semibold text-slate-800 mb-3">Menurut Anda, seberapa relevan kegiatan berikut untuk didukung oleh kompetensi dokter Sp.KKLP di Puskesmas / Klinik?</p>
                   <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
                     <table className="w-full text-left text-sm">
                       <thead className="bg-slate-50 border-b border-slate-200">
@@ -870,7 +870,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
                 {/* Layanan yang masih sering dirujuk */}
                 <div>
-                  <p className="text-sm font-semibold text-slate-800 mb-3">Menurut Anda, layanan apa yang masih sering dirujuk ke FKRTL tetapi seharusnya dapat ditangani di FKTP? <span className="font-normal text-slate-500">(centang semua yang sesuai)</span></p>
+                  <p className="text-sm font-semibold text-slate-800 mb-3">Menurut Anda, layanan apa yang masih sering dirujuk ke FKRTL tetapi seharusnya dapat ditangani di Puskesmas / Klinik? <span className="font-normal text-slate-500">(centang semua yang sesuai)</span></p>
                   <div className="grid grid-cols-1 gap-2">
                     {layananDirujukItems.map((item, idx) => (
                       <label key={idx} className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-all ${formData.layananDirujuk[idx] ? 'border-indigo-400 bg-indigo-50 text-indigo-800' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'}`}>
@@ -887,7 +887,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
                 {/* Layanan SpKKLP yang belum berjalan */}
                 <div>
-                  <p className="text-sm font-semibold text-slate-800 mb-3">Menurut Anda, layanan apa yang seharusnya dapat dilakukan oleh dokter Sp.KKLP tetapi saat ini belum berjalan atau belum optimal di FKTP Anda? <span className="font-normal text-slate-500">(centang semua yang sesuai)</span></p>
+                  <p className="text-sm font-semibold text-slate-800 mb-3">Menurut Anda, layanan apa yang seharusnya dapat dilakukan oleh dokter Sp.KKLP tetapi saat ini belum berjalan atau belum optimal di Puskesmas / Klinik Anda? <span className="font-normal text-slate-500">(centang semua yang sesuai)</span></p>
                   <div className="grid grid-cols-1 gap-2">
                     {layananBelumBerjalanItems.map((item, idx) => (
                       <label key={idx} className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-all ${formData.layananBelumBerjalan[idx] ? 'border-amber-400 bg-amber-50 text-amber-800' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'}`}>
@@ -929,7 +929,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     </div>
                     <div><label className="block text-xs font-semibold text-slate-700 mb-1">Rata-rata jumlah rujukan ke FKRTL per bulan <span className="text-rose-500">*</span></label><input type="number" placeholder="Jumlah" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none ${showErrors && !formData.prb?.rataRujukan ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.prb?.rataRujukan || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, rataRujukan: e.target.value } }))} /></div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-semibold text-slate-700 mb-2">Mekanisme pemantauan peserta PRB di FKTP <span className="text-rose-500">*</span> <span className="font-normal text-slate-400">(centang bisa lebih dari 1)</span></label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-2">Mekanisme pemantauan peserta PRB di Puskesmas / Klinik <span className="text-rose-500">*</span> <span className="font-normal text-slate-400">(centang bisa lebih dari 1)</span></label>
                       <div className={`grid grid-cols-2 sm:grid-cols-3 gap-2 ${showErrors && !formData.prb?.mekanisme ? 'p-2 ring-2 ring-rose-500 rounded-lg bg-rose-50/50' : ''}`}>
                         {['Pengingat kunjungan', 'Telepon/WA', 'Kunjungan rumah', 'Tidak ada mekanisme khusus', 'Lainnya'].map(m => (
                           <label key={m} className="flex items-center gap-2 text-xs cursor-pointer p-2 border border-slate-200 rounded-lg hover:bg-slate-50 bg-white">
@@ -1010,7 +1010,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     <span className="text-xs text-slate-400">(diisi semua responden)</span>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-700 mb-3">Apakah FKTP pernah memberikan layanan home care dalam 12 bulan terakhir?</p>
+                    <p className="text-sm font-semibold text-slate-700 mb-3">Apakah Puskesmas / Klinik pernah memberikan layanan home care dalam 12 bulan terakhir?</p>
                     <div className="flex gap-4">
                       {['Ya', 'Tidak'].map(opt => (
                         <label key={opt} className={`flex items-center gap-3 px-5 py-3 border-2 rounded-xl cursor-pointer transition-all ${
@@ -1070,7 +1070,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     <span className="text-xs text-slate-400">(diisi semua responden)</span>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-700 mb-3">Apakah FKTP pernah memberikan layanan paliatif dalam 12 bulan terakhir?</p>
+                    <p className="text-sm font-semibold text-slate-700 mb-3">Apakah Puskesmas / Klinik pernah memberikan layanan paliatif dalam 12 bulan terakhir?</p>
                     <div className="flex gap-4">
                       {['Ya', 'Tidak'].map(opt => (
                         <label key={opt} className={`flex items-center gap-3 px-5 py-3 border-2 rounded-xl cursor-pointer transition-all ${
@@ -1304,13 +1304,13 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
               <button onClick={() => setShowPanduan(false)} className="text-slate-400 hover:text-red-500 transition-colors"><svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             <div className="p-6 overflow-y-auto text-slate-700 space-y-6">
-              <div className="bg-primary-50 border border-primary-100 rounded-xl p-4 text-sm text-primary-800"><span className="font-bold block mb-1">ℹ️ Tentang Survey Ini</span>Survey ini bertujuan mengidentifikasi layanan JKN yang sudah berjalan dan yang belum optimal di FKTP, serta menilai peran dokter Sp.KKLP berdasarkan kondisi nyata di lapangan.</div>
-              <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">📍 Tahap 1 — Identitas</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Pilih <strong>Provinsi</strong> terlebih dahulu, lalu pilih <strong>Nama Puskesmas / Klinik</strong>.</li><li>Pilih <strong>Jabatan</strong> Anda saat ini.</li><li>Pilih apakah FKTP memiliki dokter Sp.KKLP.</li></ul></section>
+              <div className="bg-primary-50 border border-primary-100 rounded-xl p-4 text-sm text-primary-800"><span className="font-bold block mb-1">ℹ️ Tentang Survey Ini</span>Survey ini bertujuan mengidentifikasi layanan JKN yang sudah berjalan dan yang belum optimal di Puskesmas / Klinik, serta menilai peran dokter Sp.KKLP berdasarkan kondisi nyata di lapangan.</div>
+              <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">📍 Tahap 1 — Identitas</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Pilih <strong>Provinsi</strong> terlebih dahulu, lalu pilih <strong>Nama Puskesmas / Klinik</strong>.</li><li>Pilih <strong>Jabatan</strong> Anda saat ini.</li><li>Pilih apakah Puskesmas / Klinik memiliki dokter Sp.KKLP.</li></ul></section>
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">⏱️ Tahap 2 — Kompetensi Dokter</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li><strong>Khusus Dokter Umum &amp; Sp.KKLP:</strong> isi beban kerja dan tabel kompetensi.</li><li><strong>Khusus Sp.KKLP:</strong> isi tambahan bagian praktik dan poli KKLP.</li><li>Kepala Puskesmas dan Nakes lainnya dapat melewati tahap ini.</li></ul></section>
-              <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">🏥 Tahap 3 — Perspektif Sp.KKLP</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Nilai relevansi 12 kegiatan Sp.KKLP menggunakan skala 1–4 (Sangat Tidak Setuju s/d Sangat Setuju).</li><li>Centang layanan yang masih sering dirujuk ke RS dan layanan yang belum berjalan di FKTP.</li><li>Isi informasi Program Rujuk Balik (PRB).</li></ul></section>
-              <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">💊 Tahap 4 — Manfaat JKN</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Beri nilai skala 1–4 untuk 8 layanan JKN.</li><li>Isi bagian Home Care dan Paliatif jika FKTP pernah memberikan layanan tersebut.</li></ul></section>
+              <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">🏥 Tahap 3 — Perspektif Sp.KKLP</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Nilai relevansi 12 kegiatan Sp.KKLP menggunakan skala 1–4 (Sangat Tidak Setuju s/d Sangat Setuju).</li><li>Centang layanan yang masih sering dirujuk ke RS dan layanan yang belum berjalan di Puskesmas / Klinik.</li><li>Isi informasi Program Rujuk Balik (PRB).</li></ul></section>
+              <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">💊 Tahap 4 — Manfaat JKN</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Beri nilai skala 1–4 untuk 8 layanan JKN.</li><li>Isi bagian Home Care dan Paliatif jika Puskesmas / Klinik pernah memberikan layanan tersebut.</li></ul></section>
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">🔧 Tahap 5 — Layanan Non-Optimal</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Untuk setiap layanan, pilih <strong>Masuk JKN</strong> (Ya/Tidak/Tidak Tahu) dan berikan <strong>nilai skala 1–4</strong>.</li></ul></section>
-              <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">💬 Tahap 6 — Pendalaman Kualitatif</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Jawab 7 pertanyaan terbuka sesuai kondisi nyata di FKTP Anda.</li><li>Semua pertanyaan wajib diisi sebelum mengirimkan survey.</li></ul></section>
+              <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">💬 Tahap 6 — Pendalaman Kualitatif</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Jawab 7 pertanyaan terbuka sesuai kondisi nyata di Puskesmas / Klinik Anda.</li><li>Semua pertanyaan wajib diisi sebelum mengirimkan survey.</li></ul></section>
             </div>
             <div className="p-4 border-t border-slate-100 bg-slate-50 text-right"><button onClick={() => setShowPanduan(false)} className="bg-slate-800 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-slate-700 transition-colors shadow-sm">Saya Mengerti, Tutup Panduan</button></div>
           </div>

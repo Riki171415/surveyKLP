@@ -1,7 +1,23 @@
 const fs = require('fs');
 
-// 1. Load existing mapping
-const originalMapping = JSON.parse(fs.readFileSync('src/data/wilayahMapping.json', 'utf8'));
+// 1. Load existing mapping from v_fasyankes.csv
+const fasyankesData = fs.readFileSync('v_fasyankes.csv', 'utf8').split('\n');
+const originalMapping = {};
+
+for (let i = 1; i < fasyankesData.length; i++) {
+  const line = fasyankesData[i].trim();
+  if (!line) continue;
+  const parts = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+  if (parts.length >= 8) {
+    const prov = parts[1].replace(/^"|"$/g, '');
+    const kab = parts[2].replace(/^"|"$/g, '');
+    const nama = parts[7].replace(/^"|"$/g, '');
+    
+    if (!originalMapping[prov]) originalMapping[prov] = {};
+    if (!originalMapping[prov][kab]) originalMapping[prov][kab] = [];
+    originalMapping[prov][kab].push(nama);
+  }
+}
 
 // 2. Define user's allowed rules
 const allowedRules = {
@@ -27,7 +43,7 @@ const allowedRules = {
 const finalMapping = {};
 
 // Helper to normalize names for comparison
-function norm(s) { return s.toLowerCase().replace(/kota administrasi/g, 'kota').replace(/kabupaten/g, 'kab.').replace(/\s+/g, ' ').trim(); }
+function norm(s) { return s.toLowerCase().replace(/kota administrasi/g, 'kota').replace(/kabupaten/g, 'kab.').replace(/\s+/g, ''); }
 
 for (const prov of Object.keys(originalMapping)) {
   const normProv = norm(prov);
