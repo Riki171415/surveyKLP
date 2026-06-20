@@ -126,21 +126,32 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const [loadingData, setLoadingData] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
 
-  const provinsiList = Object.keys(wilayahMapping).sort();
-  const kabKotaList = formData.provinsi && wilayahMapping[formData.provinsi]
-    ? Object.keys(wilayahMapping[formData.provinsi]).sort()
-    : [];
-  const puskesmasListRaw = formData.provinsi && formData.kabKota && wilayahMapping[formData.provinsi]?.[formData.kabKota]
-    ? wilayahMapping[formData.provinsi][formData.kabKota]
+  const combinedProvinsi = new Set([
+    ...Object.keys(wilayahMapping.fktp || {}),
+    ...Object.keys(wilayahMapping.dpm || {})
+  ]);
+  const provinsiList = Array.from(combinedProvinsi).sort();
+
+  const kabKotaList = formData.provinsi ? Array.from(new Set([
+    ...Object.keys(wilayahMapping.fktp?.[formData.provinsi] || {}),
+    ...Object.keys(wilayahMapping.dpm?.[formData.provinsi] || {})
+  ])).sort() : [];
+
+  const sourceMap = formData.jenisFaskes === 'Dokter Praktik Mandiri' ? wilayahMapping.dpm : wilayahMapping.fktp;
+
+  const faskesListRaw = formData.provinsi && formData.kabKota && sourceMap[formData.provinsi]?.[formData.kabKota]
+    ? sourceMap[formData.provinsi][formData.kabKota]
     : [];
     
-  const puskesmasList = [...puskesmasListRaw].sort((a, b) => {
-    const isAPusk = a.toLowerCase().startsWith('puskesmas');
-    const isBPusk = b.toLowerCase().startsWith('puskesmas');
-    if (isAPusk && !isBPusk) return -1;
-    if (!isAPusk && isBPusk) return 1;
-    return a.localeCompare(b);
-  });
+  const faskesList = formData.jenisFaskes === 'Dokter Praktik Mandiri' 
+    ? [...faskesListRaw].sort()
+    : [...faskesListRaw].sort((a, b) => {
+        const isAPusk = a.toLowerCase().startsWith('puskesmas');
+        const isBPusk = b.toLowerCase().startsWith('puskesmas');
+        if (isAPusk && !isBPusk) return -1;
+        if (!isAPusk && isBPusk) return 1;
+        return a.localeCompare(b);
+      });
 
   useEffect(() => {
     if (isInterview && location.state?.surveyData) {
@@ -560,14 +571,18 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">
                           {isRoleDpm ? 'Nama Praktik Dokter Mandiri' : 'Nama Puskesmas / Klinik'}
                         </label>
-                        {isRoleDpm ? (
-                          <input type="text" name="fktpName" value={formData.fktpName} onChange={handleInputChange} placeholder="Contoh: Praktik dr. Budi" className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300 ${showErrors && !formData.fktpName ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} />
-                        ) : (
-                          <div className={showErrors && !formData.fktpName && formData.kabKota ? 'ring-2 ring-rose-500 rounded-lg' : ''}>
-                            <SearchableSelect name="fktpName" options={puskesmasList} value={formData.fktpName} onChange={(val) => handleInputChange({ target: { name: 'fktpName', value: val } })} disabled={!formData.kabKota} placeholder="-- Pilih atau Ketik Puskesmas --" allowManual={true} />
-                          </div>
-                        )}
-                        {!isRoleDpm && !formData.kabKota ? <p className="text-xs text-amber-600 mt-1">Pilih Kab/Kota terlebih dahulu</p> : showErrors && !formData.fktpName ? <p className="text-xs text-rose-500 mt-1">Nama Faskes wajib diisi</p> : null}
+                        <div className={showErrors && !formData.fktpName && formData.kabKota ? 'ring-2 ring-rose-500 rounded-lg' : ''}>
+                          <SearchableSelect 
+                            name="fktpName" 
+                            options={faskesList} 
+                            value={formData.fktpName} 
+                            onChange={(val) => handleInputChange({ target: { name: 'fktpName', value: val } })} 
+                            disabled={!formData.kabKota} 
+                            placeholder={isRoleDpm ? "-- Pilih atau Ketik Nama DPM --" : "-- Pilih atau Ketik Puskesmas / Klinik --"} 
+                            allowManual={true} 
+                          />
+                        </div>
+                        {!formData.kabKota ? <p className="text-xs text-amber-600 mt-1">Pilih Kab/Kota terlebih dahulu</p> : showErrors && !formData.fktpName ? <p className="text-xs text-rose-500 mt-1">Nama Faskes wajib diisi</p> : null}
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Kode Faskes BPJS</label>

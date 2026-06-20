@@ -1,8 +1,8 @@
 const fs = require('fs');
-
 // 1. Load existing mapping from v_fasyankes.csv
 const fasyankesData = fs.readFileSync('v_fasyankes.csv', 'utf8').split('\n');
-const originalMapping = {};
+const originalFktp = {};
+const originalDpm = {};
 
 for (let i = 1; i < fasyankesData.length; i++) {
   const line = fasyankesData[i].trim();
@@ -11,11 +11,21 @@ for (let i = 1; i < fasyankesData.length; i++) {
   if (parts.length >= 8) {
     const prov = parts[1].replace(/^"|"$/g, '');
     const kab = parts[2].replace(/^"|"$/g, '');
+    const type = parts[3].replace(/^"|"$/g, '');
     const nama = parts[7].replace(/^"|"$/g, '');
     
-    if (!originalMapping[prov]) originalMapping[prov] = {};
-    if (!originalMapping[prov][kab]) originalMapping[prov][kab] = [];
-    originalMapping[prov][kab].push(nama);
+    let targetMap = null;
+    if (type === 'Puskesmas' || type === 'Klinik') {
+      targetMap = originalFktp;
+    } else if (type === 'Dokter Praktik Mandiri') {
+      targetMap = originalDpm;
+    }
+    
+    if (targetMap) {
+      if (!targetMap[prov]) targetMap[prov] = {};
+      if (!targetMap[prov][kab]) targetMap[prov][kab] = [];
+      targetMap[prov][kab].push(nama);
+    }
   }
 }
 
@@ -40,61 +50,70 @@ const allowedRules = {
   "Aceh": "*"
 };
 
-const finalMapping = {};
+const finalMapping = { fktp: {}, dpm: {} };
 
 // Helper to normalize names for comparison
 function norm(s) { return s.toLowerCase().replace(/kota administrasi/g, 'kota').replace(/kabupaten/g, 'kab.').replace(/\s+/g, ''); }
 
-for (const prov of Object.keys(originalMapping)) {
-  const normProv = norm(prov);
-  let matchedProvKey = null;
-  let rule = null;
-  
-  for (const k of Object.keys(allowedRules)) {
-    if (normProv.includes(norm(k)) || norm(k).includes(normProv)) {
-      matchedProvKey = k;
-      rule = allowedRules[k];
-      break;
-    }
-  }
-  
-  if (matchedProvKey) {
-    if (!finalMapping[matchedProvKey]) finalMapping[matchedProvKey] = {};
+function processMapping(original, targetObj) {
+  for (const prov of Object.keys(original)) {
+    const normProv = norm(prov);
+    let matchedProvKey = null;
+    let rule = null;
     
-    for (const kab of Object.keys(originalMapping[prov])) {
-      const normKab = norm(kab);
-      let include = false;
-      let kabKey = kab;
+    for (const k of Object.keys(allowedRules)) {
+      if (normProv.includes(norm(k)) || norm(k).includes(normProv)) {
+        matchedProvKey = k;
+        rule = allowedRules[k];
+        break;
+      }
+    }
+    
+    if (matchedProvKey) {
+      if (!targetObj[matchedProvKey]) targetObj[matchedProvKey] = {};
       
-      if (rule === "*") {
-        include = true;
-      } else {
-        for (const allowedKab of rule) {
-          if (normKab.includes(norm(allowedKab)) || norm(allowedKab).includes(normKab)) {
-            include = true;
-            kabKey = allowedKab; // use user's precise name
-            break;
+      for (const kab of Object.keys(original[prov])) {
+        const normKab = norm(kab);
+        let include = false;
+        let kabKey = kab;
+        
+        if (rule === "*") {
+          include = true;
+        } else {
+          for (const allowedKab of rule) {
+            if (normKab.includes(norm(allowedKab)) || norm(allowedKab).includes(normKab)) {
+              include = true;
+              kabKey = allowedKab;
+              break;
+            }
           }
         }
-      }
-      
-      if (include) {
-        if (!finalMapping[matchedProvKey][kabKey]) finalMapping[matchedProvKey][kabKey] = [];
-        finalMapping[matchedProvKey][kabKey].push(...originalMapping[prov][kab]);
+        
+        if (include) {
+          if (!targetObj[matchedProvKey][kabKey]) targetObj[matchedProvKey][kabKey] = [];
+          targetObj[matchedProvKey][kabKey].push(...original[prov][kab]);
+        }
       }
     }
   }
 }
 
+processMapping(originalFktp, finalMapping.fktp);
+processMapping(originalDpm, finalMapping.dpm);
+
+fs.writeFileSync('src/data/wilayahMapping.json', JSON.stringify(finalMapping, null, 2));
+
+console.log('Successfully recreated src/data/wilayahMapping.json with fktp and dpm split');
+
 // 3. Add DKI Jakarta manually from Data_Puskesmas_2026.csv
 const puskData = fs.readFileSync('Data_Puskesmas_2026.csv', 'utf8').split('\n');
-if (!finalMapping["DKI Jakarta"]) {
-  finalMapping["DKI Jakarta"] = {};
+if (!finalMapping.fktp["DKI Jakarta"]) {
+  finalMapping.fktp["DKI Jakarta"] = {};
 }
 
 const dkiRules = allowedRules["DKI Jakarta"];
 for (const ruleKab of dkiRules) {
-  finalMapping["DKI Jakarta"][ruleKab] = [];
+  finalMapping.fktp["DKI Jakarta"][ruleKab] = [];
 }
 
 for (let i = 1; i < puskData.length; i++) {
@@ -111,7 +130,7 @@ for (let i = 1; i < puskData.length; i++) {
       // Check e.g., "jakarta utara"
       let checkName = ruleKab.toLowerCase().replace("kota administrasi ", "");
       if (rawText.includes(checkName)) {
-        finalMapping["DKI Jakarta"][ruleKab].push(namaPusk);
+        finalMapping.fktp["DKI Jakarta"][ruleKab].push(namaPusk);
         break;
       }
     }
@@ -119,18 +138,22 @@ for (let i = 1; i < puskData.length; i++) {
 }
 
 // Ensure array uniqueness and remove empties
-for (const p in finalMapping) {
-  for (const k in finalMapping[p]) {
-    if (finalMapping[p][k].length === 0) delete finalMapping[p][k];
-    else {
-      finalMapping[p][k] = [...new Set(finalMapping[p][k])].sort();
+for (const type of ['fktp', 'dpm']) {
+  for (const p in finalMapping[type]) {
+    for (const k in finalMapping[type][p]) {
+      if (finalMapping[type][p][k].length === 0) delete finalMapping[type][p][k];
+      else {
+        finalMapping[type][p][k] = [...new Set(finalMapping[type][p][k])].sort();
+      }
     }
+    if (Object.keys(finalMapping[type][p]).length === 0) delete finalMapping[type][p];
   }
-  if (Object.keys(finalMapping[p]).length === 0) delete finalMapping[p];
 }
 
-console.log("Filtered Provinces:", Object.keys(finalMapping));
-Object.keys(finalMapping).forEach(p => console.log(`  ${p}: ${Object.keys(finalMapping[p]).length} Kab/Kota`));
+console.log("Filtered Provinces (FKTP):", Object.keys(finalMapping.fktp));
+Object.keys(finalMapping.fktp).forEach(p => console.log(`  ${p}: ${Object.keys(finalMapping.fktp[p]).length} Kab/Kota`));
+console.log("Filtered Provinces (DPM):", Object.keys(finalMapping.dpm));
+Object.keys(finalMapping.dpm).forEach(p => console.log(`  ${p}: ${Object.keys(finalMapping.dpm[p]).length} Kab/Kota`));
 
 fs.writeFileSync('src/data/wilayahMapping.json', JSON.stringify(finalMapping, null, 2));
 console.log("Successfully recreated src/data/wilayahMapping.json");
