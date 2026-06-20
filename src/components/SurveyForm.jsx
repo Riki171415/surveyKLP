@@ -89,7 +89,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     id: null,
-    fktpName: '', provinsi: '', kabKota: '', city: '', role: '',
+    jenisFaskes: '', fktpName: '', provinsi: '', kabKota: '', city: '', role: '',
     kodeFaskes: '', namaResponden: '',
     docUmum: '', docGigi: '', docKklp: '',
     timeInPoli: '', timeHomeVisit: '', propInFktp: '', propOutFktp: '',
@@ -224,7 +224,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
   // Validasi per Step
   const isStep1Valid = (() => {
-    if (formData.fktpName.trim() === '' || formData.provinsi.trim() === '' || formData.kabKota.trim() === '' || formData.role === '' || formData.docKklp === '' || formData.kodeFaskes.trim() === '' || formData.namaResponden.trim() === '') return false;
+    if (formData.fktpName.trim() === '' || formData.provinsi.trim() === '' || formData.kabKota.trim() === '' || formData.role === '' || formData.kodeFaskes.trim() === '' || formData.namaResponden.trim() === '') return false;
+    if (!isRoleDpm && formData.docKklp === '') return false;
     if (formData.role === 'Dokter Sp.KKLP') {
       if (!formData.spkklpBerpraktik) return false;
       if (!formData.spkklpPoli?.hasPoli) return false;
@@ -532,6 +533,29 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         </div>
                         {!formData.provinsi ? <p className="text-xs text-amber-600 mt-1">Pilih provinsi terlebih dahulu</p> : showErrors && !formData.kabKota ? <p className="text-xs text-rose-500 mt-1">Kab/Kota wajib diisi</p> : null}
                       </div>
+
+                      {formData.kabKota && (
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">Jenis Faskes / Responden</label>
+                          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${showErrors && !formData.jenisFaskes ? 'p-2 ring-2 ring-rose-500 rounded-xl bg-rose-50/50' : ''}`}>
+                            {['Puskesmas / Klinik', 'Dokter Praktik Mandiri'].map(jf => (
+                              <label key={jf} className={`relative flex items-center justify-center px-4 py-4 border-2 rounded-2xl cursor-pointer transition-all duration-300 text-center leading-tight group ${
+                                formData.jenisFaskes === jf ? 'border-primary-500 bg-primary-50/50 text-primary-700 font-bold shadow-md shadow-primary-500/10 scale-[1.02]' : 'border-slate-100 bg-white hover:border-primary-300 hover:bg-slate-50 text-slate-600'
+                              }`}>
+                                <input type="radio" name="jenisFaskes" value={jf} checked={formData.jenisFaskes === jf} onChange={(e) => {
+                                  const val = e.target.value;
+                                  setFormData(prev => ({ ...prev, jenisFaskes: val, role: val === 'Dokter Praktik Mandiri' ? 'Dokter Praktik Mandiri' : '', fktpName: '' }));
+                                }} className="hidden" />
+                                <span className="text-sm font-medium">{jf}</span>
+                              </label>
+                            ))}
+                          </div>
+                          {showErrors && !formData.jenisFaskes && <p className="text-xs text-rose-500 mt-1">Jenis Faskes wajib dipilih</p>}
+                        </div>
+                      )}
+
+                      {formData.jenisFaskes && (
+                      <>
                       <div className="md:col-span-2">
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">
                           {isRoleDpm ? 'Nama Praktik Dokter Mandiri' : 'Nama Puskesmas / Klinik'}
@@ -555,12 +579,16 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         <input type="text" name="namaResponden" value={formData.namaResponden} onChange={handleInputChange} placeholder="Nama lengkap responden" className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300 ${showErrors && !formData.namaResponden ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} />
                         {showErrors && !formData.namaResponden && <p className="text-xs text-rose-500 mt-1">Nama Responden wajib diisi</p>}
                       </div>
+                      </>
+                      )}
                     </>
                   )}
+                  {formData.jenisFaskes === 'Puskesmas / Klinik' && (
+                  <>
                   <div className="md:col-span-2">
                     <div className="mb-3"><label className="block text-sm font-semibold text-slate-700 mb-1">Jabatan <span className="text-xs text-slate-400 font-normal ml-1">(Pilih salah satu)</span></label></div>
                     <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 p-2 rounded-2xl ${showErrors && !formData.role ? 'ring-2 ring-rose-500 bg-rose-50/50' : ''}`}>
-                      {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Dokter Praktik Mandiri', 'Tenaga Kesehatan Fungsional (Dokter Gigi, Bidan, Perawat, Farmasi)'].map(role => (
+                      {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Tenaga Kesehatan Fungsional (Dokter Gigi, Bidan, Perawat, Farmasi)'].map(role => (
                         <label key={role} className={`relative flex items-center justify-center px-4 py-4 border-2 rounded-2xl cursor-pointer transition-all duration-300 text-center leading-tight group ${
                           formData.role === role ? 'border-primary-500 bg-primary-50/50 text-primary-700 font-bold shadow-md shadow-primary-500/10 scale-[1.02]' : 'border-slate-100 bg-white hover:border-primary-300 hover:bg-slate-50 text-slate-600'
                         }`}>
@@ -591,6 +619,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     </div>
                     {showErrors && !formData.docKklp && <p className="text-xs text-rose-500 mt-1">Wajib dipilih</p>}
                   </div>
+                  </>
+                  )}
                 </div>
               </div>
             )}
