@@ -207,7 +207,13 @@ export default function DataManagement() {
           base["Layanan Belum Berjalan"] = row.layanan_belum_berjalan || '-';
 
           // PRB
-          base["PRB_Mekanisme"] = row.prb?.mekanisme?.join(', ') || '-';
+          const meks = [];
+          if (row.prb) {
+            Object.keys(row.prb).forEach(k => {
+              if (k.startsWith('mek_') && row.prb[k]) meks.push(k.replace('mek_', ''));
+            });
+          }
+          base["PRB_Mekanisme"] = meks.length > 0 ? meks.join(', ') : '-';
           base["PRB_Rata Rujukan ke FKRTL"] = row.prb?.rataRujukan || '-';
           base["PRB_Total Peserta"] = row.prb?.totalPeserta || '-';
           base["PRB_Kunjungan Rutin"] = row.prb?.kunjunganRutin || '-';
@@ -233,8 +239,18 @@ export default function DataManagement() {
           if (row.home_care?.screening === 'Ya' || row.home_care?.screening === 'ya') {
             base["HC_Tenaga"] = row.home_care?.tenaga || '-';
             base["HC_Diagnosis"] = row.home_care?.diagnosis || '-';
-            base["HC_Kondisi"] = row.home_care?.kondisi ? Object.keys(row.home_care.kondisi).filter(k => row.home_care.kondisi[k]).join(', ') : '-';
-            base["HC_Jenis Layanan"] = row.home_care?.jenisLayanan ? Object.keys(row.home_care.jenisLayanan).filter(k => row.home_care.jenisLayanan[k]).join(', ') : '-';
+            
+            const hcKondisi = [];
+            const hcJenis = [];
+            if (row.home_care) {
+               Object.keys(row.home_care).forEach(k => {
+                 if (k.startsWith('kondisi_') && row.home_care[k]) hcKondisi.push(k.replace('kondisi_', ''));
+                 if (k.startsWith('jenis_') && row.home_care[k]) hcJenis.push(k.replace('jenis_', ''));
+               });
+            }
+            base["HC_Kondisi"] = hcKondisi.length > 0 ? hcKondisi.join(', ') : '-';
+            base["HC_Jenis Layanan"] = hcJenis.length > 0 ? hcJenis.join(', ') : '-';
+
             base["HC_Jumlah Kunjungan"] = row.home_care?.jumlahKunjungan || '-';
             base["HC_Kolaborasi"] = row.home_care?.kolaborasi || '-';
             base["HC_Kepatuhan"] = row.home_care?.kepatuhan || '-';
@@ -246,8 +262,18 @@ export default function DataManagement() {
           if (row.paliatif?.screening === 'Ya' || row.paliatif?.screening === 'ya') {
             base["Pal_Tenaga"] = row.paliatif?.tenaga || '-';
             base["Pal_Diagnosis"] = row.paliatif?.diagnosis || '-';
-            base["Pal_Kondisi"] = row.paliatif?.kondisi ? Object.keys(row.paliatif.kondisi).filter(k => row.paliatif.kondisi[k]).join(', ') : '-';
-            base["Pal_Tujuan"] = row.paliatif?.tujuan ? Object.keys(row.paliatif.tujuan).filter(k => row.paliatif.tujuan[k]).join(', ') : '-';
+            
+            const palKondisi = [];
+            const palTujuan = [];
+            if (row.paliatif) {
+               Object.keys(row.paliatif).forEach(k => {
+                 if (k.startsWith('kondisi_') && row.paliatif[k]) palKondisi.push(k.replace('kondisi_', ''));
+                 if (k.startsWith('tujuan_') && row.paliatif[k]) palTujuan.push(k.replace('tujuan_', ''));
+               });
+            }
+            base["Pal_Kondisi"] = palKondisi.length > 0 ? palKondisi.join(', ') : '-';
+            base["Pal_Tujuan"] = palTujuan.length > 0 ? palTujuan.join(', ') : '-';
+
             base["Pal_Terapi"] = row.paliatif?.terapi || '-';
             base["Pal_Kolaborasi"] = row.paliatif?.kolaborasi || '-';
             base["Pal_Kepatuhan"] = row.paliatif?.kepatuhan || '-';
