@@ -1275,9 +1275,10 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
               <button type="button" onClick={prevStep} disabled={step === 1} className={`flex items-center px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${step === 1 ? 'opacity-0 pointer-events-none' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 shadow-sm hover:shadow active:scale-95'}`}>
                 <ChevronLeft className="w-5 h-5 mr-1.5" /> Sebelumnya
               </button>
-              {step < totalSteps - 1 ? (
-                <button type="button" onClick={nextStep} className="flex items-center px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg bg-primary-600 text-white hover:bg-primary-700 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary-600/30 active:scale-95">
-                  Selanjutnya <ChevronRight className="w-5 h-5 ml-1.5" />
+              {step === totalSteps ? (
+                <button type="button" onClick={() => submitData(false)} disabled={isSubmitting} className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 hover:-translate-y-0.5 hover:shadow-emerald-500/40 active:scale-95'}`}>
+                  {isSubmitting ? 'Memproses...' : 'Simpan Selesai'}
+                  {!isSubmitting && <Save className="w-5 h-5 ml-2" />}
                 </button>
               ) : step === totalSteps - 1 && !isRoleDpm ? (
                 <button type="button" onClick={() => submitData(true)} disabled={isSubmitting} className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 hover:-translate-y-0.5 hover:shadow-amber-500/40 active:scale-95'}`}>
@@ -1285,9 +1286,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   {!isSubmitting && <ChevronRight className="w-5 h-5 ml-2" />}
                 </button>
               ) : (
-                <button type="button" onClick={() => submitData(false)} disabled={isSubmitting} className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 hover:-translate-y-0.5 hover:shadow-emerald-500/40 active:scale-95'}`}>
-                  {isSubmitting ? 'Memproses...' : 'Simpan Selesai'}
-                  {!isSubmitting && <Save className="w-5 h-5 ml-2" />}
+                <button type="button" onClick={nextStep} className="flex items-center px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg bg-primary-600 text-white hover:bg-primary-700 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary-600/30 active:scale-95">
+                  Selanjutnya <ChevronRight className="w-5 h-5 ml-1.5" />
                 </button>
               )}
             </div>
