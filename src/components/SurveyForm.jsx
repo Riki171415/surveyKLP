@@ -976,7 +976,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         ))}
                       </div>
                     </div>
-                    <div className="md:col-span-2"><label className="block text-xs font-semibold text-slate-700 mb-1">Kendala utama dalam pelaksanaan PRB <span className="font-normal text-slate-400">(tidak wajib)</span></label><textarea rows={2} placeholder="Jelaskan kendala..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none resize-none" value={formData.prb?.kendala || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, kendala: e.target.value } }))} /></div>
+                    <div className="md:col-span-2"><label className="block text-xs font-semibold text-slate-700 mb-1">Kendala utama dalam pelaksanaan PRB</label><textarea rows={2} placeholder="Jelaskan kendala..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none resize-none" value={formData.prb?.kendala || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, kendala: e.target.value } }))} /></div>
                   </div>
                 </div>
               </div>
