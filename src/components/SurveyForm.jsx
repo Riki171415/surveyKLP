@@ -237,20 +237,6 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const isStep1Valid = (() => {
     if (formData.fktpName.trim() === '' || formData.provinsi.trim() === '' || formData.kabKota.trim() === '' || formData.role === '' || formData.kodeFaskes.trim() === '' || formData.namaResponden.trim() === '') return false;
     if (!isRoleDpm && formData.docKklp === '') return false;
-    if (formData.role === 'Dokter Sp.KKLP') {
-      if (!formData.spkklpBerpraktik) return false;
-      if (!formData.spkklpPoli?.hasPoli) return false;
-      if (formData.spkklpPoli.hasPoli === 'Ya') {
-        if (!formData.spkklpPoli.sejak?.trim() || !formData.spkklpPoli.kunjungan || !formData.spkklpPoli.pembiayaan?.trim()) return false;
-      }
-      if (formData.spkklpPoli.hasPoli === 'Tidak') {
-        if (!formData.spkklpPoli.diagnosis?.trim() || !formData.spkklpPoli.tindakan?.trim()) return false;
-      }
-      if (!formData.spkklpKendala?.hasKendala) return false;
-      if (formData.spkklpKendala.hasKendala === 'Ya') {
-        if (!formData.spkklpKendala.diagnosis?.trim() || !formData.spkklpKendala.tindakan?.trim()) return false;
-      }
-    }
     return true;
   })();
   const propTotal = Number(formData.propInFktp || 0) + Number(formData.propOutFktp || 0);
@@ -275,7 +261,22 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   })() : isRoleDoctor
     ? (formData.timeInPoli !== '' && formData.timeHomeVisit !== '' &&
        isPropValid &&
-       kompetensiLayanan.every((_, idx) => formData.kompetensi[idx]?.status))
+       kompetensiLayanan.every((_, idx) => formData.kompetensi[idx]?.status) &&
+       (formData.role === 'Dokter Sp.KKLP' ? (() => {
+         if (!formData.spkklpBerpraktik) return false;
+         if (!formData.spkklpPoli?.hasPoli) return false;
+         if (formData.spkklpPoli.hasPoli === 'Ya') {
+           if (!formData.spkklpPoli.sejak?.trim() || !formData.spkklpPoli.kunjungan || !formData.spkklpPoli.pembiayaan?.trim()) return false;
+         }
+         if (formData.spkklpPoli.hasPoli === 'Tidak') {
+           if (!formData.spkklpPoli.diagnosis?.trim() || !formData.spkklpPoli.tindakan?.trim()) return false;
+         }
+         if (!formData.spkklpKendala?.hasKendala) return false;
+         if (formData.spkklpKendala.hasKendala === 'Ya') {
+           if (!formData.spkklpKendala.diagnosis?.trim() || !formData.spkklpKendala.tindakan?.trim()) return false;
+         }
+         return true;
+       })() : true))
     : true;
 
   const isStep3Valid = relevansiItems.every((_, idx) => formData.relevansiSpkklp[idx]) &&
@@ -925,8 +926,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div><label className="block text-xs font-semibold text-slate-700 mb-1">Jumlah peserta PRB saat ini <span className="text-rose-500">*</span></label><input type="number" placeholder="Jumlah" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none ${showErrors && !formData.prb?.jumlah ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.prb?.jumlah || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, jumlah: e.target.value } }))} /></div>
-                    <div><label className="block text-xs font-semibold text-slate-700 mb-1">Peserta PRB rutin kunjungan ≥1x/bulan (3 bln terakhir) <span className="font-normal text-slate-400">(tidak wajib)</span></label><input type="number" placeholder="Jumlah" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.rutinKunjungan || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, rutinKunjungan: e.target.value } }))} /></div>
-                    <div><label className="block text-xs font-semibold text-slate-700 mb-1">Peserta PRB tidak berkunjung 3 bulan terakhir <span className="font-normal text-slate-400">(tidak wajib)</span></label><input type="number" placeholder="Jumlah" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.tidakBerkunjung || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, tidakBerkunjung: e.target.value } }))} /></div>
+                    <div><label className="block text-xs font-semibold text-slate-700 mb-1">Peserta PRB rutin kunjungan ≥1x/bulan (3 bln terakhir)</label><input type="number" placeholder="Jumlah" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.rutinKunjungan || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, rutinKunjungan: e.target.value } }))} /></div>
+                    <div><label className="block text-xs font-semibold text-slate-700 mb-1">Peserta PRB tidak berkunjung 3 bulan terakhir</label><input type="number" placeholder="Jumlah" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.tidakBerkunjung || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, tidakBerkunjung: e.target.value } }))} /></div>
 
                     <div className="md:col-span-2 mt-2">
                       <label className="block text-xs font-bold text-slate-800 mb-2 border-b pb-1">Jumlah peserta PRB berdasarkan diagnosis (isian angka):</label>
