@@ -1301,7 +1301,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     {(() => { const b = nonOptimalServices.filter((_, i) => !formData.nonOptimal[i]?.masukJkn || !formData.nonOptimal[i]?.skala).length; return b > 0 ? <li>{b} layanan non-optimal belum diisi lengkap</li> : null; })()}
                   </>)}
                   {step === 6 && (<>
-                    {(() => { const b = interviewQuestions.filter((_, i) => (formData.wawancara[i]?.trim() || '').length < 10).length; return b > 0 ? <li>Ada {b} pertanyaan pendalaman kualitatif yang belum dijawab (minimal 10 karakter)</li> : null; })()}
+                    {(() => { const b = interviewQuestions.filter((_, i) => (formData.wawancara[i]?.trim() || '').length < 10).length; return b > 0 ? <li>Ada {b} pertanyaan pendalaman kualitatif yang belum dijawab</li> : null; })()}
                   </>)}
                 </ul>
               </div>
