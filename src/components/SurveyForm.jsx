@@ -574,6 +574,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         </label>
                         <div className={showErrors && !formData.fktpName && formData.kabKota ? 'ring-2 ring-rose-500 rounded-lg' : ''}>
                           <SearchableSelect 
+                            key={`${formData.kabKota}-${formData.jenisFaskes}`}
                             name="fktpName" 
                             options={faskesList} 
                             value={formData.fktpName} 

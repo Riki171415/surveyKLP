@@ -23,8 +23,6 @@ export default function SearchableSelect({ options = [], value, onChange, placeh
   useEffect(() => {
     if (value && options.length > 0 && !options.includes(value)) {
       setIsManual(true);
-    } else if (!value) {
-      setIsManual(false);
     }
   }, [value, options]);
 
