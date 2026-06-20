@@ -485,46 +485,51 @@ export default function DataManagement() {
                     {selected.dpm_data.karakteristik && (
                       <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
                         <div className="font-semibold text-slate-600 mb-1">A. Karakteristik Praktik</div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Jumlah Pasien BPJS/bln:</span> <span>{selected.dpm_data.karakteristik.jumlahPasienBpjs || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Jumlah Pasien Umum/bln:</span> <span>{selected.dpm_data.karakteristik.jumlahPasienUmum || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Proporsi Pasien BPJS (%):</span> <span>{selected.dpm_data.karakteristik.proporsiPasienBpjs || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Lama Praktik DPM (Tahun):</span> <span>{selected.dpm_data.karakteristik.lamaPraktik || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Jumlah Tim Medis:</span> <span>{selected.dpm_data.karakteristik.jumlahTimMedis || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Lama Praktik:</span> <span>{selected.dpm_data.karakteristik.lamaPraktik || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Rata-rata Kunjungan:</span> <span>{selected.dpm_data.karakteristik.jumlahKunjungan || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Mayoritas Kelompok Umur:</span> <span>{selected.dpm_data.karakteristik.kelompokUmur || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Status Kepesertaan:</span> <span>{selected.dpm_data.karakteristik.statusPeserta || '-'}</span></div>
                       </div>
                     )}
                     {/* Kasus */}
                     {selected.dpm_data.kasus && (
                       <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
                         <div className="font-semibold text-slate-600 mb-1">B. Gambaran Kasus</div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">10 Terbanyak:</span> <span>{Array.isArray(selected.dpm_data.kasus.kasusTerbanyak) ? selected.dpm_data.kasus.kasusTerbanyak.join(', ') : '-'} {selected.dpm_data.kasus.kasusLainnya ? `(${selected.dpm_data.kasus.kasusLainnya})` : ''}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Masalah Kesehatan Terbanyak:</span> <span>{Array.isArray(selected.dpm_data.kasus.masalahKesehatan) ? selected.dpm_data.kasus.masalahKesehatan.join(', ') : '-'} {selected.dpm_data.kasus.masalahLainnya ? `(${selected.dpm_data.kasus.masalahLainnya})` : ''}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Proporsi Kasus Kronis:</span> <span>{selected.dpm_data.kasus.persenKronis || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Proporsi Pasien Kontrol:</span> <span>{selected.dpm_data.kasus.persenKontrol || '-'}</span></div>
+                        {selected.dpm_data.kasus.alasanRujukan && <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Indikasi/Alasan Rujukan:</span> <span>{selected.dpm_data.kasus.alasanRujukan}</span></div>}
                       </div>
                     )}
                     {/* Pendekatan */}
                     {selected.dpm_data.pendekatan && (
                       <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
-                        <div className="font-semibold text-slate-600 mb-1">C. Pendekatan Pasien & Keluarga</div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Aspek Digali:</span> <span>{Array.isArray(selected.dpm_data.pendekatan.aspekDigali) ? selected.dpm_data.pendekatan.aspekDigali.join(', ') : '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Alat Bantu Keluarga:</span> <span>{Array.isArray(selected.dpm_data.pendekatan.alatBantuKeluarga) ? selected.dpm_data.pendekatan.alatBantuKeluarga.join(', ') : '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Melakukan Home Visit:</span> <span>{selected.dpm_data.pendekatan.melakukanHomeVisit || '-'}</span></div>
+                        <div className="font-semibold text-slate-600 mb-1">C. Pendekatan Kedokteran Keluarga</div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Tahu Keluarga Inti:</span> <span>{selected.dpm_data.pendekatan.tahuKeluargaInti || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Menangani Keluarga Yg Sama:</span> <span>{selected.dpm_data.pendekatan.menanganiKeluargaSama || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Tanya Kondisi Keluarga Lain:</span> <span>{selected.dpm_data.pendekatan.tanyaKondisiKeluargaLain || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Aspek Digali:</span> <span>{Array.isArray(selected.dpm_data.pendekatan.aspekDigali) ? selected.dpm_data.pendekatan.aspekDigali.join(', ') : '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Pengaruh Keluarga pd Kasus:</span> <span>{selected.dpm_data.pendekatan.pengaruhKeluargaKasus || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Contoh Masalah Keluarga:</span> <span>{selected.dpm_data.pendekatan.contohMasalahKeluarga || '-'} {selected.dpm_data.pendekatan.contohMasalahLainnya ? `(${selected.dpm_data.pendekatan.contohMasalahLainnya})` : ''}</span></div>
                       </div>
                     )}
                     {/* Kontinuitas */}
                     {selected.dpm_data.kontinuitas && (
                       <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
                         <div className="font-semibold text-slate-600 mb-1">D. Kontinuitas Pelayanan</div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Sistem Pencatatan:</span> <span>{selected.dpm_data.kontinuitas.sistemPencatatan || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Jadwalkan Kunj. Ulang:</span> <span>{selected.dpm_data.kontinuitas.jadwalkanKunjunganUlang || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Tindak Lanjut Tdk Datang:</span> <span>{selected.dpm_data.kontinuitas.tindakLanjutTidakDatang || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Sistem Pencatatan JK Panjang:</span> <span>{selected.dpm_data.kontinuitas.sistemPencatatan || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Jadwalkan Kunjungan Ulang:</span> <span>{selected.dpm_data.kontinuitas.jadwalkanKunjunganUlang || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Tindak Lanjut Tdk Datang:</span> <span>{selected.dpm_data.kontinuitas.tindakLanjutTidakDatang || '-'}</span></div>
                       </div>
                     )}
                     {/* Gambaran */}
                     {selected.dpm_data.gambaran && (
                       <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
                         <div className="font-semibold text-slate-600 mb-1">E. Gambaran Komprehensif</div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Kegiatan Dilakukan:</span> <span>{Array.isArray(selected.dpm_data.gambaran.kegiatanDilakukan) ? selected.dpm_data.gambaran.kegiatanDilakukan.join(', ') : '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Bentuk Pelayanan Keluarga:</span> <span>{selected.dpm_data.gambaran.bentukPelayananKeluarga || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Contoh Kasus Keluarga:</span> <span>{selected.dpm_data.gambaran.contohKasusKeluarga || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Contoh Layanan Holistik:</span> <span>{selected.dpm_data.gambaran.contohLayananHolistik || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Kegiatan Dilakukan:</span> <span>{Array.isArray(selected.dpm_data.gambaran.kegiatanDilakukan) ? selected.dpm_data.gambaran.kegiatanDilakukan.join(', ') : '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Bentuk Pelayanan Keluarga:</span> <span>{selected.dpm_data.gambaran.bentukPelayananKeluarga || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Contoh Kasus Keluarga:</span> <span>{selected.dpm_data.gambaran.contohKasusKeluarga || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Contoh Layanan Holistik:</span> <span>{selected.dpm_data.gambaran.contohLayananHolistik || '-'}</span></div>
                       </div>
                     )}
                   </div>
