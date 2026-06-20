@@ -150,25 +150,36 @@ export default function DataManagement() {
         };
 
         // Flatten Survei DPM (A-E)
-        if (row.role === 'Dokter Praktik Mandiri' && row.dpm_data) {
-          const d = row.dpm_data;
-          base["DPM_Jumlah Pasien BPJS"] = d.karakteristik?.jumlahPasienBpjs || '-';
-          base["DPM_Jumlah Pasien Umum"] = d.karakteristik?.jumlahPasienUmum || '-';
-          base["DPM_Proporsi Pasien BPJS (%)"] = d.karakteristik?.proporsiPasienBpjs || '-';
+        if (row.role === 'Dokter Praktik Mandiri' && row.dpm) {
+          const d = row.dpm;
+          // A
           base["DPM_Lama Praktik"] = d.karakteristik?.lamaPraktik || '-';
-          base["DPM_Jumlah Tim Medis"] = d.karakteristik?.jumlahTimMedis || '-';
-          
-          base["DPM_Kasus Terbanyak"] = d.kasus?.kasusTerbanyak?.join(', ') || '-';
-          base["DPM_Kasus Lainnya"] = d.kasus?.kasusLainnya || '-';
+          base["DPM_Rata-rata Kunjungan"] = d.karakteristik?.jumlahKunjungan || '-';
+          base["DPM_Kelompok Umur"] = d.karakteristik?.kelompokUmur || '-';
+          base["DPM_Status Kepesertaan"] = d.karakteristik?.statusPeserta || '-';
 
+          // B
+          base["DPM_Masalah Kesehatan"] = d.kasus?.masalahKesehatan?.join(', ') || '-';
+          base["DPM_Masalah Lainnya"] = d.kasus?.masalahLainnya || '-';
+          base["DPM_Persen Kasus Kronis"] = d.kasus?.persenKronis || '-';
+          base["DPM_Persen Pasien Kontrol"] = d.kasus?.persenKontrol || '-';
+          base["DPM_Alasan Rujukan"] = d.kasus?.alasanRujukan || '-';
+
+          // C
+          base["DPM_Tahu Keluarga Inti"] = d.pendekatan?.tahuKeluargaInti || '-';
+          base["DPM_Menangani Keluarga Yg Sama"] = d.pendekatan?.menanganiKeluargaSama || '-';
+          base["DPM_Tanya Kondisi Keluarga Lain"] = d.pendekatan?.tanyaKondisiKeluargaLain || '-';
           base["DPM_Aspek Digali"] = d.pendekatan?.aspekDigali?.join(', ') || '-';
-          base["DPM_Alat Bantu Keluarga"] = d.pendekatan?.alatBantuKeluarga?.join(', ') || '-';
-          base["DPM_Melakukan Home Visit"] = d.pendekatan?.melakukanHomeVisit || '-';
+          base["DPM_Pengaruh Keluarga pd Kasus"] = d.pendekatan?.pengaruhKeluargaKasus || '-';
+          base["DPM_Contoh Masalah Keluarga"] = d.pendekatan?.contohMasalahKeluarga || '-';
+          base["DPM_Contoh Masalah Lainnya"] = d.pendekatan?.contohMasalahLainnya || '-';
 
+          // D
           base["DPM_Sistem Pencatatan"] = d.kontinuitas?.sistemPencatatan || '-';
           base["DPM_Jadwalkan Kunjungan Ulang"] = d.kontinuitas?.jadwalkanKunjunganUlang || '-';
-          base["DPM_Tindak Lanjut Tidak Datang"] = d.kontinuitas?.tindakLanjutTidakDatang || '-';
+          base["DPM_Tindak Lanjut Tdk Datang"] = d.kontinuitas?.tindakLanjutTidakDatang || '-';
 
+          // E
           base["DPM_Kegiatan Dilakukan"] = d.gambaran?.kegiatanDilakukan?.join(', ') || '-';
           base["DPM_Bentuk Pelayanan Keluarga"] = d.gambaran?.bentukPelayananKeluarga || '-';
           base["DPM_Contoh Kasus Keluarga"] = d.gambaran?.contohKasusKeluarga || '-';
@@ -477,59 +488,59 @@ export default function DataManagement() {
               )}
 
               {/* ── B. Detail Dokter Praktik Mandiri (DPM) ── */}
-              {selected.role === 'Dokter Praktik Mandiri' && selected.dpm_data && (
+              {selected.role === 'Dokter Praktik Mandiri' && selected.dpm && (
                 <div>
                   <SectionHeader label="B. Detail Dokter Praktik Mandiri (DPM)" />
                   <div className="space-y-4 text-xs">
                     {/* Karakteristik Praktik */}
-                    {selected.dpm_data.karakteristik && (
+                    {selected.dpm.karakteristik && (
                       <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
                         <div className="font-semibold text-slate-600 mb-1">A. Karakteristik Praktik</div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Lama Praktik:</span> <span>{selected.dpm_data.karakteristik.lamaPraktik || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Rata-rata Kunjungan:</span> <span>{selected.dpm_data.karakteristik.jumlahKunjungan || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Mayoritas Kelompok Umur:</span> <span>{selected.dpm_data.karakteristik.kelompokUmur || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Status Kepesertaan:</span> <span>{selected.dpm_data.karakteristik.statusPeserta || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Lama Praktik:</span> <span>{selected.dpm.karakteristik.lamaPraktik || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Rata-rata Kunjungan:</span> <span>{selected.dpm.karakteristik.jumlahKunjungan || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Mayoritas Kelompok Umur:</span> <span>{selected.dpm.karakteristik.kelompokUmur || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Status Kepesertaan:</span> <span>{selected.dpm.karakteristik.statusPeserta || '-'}</span></div>
                       </div>
                     )}
                     {/* Kasus */}
-                    {selected.dpm_data.kasus && (
+                    {selected.dpm.kasus && (
                       <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
                         <div className="font-semibold text-slate-600 mb-1">B. Gambaran Kasus</div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Masalah Kesehatan Terbanyak:</span> <span>{Array.isArray(selected.dpm_data.kasus.masalahKesehatan) ? selected.dpm_data.kasus.masalahKesehatan.join(', ') : '-'} {selected.dpm_data.kasus.masalahLainnya ? `(${selected.dpm_data.kasus.masalahLainnya})` : ''}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Proporsi Kasus Kronis:</span> <span>{selected.dpm_data.kasus.persenKronis || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Proporsi Pasien Kontrol:</span> <span>{selected.dpm_data.kasus.persenKontrol || '-'}</span></div>
-                        {selected.dpm_data.kasus.alasanRujukan && <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Indikasi/Alasan Rujukan:</span> <span>{selected.dpm_data.kasus.alasanRujukan}</span></div>}
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Masalah Kesehatan Terbanyak:</span> <span>{Array.isArray(selected.dpm.kasus.masalahKesehatan) ? selected.dpm.kasus.masalahKesehatan.join(', ') : '-'} {selected.dpm.kasus.masalahLainnya ? `(${selected.dpm.kasus.masalahLainnya})` : ''}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Proporsi Kasus Kronis:</span> <span>{selected.dpm.kasus.persenKronis || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Proporsi Pasien Kontrol:</span> <span>{selected.dpm.kasus.persenKontrol || '-'}</span></div>
+                        {selected.dpm.kasus.alasanRujukan && <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Indikasi/Alasan Rujukan:</span> <span>{selected.dpm.kasus.alasanRujukan}</span></div>}
                       </div>
                     )}
                     {/* Pendekatan */}
-                    {selected.dpm_data.pendekatan && (
+                    {selected.dpm.pendekatan && (
                       <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
                         <div className="font-semibold text-slate-600 mb-1">C. Pendekatan Kedokteran Keluarga</div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Tahu Keluarga Inti:</span> <span>{selected.dpm_data.pendekatan.tahuKeluargaInti || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Menangani Keluarga Yg Sama:</span> <span>{selected.dpm_data.pendekatan.menanganiKeluargaSama || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Tanya Kondisi Keluarga Lain:</span> <span>{selected.dpm_data.pendekatan.tanyaKondisiKeluargaLain || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Aspek Digali:</span> <span>{Array.isArray(selected.dpm_data.pendekatan.aspekDigali) ? selected.dpm_data.pendekatan.aspekDigali.join(', ') : '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Pengaruh Keluarga pd Kasus:</span> <span>{selected.dpm_data.pendekatan.pengaruhKeluargaKasus || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Contoh Masalah Keluarga:</span> <span>{selected.dpm_data.pendekatan.contohMasalahKeluarga || '-'} {selected.dpm_data.pendekatan.contohMasalahLainnya ? `(${selected.dpm_data.pendekatan.contohMasalahLainnya})` : ''}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Tahu Keluarga Inti:</span> <span>{selected.dpm.pendekatan.tahuKeluargaInti || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Menangani Keluarga Yg Sama:</span> <span>{selected.dpm.pendekatan.menanganiKeluargaSama || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Tanya Kondisi Keluarga Lain:</span> <span>{selected.dpm.pendekatan.tanyaKondisiKeluargaLain || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Aspek Digali:</span> <span>{Array.isArray(selected.dpm.pendekatan.aspekDigali) ? selected.dpm.pendekatan.aspekDigali.join(', ') : '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Pengaruh Keluarga pd Kasus:</span> <span>{selected.dpm.pendekatan.pengaruhKeluargaKasus || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Contoh Masalah Keluarga:</span> <span>{selected.dpm.pendekatan.contohMasalahKeluarga || '-'} {selected.dpm.pendekatan.contohMasalahLainnya ? `(${selected.dpm.pendekatan.contohMasalahLainnya})` : ''}</span></div>
                       </div>
                     )}
                     {/* Kontinuitas */}
-                    {selected.dpm_data.kontinuitas && (
+                    {selected.dpm.kontinuitas && (
                       <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
                         <div className="font-semibold text-slate-600 mb-1">D. Kontinuitas Pelayanan</div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Sistem Pencatatan JK Panjang:</span> <span>{selected.dpm_data.kontinuitas.sistemPencatatan || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Jadwalkan Kunjungan Ulang:</span> <span>{selected.dpm_data.kontinuitas.jadwalkanKunjunganUlang || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Tindak Lanjut Tdk Datang:</span> <span>{selected.dpm_data.kontinuitas.tindakLanjutTidakDatang || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Sistem Pencatatan JK Panjang:</span> <span>{selected.dpm.kontinuitas.sistemPencatatan || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Jadwalkan Kunjungan Ulang:</span> <span>{selected.dpm.kontinuitas.jadwalkanKunjunganUlang || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Tindak Lanjut Tdk Datang:</span> <span>{selected.dpm.kontinuitas.tindakLanjutTidakDatang || '-'}</span></div>
                       </div>
                     )}
                     {/* Gambaran */}
-                    {selected.dpm_data.gambaran && (
+                    {selected.dpm.gambaran && (
                       <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
                         <div className="font-semibold text-slate-600 mb-1">E. Gambaran Komprehensif</div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Kegiatan Dilakukan:</span> <span>{Array.isArray(selected.dpm_data.gambaran.kegiatanDilakukan) ? selected.dpm_data.gambaran.kegiatanDilakukan.join(', ') : '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Bentuk Pelayanan Keluarga:</span> <span>{selected.dpm_data.gambaran.bentukPelayananKeluarga || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Contoh Kasus Keluarga:</span> <span>{selected.dpm_data.gambaran.contohKasusKeluarga || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Contoh Layanan Holistik:</span> <span>{selected.dpm_data.gambaran.contohLayananHolistik || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Kegiatan Dilakukan:</span> <span>{Array.isArray(selected.dpm.gambaran.kegiatanDilakukan) ? selected.dpm.gambaran.kegiatanDilakukan.join(', ') : '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Bentuk Pelayanan Keluarga:</span> <span>{selected.dpm.gambaran.bentukPelayananKeluarga || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Contoh Kasus Keluarga:</span> <span>{selected.dpm.gambaran.contohKasusKeluarga || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Contoh Layanan Holistik:</span> <span>{selected.dpm.gambaran.contohLayananHolistik || '-'}</span></div>
                       </div>
                     )}
                   </div>
