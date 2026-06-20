@@ -95,15 +95,21 @@ export default function Dashboard() {
       return;
     }
     const headers = [
-      "No", "Tanggal Pengisian", "Provinsi", "Kabupaten/Kota", "Nama Praktik", "Nama Dokter", "Lama Praktik", "Kunjungan/Hari", 
-      "Kelompok Umur Utama", "Penerapan RM Keluarga", "Kunjungan Rumah", "Bentuk Pelayanan Keluarga"
+      "No", "Tanggal Pengisian", "Provinsi", "Kabupaten/Kota", "Nama Praktik", "Nama Dokter", 
+      "Lama Praktik", "Kunjungan/Hari", "Kelompok Umur", "Status Kepesertaan",
+      "Masalah Kesehatan Terbanyak", "Proporsi Kronis", "Proporsi Kontrol", "Alasan Rujukan",
+      "Sistem Pencatatan", "Jadwal Kunjungan Ulang", "Tindak Lanjut Tdk Datang",
+      "Bentuk Pelayanan Keluarga", "Kegiatan Dilakukan"
     ];
     const rows = dpmData.map((row, index) => {
       const d = row.dpm || {};
       return [
         index + 1, new Date(row.created_at).toLocaleString('id-ID'), row.provinsi || '', row.kab_kota || '', row.fktp_name || '', row.nama_responden || '',
-        d.karakteristik?.lamaPraktik || '', d.karakteristik?.jumlahKunjungan || '', d.karakteristik?.kelompokUmur?.join(', ') || '',
-        d.kontinuitas?.sistemPencatatan || '', d.pendekatan?.melakukanKunjunganRumah || '', d.gambaran?.bentukPelayananKeluarga || ''
+        d.karakteristik?.lamaPraktik || '', d.karakteristik?.jumlahKunjungan || '', d.karakteristik?.kelompokUmur || '', d.karakteristik?.statusPeserta || '',
+        Array.isArray(d.kasus?.masalahKesehatan) ? d.kasus.masalahKesehatan.join(', ') : (d.kasus?.masalahKesehatan || ''), 
+        d.kasus?.persenKronis || '', d.kasus?.persenKontrol || '', d.kasus?.alasanRujukan || '',
+        d.kontinuitas?.sistemPencatatan || '', d.kontinuitas?.jadwalkanKunjunganUlang || '', d.kontinuitas?.tindakLanjutTidakDatang || '',
+        d.gambaran?.bentukPelayananKeluarga || '', Array.isArray(d.gambaran?.kegiatanDilakukan) ? d.gambaran.kegiatanDilakukan.join(', ') : (d.gambaran?.kegiatanDilakukan || '')
       ];
     });
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);

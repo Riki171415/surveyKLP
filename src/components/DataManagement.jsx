@@ -159,7 +159,7 @@ export default function DataManagement() {
           base["DPM_Status Kepesertaan"] = d.karakteristik?.statusPeserta || '-';
 
           // B
-          base["DPM_Masalah Kesehatan"] = d.kasus?.masalahKesehatan?.join(', ') || '-';
+          base["DPM_Masalah Kesehatan"] = Array.isArray(d.kasus?.masalahKesehatan) ? d.kasus.masalahKesehatan.join(', ') : (d.kasus?.masalahKesehatan || '-');
           base["DPM_Masalah Lainnya"] = d.kasus?.masalahLainnya || '-';
           base["DPM_Persen Kasus Kronis"] = d.kasus?.persenKronis || '-';
           base["DPM_Persen Pasien Kontrol"] = d.kasus?.persenKontrol || '-';
@@ -169,7 +169,7 @@ export default function DataManagement() {
           base["DPM_Tahu Keluarga Inti"] = d.pendekatan?.tahuKeluargaInti || '-';
           base["DPM_Menangani Keluarga Yg Sama"] = d.pendekatan?.menanganiKeluargaSama || '-';
           base["DPM_Tanya Kondisi Keluarga Lain"] = d.pendekatan?.tanyaKondisiKeluargaLain || '-';
-          base["DPM_Aspek Digali"] = d.pendekatan?.aspekDigali?.join(', ') || '-';
+          base["DPM_Aspek Digali"] = Array.isArray(d.pendekatan?.aspekDigali) ? d.pendekatan.aspekDigali.join(', ') : (d.pendekatan?.aspekDigali || '-');
           base["DPM_Pengaruh Keluarga pd Kasus"] = d.pendekatan?.pengaruhKeluargaKasus || '-';
           base["DPM_Contoh Masalah Keluarga"] = d.pendekatan?.contohMasalahKeluarga || '-';
           base["DPM_Contoh Masalah Lainnya"] = d.pendekatan?.contohMasalahLainnya || '-';
@@ -180,7 +180,7 @@ export default function DataManagement() {
           base["DPM_Tindak Lanjut Tdk Datang"] = d.kontinuitas?.tindakLanjutTidakDatang || '-';
 
           // E
-          base["DPM_Kegiatan Dilakukan"] = d.gambaran?.kegiatanDilakukan?.join(', ') || '-';
+          base["DPM_Kegiatan Dilakukan"] = Array.isArray(d.gambaran?.kegiatanDilakukan) ? d.gambaran.kegiatanDilakukan.join(', ') : (d.gambaran?.kegiatanDilakukan || '-');
           base["DPM_Bentuk Pelayanan Keluarga"] = d.gambaran?.bentukPelayananKeluarga || '-';
           base["DPM_Contoh Kasus Keluarga"] = d.gambaran?.contohKasusKeluarga || '-';
           base["DPM_Contoh Layanan Holistik"] = d.gambaran?.contohLayananHolistik || '-';
