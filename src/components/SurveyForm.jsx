@@ -324,7 +324,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   })();
 
   const isStep5Valid = nonOptimalServices.every((_, idx) => formData.nonOptimal[idx]?.masukJkn && formData.nonOptimal[idx]?.skala);
-  const isStep6Valid = interviewQuestions.every((_, idx) => !!formData.wawancara[idx]?.trim());
+  const isStep6Valid = interviewQuestions.every((_, idx) => (formData.wawancara[idx]?.trim() || '').length >= 10);
 
   const canProceed = () => {
     if (step === 1) return isStep1Valid;
@@ -1250,7 +1250,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         rows={6}
                         required
                         placeholder={interviewExamples[idx] || "Tuliskan jawaban/alasan di sini..."}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y ${showErrors && !formData.wawancara[idx]?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y ${showErrors && (formData.wawancara[idx]?.trim() || '').length < 10 ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`}
                         value={formData.wawancara[idx] || ''}
                         onChange={(e) => handleWawancaraChange(idx, e.target.value)}
                       ></textarea>
@@ -1301,7 +1301,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     {(() => { const b = nonOptimalServices.filter((_, i) => !formData.nonOptimal[i]?.masukJkn || !formData.nonOptimal[i]?.skala).length; return b > 0 ? <li>{b} layanan non-optimal belum diisi lengkap</li> : null; })()}
                   </>)}
                   {step === 6 && (<>
-                    {(() => { const b = interviewQuestions.filter((_, i) => !formData.wawancara[i]?.trim()).length; return b > 0 ? <li>Ada {b} pertanyaan pendalaman kualitatif yang belum dijawab</li> : null; })()}
+                    {(() => { const b = interviewQuestions.filter((_, i) => (formData.wawancara[i]?.trim() || '').length < 10).length; return b > 0 ? <li>Ada {b} pertanyaan pendalaman kualitatif yang belum dijawab (minimal 10 karakter)</li> : null; })()}
                   </>)}
                 </ul>
               </div>
