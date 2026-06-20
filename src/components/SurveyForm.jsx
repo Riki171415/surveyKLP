@@ -270,6 +270,9 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
          }
          // Diagnosis and Tindakan are now required for both Ya and Tidak
          if (!formData.spkklpPoli.diagnosis?.trim() || !formData.spkklpPoli.tindakan?.trim()) return false;
+         if (formData.spkklpPoli['luaran_Rujukan ke FKRTL']) {
+           if (!formData.spkklpPoli.alasanRujukan?.trim()) return false;
+         }
          if (!formData.spkklpKendala?.hasKendala) return false;
          if (formData.spkklpKendala.hasKendala === 'Ya') {
            if (!formData.spkklpKendala.diagnosis?.trim() || !formData.spkklpKendala.tindakan?.trim()) return false;
@@ -786,6 +789,12 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                                 <label key={l} className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" checked={formData.spkklpPoli?.[`luaran_${l}`] || false} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, [`luaran_${l}`]: e.target.checked } }))} className="rounded" />{l}</label>
                               ))}</div>
                             </div>
+                            {formData.spkklpPoli?.['luaran_Rujukan ke FKRTL'] && (
+                              <div className="md:col-span-2 mt-2 pt-3 border-t border-slate-100">
+                                <label className="block text-xs font-semibold text-slate-700 mb-1">Apabila pasien di rujuk, Apa indikasi atau alasan rujukan tersebut? <span className="text-rose-500">*</span></label>
+                                <textarea rows={2} placeholder="Jelaskan indikasi atau alasan rujukan..." className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.alasanRujukan?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.alasanRujukan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, alasanRujukan: e.target.value } }))} />
+                              </div>
+                            )}
                           </div>
                         )}
 
