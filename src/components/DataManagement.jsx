@@ -35,9 +35,18 @@ const interviewQuestions = [
 ];
 
 const relevansiItems = [
-  "Peran sebagai dokter di poli umum", "Poli / Layanan khusus penyakit tidak menular (PTM)",
-  "Poli / layanan khusus Geriatri", "Poli / Layanan khusus Anak/MTBS",
-  "Kegiatan Home Visit / Home Care", "Kepala Puskesmas / Klinik", "Penanggung Jawab Mutu / UKP"
+  "Pengelolaan pasien dengan kondisi kronis dan multimorbiditas",
+  "Pendampingan pasien kronis melalui home care",
+  "Pelayanan paliatif di tingkat primer",
+  "Edukasi kelompok pasien kronis",
+  "Pendampingan keluarga pasien kronis",
+  "Pemantauan berkelanjutan pasien kronis di komunitas",
+  "Monitoring komunitas risiko tinggi penyakit kronis",
+  "Penguatan Program Rujuk Balik (PRB)",
+  "Koordinasi pelayanan lintas profesi dan kader kesehatan",
+  "Pembinaan Posbindu PTM",
+  "Pengelolaan pasien geriatri dengan kebutuhan pelayanan jangka panjang",
+  "Apakah keberadaan Sp.KKLP berpengaruh terhadap penurunan rujukan?"
 ];
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -303,10 +312,10 @@ export default function DataManagement() {
                     {selected.dpm.kasus && (
                       <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
                         <div className="font-semibold text-slate-600 mb-1">Gambaran Kasus</div>
-                        <p><span className="text-slate-500 font-medium w-32 inline-block">10 Terbanyak:</span> {Array.isArray(selected.dpm.kasus.masalahKesehatan) ? selected.dpm.kasus.masalahKesehatan.join(', ') : '-'} {selected.dpm.kasus.masalahLainnya ? `(${selected.dpm.kasus.masalahLainnya})` : ''}</p>
-                        <p><span className="text-slate-500 font-medium w-32 inline-block">% Kasus Kronis:</span> {selected.dpm.kasus.persenKronis || '-'}</p>
-                        <p><span className="text-slate-500 font-medium w-32 inline-block">% Pasien Kontrol:</span> {selected.dpm.kasus.persenKontrol || '-'}</p>
-                        {selected.dpm.kasus.alasanRujukan && <p><span className="text-slate-500 font-medium w-32 inline-block">Indikasi Rujukan:</span> {selected.dpm.kasus.alasanRujukan}</p>}
+                        <div className="flex"><span className="text-slate-500 font-medium w-32 shrink-0">10 Terbanyak:</span> <span>{Array.isArray(selected.dpm.kasus.masalahKesehatan) ? selected.dpm.kasus.masalahKesehatan.join(', ') : '-'} {selected.dpm.kasus.masalahLainnya ? `(${selected.dpm.kasus.masalahLainnya})` : ''}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-32 shrink-0">% Kasus Kronis:</span> <span>{selected.dpm.kasus.persenKronis || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-32 shrink-0">% Pasien Kontrol:</span> <span>{selected.dpm.kasus.persenKontrol || '-'}</span></div>
+                        {selected.dpm.kasus.alasanRujukan && <div className="flex"><span className="text-slate-500 font-medium w-32 shrink-0">Indikasi Rujukan:</span> <span>{selected.dpm.kasus.alasanRujukan}</span></div>}
                       </div>
                     )}
                   </div>
