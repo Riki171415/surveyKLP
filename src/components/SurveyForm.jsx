@@ -7,6 +7,7 @@ import { useAuth } from './AuthContext';
 import wilayahMapping from '../data/wilayahMapping.json';
 import logoKemenkes from '../assets/logo-kemenkes.png';
 import SearchableSelect from './SearchableSelect';
+import SurveiDPM from './SurveiDPM';
 
 const jknBenefits = [
   "Pengelolaan Diabetes Melitus tanpa komplikasi", "Penyusunan care plan jangka panjang pasien kronik",
@@ -85,17 +86,6 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const STEPS = [
-    { id: 1, title: 'Identitas' },
-    { id: 2, title: 'Kompetensi' },
-    { id: 3, title: 'Perspektif' },
-    { id: 4, title: 'Manfaat JKN' },
-    { id: 5, title: 'Non-Optimal' },
-    { id: 6, title: 'Pendalaman' }
-  ];
-
-  const totalSteps = 6;
-
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     id: null,
@@ -109,8 +99,25 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
     spkklpBerpraktik: '', spkklpPoli: {}, spkklpKendala: {},
     // Step 3 Perspektif
     relevansiSpkklp: {}, layananDirujuk: {}, layananBelumBerjalan: {},
-    prb: {}
+    prb: {},
+    dpm: {}
   });
+
+  const isRoleDpm = formData?.role === 'Dokter Praktik Mandiri';
+
+  const STEPS = isRoleDpm ? [
+    { id: 1, title: 'Identitas' },
+    { id: 2, title: 'Survei DPM' }
+  ] : [
+    { id: 1, title: 'Identitas' },
+    { id: 2, title: 'Kompetensi' },
+    { id: 3, title: 'Perspektif' },
+    { id: 4, title: 'Manfaat JKN' },
+    { id: 5, title: 'Non-Optimal' },
+    { id: 6, title: 'Pendalaman' }
+  ];
+
+  const totalSteps = STEPS.length;
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showTransition, setShowTransition] = useState(false);
@@ -123,9 +130,17 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const kabKotaList = formData.provinsi && wilayahMapping[formData.provinsi]
     ? Object.keys(wilayahMapping[formData.provinsi]).sort()
     : [];
-  const puskesmasList = formData.provinsi && formData.kabKota && wilayahMapping[formData.provinsi]?.[formData.kabKota]
+  const puskesmasListRaw = formData.provinsi && formData.kabKota && wilayahMapping[formData.provinsi]?.[formData.kabKota]
     ? wilayahMapping[formData.provinsi][formData.kabKota]
     : [];
+    
+  const puskesmasList = [...puskesmasListRaw].sort((a, b) => {
+    const isAPusk = a.toLowerCase().startsWith('puskesmas');
+    const isBPusk = b.toLowerCase().startsWith('puskesmas');
+    if (isAPusk && !isBPusk) return -1;
+    if (!isAPusk && isBPusk) return 1;
+    return a.localeCompare(b);
+  });
 
   useEffect(() => {
     if (isInterview && location.state?.surveyData) {
@@ -208,23 +223,88 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const isRoleSpKklp = formData.role === 'Dokter Sp.KKLP';
 
   // Validasi per Step
-  const isStep1Valid = formData.fktpName.trim() !== '' && formData.provinsi.trim() !== '' && formData.kabKota.trim() !== '' && formData.role !== '' && formData.docKklp !== '' && formData.kodeFaskes.trim() !== '' && formData.namaResponden.trim() !== '';
+  const isStep1Valid = (() => {
+    if (formData.fktpName.trim() === '' || formData.provinsi.trim() === '' || formData.kabKota.trim() === '' || formData.role === '' || formData.docKklp === '' || formData.kodeFaskes.trim() === '' || formData.namaResponden.trim() === '') return false;
+    if (formData.role === 'Dokter Sp.KKLP') {
+      if (!formData.spkklpBerpraktik) return false;
+      if (!formData.spkklpPoli?.hasPoli) return false;
+      if (formData.spkklpPoli.hasPoli === 'Ya') {
+        if (!formData.spkklpPoli.sejak?.trim() || !formData.spkklpPoli.kunjungan || !formData.spkklpPoli.pembiayaan?.trim()) return false;
+      }
+      if (formData.spkklpPoli.hasPoli === 'Tidak') {
+        if (!formData.spkklpPoli.diagnosis?.trim() || !formData.spkklpPoli.tindakan?.trim()) return false;
+      }
+      if (!formData.spkklpKendala?.hasKendala) return false;
+      if (formData.spkklpKendala.hasKendala === 'Ya') {
+        if (!formData.spkklpKendala.diagnosis?.trim() || !formData.spkklpKendala.tindakan?.trim()) return false;
+      }
+    }
+    return true;
+  })();
   const propTotal = Number(formData.propInFktp || 0) + Number(formData.propOutFktp || 0);
   const isPropValid = formData.propInFktp !== '' && formData.propOutFktp !== '' && propTotal === 100;
-  const isStep2Valid = isRoleDoctor
+  const isStep2Valid = isRoleDpm ? (() => {
+    const dpm = formData.dpm;
+    if (!dpm) return false;
+    // A
+    if (!dpm.karakteristik?.lamaPraktik || !dpm.karakteristik?.jumlahKunjungan || !dpm.karakteristik?.kelompokUmur || !dpm.karakteristik?.statusPeserta) return false;
+    // B
+    if (!dpm.kasus?.masalahKesehatan || dpm.kasus.masalahKesehatan.length === 0 || !dpm.kasus?.persenKronis || !dpm.kasus?.persenKontrol) return false;
+    // C
+    if (!dpm.pendekatan?.tahuKeluargaInti || !dpm.pendekatan?.menanganiKeluargaSama || !dpm.pendekatan?.tanyaKondisiKeluargaLain) return false;
+    if (!dpm.pendekatan?.aspekDigali || dpm.pendekatan.aspekDigali.length === 0) return false;
+    if (!dpm.pendekatan?.pengaruhKeluargaKasus || !dpm.pendekatan?.contohMasalahKeluarga) return false;
+    // D
+    if (!dpm.kontinuitas?.sistemPencatatan || !dpm.kontinuitas?.jadwalkanKunjunganUlang || !dpm.kontinuitas?.tindakLanjutTidakDatang) return false;
+    // E
+    if (!dpm.gambaran?.kegiatanDilakukan || dpm.gambaran.kegiatanDilakukan.length === 0) return false;
+    if (!dpm.gambaran?.bentukPelayananKeluarga?.trim() || !dpm.gambaran?.contohKasusKeluarga?.trim() || !dpm.gambaran?.contohLayananHolistik?.trim()) return false;
+    return true;
+  })() : isRoleDoctor
     ? (formData.timeInPoli !== '' && formData.timeHomeVisit !== '' &&
        isPropValid &&
        kompetensiLayanan.every((_, idx) => formData.kompetensi[idx]?.status))
     : true;
+
   const isStep3Valid = relevansiItems.every((_, idx) => formData.relevansiSpkklp[idx]) &&
+    formData.prb?.jumlah && formData.prb?.peserta_dm && formData.prb?.peserta_ht &&
     formData.prb?.mekanisme && formData.prb?.rataRujukan;
-  const isStep4Valid = jknBenefits.every((_, idx) => formData.jkn[idx]?.skala);
+
+  const isStep4Valid = (() => {
+    if (!jknBenefits.every((_, idx) => formData.jkn[idx]?.skala)) return false;
+    
+    if (formData.homeCare?.screening === 'Ya') {
+      const hc = formData.homeCare;
+      if (!hc.tenaga?.trim() || !hc.diagnosis?.trim() || !hc.jumlahKunjungan || !hc.kolaborasi || !hc.kepatuhan || !hc.perbaikan) return false;
+      if (hc.kolaborasi === 'Ya' && !hc.bentukKolaborasi?.trim()) return false;
+      if (hc.perbaikan === 'Ya' && !hc.bentukPerbaikan?.trim()) return false;
+      const hasKondisi = ['Mandiri (independen)', 'Memerlukan bantuan sebagian', 'Memerlukan bantuan penuh', 'Tirah baring', 'Lainnya'].some(k => hc[`kondisi_${k}`]);
+      if (!hasKondisi) return false;
+      const hasJenis = ['Pemeriksaan kesehatan', 'Pemantauan penyakit kronis', 'Perawatan luka', 'Rehabilitasi sederhana', 'Edukasi keluarga', 'Lainnya'].some(j => hc[`jenis_${j}`]);
+      if (!hasJenis) return false;
+    }
+
+    if (formData.paliatif?.screening === 'Ya') {
+      const pl = formData.paliatif;
+      if (!pl.tenaga?.trim() || !pl.diagnosis?.trim() || !pl.terapi?.trim() || !pl.kolaborasi || !pl.kepatuhan || !pl.perbaikan) return false;
+      if (pl.kolaborasi === 'Ya' && !pl.bentukKolaborasi?.trim()) return false;
+      if (pl.perbaikan === 'Ya' && !pl.bentukPerbaikan?.trim()) return false;
+      const hasKondisiPl = ['Mandiri (independen)', 'Memerlukan bantuan sebagian', 'Memerlukan bantuan penuh', 'Tirah baring', 'Lainnya'].some(k => pl[`kondisi_${k}`]);
+      if (!hasKondisiPl) return false;
+      const hasTujuan = ['Pengendalian nyeri', 'Pengendalian gejala', 'Dukungan psikososial', 'Edukasi keluarga/caregiver', 'Perawatan akhir kehidupan', 'Lainnya'].some(t => pl[`tujuan_${t}`]);
+      if (!hasTujuan) return false;
+    }
+
+    return true;
+  })();
+
   const isStep5Valid = nonOptimalServices.every((_, idx) => formData.nonOptimal[idx]?.masukJkn && formData.nonOptimal[idx]?.skala);
   const isStep6Valid = interviewQuestions.every((_, idx) => formData.wawancara[idx]?.trim() !== '');
 
   const canProceed = () => {
     if (step === 1) return isStep1Valid;
     if (step === 2) return isStep2Valid;
+    if (isRoleDpm) return false; // DPM only has 2 steps!
     if (step === 3) return isStep3Valid;
     if (step === 4) return isStep4Valid;
     if (step === 5) return isStep5Valid;
@@ -245,16 +325,25 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
   const submitData = async (isIntermediate = false) => {
-    if (isIntermediate && !isStep5Valid) {
-      setShowErrors(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
+    if (isRoleDpm) {
+      if (!isStep2Valid) {
+        setShowErrors(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+    } else {
+      if (isIntermediate && !isStep5Valid) {
+        setShowErrors(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (!isIntermediate && !isStep6Valid) {
+        setShowErrors(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
     }
-    if (!isIntermediate && !isStep6Valid) {
-      setShowErrors(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
+    
     setIsSubmitting(true);
     try {
       const payload = {
@@ -284,7 +373,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
         relevansi_spkklp: formData.relevansiSpkklp,
         layanan_dirujuk: formData.layananDirujuk,
         layanan_belum_berjalan: formData.layananBelumBerjalan,
-        prb: formData.prb
+        prb: formData.prb,
+        dpm: formData.dpm
       };
       let error;
       if (formData.id) {
@@ -443,11 +533,17 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         {!formData.provinsi ? <p className="text-xs text-amber-600 mt-1">Pilih provinsi terlebih dahulu</p> : showErrors && !formData.kabKota ? <p className="text-xs text-rose-500 mt-1">Kab/Kota wajib diisi</p> : null}
                       </div>
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Nama Puskesmas / Klinik</label>
-                        <div className={showErrors && !formData.fktpName ? 'ring-2 ring-rose-500 rounded-lg shadow-sm' : ''}>
-                          <SearchableSelect name="fktpName" options={puskesmasList} value={formData.fktpName} onChange={(val) => handleInputChange({ target: { name: 'fktpName', value: val } })} disabled={!formData.kabKota} placeholder="-- Pilih atau Ketik Puskesmas --" allowManual={true} />
-                        </div>
-                        {!formData.kabKota ? <p className="text-xs text-amber-600 mt-1">Pilih Kab/Kota terlebih dahulu</p> : showErrors && !formData.fktpName ? <p className="text-xs text-rose-500 mt-1">Nama Puskesmas wajib diisi</p> : null}
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">
+                          {isRoleDpm ? 'Nama Praktik Dokter Mandiri' : 'Nama Puskesmas / Klinik'}
+                        </label>
+                        {isRoleDpm ? (
+                          <input type="text" name="fktpName" value={formData.fktpName} onChange={handleInputChange} placeholder="Contoh: Praktik dr. Budi" className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300 ${showErrors && !formData.fktpName ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} />
+                        ) : (
+                          <div className={showErrors && !formData.fktpName && formData.kabKota ? 'ring-2 ring-rose-500 rounded-lg' : ''}>
+                            <SearchableSelect name="fktpName" options={puskesmasList} value={formData.fktpName} onChange={(val) => handleInputChange({ target: { name: 'fktpName', value: val } })} disabled={!formData.kabKota} placeholder="-- Pilih atau Ketik Puskesmas --" allowManual={true} />
+                          </div>
+                        )}
+                        {!isRoleDpm && !formData.kabKota ? <p className="text-xs text-amber-600 mt-1">Pilih Kab/Kota terlebih dahulu</p> : showErrors && !formData.fktpName ? <p className="text-xs text-rose-500 mt-1">Nama Faskes wajib diisi</p> : null}
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Kode Faskes BPJS</label>
@@ -464,7 +560,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   <div className="md:col-span-2">
                     <div className="mb-3"><label className="block text-sm font-semibold text-slate-700 mb-1">Jabatan <span className="text-xs text-slate-400 font-normal ml-1">(Pilih salah satu)</span></label></div>
                     <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 p-2 rounded-2xl ${showErrors && !formData.role ? 'ring-2 ring-rose-500 bg-rose-50/50' : ''}`}>
-                      {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Tenaga Kesehatan Fungsional (Dokter Gigi, Bidan, Perawat, Farmasi)'].map(role => (
+                      {['Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP', 'Dokter Praktik Mandiri', 'Tenaga Kesehatan Fungsional (Dokter Gigi, Bidan, Perawat, Farmasi)'].map(role => (
                         <label key={role} className={`relative flex items-center justify-center px-4 py-4 border-2 rounded-2xl cursor-pointer transition-all duration-300 text-center leading-tight group ${
                           formData.role === role ? 'border-primary-500 bg-primary-50/50 text-primary-700 font-bold shadow-md shadow-primary-500/10 scale-[1.02]' : 'border-slate-100 bg-white hover:border-primary-300 hover:bg-slate-50 text-slate-600'
                         }`}>
@@ -499,8 +595,13 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
               </div>
             )}
 
+            {/* ===== STEP 2: SURVEI DPM ===== */}
+            {step === 2 && isRoleDpm && (
+              <SurveiDPM formData={formData} setFormData={setFormData} showErrors={showErrors} />
+            )}
+
             {/* ===== STEP 2: KOMPETENSI DOKTER ===== */}
-            {step === 2 && (
+            {step === 2 && !isRoleDpm && (
               <div className="space-y-8">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
@@ -583,8 +684,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
                         {/* Apakah berpraktik */}
                         <div>
-                          <label className="block text-sm font-semibold text-slate-700 mb-3">Apakah Anda berpraktik sebagai dokter Sp.KKLP?</label>
-                          <div className="flex gap-4">
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">Apakah Anda berpraktik sebagai dokter Sp.KKLP? <span className="text-rose-500">*</span></label>
+                          <div className={`flex gap-4 ${showErrors && !formData.spkklpBerpraktik ? 'p-2 ring-2 ring-rose-500 rounded-xl bg-rose-50/50' : ''}`}>
                             {['Ya', 'Tidak'].map(opt => (
                               <label key={opt} className={`flex items-center gap-3 px-5 py-3 border-2 rounded-xl cursor-pointer transition-all ${
                                 formData.spkklpBerpraktik === opt ? 'border-blue-500 bg-blue-50 text-blue-700 font-bold' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'
@@ -601,8 +702,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
                         {/* Apakah punya poli SpKKLP */}
                         <div>
-                          <label className="block text-sm font-semibold text-slate-700 mb-3">Apakah Sp.KKLP memiliki Poli Sp.KKLP?</label>
-                          <div className="flex gap-4">
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">Apakah Sp.KKLP memiliki Poli Sp.KKLP? <span className="text-rose-500">*</span></label>
+                          <div className={`flex gap-4 ${showErrors && !formData.spkklpPoli?.hasPoli ? 'p-2 ring-2 ring-rose-500 rounded-xl bg-rose-50/50' : ''}`}>
                             {['Ya', 'Tidak'].map(opt => (
                               <label key={opt} className={`flex items-center gap-3 px-5 py-3 border-2 rounded-xl cursor-pointer transition-all ${
                                 formData.spkklpPoli?.hasPoli === opt ? 'border-blue-500 bg-blue-50 text-blue-700 font-bold' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'
@@ -619,21 +720,21 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
                         {formData.spkklpPoli?.hasPoli === 'Ya' && (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
-                            <div><label className="block text-xs font-semibold text-slate-700 mb-1">Sejak kapan poli KKLP beroperasi?</label><input type="text" placeholder="Contoh: Januari 2024" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={formData.spkklpPoli?.sejak || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, sejak: e.target.value } }))} /></div>
-                            <div><label className="block text-xs font-semibold text-slate-700 mb-1">Rata-rata jumlah kunjungan per bulan</label><input type="number" placeholder="Jumlah" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={formData.spkklpPoli?.kunjungan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, kunjungan: e.target.value } }))} /></div>
+                            <div><label className="block text-xs font-semibold text-slate-700 mb-1">Sejak kapan poli KKLP beroperasi? <span className="text-rose-500">*</span></label><input type="text" placeholder="Contoh: Januari 2024" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none ${showErrors && !formData.spkklpPoli?.sejak?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.sejak || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, sejak: e.target.value } }))} /></div>
+                            <div><label className="block text-xs font-semibold text-slate-700 mb-1">Rata-rata jumlah kunjungan per bulan <span className="text-rose-500">*</span></label><input type="number" placeholder="Jumlah" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none ${showErrors && !formData.spkklpPoli?.kunjungan ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.kunjungan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, kunjungan: e.target.value } }))} /></div>
                             <div><label className="block text-xs font-semibold text-slate-700 mb-1">Mekanisme pasien masuk ke Poli KKLP</label>
                               <div className="flex flex-col gap-1">{['Dari poli umum', 'Rujukan internal', 'Langsung datang', 'Lainnya'].map(m => (
                                 <label key={m} className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" checked={formData.spkklpPoli?.[`mek_${m}`] || false} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, [`mek_${m}`]: e.target.checked } }))} className="rounded" />{m}</label>
                               ))}</div>
                             </div>
-                            <div><label className="block text-xs font-semibold text-slate-700 mb-1">Mekanisme pembiayaan layanan Poli KKLP</label><input type="text" placeholder="Jelaskan..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={formData.spkklpPoli?.pembiayaan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, pembiayaan: e.target.value } }))} /></div>
+                            <div><label className="block text-xs font-semibold text-slate-700 mb-1">Mekanisme pembiayaan layanan Poli KKLP <span className="text-rose-500">*</span></label><input type="text" placeholder="Jelaskan..." className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none ${showErrors && !formData.spkklpPoli?.pembiayaan?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.pembiayaan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, pembiayaan: e.target.value } }))} /></div>
                           </div>
                         )}
 
                         {formData.spkklpPoli?.hasPoli === 'Tidak' && (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl">
-                            <div className="md:col-span-2"><label className="block text-xs font-semibold text-slate-700 mb-1">Nama diagnosis yang ditangani Sp.KKLP (cantumkan Kode ICD-10)</label><textarea rows={2} placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none" value={formData.spkklpPoli?.diagnosis || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, diagnosis: e.target.value } }))} /></div>
-                            <div><label className="block text-xs font-semibold text-slate-700 mb-1">Tindakan/Prosedur yang dilakukan</label><textarea rows={2} placeholder="Jelaskan..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none" value={formData.spkklpPoli?.tindakan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, tindakan: e.target.value } }))} /></div>
+                            <div className="md:col-span-2"><label className="block text-xs font-semibold text-slate-700 mb-1">Nama diagnosis yang ditangani Sp.KKLP (cantumkan Kode ICD-10) <span className="text-rose-500">*</span></label><textarea rows={2} placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.diagnosis?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.diagnosis || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, diagnosis: e.target.value } }))} /></div>
+                            <div><label className="block text-xs font-semibold text-slate-700 mb-1">Tindakan/Prosedur yang dilakukan <span className="text-rose-500">*</span></label><textarea rows={2} placeholder="Jelaskan..." className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.tindakan?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.tindakan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, tindakan: e.target.value } }))} /></div>
                             <div><label className="block text-xs font-semibold text-slate-700 mb-1">Luaran pelayanan (centang semua yang sesuai)</label>
                               <div className="flex flex-col gap-1">{['Selesai di FKTP', 'Kontrol berkala di FKTP', 'Home care', 'Paliatif', 'PRB', 'Rujukan ke FKRTL', 'Lainnya'].map(l => (
                                 <label key={l} className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" checked={formData.spkklpPoli?.[`luaran_${l}`] || false} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, [`luaran_${l}`]: e.target.checked } }))} className="rounded" />{l}</label>
@@ -644,8 +745,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
                         {/* Apakah ada kasus yang belum bisa dilakukan */}
                         <div>
-                          <label className="block text-sm font-semibold text-slate-700 mb-3">Apakah terdapat kasus yang secara kompetensi dapat ditangani Sp.KKLP namun belum dapat dilaksanakan di FKTP?</label>
-                          <div className="flex gap-4">
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">Apakah terdapat kasus yang secara kompetensi dapat ditangani Sp.KKLP namun belum dapat dilaksanakan di FKTP? <span className="text-rose-500">*</span></label>
+                          <div className={`flex gap-4 ${showErrors && !formData.spkklpKendala?.hasKendala ? 'p-2 ring-2 ring-rose-500 rounded-xl bg-rose-50/50' : ''}`}>
                             {['Ya', 'Tidak'].map(opt => (
                               <label key={opt} className={`flex items-center gap-3 px-5 py-3 border-2 rounded-xl cursor-pointer transition-all ${
                                 formData.spkklpKendala?.hasKendala === opt ? 'border-blue-500 bg-blue-50 text-blue-700 font-bold' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'
@@ -660,8 +761,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                           </div>
                           {formData.spkklpKendala?.hasKendala === 'Ya' && (
                             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-amber-50 border border-amber-100 rounded-xl">
-                              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Sebutkan diagnosisnya</label><textarea rows={2} placeholder="Tulis diagnosis..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none resize-none" value={formData.spkklpKendala?.diagnosis || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpKendala: { ...prev.spkklpKendala, diagnosis: e.target.value } }))} /></div>
-                              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Sebutkan tindakan/prosedur yang diperlukan</label><textarea rows={2} placeholder="Tulis tindakan..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none resize-none" value={formData.spkklpKendala?.tindakan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpKendala: { ...prev.spkklpKendala, tindakan: e.target.value } }))} /></div>
+                              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Sebutkan diagnosisnya <span className="text-rose-500">*</span></label><textarea rows={2} placeholder="Tulis diagnosis..." className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none resize-none ${showErrors && !formData.spkklpKendala?.diagnosis?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpKendala?.diagnosis || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpKendala: { ...prev.spkklpKendala, diagnosis: e.target.value } }))} /></div>
+                              <div><label className="block text-xs font-semibold text-slate-700 mb-1">Sebutkan tindakan/prosedur yang diperlukan <span className="text-rose-500">*</span></label><textarea rows={2} placeholder="Tulis tindakan..." className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none resize-none ${showErrors && !formData.spkklpKendala?.tindakan?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpKendala?.tindakan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpKendala: { ...prev.spkklpKendala, tindakan: e.target.value } }))} /></div>
                               <div className="md:col-span-2"><label className="block text-xs font-semibold text-slate-700 mb-2">Kendala utama (centang semua yang sesuai)</label>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">{['SDM', 'Sarana prasarana', 'Alat kesehatan', 'Obat', 'Pembiayaan', 'Regulasi', 'Lainnya'].map(k => (
                                   <label key={k} className="flex items-center gap-2 text-xs cursor-pointer p-2 border border-slate-200 rounded-lg hover:bg-slate-50"><input type="checkbox" checked={formData.spkklpKendala?.[`kendala_${k}`] || false} onChange={(e) => setFormData(prev => ({ ...prev, spkklpKendala: { ...prev.spkklpKendala, [`kendala_${k}`]: e.target.checked } }))} className="rounded" />{k}</label>
@@ -778,9 +879,24 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     <h3 className="text-base font-bold text-slate-800">Program Rujuk Balik (PRB)</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div><label className="block text-xs font-semibold text-slate-700 mb-1">Jumlah peserta PRB saat ini <span className="font-normal text-slate-400">(tidak wajib)</span></label><input type="number" placeholder="Jumlah" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.jumlah || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, jumlah: e.target.value } }))} /></div>
+                    <div><label className="block text-xs font-semibold text-slate-700 mb-1">Jumlah peserta PRB saat ini <span className="text-rose-500">*</span></label><input type="number" placeholder="Jumlah" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none ${showErrors && !formData.prb?.jumlah ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.prb?.jumlah || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, jumlah: e.target.value } }))} /></div>
                     <div><label className="block text-xs font-semibold text-slate-700 mb-1">Peserta PRB rutin kunjungan ≥1x/bulan (3 bln terakhir) <span className="font-normal text-slate-400">(tidak wajib)</span></label><input type="number" placeholder="Jumlah" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.rutinKunjungan || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, rutinKunjungan: e.target.value } }))} /></div>
                     <div><label className="block text-xs font-semibold text-slate-700 mb-1">Peserta PRB tidak berkunjung 3 bulan terakhir <span className="font-normal text-slate-400">(tidak wajib)</span></label><input type="number" placeholder="Jumlah" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.tidakBerkunjung || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, tidakBerkunjung: e.target.value } }))} /></div>
+
+                    <div className="md:col-span-2 mt-2">
+                      <label className="block text-xs font-bold text-slate-800 mb-2 border-b pb-1">Jumlah peserta PRB berdasarkan diagnosis (isian angka):</label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <div><label className="block text-xs text-slate-700 mb-1">DM <span className="text-rose-500">*</span></label><input type="number" placeholder="0" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none ${showErrors && !formData.prb?.peserta_dm ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.prb?.peserta_dm || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, peserta_dm: e.target.value } }))} /></div>
+                        <div><label className="block text-xs text-slate-700 mb-1">Hipertensi <span className="text-rose-500">*</span></label><input type="number" placeholder="0" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none ${showErrors && !formData.prb?.peserta_ht ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.prb?.peserta_ht || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, peserta_ht: e.target.value } }))} /></div>
+                        <div><label className="block text-xs text-slate-700 mb-1">Jantung</label><input type="number" placeholder="0" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.peserta_jantung || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, peserta_jantung: e.target.value } }))} /></div>
+                        <div><label className="block text-xs text-slate-700 mb-1">PPOK</label><input type="number" placeholder="0" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.peserta_ppok || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, peserta_ppok: e.target.value } }))} /></div>
+                        <div><label className="block text-xs text-slate-700 mb-1">Asma</label><input type="number" placeholder="0" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.peserta_asma || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, peserta_asma: e.target.value } }))} /></div>
+                        <div><label className="block text-xs text-slate-700 mb-1">Stroke</label><input type="number" placeholder="0" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.peserta_stroke || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, peserta_stroke: e.target.value } }))} /></div>
+                        <div><label className="block text-xs text-slate-700 mb-1">Epilepsi</label><input type="number" placeholder="0" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.peserta_epilepsi || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, peserta_epilepsi: e.target.value } }))} /></div>
+                        <div><label className="block text-xs text-slate-700 mb-1">Skizofrenia</label><input type="number" placeholder="0" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.peserta_skizofrenia || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, peserta_skizofrenia: e.target.value } }))} /></div>
+                        <div><label className="block text-xs text-slate-700 mb-1">SLE</label><input type="number" placeholder="0" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.peserta_sle || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, peserta_sle: e.target.value } }))} /></div>
+                      </div>
+                    </div>
                     <div><label className="block text-xs font-semibold text-slate-700 mb-1">Rata-rata jumlah rujukan ke FKRTL per bulan <span className="text-rose-500">*</span></label><input type="number" placeholder="Jumlah" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none ${showErrors && !formData.prb?.rataRujukan ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.prb?.rataRujukan || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, rataRujukan: e.target.value } }))} /></div>
                     <div className="md:col-span-2">
                       <label className="block text-xs font-semibold text-slate-700 mb-2">Mekanisme pemantauan peserta PRB di FKTP <span className="text-rose-500">*</span> <span className="font-normal text-slate-400">(centang bisa lebih dari 1)</span></label>
@@ -1094,7 +1210,12 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     {!formData.role && <li>Jabatan belum dipilih</li>}
                     {!formData.docKklp && <li>Status kepemilikan Sp.KKLP belum dipilih</li>}
                   </>)}
-                  {step === 2 && isRoleDoctor && (<>
+                  {step === 2 && isRoleDpm && (
+                    <>
+                      {!isStep2Valid && <li>Pastikan semua field pada Survei DPM (A-E) terisi lengkap.</li>}
+                    </>
+                  )}
+                  {step === 2 && !isRoleDpm && isRoleDoctor && (<>
                     {!formData.timeInPoli && <li>Waktu rata-rata poli belum diisi</li>}
                     {!formData.timeHomeVisit && <li>Waktu rata-rata home visit belum diisi</li>}
                     {(!formData.propInFktp || !formData.propOutFktp) && <li>Beban dalam/luar gedung belum diisi</li>}
@@ -1108,6 +1229,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   </>)}
                   {step === 4 && (<>
                     {(() => { const b = jknBenefits.filter((_, i) => !formData.jkn[i]?.skala).length; return b > 0 ? <li>{b} layanan JKN belum diberi nilai skala</li> : null; })()}
+                    {!isStep4Valid && formData.homeCare?.screening === 'Ya' && <li>Ada isian Pelayanan Home Care yang belum lengkap</li>}
+                    {!isStep4Valid && formData.paliatif?.screening === 'Ya' && <li>Ada isian Pelayanan Paliatif yang belum lengkap</li>}
                   </>)}
                   {step === 5 && (<>
                     {(() => { const b = nonOptimalServices.filter((_, i) => !formData.nonOptimal[i]?.masukJkn || !formData.nonOptimal[i]?.skala).length; return b > 0 ? <li>{b} layanan non-optimal belum diisi lengkap</li> : null; })()}
@@ -1122,11 +1245,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
               <button type="button" onClick={prevStep} disabled={step === 1} className={`flex items-center px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${step === 1 ? 'opacity-0 pointer-events-none' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 shadow-sm hover:shadow active:scale-95'}`}>
                 <ChevronLeft className="w-5 h-5 mr-1.5" /> Sebelumnya
               </button>
-              {step < 5 ? (
+              {step < totalSteps - 1 ? (
                 <button type="button" onClick={nextStep} className="flex items-center px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg bg-primary-600 text-white hover:bg-primary-700 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary-600/30 active:scale-95">
                   Selanjutnya <ChevronRight className="w-5 h-5 ml-1.5" />
                 </button>
-              ) : step === 5 ? (
+              ) : step === totalSteps - 1 && !isRoleDpm ? (
                 <button type="button" onClick={() => submitData(true)} disabled={isSubmitting} className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 hover:-translate-y-0.5 hover:shadow-amber-500/40 active:scale-95'}`}>
                   {isSubmitting ? 'Menyimpan...' : 'Simpan & Lanjut Pendalaman'}
                   {!isSubmitting && <ChevronRight className="w-5 h-5 ml-2" />}

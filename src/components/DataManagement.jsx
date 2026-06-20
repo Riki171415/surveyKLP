@@ -248,11 +248,28 @@ export default function DataManagement() {
                 <div>
                   <SectionHeader label="C. Program Rujuk Balik (PRB)" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                    <Field label="Diagnosis PRB" value={selected.prb.diagnosis_ditangani ? Object.keys(selected.prb.diagnosis_ditangani).filter(k => selected.prb.diagnosis_ditangani[k]).join(', ') : '-'} />
-                    <Field label="Pendaftaran PRB oleh" value={selected.prb.pendaftaran_prb ? Object.keys(selected.prb.pendaftaran_prb).filter(k => selected.prb.pendaftaran_prb[k]).join(', ') : '-'} />
-                    <Field label="Peresepan obat PRB oleh" value={selected.prb.peresepan_obat_prb ? Object.keys(selected.prb.peresepan_obat_prb).filter(k => selected.prb.peresepan_obat_prb[k]).join(', ') : '-'} />
-                    <Field label="Ketersediaan Obat PRB" value={selected.prb.ketersediaan_obat_prb ? Object.keys(selected.prb.ketersediaan_obat_prb).filter(k => selected.prb.ketersediaan_obat_prb[k]).join(', ') : '-'} />
-                    <Field label="Koordinasi Faskes Rujukan" value={selected.prb.faskes_rujukan ? Object.keys(selected.prb.faskes_rujukan).filter(k => selected.prb.faskes_rujukan[k]).join(', ') : '-'} />
+                    <Field label="Jumlah Peserta PRB" value={selected.prb.jumlah || '-'} />
+                    <Field label="Rutin Kunjungan (≥1x/bln)" value={selected.prb.rutinKunjungan || '-'} />
+                    <Field label="Tidak Berkunjung (3 bln)" value={selected.prb.tidakBerkunjung || '-'} />
+                    <Field label="Rata-rata Rujukan per Bulan" value={selected.prb.rataRujukan || '-'} />
+                    
+                    <div className="md:col-span-2">
+                      <span className="font-semibold block text-xs text-slate-500 uppercase tracking-wider mb-1 mt-2">Jumlah Diagnosis PRB</span>
+                      <div className="grid grid-cols-3 gap-2">
+                        <Field label="DM" value={selected.prb.peserta_dm || '-'} />
+                        <Field label="Hipertensi" value={selected.prb.peserta_ht || '-'} />
+                        <Field label="Jantung" value={selected.prb.peserta_jantung || '-'} />
+                        <Field label="PPOK" value={selected.prb.peserta_ppok || '-'} />
+                        <Field label="Asma" value={selected.prb.peserta_asma || '-'} />
+                        <Field label="Stroke" value={selected.prb.peserta_stroke || '-'} />
+                        <Field label="Epilepsi" value={selected.prb.peserta_epilepsi || '-'} />
+                        <Field label="Skizofrenia" value={selected.prb.peserta_skizofrenia || '-'} />
+                        <Field label="SLE" value={selected.prb.peserta_sle || '-'} />
+                      </div>
+                    </div>
+                    
+                    <Field label="Mekanisme Pemantauan" value={Object.keys(selected.prb).filter(k => k.startsWith('mek_') && selected.prb[k]).map(k => k.replace('mek_', '')).join(', ') || '-'} />
+                    <Field label="Kendala Pelaksanaan" value={selected.prb.kendala || '-'} />
                   </div>
                 </div>
               )}
