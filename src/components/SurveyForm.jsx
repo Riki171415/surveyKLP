@@ -268,9 +268,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
          if (formData.spkklpPoli.hasPoli === 'Ya') {
            if (!formData.spkklpPoli.sejak?.trim() || !formData.spkklpPoli.kunjungan || !formData.spkklpPoli.pembiayaan?.trim()) return false;
          }
-         if (formData.spkklpPoli.hasPoli === 'Tidak') {
-           if (!formData.spkklpPoli.diagnosis?.trim() || !formData.spkklpPoli.tindakan?.trim()) return false;
-         }
+         // Diagnosis and Tindakan are now required for both Ya and Tidak
+         if (!formData.spkklpPoli.diagnosis?.trim() || !formData.spkklpPoli.tindakan?.trim()) return false;
          if (!formData.spkklpKendala?.hasKendala) return false;
          if (formData.spkklpKendala.hasKendala === 'Ya') {
            if (!formData.spkklpKendala.diagnosis?.trim() || !formData.spkklpKendala.tindakan?.trim()) return false;
@@ -778,8 +777,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                           </div>
                         )}
 
-                        {formData.spkklpPoli?.hasPoli === 'Tidak' && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        {formData.spkklpPoli?.hasPoli && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl mt-4">
                             <div className="md:col-span-2"><label className="block text-xs font-semibold text-slate-700 mb-1">Nama diagnosis yang ditangani Sp.KKLP (cantumkan Kode ICD-10) <span className="text-rose-500">*</span></label><textarea rows={2} placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.diagnosis?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.diagnosis || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, diagnosis: e.target.value } }))} /></div>
                             <div><label className="block text-xs font-semibold text-slate-700 mb-1">Tindakan/Prosedur yang dilakukan <span className="text-rose-500">*</span></label><textarea rows={2} placeholder="Jelaskan..." className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.tindakan?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.tindakan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, tindakan: e.target.value } }))} /></div>
                             <div><label className="block text-xs font-semibold text-slate-700 mb-1">Luaran pelayanan (centang semua yang sesuai)</label>
