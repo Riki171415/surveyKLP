@@ -96,6 +96,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step]);
+
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     id: null,
