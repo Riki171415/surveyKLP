@@ -430,6 +430,50 @@ export default function KokpitKemenkes() {
 
       </div>
 
+      {/* EXECUTIVE INSIGHT PANEL */}
+      <div className="mt-8 bg-slate-800/80 border border-primary-500/30 rounded-3xl p-6 md:p-8 relative overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 rounded-full blur-3xl -z-10"></div>
+        <div className="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
+          <Layers className="w-6 h-6 text-primary-400" />
+          <h2 className="text-xl md:text-2xl font-black text-white tracking-wide uppercase">Executive Insight: Peta Jalan Kebijakan Sp.KKLP</h2>
+        </div>
+        
+        <div className="space-y-6 text-slate-300 leading-relaxed text-sm md:text-base">
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 rounded-full bg-primary-500/20 text-primary-400 flex items-center justify-center shrink-0 font-bold">1</div>
+            <div>
+              <h4 className="text-white font-bold mb-1">Paradoks Ketersediaan vs Kebutuhan</h4>
+              <p>Meskipun sebagian besar FKTP belum memiliki Sp.KKLP, data <span className="text-primary-300 font-semibold">Gap Persepsi</span> menunjukkan bahwa institusi primer (Kepala PKM & Dokter Umum) memberikan skor relevansi yang sangat tinggi. Pasar layanan primer sudah siap; urgensi saat ini bergeser pada percepatan distribusi tenaga medis.</p>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 font-bold">2</div>
+            <div>
+              <h4 className="text-white font-bold mb-1">Kebocoran Gatekeeper pada Kasus Sederhana</h4>
+              <p>Top rujukan primer masih didominasi oleh kasus PTM tanpa komplikasi dan bedah minor. Ini membuktikan bahwa <span className="text-rose-300 font-semibold">fungsi gatekeeper JKN belum optimal</span>. Kehadiran Sp.KKLP di titik-titik lemah (provinsi merah) dapat mencegah triliunan rupiah bocor ke FKRTL.</p>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 font-bold">3</div>
+            <div>
+              <h4 className="text-white font-bold mb-1">"Blind Spot" Pembiayaan Non-Kapitasi</h4>
+              <p>Suara lapangan dan usulan prioritas secara masif menuntut diakomodasinya layanan <span className="text-amber-300 font-semibold">Home Care dan Paliatif</span>. Penempatan Sp.KKLP wajib dibarengi perombakan skema insentif JKN yang mengapresiasi upaya preventif & proaktif, bukan sekadar kuratif reaktif.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-slate-700">
+          <h4 className="text-emerald-400 font-bold mb-3 flex items-center gap-2"><Target className="w-4 h-4" /> REKOMENDASI TINDAKAN (30 HARI KEDEPAN)</h4>
+          <ul className="list-disc pl-5 space-y-2 text-sm text-emerald-100/80 marker:text-emerald-500">
+            <li>Gunakan data usulan prioritas untuk advokasi revisi PMK (Paket Manfaat JKN).</li>
+            <li>Fokuskan beasiswa afirmasi Sp.KKLP pada 5 Provinsi terbawah di Peta Kesiapan yang rujukannya masih tinggi.</li>
+            <li>Lakukan sosialisasi ke Kepala FKTP agar Sp.KKLP dimanfaatkan sebagai <em className="text-white">Manager of Care</em> komunitas.</li>
+          </ul>
+        </div>
+      </div>
+
     </div>
   );
 }
