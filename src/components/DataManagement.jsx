@@ -223,13 +223,48 @@ export default function DataManagement() {
                 <div>
                   <SectionHeader label="B. Detail Khusus Sp.KKLP & Perspektif" />
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Field label="Berpraktik sbg Sp.KKLP?" value={selected.spkklp_berpraktik} />
-                      <Field label="Poli Tempat Praktik" value={selected.spkklp_poli ? Object.keys(selected.spkklp_poli).filter(k => selected.spkklp_poli[k]).join(', ') : '-'} />
-                      <Field label="Kendala Praktik" value={selected.spkklp_kendala ? Object.keys(selected.spkklp_kendala).filter(k => selected.spkklp_kendala[k]).join(', ') : '-'} />
+                    <Field label="Berpraktik sbg Sp.KKLP?" value={selected.spkklp_berpraktik} />
+                    
+                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2">
+                      <p className="font-semibold text-slate-700 text-xs">Poli Tempat Praktik</p>
+                      {selected.spkklp_poli?.hasPoli === 'Ya' ? (
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <p><span className="text-slate-500">Sejak:</span> {selected.spkklp_poli.sejak || '-'}</p>
+                          <p><span className="text-slate-500">Kunjungan/hari:</span> {selected.spkklp_poli.kunjungan || '-'}</p>
+                          <p><span className="text-slate-500">Pembiayaan:</span> {selected.spkklp_poli.pembiayaan || '-'}</p>
+                          <div className="col-span-2">
+                             <p><span className="text-slate-500">Diagnosis:</span> {selected.spkklp_poli.diagnosis || '-'}</p>
+                             <p><span className="text-slate-500 mt-1">Tindakan:</span> {selected.spkklp_poli.tindakan || '-'}</p>
+                          </div>
+                          <div className="col-span-2 mt-1">
+                             <p><span className="text-slate-500">Luaran:</span> {Object.keys(selected.spkklp_poli).filter(k => k.startsWith('luaran_') && selected.spkklp_poli[k]).map(k => k.replace('luaran_', '')).join(', ') || '-'}</p>
+                             {selected.spkklp_poli.alasanRujukan && <p><span className="text-slate-500 mt-1 block">Alasan Rujukan:</span> {selected.spkklp_poli.alasanRujukan}</p>}
+                          </div>
+                        </div>
+                      ) : selected.spkklp_poli?.hasPoli === 'Tidak' ? (
+                        <div className="text-xs">
+                          <p>Tidak ada poli tersendiri.</p>
+                          <p><span className="text-slate-500 mt-2 block">Diagnosis yang dilayani:</span> {selected.spkklp_poli.diagnosis || '-'}</p>
+                          <p><span className="text-slate-500 mt-1 block">Tindakan/Prosedur:</span> {selected.spkklp_poli.tindakan || '-'}</p>
+                          <p><span className="text-slate-500 mt-1 block">Luaran:</span> {Object.keys(selected.spkklp_poli).filter(k => k.startsWith('luaran_') && selected.spkklp_poli[k]).map(k => k.replace('luaran_', '')).join(', ') || '-'}</p>
+                          {selected.spkklp_poli.alasanRujukan && <p><span className="text-slate-500 mt-1 block">Alasan Rujukan:</span> {selected.spkklp_poli.alasanRujukan}</p>}
+                        </div>
+                      ) : <p className="text-xs text-slate-400">-</p>}
                     </div>
+
+                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2">
+                      <p className="font-semibold text-slate-700 text-xs">Kendala Praktik (Tanpa Poli)</p>
+                      {selected.spkklp_kendala?.hasKendala === 'Ya' ? (
+                        <div className="text-xs">
+                           <p>Terdapat kendala.</p>
+                           <p><span className="text-slate-500 mt-2 block">Diagnosis yang sering dirujuk:</span> {selected.spkklp_kendala.diagnosis || '-'}</p>
+                           <p><span className="text-slate-500 mt-1 block">Tindakan/Prosedur yang terkendala:</span> {selected.spkklp_kendala.tindakan || '-'}</p>
+                        </div>
+                      ) : <p className="text-xs">{selected.spkklp_kendala?.hasKendala || '-'}</p>}
+                    </div>
+
                     {selected.relevansi_spkklp && Object.keys(selected.relevansi_spkklp).length > 0 && (
-                      <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                      <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 mt-4">
                         <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Skala Relevansi Sp.KKLP (1-4):</p>
                         {Object.entries(selected.relevansi_spkklp).map(([idx, val]) => (
                           <div key={idx} className="flex justify-between items-center py-1.5 text-xs border-b border-slate-200/50 last:border-0">
@@ -237,6 +272,35 @@ export default function DataManagement() {
                             <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shrink-0">{val}</span>
                           </div>
                         ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ── B. Detail Dokter Praktik Mandiri (DPM) ── */}
+              {selected.role === 'Dokter Praktik Mandiri' && selected.dpm && (
+                <div>
+                  <SectionHeader label="B. Detail Dokter Praktik Mandiri (DPM)" />
+                  <div className="space-y-4 text-xs">
+                    {/* Usia */}
+                    {selected.dpm.usia && (
+                      <div className="grid grid-cols-4 gap-2 border p-3 rounded-lg bg-slate-50 border-slate-100">
+                        <div className="col-span-4 font-semibold text-slate-600 mb-1">Proporsi Usia Pasien</div>
+                        <div><span className="text-slate-400 block">&lt; 15 th</span>{selected.dpm.usia['<15'] || '-'}</div>
+                        <div><span className="text-slate-400 block">15-44 th</span>{selected.dpm.usia['15-44'] || '-'}</div>
+                        <div><span className="text-slate-400 block">45-59 th</span>{selected.dpm.usia['45-59'] || '-'}</div>
+                        <div><span className="text-slate-400 block">&gt; 60 th</span>{selected.dpm.usia['>60'] || '-'}</div>
+                      </div>
+                    )}
+                    {/* Kasus */}
+                    {selected.dpm.kasus && (
+                      <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
+                        <div className="font-semibold text-slate-600 mb-1">Gambaran Kasus</div>
+                        <p><span className="text-slate-500 font-medium w-32 inline-block">10 Terbanyak:</span> {Array.isArray(selected.dpm.kasus.masalahKesehatan) ? selected.dpm.kasus.masalahKesehatan.join(', ') : '-'} {selected.dpm.kasus.masalahLainnya ? `(${selected.dpm.kasus.masalahLainnya})` : ''}</p>
+                        <p><span className="text-slate-500 font-medium w-32 inline-block">% Kasus Kronis:</span> {selected.dpm.kasus.persenKronis || '-'}</p>
+                        <p><span className="text-slate-500 font-medium w-32 inline-block">% Pasien Kontrol:</span> {selected.dpm.kasus.persenKontrol || '-'}</p>
+                        {selected.dpm.kasus.alasanRujukan && <p><span className="text-slate-500 font-medium w-32 inline-block">Indikasi Rujukan:</span> {selected.dpm.kasus.alasanRujukan}</p>}
                       </div>
                     )}
                   </div>
