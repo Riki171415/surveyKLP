@@ -1365,7 +1365,20 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
             </div>
             <div className="p-6 overflow-y-auto text-slate-700 space-y-6">
               <div className="bg-primary-50 border border-primary-100 rounded-xl p-4 text-sm text-primary-800"><span className="font-bold block mb-1">ℹ️ Tentang Survey Ini</span>Survey ini bertujuan mengidentifikasi layanan JKN yang sudah berjalan dan yang belum optimal di Puskesmas / Klinik, serta menilai peran dokter Sp.KKLP berdasarkan kondisi nyata di lapangan.</div>
-              <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">📍 Tahap 1 — Identitas</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Pilih <strong>Provinsi</strong> terlebih dahulu, lalu pilih <strong>Nama Puskesmas / Klinik</strong>.</li><li>Pilih <strong>Jabatan</strong> Anda saat ini.</li><li>Pilih apakah Puskesmas / Klinik memiliki dokter Sp.KKLP.</li></ul></section>
+              
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 text-sm text-amber-900 shadow-sm">
+                <span className="font-bold block mb-2 text-base text-amber-700">📋 Data yang Perlu Dipersiapkan Sebelum Mengisi Survei:</span>
+                <p className="mb-2">Untuk memperlancar pengisian survei, mohon siapkan data-data berikut dari faskes Anda (terutama untuk pertanyaan di Tahap 2 & 3):</p>
+                <ul className="list-disc pl-5 space-y-1.5">
+                  <li><strong>Data Program Rujuk Balik (PRB):</strong> Total peserta PRB, peserta rutin berkunjung, dan yang tidak berkunjung dalam 3 bulan terakhir.</li>
+                  <li><strong>Rincian Peserta PRB berdasarkan Diagnosis:</strong> Jumlah peserta untuk DM, Hipertensi, Jantung, PPOK, Asma, Stroke, Epilepsi, Skizofrenia, dan SLE.</li>
+                  <li><strong>Data Rujukan:</strong> Rata-rata jumlah rujukan pasien ke FKRTL per bulan.</li>
+                  <li><strong>Data Beban Kerja (Khusus Dokter):</strong> Estimasi waktu pelayanan rata-rata per pasien di Poli dan Home Visit, serta proporsi layanan dalam gedung vs luar gedung.</li>
+                  <li><strong>Data Home Care & Paliatif (Jika ada):</strong> Contoh diagnosis pasien, jenis layanan yang diberikan, jumlah kunjungan, serta tingkat kepatuhan/perbaikan.</li>
+                </ul>
+              </div>
+
+              <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">📍 Tahap 1 — Identitas</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Pilih <strong>Provinsi</strong> terlebih dahulu, lalu pilih <strong>Nama Fasilitas Kesehatan</strong>.</li><li>Pilih <strong>Jabatan</strong> Anda saat ini.</li><li>Pilih apakah Faskes memiliki dokter Sp.KKLP.</li></ul></section>
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">⏱️ Tahap 2 — Kompetensi Dokter</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li><strong>Khusus Dokter Umum &amp; Sp.KKLP:</strong> isi beban kerja dan tabel kompetensi.</li><li><strong>Khusus Sp.KKLP:</strong> isi tambahan bagian praktik dan poli KKLP.</li><li>Kepala Puskesmas dan Nakes lainnya dapat melewati tahap ini.</li></ul></section>
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">🏥 Tahap 3 — Perspektif Sp.KKLP</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Nilai relevansi 12 kegiatan Sp.KKLP menggunakan skala 1–4 (Sangat Tidak Setuju s/d Sangat Setuju).</li><li>Centang layanan yang masih sering dirujuk ke RS dan layanan yang belum berjalan di Puskesmas / Klinik.</li><li>Isi informasi Program Rujuk Balik (PRB).</li></ul></section>
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">💊 Tahap 4 — Manfaat JKN</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Beri nilai skala 1–4 untuk 8 layanan JKN.</li><li>Isi bagian Home Care dan Paliatif jika Puskesmas / Klinik pernah memberikan layanan tersebut.</li></ul></section>
