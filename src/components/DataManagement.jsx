@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Search, Edit, Trash2, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import * as XLSX from 'xlsx';
 
 // ─── Data referensi (sama dengan SurveyForm) ───────────────────────────────
 const jknBenefits = [
@@ -132,6 +133,153 @@ export default function DataManagement() {
     (s.kab_kota || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleDownloadExcel = () => {
+    try {
+      const flatData = surveys.map((row) => {
+        // Flatten Identitas
+        const base = {
+          "Timestamp": new Date(row.created_at).toLocaleString('id-ID'),
+          "Provinsi": row.provinsi || row.city || '-',
+          "Kabupaten/Kota": row.kab_kota || '-',
+          "Nama Faskes": row.fktp_name || '-',
+          "Kode Faskes": row.kode_faskes || '-',
+          "Nama Responden": row.nama_responden || '-',
+          "Nomor WA": row.nomor_wa || '-',
+          "Jabatan": row.role || '-',
+          "Dokter Sp.KKLP": row.doc_kklp || '-'
+        };
+
+        // Flatten Survei DPM (A-E)
+        if (row.role === 'Dokter Praktik Mandiri' && row.dpm_data) {
+          const d = row.dpm_data;
+          base["DPM_Jumlah Pasien BPJS"] = d.karakteristik?.jumlahPasienBpjs || '-';
+          base["DPM_Jumlah Pasien Umum"] = d.karakteristik?.jumlahPasienUmum || '-';
+          base["DPM_Proporsi Pasien BPJS (%)"] = d.karakteristik?.proporsiPasienBpjs || '-';
+          base["DPM_Lama Praktik"] = d.karakteristik?.lamaPraktik || '-';
+          base["DPM_Jumlah Tim Medis"] = d.karakteristik?.jumlahTimMedis || '-';
+          
+          base["DPM_Kasus Terbanyak"] = d.kasus?.kasusTerbanyak?.join(', ') || '-';
+          base["DPM_Kasus Lainnya"] = d.kasus?.kasusLainnya || '-';
+
+          base["DPM_Aspek Digali"] = d.pendekatan?.aspekDigali?.join(', ') || '-';
+          base["DPM_Alat Bantu Keluarga"] = d.pendekatan?.alatBantuKeluarga?.join(', ') || '-';
+          base["DPM_Melakukan Home Visit"] = d.pendekatan?.melakukanHomeVisit || '-';
+
+          base["DPM_Sistem Pencatatan"] = d.kontinuitas?.sistemPencatatan || '-';
+          base["DPM_Jadwalkan Kunjungan Ulang"] = d.kontinuitas?.jadwalkanKunjunganUlang || '-';
+          base["DPM_Tindak Lanjut Tidak Datang"] = d.kontinuitas?.tindakLanjutTidakDatang || '-';
+
+          base["DPM_Kegiatan Dilakukan"] = d.gambaran?.kegiatanDilakukan?.join(', ') || '-';
+          base["DPM_Bentuk Pelayanan Keluarga"] = d.gambaran?.bentukPelayananKeluarga || '-';
+          base["DPM_Contoh Kasus Keluarga"] = d.gambaran?.contohKasusKeluarga || '-';
+          base["DPM_Contoh Layanan Holistik"] = d.gambaran?.contohLayananHolistik || '-';
+        }
+
+        // Khusus Dokter / SpKKLP
+        if (row.role !== 'Dokter Praktik Mandiri' && (row.role === 'Dokter Umum' || row.role === 'Dokter Sp.KKLP')) {
+          base["Waktu Rata-rata Poli (menit)"] = row.time_in_poli || '-';
+          base["Waktu Rata-rata Home Visit (menit)"] = row.time_home_visit || '-';
+          base["Proporsi Dalam Gedung (%)"] = row.prop_in_fktp || '-';
+          base["Proporsi Luar Gedung (%)"] = row.prop_out_fktp || '-';
+
+          kompetensiLayanan.forEach((komp, i) => {
+            base[`Kompetensi_${i+1}`] = komp;
+            base[`Kompetensi_Status_${i+1}`] = row.kompetensi?.[i]?.status || '-';
+          });
+        }
+
+        if (row.role === 'Dokter Sp.KKLP') {
+          base["SpKKLP Berpraktik"] = row.spkklp_berpraktik || '-';
+          base["SpKKLP Poli_Sejak"] = row.spkklp_poli?.sejak || '-';
+          base["SpKKLP Poli_Kunjungan/hari"] = row.spkklp_poli?.kunjungan || '-';
+          base["SpKKLP Poli_Pembiayaan"] = row.spkklp_poli?.pembiayaan || '-';
+          base["SpKKLP Poli_Diagnosis"] = row.spkklp_poli?.diagnosis || '-';
+          base["SpKKLP Poli_Tindakan"] = row.spkklp_poli?.tindakan || '-';
+        }
+
+        if (row.role !== 'Dokter Praktik Mandiri') {
+          // Perspektif
+          relevansiItems.forEach((rel, i) => {
+            base[`Relevansi_Skala_${i+1}`] = row.relevansi_spkklp?.[i] || '-';
+          });
+          base["Layanan Sering Dirujuk"] = row.layanan_dirujuk || '-';
+          base["Alasan Dirujuk"] = row.alasan_dirujuk || '-';
+          base["Layanan Belum Berjalan"] = row.layanan_belum_berjalan || '-';
+
+          // PRB
+          base["PRB_Mekanisme"] = row.prb?.mekanisme?.join(', ') || '-';
+          base["PRB_Rata Rujukan ke FKRTL"] = row.prb?.rataRujukan || '-';
+          base["PRB_Total Peserta"] = row.prb?.totalPeserta || '-';
+          base["PRB_Kunjungan Rutin"] = row.prb?.kunjunganRutin || '-';
+          base["PRB_Tidak Berkunjung"] = row.prb?.tidakBerkunjung || '-';
+          base["PRB_Kasus_DM"] = row.prb?.kasus?.DM || '-';
+          base["PRB_Kasus_Hipertensi"] = row.prb?.kasus?.Hipertensi || '-';
+          base["PRB_Kasus_Jantung"] = row.prb?.kasus?.Jantung || '-';
+          base["PRB_Kasus_PPOK"] = row.prb?.kasus?.PPOK || '-';
+          base["PRB_Kasus_Asma"] = row.prb?.kasus?.Asma || '-';
+          base["PRB_Kasus_Stroke"] = row.prb?.kasus?.Stroke || '-';
+          base["PRB_Kasus_Epilepsi"] = row.prb?.kasus?.Epilepsi || '-';
+          base["PRB_Kasus_Skizofrenia"] = row.prb?.kasus?.Skizofrenia || '-';
+          base["PRB_Kasus_SLE"] = row.prb?.kasus?.SLE || '-';
+
+          // JKN Benefits
+          jknBenefits.forEach((jkn, i) => {
+            base[`JKN_${i+1}_Skala`] = row.jkn?.[i]?.skala || '-';
+            base[`JKN_${i+1}_Catatan`] = row.jkn?.[i]?.catatan || '-';
+          });
+
+          // Home Care
+          base["HC_Melaksanakan"] = row.home_care?.screening || '-';
+          if (row.home_care?.screening === 'Ya' || row.home_care?.screening === 'ya') {
+            base["HC_Tenaga"] = row.home_care?.tenaga || '-';
+            base["HC_Diagnosis"] = row.home_care?.diagnosis || '-';
+            base["HC_Kondisi"] = row.home_care?.kondisi ? Object.keys(row.home_care.kondisi).filter(k => row.home_care.kondisi[k]).join(', ') : '-';
+            base["HC_Jenis Layanan"] = row.home_care?.jenisLayanan ? Object.keys(row.home_care.jenisLayanan).filter(k => row.home_care.jenisLayanan[k]).join(', ') : '-';
+            base["HC_Jumlah Kunjungan"] = row.home_care?.jumlahKunjungan || '-';
+            base["HC_Kolaborasi"] = row.home_care?.kolaborasi || '-';
+            base["HC_Kepatuhan"] = row.home_care?.kepatuhan || '-';
+            base["HC_Perbaikan"] = row.home_care?.perbaikan || '-';
+          }
+
+          // Paliatif
+          base["Pal_Melaksanakan"] = row.paliatif?.screening || '-';
+          if (row.paliatif?.screening === 'Ya' || row.paliatif?.screening === 'ya') {
+            base["Pal_Tenaga"] = row.paliatif?.tenaga || '-';
+            base["Pal_Diagnosis"] = row.paliatif?.diagnosis || '-';
+            base["Pal_Kondisi"] = row.paliatif?.kondisi ? Object.keys(row.paliatif.kondisi).filter(k => row.paliatif.kondisi[k]).join(', ') : '-';
+            base["Pal_Tujuan"] = row.paliatif?.tujuan ? Object.keys(row.paliatif.tujuan).filter(k => row.paliatif.tujuan[k]).join(', ') : '-';
+            base["Pal_Terapi"] = row.paliatif?.terapi || '-';
+            base["Pal_Kolaborasi"] = row.paliatif?.kolaborasi || '-';
+            base["Pal_Kepatuhan"] = row.paliatif?.kepatuhan || '-';
+            base["Pal_Perbaikan"] = row.paliatif?.perbaikan || '-';
+          }
+
+          // Non-Optimal
+          nonOptimalServices.forEach((nonOpt, i) => {
+            base[`NonOpt_${i+1}_MasukJKN`] = row.non_optimal?.[i]?.masukJkn || '-';
+            base[`NonOpt_${i+1}_Skala`] = row.non_optimal?.[i]?.skala || '-';
+            base[`NonOpt_${i+1}_Catatan`] = row.non_optimal?.[i]?.catatan || '-';
+          });
+        }
+
+        // Wawancara / Pendalaman (7 Pertanyaan)
+        interviewQuestions.forEach((q, i) => {
+          base[`Wawancara_Q${i+1}`] = row.wawancara?.[i] || '-';
+        });
+
+        return base;
+      });
+
+      const worksheet = XLSX.utils.json_to_sheet(flatData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Data Survey");
+      XLSX.writeFile(workbook, `Data_Survey_KKLP_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal membuat file Excel.');
+    }
+  };
+
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-[400px]">
       <Loader2 className="w-8 h-8 text-primary-600 animate-spin mb-4" />
@@ -141,9 +289,20 @@ export default function DataManagement() {
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Manajemen Data Survey</h1>
-        <p className="text-slate-500 mt-1 text-sm">Klik baris data untuk melihat seluruh isian secara lengkap.</p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Manajemen Data Survey</h1>
+          <p className="text-slate-500 mt-1 text-sm">Klik baris data untuk melihat seluruh isian secara lengkap.</p>
+        </div>
+        <button
+          onClick={handleDownloadExcel}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Download Excel All Data
+        </button>
       </div>
 
       <div className="flex gap-5 items-start">
