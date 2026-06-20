@@ -101,6 +101,11 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
 
         <RadioGroup category="kasus" field="persenKronis" label="6. Dari seluruh pasien yang datang, berapa persen yang merupakan kasus penyakit kronis?" required options={['< 25%', '25–50%', '51–75%', '> 75%']} />
         <RadioGroup category="kasus" field="persenKontrol" label="7. Berapa persen pasien yang datang merupakan pasien yang berkunjung kembali (kontrol)?" required options={['< 25%', '25–50%', '51–75%', '> 75%']} />
+        
+        <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.kasus?.alasanRujukan ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
+          <label className="block text-sm font-semibold text-slate-800 mb-2">8. Apabila pasien di rujuk, Apa indikasi atau alasan rujukan tersebut? <span className="text-rose-500">*</span></label>
+          <textarea rows={3} required placeholder="Tuliskan indikasi atau alasan rujukan..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.kasus?.alasanRujukan || ''} onChange={(e) => updateField('kasus', 'alasanRujukan', e.target.value)}></textarea>
+        </div>
       </section>
 
       {/* C. Pendekatan Kedokteran Keluarga */}
@@ -111,13 +116,13 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
         </div>
         
         <h3 className="font-semibold text-slate-700 mb-4 bg-slate-100 p-2 rounded">Mengenal Keluarga Pasien</h3>
-        <RadioGroup category="pendekatan" field="tahuKeluargaInti" label="8. Saat menangani pasien, seberapa sering dokter mengetahui anggota keluarga inti pasien?" required options={['Tidak pernah', 'Jarang', 'Kadang-kadang', 'Sering', 'Selalu']} />
-        <RadioGroup category="pendekatan" field="menanganiKeluargaSama" label="9. Dalam satu bulan terakhir, apakah pernah menangani lebih dari satu anggota keluarga yang sama?" required options={['Tidak pernah', '1–5 keluarga', '6–10 keluarga', '> 10 keluarga']} />
-        <RadioGroup category="pendekatan" field="tanyaKondisiKeluargaLain" label="10. Ketika pasien memiliki penyakit kronis, apakah dokter menanyakan kondisi kesehatan anggota keluarga lainnya?" required options={['Tidak pernah', 'Jarang', 'Kadang-kadang', 'Sering', 'Selalu']} />
+        <RadioGroup category="pendekatan" field="tahuKeluargaInti" label="9. Saat menangani pasien, seberapa sering dokter mengetahui anggota keluarga inti pasien?" required options={['Tidak pernah', 'Jarang', 'Kadang-kadang', 'Sering', 'Selalu']} />
+        <RadioGroup category="pendekatan" field="menanganiKeluargaSama" label="10. Dalam satu bulan terakhir, apakah pernah menangani lebih dari satu anggota keluarga yang sama?" required options={['Tidak pernah', '1–5 keluarga', '6–10 keluarga', '> 10 keluarga']} />
+        <RadioGroup category="pendekatan" field="tanyaKondisiKeluargaLain" label="11. Ketika pasien memiliki penyakit kronis, apakah dokter menanyakan kondisi kesehatan anggota keluarga lainnya?" required options={['Tidak pernah', 'Jarang', 'Kadang-kadang', 'Sering', 'Selalu']} />
 
         <h3 className="font-semibold text-slate-700 mb-4 mt-6 bg-slate-100 p-2 rounded">Pelayanan Holistik</h3>
         <div className={`mb-6 p-4 rounded-xl border ${showErrors && (!data.pendekatan?.aspekDigali || data.pendekatan?.aspekDigali.length === 0) ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-          <label className="block text-sm font-semibold text-slate-800 mb-3">11. Selain keluhan fisik, aspek apa yang paling sering digali saat konsultasi? (boleh lebih dari satu): <span className="text-rose-500">*</span></label>
+          <label className="block text-sm font-semibold text-slate-800 mb-3">12. Selain keluhan fisik, aspek apa yang paling sering digali saat konsultasi? (boleh lebih dari satu): <span className="text-rose-500">*</span></label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {['Pola makan', 'Aktivitas fisik', 'Kondisi pekerjaan', 'Kondisi ekonomi', 'Kondisi psikologis', 'Dukungan keluarga', 'Lingkungan tempat tinggal', 'Tidak ada'].map(a => (
               <label key={a} className="flex items-center gap-2 cursor-pointer text-sm">
@@ -128,10 +133,10 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
           </div>
         </div>
         
-        <RadioGroup category="pendekatan" field="pengaruhKeluargaKasus" label="12. Dalam satu bulan terakhir, berapa kali dokter menemukan bahwa masalah kesehatan pasien dipengaruhi kondisi keluarga?" required options={['Tidak pernah', '1–5 kasus', '6–10 kasus', '> 10 kasus']} />
+        <RadioGroup category="pendekatan" field="pengaruhKeluargaKasus" label="13. Dalam satu bulan terakhir, berapa kali dokter menemukan bahwa masalah kesehatan pasien dipengaruhi kondisi keluarga?" required options={['Tidak pernah', '1–5 kasus', '6–10 kasus', '> 10 kasus']} />
         
         <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.pendekatan?.contohMasalahKeluarga ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-          <label className="block text-sm font-semibold text-slate-800 mb-3">13. Contoh masalah keluarga yang paling sering memengaruhi kondisi pasien: <span className="text-rose-500">*</span></label>
+          <label className="block text-sm font-semibold text-slate-800 mb-3">14. Contoh masalah keluarga yang paling sering memengaruhi kondisi pasien: <span className="text-rose-500">*</span></label>
           <select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500 bg-white" value={data.pendekatan?.contohMasalahKeluarga || ''} onChange={(e) => updateField('pendekatan', 'contohMasalahKeluarga', e.target.value)}>
             <option value="">-- Pilih --</option>
             {['Pola makan keluarga', 'Perawatan lansia', 'Pengasuhan anak', 'Kepatuhan minum obat', 'Konflik keluarga', 'Masalah ekonomi', 'Lainnya'].map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -148,9 +153,9 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
           <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
           <h2 className="text-lg font-bold text-slate-800">D. Kontinuitas Pelayanan</h2>
         </div>
-        <RadioGroup category="kontinuitas" field="sistemPencatatan" label="14. Apakah dokter memiliki sistem pencatatan riwayat pasien yang memungkinkan pemantauan jangka panjang?" required options={['Ya', 'Tidak']} />
-        <RadioGroup category="kontinuitas" field="jadwalkanKunjunganUlang" label="15. Apakah dokter secara aktif menjadwalkan kunjungan ulang untuk pasien kronis?" required options={['Tidak pernah', 'Jarang', 'Kadang-kadang', 'Sering', 'Selalu']} />
-        <RadioGroup category="kontinuitas" field="tindakLanjutTidakDatang" label="16. Apakah dokter melakukan tindak lanjut terhadap pasien yang tidak datang kontrol sesuai jadwal?" required options={['Ya', 'Tidak']} />
+        <RadioGroup category="kontinuitas" field="sistemPencatatan" label="15. Apakah dokter memiliki sistem pencatatan riwayat pasien yang memungkinkan pemantauan jangka panjang?" required options={['Ya', 'Tidak']} />
+        <RadioGroup category="kontinuitas" field="jadwalkanKunjunganUlang" label="16. Apakah dokter secara aktif menjadwalkan kunjungan ulang untuk pasien kronis?" required options={['Tidak pernah', 'Jarang', 'Kadang-kadang', 'Sering', 'Selalu']} />
+        <RadioGroup category="kontinuitas" field="tindakLanjutTidakDatang" label="17. Apakah dokter melakukan tindak lanjut terhadap pasien yang tidak datang kontrol sesuai jadwal?" required options={['Ya', 'Tidak']} />
       </section>
 
       {/* E. Gambaran Praktik Kedokteran Keluarga */}
@@ -161,7 +166,7 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
         </div>
 
         <div className={`mb-6 p-4 rounded-xl border ${showErrors && (!data.gambaran?.kegiatanDilakukan || data.gambaran?.kegiatanDilakukan.length === 0) ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-          <label className="block text-sm font-semibold text-slate-800 mb-3">17. Dalam satu bulan terakhir, kegiatan berikut yang pernah dilakukan (boleh lebih dari satu): <span className="text-rose-500">*</span></label>
+          <label className="block text-sm font-semibold text-slate-800 mb-3">18. Dalam satu bulan terakhir, kegiatan berikut yang pernah dilakukan (boleh lebih dari satu): <span className="text-rose-500">*</span></label>
           <div className="grid grid-cols-1 gap-2">
             {[
               'Edukasi keluarga pasien', 'Konseling perubahan perilaku hidup sehat', 
@@ -178,17 +183,17 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
         </div>
 
         <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.gambaran?.bentukPelayananKeluarga ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-          <label className="block text-sm font-semibold text-slate-800 mb-2">18. Menurut dokter, apa bentuk pelayanan keluarga yang paling sering dilakukan di praktik sehari-hari? <span className="text-rose-500">*</span></label>
+          <label className="block text-sm font-semibold text-slate-800 mb-2">19. Menurut dokter, apa bentuk pelayanan keluarga yang paling sering dilakukan di praktik sehari-hari? <span className="text-rose-500">*</span></label>
           <textarea rows={3} required placeholder="Tuliskan jawaban Anda..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.gambaran?.bentukPelayananKeluarga || ''} onChange={(e) => updateField('gambaran', 'bentukPelayananKeluarga', e.target.value)}></textarea>
         </div>
 
         <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.gambaran?.contohKasusKeluarga ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-          <label className="block text-sm font-semibold text-slate-800 mb-2">19. Ceritakan satu contoh kasus di mana kondisi keluarga memengaruhi penanganan pasien. <span className="text-rose-500">*</span></label>
+          <label className="block text-sm font-semibold text-slate-800 mb-2">20. Ceritakan satu contoh kasus di mana kondisi keluarga memengaruhi penanganan pasien. <span className="text-rose-500">*</span></label>
           <textarea rows={4} required placeholder="Ceritakan pengalamannya..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.gambaran?.contohKasusKeluarga || ''} onChange={(e) => updateField('gambaran', 'contohKasusKeluarga', e.target.value)}></textarea>
         </div>
 
         <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.gambaran?.contohLayananHolistik ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-          <label className="block text-sm font-semibold text-slate-800 mb-2">20. Ceritakan satu contoh kegiatan pelayanan holistik yang pernah dilakukan kepada pasien atau keluarganya. <span className="text-rose-500">*</span></label>
+          <label className="block text-sm font-semibold text-slate-800 mb-2">21. Ceritakan satu contoh kegiatan pelayanan holistik yang pernah dilakukan kepada pasien atau keluarganya. <span className="text-rose-500">*</span></label>
           <textarea rows={4} required placeholder="Ceritakan pengalamannya..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.gambaran?.contohLayananHolistik || ''} onChange={(e) => updateField('gambaran', 'contohLayananHolistik', e.target.value)}></textarea>
         </div>
 

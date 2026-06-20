@@ -247,7 +247,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
     // A
     if (!dpm.karakteristik?.lamaPraktik || !dpm.karakteristik?.jumlahKunjungan || !dpm.karakteristik?.kelompokUmur || !dpm.karakteristik?.statusPeserta) return false;
     // B
-    if (!dpm.kasus?.masalahKesehatan || dpm.kasus.masalahKesehatan.length === 0 || !dpm.kasus?.persenKronis || !dpm.kasus?.persenKontrol) return false;
+    if (!dpm.kasus?.masalahKesehatan || dpm.kasus.masalahKesehatan.length === 0 || !dpm.kasus?.persenKronis || !dpm.kasus?.persenKontrol || !dpm.kasus?.alasanRujukan?.trim()) return false;
     // C
     if (!dpm.pendekatan?.tahuKeluargaInti || !dpm.pendekatan?.menanganiKeluargaSama || !dpm.pendekatan?.tanyaKondisiKeluargaLain) return false;
     if (!dpm.pendekatan?.aspekDigali || dpm.pendekatan.aspekDigali.length === 0) return false;
