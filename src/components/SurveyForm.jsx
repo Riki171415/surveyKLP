@@ -324,7 +324,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   })();
 
   const isStep5Valid = nonOptimalServices.every((_, idx) => formData.nonOptimal[idx]?.masukJkn && formData.nonOptimal[idx]?.skala);
-  const isStep6Valid = interviewQuestions.every((_, idx) => formData.wawancara[idx]?.trim() !== '');
+  const isStep6Valid = interviewQuestions.every((_, idx) => !!formData.wawancara[idx]?.trim());
 
   const canProceed = () => {
     if (step === 1) return isStep1Valid;
