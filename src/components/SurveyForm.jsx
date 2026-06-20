@@ -81,6 +81,16 @@ const interviewQuestions = [
   "7. Menurut Anda, bentuk dukungan apa yang diperlukan agar Puskesmas / Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?"
 ];
 
+const interviewExamples = [
+  "Contoh: Pelayanan menjadi lebih family-oriented dan berbasis komunitas. Sangat terasa manfaatnya pada pasien geriatri yang dinilai secara holistik hingga dilakukan family meeting...",
+  "Contoh: Perlu ada kolaborasi dengan nakes lain (misal: penanganan gizi buruk balita, pasien depresi, KDRT, lansia) dan dukungan operasional yang memadai...",
+  "Contoh: Dilakukan bersama nakes lain. Edukasi butuh waktu konsultasi yang lebih lama (15-30 menit), akan sangat terbantu jika ada insentif khusus/non-kapitasi...",
+  "Contoh: Perlu, karena kasus paliatif di Faskes Primer cukup banyak, tidak hanya untuk kasus kanker tetapi juga lansia dan nyeri kronis...",
+  "Contoh: Perlu penambahan kewenangan agar Sp.KKLP bisa menyesuaikan terapi/obat tanpa harus selalu merujuk kembali ke RS, agar memudahkan pasien...",
+  "Contoh: Pendekatan medis menjadi lebih komprehensif, angka rujukan menurun, dan keluarga pasien lebih dilibatkan dalam proses terapi...",
+  "Contoh: Pengakuan kewenangan klinis yang lebih luas, kejelasan status kepegawaian, dan insentif yang sesuai dengan beban kerja pelayanan yang holistik..."
+];
+
 export default function SurveyForm({ isEdit = false, isInterview = false }) {
   const [step, setStep] = useState(1);
   const location = useLocation();
@@ -1239,7 +1249,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                       <textarea
                         rows={6}
                         required
-                        placeholder="Tuliskan jawaban/alasan di sini..."
+                        placeholder={interviewExamples[idx] || "Tuliskan jawaban/alasan di sini..."}
                         className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y ${showErrors && !formData.wawancara[idx]?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`}
                         value={formData.wawancara[idx] || ''}
                         onChange={(e) => handleWawancaraChange(idx, e.target.value)}
