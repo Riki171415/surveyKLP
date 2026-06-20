@@ -498,7 +498,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
       </div>
 
       {/* Main Form Card */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-soft-lg border border-white overflow-hidden relative z-0">
+      <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-soft-lg border border-white relative z-0">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary-100/50 rounded-full blur-[80px] pointer-events-none"></div>
         <form onSubmit={(e) => e.preventDefault()} className="animate-fade-in relative z-10">
           <div className="p-8 sm:p-12">
