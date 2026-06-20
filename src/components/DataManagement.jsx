@@ -477,28 +477,54 @@ export default function DataManagement() {
               )}
 
               {/* ── B. Detail Dokter Praktik Mandiri (DPM) ── */}
-              {selected.role === 'Dokter Praktik Mandiri' && selected.dpm && (
+              {selected.role === 'Dokter Praktik Mandiri' && selected.dpm_data && (
                 <div>
                   <SectionHeader label="B. Detail Dokter Praktik Mandiri (DPM)" />
                   <div className="space-y-4 text-xs">
-                    {/* Usia */}
-                    {selected.dpm.usia && (
-                      <div className="grid grid-cols-4 gap-2 border p-3 rounded-lg bg-slate-50 border-slate-100">
-                        <div className="col-span-4 font-semibold text-slate-600 mb-1">Proporsi Usia Pasien</div>
-                        <div><span className="text-slate-400 block">&lt; 15 th</span>{selected.dpm.usia['<15'] || '-'}</div>
-                        <div><span className="text-slate-400 block">15-44 th</span>{selected.dpm.usia['15-44'] || '-'}</div>
-                        <div><span className="text-slate-400 block">45-59 th</span>{selected.dpm.usia['45-59'] || '-'}</div>
-                        <div><span className="text-slate-400 block">&gt; 60 th</span>{selected.dpm.usia['>60'] || '-'}</div>
+                    {/* Karakteristik Praktik */}
+                    {selected.dpm_data.karakteristik && (
+                      <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
+                        <div className="font-semibold text-slate-600 mb-1">A. Karakteristik Praktik</div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Jumlah Pasien BPJS/bln:</span> <span>{selected.dpm_data.karakteristik.jumlahPasienBpjs || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Jumlah Pasien Umum/bln:</span> <span>{selected.dpm_data.karakteristik.jumlahPasienUmum || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Proporsi Pasien BPJS (%):</span> <span>{selected.dpm_data.karakteristik.proporsiPasienBpjs || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Lama Praktik DPM (Tahun):</span> <span>{selected.dpm_data.karakteristik.lamaPraktik || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Jumlah Tim Medis:</span> <span>{selected.dpm_data.karakteristik.jumlahTimMedis || '-'}</span></div>
                       </div>
                     )}
                     {/* Kasus */}
-                    {selected.dpm.kasus && (
+                    {selected.dpm_data.kasus && (
                       <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
-                        <div className="font-semibold text-slate-600 mb-1">Gambaran Kasus</div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-32 shrink-0">10 Terbanyak:</span> <span>{Array.isArray(selected.dpm.kasus.masalahKesehatan) ? selected.dpm.kasus.masalahKesehatan.join(', ') : '-'} {selected.dpm.kasus.masalahLainnya ? `(${selected.dpm.kasus.masalahLainnya})` : ''}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-32 shrink-0">% Kasus Kronis:</span> <span>{selected.dpm.kasus.persenKronis || '-'}</span></div>
-                        <div className="flex"><span className="text-slate-500 font-medium w-32 shrink-0">% Pasien Kontrol:</span> <span>{selected.dpm.kasus.persenKontrol || '-'}</span></div>
-                        {selected.dpm.kasus.alasanRujukan && <div className="flex"><span className="text-slate-500 font-medium w-32 shrink-0">Indikasi Rujukan:</span> <span>{selected.dpm.kasus.alasanRujukan}</span></div>}
+                        <div className="font-semibold text-slate-600 mb-1">B. Gambaran Kasus</div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">10 Terbanyak:</span> <span>{Array.isArray(selected.dpm_data.kasus.kasusTerbanyak) ? selected.dpm_data.kasus.kasusTerbanyak.join(', ') : '-'} {selected.dpm_data.kasus.kasusLainnya ? `(${selected.dpm_data.kasus.kasusLainnya})` : ''}</span></div>
+                      </div>
+                    )}
+                    {/* Pendekatan */}
+                    {selected.dpm_data.pendekatan && (
+                      <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
+                        <div className="font-semibold text-slate-600 mb-1">C. Pendekatan Pasien & Keluarga</div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Aspek Digali:</span> <span>{Array.isArray(selected.dpm_data.pendekatan.aspekDigali) ? selected.dpm_data.pendekatan.aspekDigali.join(', ') : '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Alat Bantu Keluarga:</span> <span>{Array.isArray(selected.dpm_data.pendekatan.alatBantuKeluarga) ? selected.dpm_data.pendekatan.alatBantuKeluarga.join(', ') : '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Melakukan Home Visit:</span> <span>{selected.dpm_data.pendekatan.melakukanHomeVisit || '-'}</span></div>
+                      </div>
+                    )}
+                    {/* Kontinuitas */}
+                    {selected.dpm_data.kontinuitas && (
+                      <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
+                        <div className="font-semibold text-slate-600 mb-1">D. Kontinuitas Pelayanan</div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Sistem Pencatatan:</span> <span>{selected.dpm_data.kontinuitas.sistemPencatatan || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Jadwalkan Kunj. Ulang:</span> <span>{selected.dpm_data.kontinuitas.jadwalkanKunjunganUlang || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Tindak Lanjut Tdk Datang:</span> <span>{selected.dpm_data.kontinuitas.tindakLanjutTidakDatang || '-'}</span></div>
+                      </div>
+                    )}
+                    {/* Gambaran */}
+                    {selected.dpm_data.gambaran && (
+                      <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 space-y-2">
+                        <div className="font-semibold text-slate-600 mb-1">E. Gambaran Komprehensif</div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Kegiatan Dilakukan:</span> <span>{Array.isArray(selected.dpm_data.gambaran.kegiatanDilakukan) ? selected.dpm_data.gambaran.kegiatanDilakukan.join(', ') : '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Bentuk Pelayanan Keluarga:</span> <span>{selected.dpm_data.gambaran.bentukPelayananKeluarga || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Contoh Kasus Keluarga:</span> <span>{selected.dpm_data.gambaran.contohKasusKeluarga || '-'}</span></div>
+                        <div className="flex"><span className="text-slate-500 font-medium w-40 shrink-0">Contoh Layanan Holistik:</span> <span>{selected.dpm_data.gambaran.contohLayananHolistik || '-'}</span></div>
                       </div>
                     )}
                   </div>
@@ -602,35 +628,35 @@ export default function DataManagement() {
 
 
               {/* ── Home Care ── */}
-              {selected.home_care && selected.home_care.screening === 'ya' && (
+              {selected.home_care && (selected.home_care.screening === 'ya' || selected.home_care.screening === 'Ya') && (
                 <div>
                   <SectionHeader label="H. Pelayanan Home Care" />
                   <div className="space-y-2 text-xs">
                     <p><span className="font-semibold">Tenaga:</span> {selected.home_care.tenaga}</p>
                     <p><span className="font-semibold">Diagnosis:</span> {selected.home_care.diagnosis}</p>
-                    <p><span className="font-semibold">Kondisi:</span> {selected.home_care.kondisi ? Object.keys(selected.home_care.kondisi).filter(k => selected.home_care.kondisi[k]).join(', ') : ''} {selected.home_care.kondisiLainnya ? `(${selected.home_care.kondisiLainnya})` : ''}</p>
-                    <p><span className="font-semibold">Jenis Layanan:</span> {selected.home_care.jenisLayanan ? Object.keys(selected.home_care.jenisLayanan).filter(k => selected.home_care.jenisLayanan[k]).join(', ') : ''} {selected.home_care.jenisLayananLainnya ? `(${selected.home_care.jenisLayananLainnya})` : ''}</p>
+                    <p><span className="font-semibold">Kondisi:</span> {Object.keys(selected.home_care).filter(k => k.startsWith('kondisi_') && selected.home_care[k]).map(k => k.replace('kondisi_', '')).join(', ')} {selected.home_care.kondisiLainnya ? `(${selected.home_care.kondisiLainnya})` : ''}</p>
+                    <p><span className="font-semibold">Jenis Layanan:</span> {Object.keys(selected.home_care).filter(k => k.startsWith('jenis_') && selected.home_care[k]).map(k => k.replace('jenis_', '')).join(', ')} {selected.home_care.jenisLayananLainnya ? `(${selected.home_care.jenisLayananLainnya})` : ''}</p>
                     <p><span className="font-semibold">Jumlah Kunjungan:</span> {selected.home_care.jumlahKunjungan}</p>
-                    <p><span className="font-semibold">Kolaborasi:</span> {selected.home_care.kolaborasi === 'ya' ? selected.home_care.bentukKolaborasi : 'Tidak'}</p>
+                    <p><span className="font-semibold">Kolaborasi:</span> {(selected.home_care.kolaborasi === 'ya' || selected.home_care.kolaborasi === 'Ya') ? selected.home_care.bentukKolaborasi : 'Tidak'}</p>
                     <p><span className="font-semibold">Kepatuhan:</span> {selected.home_care.kepatuhan}</p>
-                    <p><span className="font-semibold">Perbaikan:</span> {selected.home_care.perbaikan === 'ya' ? selected.home_care.bentukPerbaikan : 'Tidak'}</p>
+                    <p><span className="font-semibold">Perbaikan:</span> {(selected.home_care.perbaikan === 'ya' || selected.home_care.perbaikan === 'Ya') ? selected.home_care.bentukPerbaikan : 'Tidak'}</p>
                   </div>
                 </div>
               )}
 
               {/* ── Paliatif ── */}
-              {selected.paliatif && selected.paliatif.screening === 'ya' && (
+              {selected.paliatif && (selected.paliatif.screening === 'ya' || selected.paliatif.screening === 'Ya') && (
                 <div>
                   <SectionHeader label="I. Pelayanan Paliatif" />
                   <div className="space-y-2 text-xs">
                     <p><span className="font-semibold">Tenaga:</span> {selected.paliatif.tenaga}</p>
                     <p><span className="font-semibold">Diagnosis:</span> {selected.paliatif.diagnosis}</p>
-                    <p><span className="font-semibold">Kondisi:</span> {selected.paliatif.kondisi ? Object.keys(selected.paliatif.kondisi).filter(k => selected.paliatif.kondisi[k]).join(', ') : ''} {selected.paliatif.kondisiLainnya ? `(${selected.paliatif.kondisiLainnya})` : ''}</p>
-                    <p><span className="font-semibold">Tujuan:</span> {selected.paliatif.tujuan ? Object.keys(selected.paliatif.tujuan).filter(k => selected.paliatif.tujuan[k]).join(', ') : ''} {selected.paliatif.tujuanLainnya ? `(${selected.paliatif.tujuanLainnya})` : ''}</p>
+                    <p><span className="font-semibold">Kondisi:</span> {Object.keys(selected.paliatif).filter(k => k.startsWith('kondisi_') && selected.paliatif[k]).map(k => k.replace('kondisi_', '')).join(', ')} {selected.paliatif.kondisiLainnya ? `(${selected.paliatif.kondisiLainnya})` : ''}</p>
+                    <p><span className="font-semibold">Tujuan:</span> {Object.keys(selected.paliatif).filter(k => k.startsWith('tujuan_') && selected.paliatif[k]).map(k => k.replace('tujuan_', '')).join(', ')} {selected.paliatif.tujuanLainnya ? `(${selected.paliatif.tujuanLainnya})` : ''}</p>
                     <p><span className="font-semibold">Terapi:</span> {selected.paliatif.terapi}</p>
-                    <p><span className="font-semibold">Kolaborasi:</span> {selected.paliatif.kolaborasi === 'ya' ? selected.paliatif.bentukKolaborasi : 'Tidak'}</p>
+                    <p><span className="font-semibold">Kolaborasi:</span> {(selected.paliatif.kolaborasi === 'ya' || selected.paliatif.kolaborasi === 'Ya') ? selected.paliatif.bentukKolaborasi : 'Tidak'}</p>
                     <p><span className="font-semibold">Kepatuhan:</span> {selected.paliatif.kepatuhan}</p>
-                    <p><span className="font-semibold">Perbaikan:</span> {selected.paliatif.perbaikan === 'ya' ? selected.paliatif.bentukPerbaikan : 'Tidak'}</p>
+                    <p><span className="font-semibold">Perbaikan:</span> {(selected.paliatif.perbaikan === 'ya' || selected.paliatif.perbaikan === 'Ya') ? selected.paliatif.bentukPerbaikan : 'Tidak'}</p>
                   </div>
                 </div>
               )}
