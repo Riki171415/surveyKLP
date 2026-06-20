@@ -326,9 +326,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
   })();
 
   const isStep5Valid = nonOptimalServices.every((_, idx) => formData.nonOptimal[idx]?.masukJkn && formData.nonOptimal[idx]?.skala);
-  const isStep6Valid = isRoleDpm
-    ? (formData.wawancara[0]?.trim() || '').length >= 10
-    : interviewQuestions.every((_, idx) => (formData.wawancara[idx]?.trim() || '').length >= 10);
+  const isStep6Valid = interviewQuestions.every((_, idx) => (formData.wawancara[idx]?.trim() || '').length >= 10);
 
   const canProceed = () => {
     if (step === 1) return isStep1Valid;
@@ -1251,33 +1249,19 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                   </div>
                 </div>
                 <div className="space-y-6">
-                  {isRoleDpm ? (
-                    <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                      <label className="block text-sm font-semibold text-slate-800 mb-3 leading-relaxed">Berikan catatan pendalaman kualitatif secara umum terkait layanan praktik Anda:</label>
+                  {interviewQuestions.map((question, idx) => (
+                    <div key={idx} className="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                      <label className="block text-sm font-semibold text-slate-800 mb-3 leading-relaxed">{question}</label>
                       <textarea
                         rows={6}
                         required
-                        placeholder="Tuliskan jawaban/alasan di sini..."
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y ${showErrors && (formData.wawancara[0]?.trim() || '').length < 10 ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`}
-                        value={formData.wawancara[0] || ''}
-                        onChange={(e) => handleWawancaraChange(0, e.target.value)}
+                        placeholder={interviewExamples[idx] || "Tuliskan jawaban/alasan di sini..."}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y ${showErrors && (formData.wawancara[idx]?.trim() || '').length < 10 ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`}
+                        value={formData.wawancara[idx] || ''}
+                        onChange={(e) => handleWawancaraChange(idx, e.target.value)}
                       ></textarea>
                     </div>
-                  ) : (
-                    interviewQuestions.map((question, idx) => (
-                      <div key={idx} className="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                        <label className="block text-sm font-semibold text-slate-800 mb-3 leading-relaxed">{question}</label>
-                        <textarea
-                          rows={6}
-                          required
-                          placeholder={interviewExamples[idx] || "Tuliskan jawaban/alasan di sini..."}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y ${showErrors && (formData.wawancara[idx]?.trim() || '').length < 10 ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`}
-                          value={formData.wawancara[idx] || ''}
-                          onChange={(e) => handleWawancaraChange(idx, e.target.value)}
-                        ></textarea>
-                      </div>
-                    ))
-                  )}
+                  ))}
                 </div>
               </div>
             )}
@@ -1323,10 +1307,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     {(() => { const b = nonOptimalServices.filter((_, i) => !formData.nonOptimal[i]?.masukJkn || !formData.nonOptimal[i]?.skala).length; return b > 0 ? <li>{b} layanan non-optimal belum diisi lengkap</li> : null; })()}
                   </>)}
                   {((isRoleDpm && step === 3) || (!isRoleDpm && step === 6)) && (<>
-                    {isRoleDpm 
-                      ? ((formData.wawancara[0]?.trim() || '').length < 10 && <li>Isian pendalaman kualitatif belum dijawab atau terlalu singkat</li>)
-                      : (() => { const b = interviewQuestions.filter((_, i) => (formData.wawancara[i]?.trim() || '').length < 10).length; return b > 0 ? <li>Ada {b} pertanyaan pendalaman kualitatif yang belum dijawab</li> : null; })()
-                    }
+                    {(() => { const b = interviewQuestions.filter((_, i) => (formData.wawancara[i]?.trim() || '').length < 10).length; return b > 0 ? <li>Ada {b} pertanyaan pendalaman kualitatif yang belum dijawab</li> : null; })()}
                   </>)}
                 </ul>
               </div>
