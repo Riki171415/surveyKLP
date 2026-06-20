@@ -275,7 +275,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
        (formData.role === 'Dokter Sp.KKLP' ? (() => {
          if (!formData.spkklpBerpraktik) return false;
          if (!formData.spkklpPoli?.hasPoli) return false;
-         if (formData.spkklpPoli.hasPoli === 'Ya') {
+         if (formData.spkklpPoli?.hasPoli === 'Ya') {
            if (!formData.spkklpPoli.sejak?.trim() || !formData.spkklpPoli.kunjungan || !formData.spkklpPoli.pembiayaan?.trim()) return false;
          }
          // Diagnosis and Tindakan are now required for both Ya and Tidak
@@ -284,7 +284,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
            if (!formData.spkklpPoli.alasanRujukan?.trim()) return false;
          }
          if (!formData.spkklpKendala?.hasKendala) return false;
-         if (formData.spkklpKendala.hasKendala === 'Ya') {
+         if (formData.spkklpKendala?.hasKendala === 'Ya') {
            if (!formData.spkklpKendala.diagnosis?.trim() || !formData.spkklpKendala.tindakan?.trim()) return false;
          }
          return true;
