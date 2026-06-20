@@ -3,7 +3,7 @@ import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate } from
 import { AuthProvider, useAuth } from './components/AuthContext';
 import Login from './components/Login';
 import SurveyForm from './components/SurveyForm';
-import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList, Loader2, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList, Loader2, ChevronRight, Target } from 'lucide-react';
 import logoKemenkes from './assets/logo-kemenkes.png';
 
 // Lazy load komponen berat — hanya di-download saat dibutuhkan
@@ -11,6 +11,7 @@ const Dashboard     = lazy(() => import('./components/Dashboard'));
 const TimSurveyList = lazy(() => import('./components/TimSurveyList'));
 const UserManagement = lazy(() => import('./components/UserManagement'));
 const DataManagement = lazy(() => import('./components/DataManagement'));
+const KokpitKemenkes = lazy(() => import('./components/KokpitKemenkes'));
 
 const PageLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-[400px]">
@@ -97,8 +98,9 @@ function Sidebar() {
 
         {user.role === 'admin' && (
           <>
-            <NavItem to="/data" icon={Database} collapsed={isCollapsed}>Manajemen Data</NavItem>
+            <NavItem to="/kokpit" icon={Target} collapsed={isCollapsed}>Kokpit Kemenkes</NavItem>
             <NavItem to="/dashboard" icon={LayoutDashboard} collapsed={isCollapsed}>Dashboard Laporan</NavItem>
+            <NavItem to="/data" icon={Database} collapsed={isCollapsed}>Manajemen Data</NavItem>
             <NavItem to="/users" icon={Users} collapsed={isCollapsed}>Kelola Akun</NavItem>
           </>
         )}
@@ -164,6 +166,7 @@ function AppContent() {
                 {/* Form Terbuka untuk Publik */}
                 <Route path="/" element={<SurveyForm />} />
                 {/* Halaman Admin / Tim Survey (Dilindungi) */}
+                <Route path="/kokpit" element={<ProtectedRoute allowedRoles={['admin']}><KokpitKemenkes /></ProtectedRoute>} />
                 <Route path="/data" element={<ProtectedRoute allowedRoles={['admin']}><DataManagement /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Dashboard /></ProtectedRoute>} />
                 <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
