@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronRight, ChevronLeft, Save, CheckCircle, Info, ArrowLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Save, CheckCircle, Info, ArrowLeft, Printer } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useAuth } from './AuthContext';
@@ -99,7 +99,7 @@ const interviewExamples = [
   "Contoh: Terkadang ada pembatasan kuota rujukan atau ketersediaan obat PRB di apotek jejaring kurang stabil, sehingga pasien mengeluh ke faskes tingkat pertama..."
 ];
 
-export default function SurveyForm({ isEdit = false, isInterview = false }) {
+export default function SurveyForm({ isEdit = false, isInterview = false, isPrintMode = false }) {
   const [step, setStep] = useState(1);
   const location = useLocation();
   const navigate = useNavigate();
@@ -513,7 +513,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
             )}
           </div>
         </div>
-        {!isInterview && (
+        {!isInterview && !isPrintMode && (
           <div className="flex flex-col gap-2 shrink-0">
             <button onClick={() => setShowPanduan(true)} className="bg-primary-600 border border-primary-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-primary-700 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm">📖 Panduan Pengisian</button>
             <button onClick={() => navigate('/login')} className="bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm">Login Petugas</button>
@@ -522,33 +522,42 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
       </div>
 
       {/* Stepper */}
-      <div className="mb-10 bg-white/80 backdrop-blur-md p-6 rounded-3xl shadow-soft border border-white overflow-x-auto relative z-10">
-        <div className="flex items-center justify-between relative min-w-[700px] px-4">
-          <div className="absolute left-10 right-10 top-5 transform -translate-y-1/2 h-1 bg-slate-100 rounded-full -z-10"></div>
-          <div className="absolute left-10 top-5 transform -translate-y-1/2 h-1 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full -z-10 transition-all duration-500 ease-in-out" style={{ width: `calc(${Math.max(0, (step - 1) / (totalSteps - 1)) * 100}% - 2.5rem)` }}></div>
-          {STEPS.map((s) => (
-            <div key={s.id} className="flex flex-col items-center relative z-10 w-full group">
-              <div className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm transition-all duration-500 shadow-sm ${
-                step > s.id ? 'bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-primary-500/40 scale-100'
-                  : step === s.id ? 'bg-primary-600 text-white ring-4 ring-primary-100 scale-110 shadow-xl'
-                  : 'bg-white border-2 border-slate-200 text-slate-400'
-              }`}>
-                {step > s.id ? <CheckCircle className="w-5 h-5" /> : s.id}
+      {!isPrintMode && (
+        <div className="mb-10 bg-white/80 backdrop-blur-md p-6 rounded-3xl shadow-soft border border-white overflow-x-auto relative z-10">
+          <div className="flex items-center justify-between relative min-w-[700px] px-4">
+            <div className="absolute left-10 right-10 top-5 transform -translate-y-1/2 h-1 bg-slate-100 rounded-full -z-10"></div>
+            <div className="absolute left-10 top-5 transform -translate-y-1/2 h-1 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full -z-10 transition-all duration-500 ease-in-out" style={{ width: `calc(${Math.max(0, (step - 1) / (totalSteps - 1)) * 100}% - 2.5rem)` }}></div>
+            {STEPS.map((s) => (
+              <div key={s.id} className="flex flex-col items-center relative z-10 w-full group">
+                <div className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm transition-all duration-500 shadow-sm ${
+                  step > s.id ? 'bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-primary-500/40 scale-100'
+                    : step === s.id ? 'bg-primary-600 text-white ring-4 ring-primary-100 scale-110 shadow-xl'
+                    : 'bg-white border-2 border-slate-200 text-slate-400'
+                }`}>
+                  {step > s.id ? <CheckCircle className="w-5 h-5" /> : s.id}
+                </div>
+                <span className={`mt-3 text-xs font-semibold transition-colors duration-300 ${step === s.id ? 'text-primary-600' : step > s.id ? 'text-slate-800' : 'text-slate-400'}`}>{s.title}</span>
               </div>
-              <span className={`mt-3 text-xs font-semibold transition-colors duration-300 ${step === s.id ? 'text-primary-600' : step > s.id ? 'text-slate-800' : 'text-slate-400'}`}>{s.title}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Form Card */}
+      {isPrintMode && (
+        <div className="no-print flex justify-end mb-4 pr-2">
+          <button onClick={() => window.print()} className="bg-slate-800 text-white px-6 py-2.5 rounded-xl font-bold flex items-center shadow-lg hover:bg-slate-900 transition-colors hover:-translate-y-0.5">
+            <Printer className="w-5 h-5 mr-2" /> Cetak ke PDF
+          </button>
+        </div>
+      )}
       <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-soft-lg border border-white relative z-0">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary-100/50 rounded-full blur-[80px] pointer-events-none"></div>
         <form onSubmit={(e) => e.preventDefault()} className="animate-fade-in relative z-10">
-          <div className="p-8 sm:p-12">
+          <div className="p-5 md:p-8">
 
             {/* ===== STEP 1: IDENTITAS ===== */}
-            {step === 1 && (
+            {(isPrintMode || step === 1) && (
               <div className="space-y-6">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
@@ -568,14 +577,14 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         <div className={showErrors && !formData.provinsi ? 'ring-2 ring-rose-500 rounded-lg shadow-sm' : ''}>
                           <SearchableSelect name="provinsi" options={provinsiList} value={formData.provinsi} onChange={(val) => { setFormData(prev => ({ ...prev, provinsi: val, kabKota: '', fktpName: '' })); }} placeholder="-- Pilih Provinsi --" />
                         </div>
-                        {showErrors && !formData.provinsi && <p className="text-xs text-rose-500 mt-1">Provinsi wajib dipilih</p>}
+                        {showErrors && !isPrintMode && !formData.provinsi && <p className="text-xs text-rose-500 mt-1">Provinsi wajib dipilih</p>}
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Kabupaten/Kota</label>
                         <div className={showErrors && !formData.kabKota ? 'ring-2 ring-rose-500 rounded-lg shadow-sm' : ''}>
                           <SearchableSelect name="kabKota" options={kabKotaList} value={formData.kabKota} onChange={(val) => { setFormData(prev => ({ ...prev, kabKota: val, fktpName: '' })); }} disabled={!formData.provinsi} placeholder="-- Pilih Kab/Kota --" allowManual={true} />
                         </div>
-                        {!formData.provinsi ? <p className="text-xs text-amber-600 mt-1">Pilih provinsi terlebih dahulu</p> : showErrors && !formData.kabKota ? <p className="text-xs text-rose-500 mt-1">Kab/Kota wajib diisi</p> : null}
+                        {!formData.provinsi ? <p className="text-xs text-amber-600 mt-1">Pilih provinsi terlebih dahulu</p> : showErrors && !isPrintMode && !formData.kabKota ? <p className="text-xs text-rose-500 mt-1">Kab/Kota wajib diisi</p> : null}
                       </div>
 
                       {formData.kabKota && (
@@ -594,7 +603,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                               </label>
                             ))}
                           </div>
-                          {showErrors && !formData.jenisFaskes && <p className="text-xs text-rose-500 mt-1">Jenis Faskes wajib dipilih</p>}
+                          {showErrors && !isPrintMode && !formData.jenisFaskes && <p className="text-xs text-rose-500 mt-1">Jenis Faskes wajib dipilih</p>}
                         </div>
                       )}
 
@@ -616,17 +625,17 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                             allowManual={true} 
                           />
                         </div>
-                        {!formData.kabKota ? <p className="text-xs text-amber-600 mt-1">Pilih Kab/Kota terlebih dahulu</p> : showErrors && !formData.fktpName ? <p className="text-xs text-rose-500 mt-1">Nama Faskes wajib diisi</p> : null}
+                        {!formData.kabKota ? <p className="text-xs text-amber-600 mt-1">Pilih Kab/Kota terlebih dahulu</p> : showErrors && !isPrintMode && !formData.fktpName ? <p className="text-xs text-rose-500 mt-1">Nama Faskes wajib diisi</p> : null}
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Kode Faskes BPJS</label>
                         <input type="text" name="kodeFaskes" value={formData.kodeFaskes} onChange={handleInputChange} placeholder="Contoh: 0101G00001" className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300 ${showErrors && !formData.kodeFaskes ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} />
-                        {showErrors && !formData.kodeFaskes && <p className="text-xs text-rose-500 mt-1">Kode Faskes wajib diisi</p>}
+                        {showErrors && !isPrintMode && !formData.kodeFaskes && <p className="text-xs text-rose-500 mt-1">Kode Faskes wajib diisi</p>}
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Nama Responden</label>
                         <input type="text" name="namaResponden" value={formData.namaResponden} onChange={handleInputChange} placeholder="Nama lengkap responden" className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300 ${showErrors && !formData.namaResponden ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} />
-                        {showErrors && !formData.namaResponden && <p className="text-xs text-rose-500 mt-1">Nama Responden wajib diisi</p>}
+                        {showErrors && !isPrintMode && !formData.namaResponden && <p className="text-xs text-rose-500 mt-1">Nama Responden wajib diisi</p>}
                       </div>
                       </>
                       )}
@@ -666,7 +675,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                         </label>
                       ))}
                     </div>
-                    {showErrors && !formData.docKklp && <p className="text-xs text-rose-500 mt-1">Wajib dipilih</p>}
+                    {showErrors && !isPrintMode && !formData.docKklp && <p className="text-xs text-rose-500 mt-1">Wajib dipilih</p>}
                   </div>
                   </>
                   )}
@@ -675,12 +684,12 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
             )}
 
             {/* ===== STEP 2: SURVEI DPM ===== */}
-            {step === 2 && isRoleDpm && (
+            {(isPrintMode || step === 2) && isRoleDpm && (
               <SurveiDPM formData={formData} setFormData={setFormData} showErrors={showErrors} />
             )}
 
-            {/* ===== STEP 2: KOMPETENSI DOKTER ===== */}
-            {step === 2 && !isRoleDpm && (
+            {/* ===== STEP 2: SDM & LAYANAN (NON-DPM) ===== */}
+            {(isPrintMode || step === 2) && !isRoleDpm && (
               <div className="space-y-8">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
@@ -862,7 +871,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
             )}
 
             {/* ===== STEP 3: PERSPEKTIF SPKKLP (SEMUA RESPONDEN) ===== */}
-            {step === 3 && !isRoleDpm && (
+            {(isPrintMode || step === 3) && !isRoleDpm && (
               <div className="space-y-8">
                 {!isRoleSpKklp && (
                   <>
@@ -1051,8 +1060,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
               </div>
             )}
 
-            {/* ===== STEP 4: MANFAAT JKN ===== */}
-            {step === 4 && !isRoleDpm && (
+            {/* ===== STEP 4: PAKET MANFAAT JKN ===== */}
+            {(isPrintMode || step === 4) && !isRoleDpm && (
               <div className="space-y-6">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
@@ -1229,7 +1238,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
             )}
 
             {/* ===== STEP 5: LAYANAN NON-OPTIMAL ===== */}
-            {step === 5 && !isRoleDpm && (
+            {(isPrintMode || step === 5) && !isRoleDpm && (
               <div className="space-y-6">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
@@ -1331,57 +1340,6 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
           </div>
 
           {/* Footer Navigation */}
-          <div className="px-8 py-5 bg-slate-50/80 backdrop-blur-md border-t border-slate-100 rounded-b-3xl">
-            {showErrors && !canProceed() && (
-              <div className="mb-4 p-4 bg-rose-50 border border-rose-200 rounded-xl">
-                <p className="text-sm font-bold text-rose-700 mb-2">⚠️ Harap lengkapi isian berikut sebelum melanjutkan:</p>
-                <ul className="text-sm text-rose-600 space-y-1 list-disc pl-5">
-                  {step === 1 && (<>
-                    {!formData.provinsi && <li>Provinsi belum dipilih</li>}
-                    {!formData.fktpName && <li>Nama Puskesmas / Klinik belum dipilih</li>}
-                    {!formData.kodeFaskes && <li>Kode Faskes belum diisi</li>}
-                    {!formData.namaResponden && <li>Nama Responden belum diisi</li>}
-                    {!formData.role && <li>Jabatan belum dipilih</li>}
-                    {!formData.docKklp && <li>Status kepemilikan Sp.KKLP belum dipilih</li>}
-                  </>)}
-                  {step === 2 && isRoleDpm && (
-                    <>
-                      {!isStep2Valid && <li>Pastikan semua field pada Survei DPM (A-E) terisi lengkap.</li>}
-                    </>
-                  )}
-                  {step === 2 && !isRoleDpm && isRoleDoctor && (<>
-                    {!formData.timeInPoli && <li>Waktu rata-rata poli belum diisi</li>}
-                    {!formData.timeHomeVisit && <li>Waktu rata-rata home visit belum diisi</li>}
-                    {(!formData.propInFktp || !formData.propOutFktp) && <li>Beban dalam/luar gedung belum diisi</li>}
-                    {formData.propInFktp && formData.propOutFktp && propTotal !== 100 && <li>Total beban dalam + luar gedung harus 100% (saat ini: {propTotal}%)</li>}
-                    {(() => { const b = kompetensiLayanan.filter((_, i) => !formData.kompetensi[i]?.status).length; return b > 0 ? <li>{b} layanan kompetensi belum dipilih status-nya</li> : null; })()}
-                  </>)}
-                  {step === 3 && (<>
-                    {!isRoleSpKklp && (() => { const b = relevansiItems.filter((_, i) => !formData.relevansiSpkklp[i]).length; return b > 0 ? <li>{b} item relevansi Sp.KKLP belum diberi nilai</li> : null; })()}
-                    {!formData.prb?.mekanisme && <li>Mekanisme pemantauan PRB wajib dipilih minimal 1</li>}
-                    {!formData.prb?.rataRujukan && <li>Rata-rata jumlah rujukan ke FKRTL belum diisi</li>}
-                  </>)}
-                  {step === 4 && (<>
-                    {(() => { const b = jknBenefits.filter((_, i) => !formData.jkn[i]?.skala).length; return b > 0 ? <li>{b} layanan JKN belum diberi nilai skala</li> : null; })()}
-                    {!isStep4Valid && formData.homeCare?.screening === 'Ya' && <li>Ada isian Pelayanan Home Care yang belum lengkap</li>}
-                    {!isStep4Valid && formData.paliatif?.screening === 'Ya' && <li>Ada isian Pelayanan Paliatif yang belum lengkap</li>}
-                  </>)}
-                  {step === 5 && (<>
-                    {(() => { const b = nonOptimalServices.filter((_, i) => !formData.nonOptimal[i]?.masukJkn || !formData.nonOptimal[i]?.skala).length; return b > 0 ? <li>{b} layanan non-optimal belum diisi lengkap</li> : null; })()}
-                  </>)}
-                  {((isRoleDpm && step === 3) || (!isRoleDpm && step === 6)) && (<>
-                    {(() => { const b = interviewQuestions.filter((_, i) => (formData.wawancara[i]?.trim() || '').length < 10).length; return b > 0 ? <li>Ada {b} pertanyaan pendalaman kualitatif yang belum dijawab</li> : null; })()}
-                  </>)}
-                </ul>
-              </div>
-            )}
-            <div className="flex justify-between items-center">
-              <button type="button" onClick={prevStep} disabled={step === 1} className={`flex items-center px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${step === 1 ? 'opacity-0 pointer-events-none' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 shadow-sm hover:shadow active:scale-95'}`}>
-                <ChevronLeft className="w-5 h-5 mr-1.5" /> Sebelumnya
-              </button>
-              {step === totalSteps ? (
-                <button type="button" onClick={() => submitData(false)} disabled={isSubmitting} className={`flex items-center px-8 py-3 text-white rounded-xl font-bold text-sm transition-all duration-300 shadow-lg ${isSubmitting ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 hover:-translate-y-0.5 hover:shadow-emerald-500/40 active:scale-95'}`}>
-                  {isSubmitting ? 'Memproses...' : 'Simpan Selesai'}
                   {!isSubmitting && <Save className="w-5 h-5 ml-2" />}
                 </button>
               ) : step === totalSteps - 1 ? (

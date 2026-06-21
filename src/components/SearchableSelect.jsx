@@ -128,7 +128,23 @@ export default function SearchableSelect({ options = [], value, onChange, placeh
                 </div>
               ))
             ) : (
-              <div className="px-4 py-3 text-sm text-slate-500 text-center italic">Data tidak ditemukan</div>
+              <div className="px-4 py-3 text-sm text-slate-500 text-center flex flex-col items-center">
+                <span className="italic">Data tidak ditemukan</span>
+                {allowManual && searchTerm && (
+                  <button 
+                    type="button" 
+                    className="mt-3 px-4 py-2 bg-primary-100 text-primary-700 font-semibold rounded-lg hover:bg-primary-200 text-xs w-full transition-colors flex items-center justify-center gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange(searchTerm);
+                      setIsOpen(false);
+                      setIsManual(true);
+                    }}
+                  >
+                    <PenLine className="w-3.5 h-3.5" /> Input manual: "{searchTerm}"
+                  </button>
+                )}
+              </div>
             )}
             {allowManual && (
               <div

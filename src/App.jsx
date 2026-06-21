@@ -3,7 +3,7 @@ import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate } from
 import { AuthProvider, useAuth } from './components/AuthContext';
 import Login from './components/Login';
 import SurveyForm from './components/SurveyForm';
-import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList, Loader2, ChevronRight, Target } from 'lucide-react';
+import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList, Loader2, ChevronRight, Target, Printer } from 'lucide-react';
 import logoKemenkes from './assets/logo-kemenkes.png';
 
 // Lazy load komponen berat — hanya di-download saat dibutuhkan
@@ -105,7 +105,10 @@ function Sidebar() {
         )}
 
         {user.role === 'admin' && (
-          <NavItem to="/users" icon={Users} collapsed={isCollapsed}>Kelola Akun</NavItem>
+          <>
+            <NavItem to="/users" icon={Users} collapsed={isCollapsed}>Kelola Akun</NavItem>
+            <NavItem to="/cetak-form" icon={Printer} collapsed={isCollapsed}>Cetak Form</NavItem>
+          </>
         )}
       </div>
 
@@ -173,6 +176,7 @@ function AppContent() {
                 <Route path="/data" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><DataManagement /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><Dashboard /></ProtectedRoute>} />
                 <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
+                <Route path="/cetak-form" element={<ProtectedRoute allowedRoles={['admin']}><SurveyForm isPrintMode={true} /></ProtectedRoute>} />
                 <Route path="/wawancara" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><TimSurveyList /></ProtectedRoute>} />
                 <Route path="/wawancara/form" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><SurveyForm isEdit={true} isInterview={true} /></ProtectedRoute>} />
               </Routes>
