@@ -120,12 +120,12 @@ function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
           <>
             <NavItem to="/kokpit" icon={Target} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Kokpit Kemenkes</NavItem>
             <NavItem to="/dashboard" icon={LayoutDashboard} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Dashboard Laporan</NavItem>
-            <NavItem to="/data" icon={Database} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Manajemen Data</NavItem>
           </>
         )}
 
         {user.role === 'admin' && (
           <>
+            <NavItem to="/data" icon={Database} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Manajemen Data</NavItem>
             <NavItem to="/users" icon={Users} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Kelola Akun</NavItem>
             <NavItem to="/cetak-form" icon={Printer} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Cetak Form</NavItem>
           </>
