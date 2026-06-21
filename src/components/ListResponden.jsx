@@ -37,7 +37,7 @@ export default function ListResponden() {
   // Filter surveys
   const filtered = surveys.filter(s => {
     const term = searchTerm.toLowerCase();
-    const faskesName = (s.nama_faskes || '').toLowerCase();
+    const faskesName = (s.fktp_name || '').toLowerCase();
     const city = (s.city || '').toLowerCase();
     const prov = (s.provinsi || '').toLowerCase();
     return faskesName.includes(term) || city.includes(term) || prov.includes(term);
@@ -113,7 +113,7 @@ export default function ListResponden() {
                         <Building2 className="w-5 h-5" />
                       </div>
                       <div>
-                        <div className="font-bold text-slate-800 text-sm uppercase">{row.nama_faskes || 'Tanpa Nama'}</div>
+                        <div className="font-bold text-slate-800 text-sm uppercase">{row.fktp_name || 'Tanpa Nama'}</div>
                         <div className="text-xs text-slate-500 mt-0.5">{row.role || '-'}</div>
                       </div>
                     </div>
