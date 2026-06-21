@@ -96,7 +96,7 @@ export default function ListResponden() {
             <thead>
               <tr className="bg-white border-b border-slate-200">
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-12">No</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Nama Faskes / Peran</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Faskes & Responden</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Lokasi</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tgl. Pengisian</th>
               </tr>
@@ -114,7 +114,9 @@ export default function ListResponden() {
                       </div>
                       <div>
                         <div className="font-bold text-slate-800 text-sm uppercase">{row.fktp_name || 'Tanpa Nama'}</div>
-                        <div className="text-xs text-slate-500 mt-0.5">{row.role || '-'}</div>
+                        <div className="text-xs text-slate-600 mt-1 font-medium">
+                          {row.nama_responden || 'Anonim'} <span className="text-slate-400 font-normal">({row.role || '-'})</span>
+                        </div>
                       </div>
                     </div>
                   </td>
