@@ -3,7 +3,7 @@ import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate } from
 import { AuthProvider, useAuth } from './components/AuthContext';
 import Login from './components/Login';
 import SurveyForm from './components/SurveyForm';
-import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList, Loader2, ChevronRight, Target, Printer } from 'lucide-react';
+import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList, Loader2, ChevronRight, Target, Printer, Menu, X } from 'lucide-react';
 import logoKemenkes from './assets/logo-kemenkes.png';
 
 // Lazy load komponen berat — hanya di-download saat dibutuhkan
@@ -30,12 +30,13 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
   return children;
 }
 
-function NavItem({ to, icon: Icon, children, collapsed }) {
+function NavItem({ to, icon: Icon, children, collapsed, onClick }) {
   const location = useLocation();
   const isActive = location.pathname === to;
   return (
     <Link 
       to={to} 
+      onClick={onClick}
       className={`flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-300 group ${
         isActive 
           ? 'bg-gradient-to-r from-primary-700 to-primary-800 text-white shadow-md' 
@@ -49,19 +50,38 @@ function NavItem({ to, icon: Icon, children, collapsed }) {
   );
 }
 
-function Sidebar() {
+function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
   const { user, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   if (!user) return null;
 
   return (
-    <div className={`no-print ${isCollapsed ? 'w-20' : 'w-72'} bg-primary-600 min-h-screen hidden md:flex flex-col shadow-2xl relative z-20 transition-all duration-300`}>
-      {/* Strip Merah-Putih Kemenkes */}
-      <div className="flex h-1.5 shrink-0">
-        <div className="flex-1 bg-red-600" />
-        <div className="flex-1 bg-white" />
-      </div>
+    <>
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+      
+      <div className={`no-print ${isCollapsed ? 'w-20' : 'w-72'} bg-primary-600 h-screen fixed md:relative z-50 transition-transform duration-300 flex flex-col shadow-2xl ${
+        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
+        {/* Strip Merah-Putih Kemenkes */}
+        <div className="flex h-1.5 shrink-0">
+          <div className="flex-1 bg-red-600" />
+          <div className="flex-1 bg-white" />
+        </div>
+        
+        {/* Mobile Close Button */}
+        <button 
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="md:hidden absolute top-4 right-4 text-white hover:bg-primary-700 p-1.5 rounded-lg z-50"
+        >
+          <X className="w-5 h-5" />
+        </button>
 
       {/* Collapse Toggle Button */}
       <button 
@@ -89,25 +109,25 @@ function Sidebar() {
         {!isCollapsed && <div className="text-xs font-bold text-primary-200 uppercase tracking-widest mb-3 px-4 mt-1">Menu Utama</div>}
 
         {['puskesmas', 'admin', 'tim survey'].includes(user.role) && (
-          <NavItem to="/" icon={FileText} collapsed={isCollapsed}>Isi Survey</NavItem>
+          <NavItem to="/" icon={FileText} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Isi Survey</NavItem>
         )}
 
         {['tim survey', 'admin'].includes(user.role) && (
-          <NavItem to="/wawancara" icon={ClipboardList} collapsed={isCollapsed}>Form Wawancara</NavItem>
+          <NavItem to="/wawancara" icon={ClipboardList} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Form Wawancara</NavItem>
         )}
 
         {['tim survey', 'admin'].includes(user.role) && (
           <>
-            <NavItem to="/kokpit" icon={Target} collapsed={isCollapsed}>Kokpit Kemenkes</NavItem>
-            <NavItem to="/dashboard" icon={LayoutDashboard} collapsed={isCollapsed}>Dashboard Laporan</NavItem>
-            <NavItem to="/data" icon={Database} collapsed={isCollapsed}>Manajemen Data</NavItem>
+            <NavItem to="/kokpit" icon={Target} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Kokpit Kemenkes</NavItem>
+            <NavItem to="/dashboard" icon={LayoutDashboard} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Dashboard Laporan</NavItem>
+            <NavItem to="/data" icon={Database} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Manajemen Data</NavItem>
           </>
         )}
 
         {user.role === 'admin' && (
           <>
-            <NavItem to="/users" icon={Users} collapsed={isCollapsed}>Kelola Akun</NavItem>
-            <NavItem to="/cetak-form" icon={Printer} collapsed={isCollapsed}>Cetak Form</NavItem>
+            <NavItem to="/users" icon={Users} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Kelola Akun</NavItem>
+            <NavItem to="/cetak-form" icon={Printer} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Cetak Form</NavItem>
           </>
         )}
       </div>
@@ -130,12 +150,14 @@ function Sidebar() {
           {!isCollapsed && <span>Keluar</span>}
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
 function AppContent() {
   const { user, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans relative overflow-hidden">
@@ -144,7 +166,7 @@ function AppContent() {
       <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-primary-400/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse-slow"></div>
       <div className="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-indigo-400/10 rounded-full blur-3xl pointer-events-none -z-10 animate-float"></div>
 
-      <Sidebar />
+      <Sidebar isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {user && (
           <div className="no-print md:hidden border-b border-white/20 p-3 flex justify-between items-center sticky top-0 z-20 bg-primary-700 shadow-md">
@@ -153,9 +175,15 @@ function AppContent() {
               <div className="flex-1 bg-red-600" />
               <div className="flex-1 bg-white" />
             </div>
-            <div className="flex items-center space-x-2 mt-0.5">
-              <div className="bg-white rounded-lg px-2.5 py-1 flex items-center justify-center">
-                <img src={logoKemenkes} alt="Logo Kemenkes" className="h-6 w-auto object-contain" />
+            <div className="flex items-center space-x-3 mt-0.5">
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="text-white hover:bg-primary-600 p-1.5 rounded-lg transition-colors"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div className="bg-white rounded-lg px-2 py-0.5 flex items-center justify-center">
+                <img src={logoKemenkes} alt="Logo Kemenkes" className="h-5 w-auto object-contain" />
               </div>
               <span className="font-display font-bold text-sm text-white">Survey <span className="text-primary-200">Sp.KKLP</span></span>
             </div>
