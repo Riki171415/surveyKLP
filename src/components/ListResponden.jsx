@@ -14,8 +14,7 @@ export default function ListResponden() {
     try {
       let data = [];
       if (import.meta.env.VITE_USE_LOCAL_API === 'true') {
-        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-        const res = await fetch(`${baseUrl}/api/surveys`);
+        const res = await fetch('/api/surveys');
         const json = await res.json();
         data = json.data || [];
       } else {
