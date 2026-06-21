@@ -334,7 +334,7 @@ export default function KokpitKemenkes() {
           {/* TOP METRICS */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-white shadow-sm border border-slate-200 p-6 rounded-3xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-bl-full -z-10 group-hover:bg-primary-500/20 transition-colors"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-50 rounded-bl-full -z-10 group-hover:bg-primary-500/20 transition-colors"></div>
               <p className="text-slate-500 text-sm font-bold tracking-wider uppercase mb-2">Indeks Kesiapan Nasional</p>
               <div className="flex items-end gap-3">
                 <h3 className="text-6xl font-black text-slate-800">{metrics.indeksKesiapan}</h3>
@@ -351,7 +351,7 @@ export default function KokpitKemenkes() {
                 <h3 className="text-4xl font-black text-slate-800">{100 - metrics.spkklpRatio}%</h3>
                 <p className="text-slate-500 mt-1">Dari {metrics.totalCount} FKTP disurvei belum memiliki Sp.KKLP</p>
               </div>
-              <div className="flex items-center gap-2 mt-4 text-amber-400 text-sm font-bold bg-amber-400/10 px-3 py-2 rounded-lg w-fit">
+              <div className="flex items-center gap-2 mt-4 text-amber-600 text-sm font-bold bg-amber-400/10 px-3 py-2 rounded-lg w-fit">
                 <AlertTriangle className="w-4 h-4" /> Butuh Pemerataan
               </div>
             </div>
@@ -362,7 +362,7 @@ export default function KokpitKemenkes() {
                 {metrics.topRujukan.map((r, i) => (
                   <div key={i} className="flex justify-between items-center">
                     <span className="text-sm font-medium text-slate-600 truncate pr-4">{i+1}. {r.name}</span>
-                    <span className="text-rose-400 font-bold bg-rose-400/10 px-2 py-1 rounded text-xs whitespace-nowrap">{r.value}% FKTP</span>
+                    <span className="text-rose-600 font-bold bg-rose-400/10 px-2 py-1 rounded text-xs whitespace-nowrap">{r.value}% FKTP</span>
                   </div>
                 ))}
               </div>
@@ -370,13 +370,13 @@ export default function KokpitKemenkes() {
           </div>
 
           {/* RECOMMENDATION ALERT */}
-          <div className="bg-gradient-to-r from-primary-900/40 to-emerald-900/40 border border-primary-500/20 p-5 rounded-2xl mb-8 flex items-start gap-4 shadow-lg shadow-primary-900/20">
+          <div className="bg-emerald-50 border border-primary-500/20 p-5 rounded-2xl mb-8 flex items-start gap-4 shadow-lg shadow-sm">
             <div className="p-3 bg-primary-500/20 text-primary-400 rounded-xl shrink-0"><Zap className="w-6 h-6" /></div>
             <div>
               <h4 className="text-slate-800 font-bold text-lg mb-1">Rekomendasi Kebijakan Hari Ini</h4>
-              <p className="text-primary-100/80 leading-relaxed text-sm">
-                Terdapat <strong className="text-slate-800">{100 - metrics.spkklpRatio}% FKTP</strong> tanpa Sp.KKLP, namun survei menunjukkan skor relevansi rata-rata tinggi. Di sisi lain, <strong className="text-rose-300">{metrics.topRujukan[0]?.name}</strong> masih terus dirujuk oleh {metrics.topRujukan[0]?.value}% FKTP. 
-                <br/><span className="text-emerald-400 mt-2 block font-medium">→ Tindakan: Prioritaskan pengangkatan Sp.KKLP di Provinsi merah dan masukan layanan prioritas ke pembiayaan JKN (Non-Kapitasi).</span>
+              <p className="text-slate-600/80 leading-relaxed text-sm">
+                Terdapat <strong className="text-slate-800">{100 - metrics.spkklpRatio}% FKTP</strong> tanpa Sp.KKLP, namun survei menunjukkan skor relevansi rata-rata tinggi. Di sisi lain, <strong className="text-rose-600">{metrics.topRujukan[0]?.name}</strong> masih terus dirujuk oleh {metrics.topRujukan[0]?.value}% FKTP. 
+                <br/><span className="text-emerald-600 mt-2 block font-medium">→ Tindakan: Prioritaskan pengangkatan Sp.KKLP di Provinsi merah dan masukan layanan prioritas ke pembiayaan JKN (Non-Kapitasi).</span>
               </p>
             </div>
           </div>
@@ -387,7 +387,7 @@ export default function KokpitKemenkes() {
             {/* Heatmap Provinsi */}
             <div className="bg-white shadow-sm border border-slate-200 rounded-3xl p-6">
               <div className="flex items-center gap-2 mb-6">
-                <Map className="w-5 h-5 text-emerald-400" />
+                <Map className="w-5 h-5 text-emerald-600" />
                 <h3 className="text-lg font-bold text-slate-800">Peta Kesiapan Wilayah</h3>
               </div>
               <div className="overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
@@ -404,7 +404,7 @@ export default function KokpitKemenkes() {
                       <tr key={i} className="border-b border-slate-200 hover:bg-slate-50">
                         <td className="px-4 py-3 font-medium text-slate-700">{p.nama}</td>
                         <td className="px-4 py-3 text-center">
-                          <span className={`px-2 py-1 rounded-lg font-bold ${p.indeks >= 70 ? 'text-emerald-400 bg-emerald-400/10' : p.indeks >= 40 ? 'text-amber-400 bg-amber-400/10' : 'text-rose-400 bg-rose-400/10'}`}>
+                          <span className={`px-2 py-1 rounded-lg font-bold ${p.indeks >= 70 ? 'text-emerald-600 bg-emerald-400/10' : p.indeks >= 40 ? 'text-amber-600 bg-amber-400/10' : 'text-rose-600 bg-rose-400/10'}`}>
                             {p.indeks}
                           </span>
                         </td>
@@ -419,7 +419,7 @@ export default function KokpitKemenkes() {
             {/* Radar Gap Persepsi */}
             <div className="bg-white shadow-sm border border-slate-200 rounded-3xl p-6 flex flex-col">
               <div className="flex items-center gap-2 mb-2">
-                <Users className="w-5 h-5 text-indigo-400" />
+                <Users className="w-5 h-5 text-indigo-600" />
                 <h3 className="text-lg font-bold text-slate-800">Gap Persepsi Antar Profesi</h3>
               </div>
               <p className="text-xs text-slate-500 mb-4">Mendeteksi perbedaan pandangan thd. peran Sp.KKLP (Skor 1-4)</p>
@@ -445,7 +445,7 @@ export default function KokpitKemenkes() {
             <div className="bg-white shadow-sm border border-slate-200 rounded-3xl p-6 flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
-                  <Briefcase className="w-5 h-5 text-amber-400" />
+                  <Briefcase className="w-5 h-5 text-amber-600" />
                   <h3 className="text-lg font-bold text-slate-800">Evaluasi Paket Manfaat JKN</h3>
                 </div>
                 <span className="text-xs text-slate-500">Skor Penting (1-4)</span>
@@ -480,9 +480,9 @@ export default function KokpitKemenkes() {
                   </div>
                 ))}
               </div>
-              <div className="mt-5 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
-                <p className="text-indigo-200 text-sm italic">
-                  "Banyak FKTP menyinggung perlunya <span className="text-indigo-400 font-bold uppercase">{metrics.kwCounts[0]?.word}</span> dan perbaikan <span className="text-indigo-400 font-bold uppercase">{metrics.kwCounts[1]?.word}</span> agar peran Sp.KKLP bisa dioptimalkan secara nyata di lapangan."
+              <div className="mt-5 p-4 bg-indigo-50 border border-indigo-500/20 rounded-xl">
+                <p className="text-indigo-700 text-sm italic">
+                  "Banyak FKTP menyinggung perlunya <span className="text-indigo-600 font-bold uppercase">{metrics.kwCounts[0]?.word}</span> dan perbaikan <span className="text-indigo-600 font-bold uppercase">{metrics.kwCounts[1]?.word}</span> agar peran Sp.KKLP bisa dioptimalkan secara nyata di lapangan."
                 </p>
               </div>
             </div>
@@ -501,30 +501,30 @@ export default function KokpitKemenkes() {
             <div className="w-8 h-8 rounded-full bg-primary-500/20 text-primary-400 flex items-center justify-center shrink-0 font-bold">1</div>
             <div>
               <h4 className="text-slate-800 font-bold mb-1">Paradoks Ketersediaan vs Kebutuhan</h4>
-              <p>Meskipun sebagian besar FKTP belum memiliki Sp.KKLP, data <span className="text-primary-300 font-semibold">Gap Persepsi</span> menunjukkan bahwa institusi primer (Kepala PKM & Dokter Umum) memberikan skor relevansi yang sangat tinggi. Pasar layanan primer sudah siap; urgensi saat ini bergeser pada percepatan distribusi tenaga medis.</p>
+              <p>Meskipun sebagian besar FKTP belum memiliki Sp.KKLP, data <span className="text-primary-600 font-semibold">Gap Persepsi</span> menunjukkan bahwa institusi primer (Kepala PKM & Dokter Umum) memberikan skor relevansi yang sangat tinggi. Pasar layanan primer sudah siap; urgensi saat ini bergeser pada percepatan distribusi tenaga medis.</p>
             </div>
           </div>
           
           <div className="flex items-start gap-4">
-            <div className="w-8 h-8 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 font-bold">2</div>
+            <div className="w-8 h-8 rounded-full bg-rose-500/20 text-rose-600 flex items-center justify-center shrink-0 font-bold">2</div>
             <div>
               <h4 className="text-slate-800 font-bold mb-1">Kebocoran Gatekeeper pada Kasus Sederhana</h4>
-              <p>Top rujukan primer masih didominasi oleh kasus PTM tanpa komplikasi dan bedah minor. Ini membuktikan bahwa <span className="text-rose-300 font-semibold">fungsi gatekeeper JKN belum optimal</span>. Kehadiran Sp.KKLP di titik-titik lemah (provinsi merah) dapat mencegah triliunan rupiah bocor ke FKRTL.</p>
+              <p>Top rujukan primer masih didominasi oleh kasus PTM tanpa komplikasi dan bedah minor. Ini membuktikan bahwa <span className="text-rose-600 font-semibold">fungsi gatekeeper JKN belum optimal</span>. Kehadiran Sp.KKLP di titik-titik lemah (provinsi merah) dapat mencegah triliunan rupiah bocor ke FKRTL.</p>
             </div>
           </div>
           
           <div className="flex items-start gap-4">
-            <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 font-bold">3</div>
+            <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-600 flex items-center justify-center shrink-0 font-bold">3</div>
             <div>
               <h4 className="text-slate-800 font-bold mb-1">"Blind Spot" Pembiayaan Non-Kapitasi</h4>
-              <p>Suara lapangan dan usulan prioritas secara masif menuntut diakomodasinya layanan <span className="text-amber-300 font-semibold">Home Care dan Paliatif</span>. Penempatan Sp.KKLP wajib dibarengi perombakan skema insentif JKN yang mengapresiasi upaya preventif & proaktif, bukan sekadar kuratif reaktif.</p>
+              <p>Suara lapangan dan usulan prioritas secara masif menuntut diakomodasinya layanan <span className="text-amber-600 font-semibold">Home Care dan Paliatif</span>. Penempatan Sp.KKLP wajib dibarengi perombakan skema insentif JKN yang mengapresiasi upaya preventif & proaktif, bukan sekadar kuratif reaktif.</p>
             </div>
           </div>
         </div>
 
         <div className="mt-8 pt-6 border-t border-slate-200">
-          <h4 className="text-emerald-400 font-bold mb-3 flex items-center gap-2"><Target className="w-4 h-4" /> REKOMENDASI TINDAKAN (30 HARI KEDEPAN)</h4>
-          <ul className="list-disc pl-5 space-y-2 text-sm text-emerald-100/80 marker:text-emerald-500">
+          <h4 className="text-emerald-600 font-bold mb-3 flex items-center gap-2"><Target className="w-4 h-4" /> REKOMENDASI TINDAKAN (30 HARI KEDEPAN)</h4>
+          <ul className="list-disc pl-5 space-y-2 text-sm text-slate-600 marker:text-emerald-500">
             <li>Gunakan data usulan prioritas untuk advokasi revisi PMK (Paket Manfaat JKN).</li>
             <li>Fokuskan beasiswa afirmasi Sp.KKLP pada 5 Provinsi terbawah di Peta Kesiapan yang rujukannya masih tinggi.</li>
             <li>Lakukan sosialisasi ke Kepala FKTP agar Sp.KKLP dimanfaatkan sebagai <em className="text-slate-800">Manager of Care</em> komunitas.</li>

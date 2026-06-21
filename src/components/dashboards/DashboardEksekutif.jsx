@@ -122,7 +122,6 @@ const ExecutiveInsight = ({ tab }) => {
             </div>
           </div>
         ))}
-        <ExecutiveInsight tab={activeTab} />
       </div>
     </div>
   );
@@ -396,7 +395,7 @@ export default function DashboardEksekutif({ data = [] }) {
               <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col justify-center">
                 <h3 className="text-lg font-bold text-slate-700 mb-4">Ketersediaan Sp.KKLP</h3>
                 <div className="flex items-end gap-4 mb-2">
-                  <span className="text-5xl font-black text-emerald-400">{metrics.spkklpCount}</span>
+                  <span className="text-5xl font-black text-emerald-600">{metrics.spkklpCount}</span>
                   <span className="text-xl text-slate-500 pb-1">/ {metrics.total} FKTP</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-4 overflow-hidden mt-4">
@@ -433,7 +432,7 @@ export default function DashboardEksekutif({ data = [] }) {
             {/* Radar Gap Layanan */}
             <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col">
               <div className="flex items-center gap-2 mb-2">
-                <Activity className="w-5 h-5 text-indigo-400" />
+                <Activity className="w-5 h-5 text-indigo-600" />
                 <h3 className="text-lg font-bold text-slate-800">Gap Layanan JKN Eksisting</h3>
               </div>
               <p className="text-xs text-slate-500 mb-4">Persepsi optimalisasi manfaat JKN berdasarkan Jenis FKTP (Skala 1-4)</p>
@@ -457,7 +456,7 @@ export default function DashboardEksekutif({ data = [] }) {
             <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
-                  <CheckSquare className="w-5 h-5 text-amber-400" />
+                  <CheckSquare className="w-5 h-5 text-amber-600" />
                   <h3 className="text-lg font-bold text-slate-800">Usulan Layanan Baru JKN</h3>
                 </div>
                 <span className="text-xs text-slate-500">% Persetujuan Tinggi</span>
@@ -488,7 +487,7 @@ export default function DashboardEksekutif({ data = [] }) {
             {/* Grouped Bar Relevansi */}
             <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col">
               <div className="flex items-center gap-2 mb-2">
-                <Stethoscope className="w-5 h-5 text-emerald-400" />
+                <Stethoscope className="w-5 h-5 text-emerald-600" />
                 <h3 className="text-lg font-bold text-slate-800">Persepsi Relevansi Sp.KKLP</h3>
               </div>
               <p className="text-xs text-slate-500 mb-4">Membandingkan FKTP yang sudah ada Sp.KKLP vs Belum Ada (Skala 1-4)</p>
@@ -510,7 +509,7 @@ export default function DashboardEksekutif({ data = [] }) {
             {/* Scatter Waktu vs Proporsi */}
             <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col">
               <div className="flex items-center gap-2 mb-2">
-                <Activity className="w-5 h-5 text-indigo-400" />
+                <Activity className="w-5 h-5 text-indigo-600" />
                 <h3 className="text-lg font-bold text-slate-800">Waktu Poli vs Proporsi Layanan</h3>
               </div>
               <p className="text-xs text-slate-500 mb-4">Melihat korelasi antara waktu layanan di poli dengan proporsi pelayanan dalam gedung.</p>
@@ -539,7 +538,7 @@ export default function DashboardEksekutif({ data = [] }) {
             {/* Pareto Top Rujukan */}
             <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col">
               <div className="flex items-center gap-2 mb-2">
-                <CheckSquare className="w-5 h-5 text-rose-400" />
+                <CheckSquare className="w-5 h-5 text-rose-600" />
                 <h3 className="text-lg font-bold text-slate-800">Layanan Paling Sering Dirujuk</h3>
               </div>
               <p className="text-xs text-slate-500 mb-4">Persentase FKTP yang rutin merujuk kasus-kasus primer ke Rumah Sakit.</p>
@@ -564,7 +563,7 @@ export default function DashboardEksekutif({ data = [] }) {
             <div className="flex flex-col gap-6">
               <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <Activity className="w-5 h-5 text-emerald-400" />
+                  <Activity className="w-5 h-5 text-emerald-600" />
                   <h3 className="text-lg font-bold text-slate-800">Kinerja Program Rujuk Balik (PRB)</h3>
                 </div>
                 <p className="text-xs text-slate-500 mb-6">Tingkat kepatuhan kunjungan pasien PRB secara nasional.</p>
@@ -656,7 +655,7 @@ export default function DashboardEksekutif({ data = [] }) {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-bold text-slate-700">{item.faskes}</span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${item.type === 'PRB' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-emerald-500/20 text-emerald-300'}`}>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${item.type === 'PRB' ? 'bg-indigo-500/20 text-indigo-600' : 'bg-emerald-500/20 text-emerald-700'}`}>
                           {item.type}
                         </span>
                       </div>
