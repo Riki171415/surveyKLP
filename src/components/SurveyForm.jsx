@@ -167,15 +167,26 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     ? sourceMap[formData.provinsi][formData.kabKota]
     : [];
     
-  const faskesList = formData.jenisFaskes === 'Dokter Praktik Mandiri' 
-    ? [...faskesListRaw].sort()
-    : [...faskesListRaw].sort((a, b) => {
-        const isAPusk = a.toLowerCase().startsWith('puskesmas');
-        const isBPusk = b.toLowerCase().startsWith('puskesmas');
-        if (isAPusk && !isBPusk) return -1;
-        if (!isAPusk && isBPusk) return 1;
-        return a.localeCompare(b);
-      });
+  const faskesList = (() => {
+    let list = [...faskesListRaw];
+    if (formData.jenisFaskes === 'Klinik') {
+      list = list.filter(name => name.toLowerCase().includes('klinik'));
+    } else if (formData.jenisFaskes === 'Puskesmas') {
+      list = list.filter(name => !name.toLowerCase().includes('klinik'));
+    }
+    
+    if (formData.jenisFaskes === 'Dokter Praktik Mandiri' || formData.jenisFaskes === 'Klinik') {
+      return list.sort();
+    }
+    
+    return list.sort((a, b) => {
+      const isAPusk = a.toLowerCase().startsWith('puskesmas');
+      const isBPusk = b.toLowerCase().startsWith('puskesmas');
+      if (isAPusk && !isBPusk) return -1;
+      if (!isAPusk && isBPusk) return 1;
+      return a.localeCompare(b);
+    });
+  })();
 
   useEffect(() => {
     if (isInterview && location.state?.surveyData) {
