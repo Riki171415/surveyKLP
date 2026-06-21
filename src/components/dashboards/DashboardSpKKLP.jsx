@@ -6,9 +6,13 @@ import {
 import { Stethoscope, Award, FileSearch, CheckCircle } from 'lucide-react';
 
 const relevansiItems = [
-  "Peran sebagai dokter di poli umum", "Poli / Layanan khusus penyakit tidak menular (PTM)",
-  "Poli / layanan khusus Geriatri", "Poli / Layanan khusus Anak/MTBS",
-  "Kegiatan Home Visit / Home Care", "Kepala Puskesmas / Klinik", "Penanggung Jawab Mutu / UKP"
+  "Dokter Sp.KKLP memberikan layanan promotif-preventif yang lebih komprehensif dibandingkan dokter umum.",
+  "Dokter Sp.KKLP mampu menangani pasien dengan multimorbiditas (lebih dari 2 penyakit kronis) tanpa harus merujuk, dibanding dokter umum.",
+  "Dalam manajemen pasien PRB, dokter Sp.KKLP lebih aktif melakukan pemantauan dan edukasi sehingga kepatuhan pasien lebih tinggi.",
+  "Angka rujukan ke rumah sakit pada pasien yang ditangani Sp.KKLP lebih rendah dibanding pasien yang ditangani dokter umum.",
+  "Dokter Sp.KKLP lebih sering melakukan kunjungan rumah dan family conference dibanding dokter umum.",
+  "Kehadiran Sp.KKLP meningkatkan mutu rekam medis dan dokumentasi klinis.",
+  "Waktu konsultasi rata-rata yang diberikan Sp.KKLP per pasien lebih lama dan lebih mendalam."
 ];
 
 const layananDirujukItems = [

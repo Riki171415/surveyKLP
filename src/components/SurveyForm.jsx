@@ -28,18 +28,21 @@ const kompetensiLayanan = [
 ];
 
 const relevansiItems = [
-  "Pengelolaan pasien dengan kondisi kronis dan multimorbiditas",
-  "Pendampingan pasien kronis melalui home care",
-  "Pelayanan paliatif di tingkat primer",
-  "Edukasi kelompok pasien kronis",
-  "Pendampingan keluarga pasien kronis",
-  "Pemantauan berkelanjutan pasien kronis di komunitas",
-  "Monitoring komunitas risiko tinggi penyakit kronis",
-  "Penguatan Program Rujuk Balik (PRB)",
-  "Koordinasi pelayanan lintas profesi dan kader kesehatan",
-  "Pembinaan Posbindu PTM",
-  "Pengelolaan pasien geriatri dengan kebutuhan pelayanan jangka panjang",
-  "Apakah keberadaan Sp.KKLP berpengaruh terhadap penurunan rujukan?"
+  "Dokter Sp.KKLP memberikan layanan promotif-preventif yang lebih komprehensif dibandingkan dokter umum.",
+  "Dokter Sp.KKLP mampu menangani pasien dengan multimorbiditas (lebih dari 2 penyakit kronis) tanpa harus merujuk, dibanding dokter umum.",
+  "Dalam manajemen pasien PRB, dokter Sp.KKLP lebih aktif melakukan pemantauan dan edukasi sehingga kepatuhan pasien lebih tinggi.",
+  "Angka rujukan ke rumah sakit pada pasien yang ditangani Sp.KKLP lebih rendah dibanding pasien yang ditangani dokter umum.",
+  "Dokter Sp.KKLP lebih sering melakukan kunjungan rumah dan family conference dibanding dokter umum.",
+  "Kehadiran Sp.KKLP meningkatkan mutu rekam medis dan dokumentasi klinis.",
+  "Waktu konsultasi rata-rata yang diberikan Sp.KKLP per pasien lebih lama dan lebih mendalam."
+];
+
+const peranSpkklpItems = [
+  "Kehadiran Sp.KKLP meningkatkan kualitas layanan promotif-preventif di FKTP saya.",
+  "Sp.KKLP mampu mengisi celah layanan yang selama ini tidak tertangani dokter umum (misal: konseling berhenti merokok, manajemen obesitas).",
+  "Sp.KKLP membuat proses rujukan menjadi lebih tepat sasaran.",
+  "Layanan yang sebelumnya tidak terakomodasi JKN dapat dioptimalkan dengan keterlibatan Sp.KKLP.",
+  "Secara keseluruhan, implementasi PMK 19/2024 menjadikan paket manfaat JKN lebih efektif dan efisien."
 ];
 
 const layananDirujukItems = [
@@ -76,7 +79,8 @@ const interviewQuestions = [
   "4. Menurut anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN Puskesmas / Klinik?",
   "5. Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB dengan adanya sp.KKLP?",
   "6. Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di Puskesmas / Klinik?",
-  "7. Menurut Anda, bentuk dukungan apa yang diperlukan agar Puskesmas / Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?"
+  "7. Menurut Anda, bentuk dukungan apa yang diperlukan agar Puskesmas / Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?",
+  "8. Adakah Kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktek mandiri dalam program JKN, Ceritakan :"
 ];
 
 const interviewExamples = [
@@ -86,7 +90,8 @@ const interviewExamples = [
   "Contoh: Perlu, karena kasus paliatif di Faskes Primer cukup banyak, tidak hanya untuk kasus kanker tetapi juga lansia dan nyeri kronis...",
   "Contoh: Perlu penambahan kewenangan agar Sp.KKLP bisa menyesuaikan terapi/obat tanpa harus selalu merujuk kembali ke RS, agar memudahkan pasien...",
   "Contoh: Pendekatan medis menjadi lebih komprehensif, angka rujukan menurun, dan keluarga pasien lebih dilibatkan dalam proses terapi...",
-  "Contoh: Pengakuan kewenangan klinis yang lebih luas, kejelasan status kepegawaian, dan insentif yang sesuai dengan beban kerja pelayanan yang holistik..."
+  "Contoh: Pengakuan kewenangan klinis yang lebih luas, kejelasan status kepegawaian, dan insentif yang sesuai dengan beban kerja pelayanan yang holistik...",
+  "Contoh: Terkadang ada pembatasan kuota rujukan atau ketersediaan obat PRB di apotek jejaring kurang stabil, sehingga pasien mengeluh ke faskes tingkat pertama..."
 ];
 
 export default function SurveyForm({ isEdit = false, isInterview = false }) {
@@ -111,7 +116,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
     // Step 2 SpKKLP extra
     spkklpBerpraktik: '', spkklpPoli: {}, spkklpKendala: {},
     // Step 3 Perspektif
-    relevansiSpkklp: {}, layananDirujuk: {}, layananBelumBerjalan: {},
+    relevansiSpkklp: {}, peranSpkklp: {}, layananDirujuk: {}, layananBelumBerjalan: {},
     prb: {},
     dpm: {}
   });
@@ -295,7 +300,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
 
   const isStep3Valid = relevansiItems.every((_, idx) => formData.relevansiSpkklp[idx]) &&
     formData.prb?.jumlah && formData.prb?.peserta_dm && formData.prb?.peserta_ht &&
-    formData.prb?.mekanisme && formData.prb?.rataRujukan;
+    formData.prb?.mekanisme && formData.prb?.rataRujukan &&
+    (isRoleSpKklp ? true : peranSpkklpItems.every((_, idx) => formData.peranSpkklp[idx]));
 
   const isStep4Valid = (() => {
     if (!jknBenefits.every((_, idx) => formData.jkn[idx]?.skala)) return false;
@@ -404,6 +410,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
         spkklp_poli: formData.spkklpPoli,
         spkklp_kendala: formData.spkklpKendala,
         relevansi_spkklp: formData.relevansiSpkklp,
+        peran_spkklp: formData.peranSpkklp,
         layanan_dirujuk: formData.layananDirujuk,
         layanan_belum_berjalan: formData.layananBelumBerjalan,
         prb: formData.prb,
@@ -864,7 +871,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     <div className="text-sm text-indigo-900">
                       <span className="font-semibold block mb-1">Panduan Penilaian Skala (1-4):</span>
                       <ul className="list-decimal pl-5 space-y-0.5">
-                        <li>Sangat Tidak Setuju</li><li>Tidak Setuju</li><li>Setuju</li><li>Sangat Setuju</li>
+                        <li>Sangat Tdk Setuju/Pernah</li><li>Tidak Setuju/Jarang</li><li>Setuju/Sering</li><li>Sangat Setuju/Selalu</li>
                       </ul>
                     </div>
                   </div>
@@ -884,10 +891,10 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                             <td className="px-4 py-3">
                               <div className="flex flex-col gap-2">
                                 {[
-                                  { val: 1, label: 'Sangat Tidak Setuju' },
-                                  { val: 2, label: 'Tidak Setuju' },
-                                  { val: 3, label: 'Setuju' },
-                                  { val: 4, label: 'Sangat Setuju' }
+                                  { val: 1, label: 'Sangat Tdk Setuju/Pernah' },
+                                  { val: 2, label: 'Tidak Setuju/Jarang' },
+                                  { val: 3, label: 'Setuju/Sering' },
+                                  { val: 4, label: 'Sangat Setuju/Selalu' }
                                 ].map(opt => {
                                   const isSelected = formData.relevansiSpkklp[idx] === opt.val.toString();
                                   return (
@@ -908,6 +915,53 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     </table>
                   </div>
                 </div>
+
+                {/* Peran SpKKLP dalam Optimalisasi Layanan (Khusus Non-SpKKLP) */}
+                {!isRoleSpKklp && (
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800 mb-3 mt-6">A.2 Peran Sp.KKLP dalam Optimalisasi Layanan</h3>
+                    <p className="text-sm text-slate-600 mb-4">Mohon berikan penilaian Anda terhadap peran Sp.KKLP di Fasilitas Kesehatan Anda:</p>
+                    
+                    <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                      <table className="w-full text-left text-sm">
+                        <thead className="bg-slate-50 border-b border-slate-200">
+                          <tr>
+                            <th className="px-4 py-3 font-semibold text-slate-700 w-3/5">Pernyataan</th>
+                            <th className="px-4 py-3 font-semibold text-slate-700 text-center">Skala (1-4)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {peranSpkklpItems.map((item, idx) => (
+                            <tr key={idx} className={`transition-colors ${showErrors && !formData.peranSpkklp[idx] ? 'bg-rose-50/50' : 'hover:bg-slate-50'}`}>
+                              <td className="px-4 py-3 text-slate-800 text-xs md:text-sm">{item}</td>
+                              <td className="px-4 py-3">
+                                <div className="flex flex-col gap-2">
+                                  {[
+                                    { val: 1, label: 'Sangat Tdk Setuju/Pernah' },
+                                    { val: 2, label: 'Tidak Setuju/Jarang' },
+                                    { val: 3, label: 'Setuju/Sering' },
+                                    { val: 4, label: 'Sangat Setuju/Selalu' }
+                                  ].map(opt => {
+                                    const isSelected = formData.peranSpkklp[idx] === opt.val.toString();
+                                    return (
+                                      <label key={opt.val} className={`flex items-center gap-2 cursor-pointer transition-all ${isSelected ? 'text-indigo-700 font-semibold' : 'text-slate-600 hover:text-indigo-600'}`}>
+                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? 'border-indigo-600' : 'border-slate-300'}`}>
+                                          {isSelected && <div className="w-2 h-2 rounded-full bg-indigo-600"></div>}
+                                        </div>
+                                        <input type="radio" className="hidden" name={`peran-${idx}`} value={opt.val} checked={isSelected} onChange={(e) => setFormData(prev => ({ ...prev, peranSpkklp: { ...prev.peranSpkklp, [idx]: e.target.value } }))} />
+                                        <span className="text-xs whitespace-nowrap">{opt.val} - {opt.label}</span>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
 
                 {/* Layanan yang masih sering dirujuk */}
                 <div>

@@ -10,10 +10,13 @@ import {
 } from 'recharts';
 
 const relevansiItems = [
-  "Peran sebagai dokter di poli umum", "Poli khusus PTM",
-  "Poli khusus Geriatri", "Poli khusus Anak/MTBS",
-  "Kegiatan Home Visit / Home Care", "Kepala Puskesmas / Klinik", "Penanggung Jawab Mutu / UKP",
-  "Pembina Posbindu", "Konsultasi Telemedicine", "Pendampingan Kader", "Pelayanan Paliatif"
+  "Dokter Sp.KKLP memberikan layanan promotif-preventif yang lebih komprehensif dibandingkan dokter umum.",
+  "Dokter Sp.KKLP mampu menangani pasien dengan multimorbiditas (lebih dari 2 penyakit kronis) tanpa harus merujuk, dibanding dokter umum.",
+  "Dalam manajemen pasien PRB, dokter Sp.KKLP lebih aktif melakukan pemantauan dan edukasi sehingga kepatuhan pasien lebih tinggi.",
+  "Angka rujukan ke rumah sakit pada pasien yang ditangani Sp.KKLP lebih rendah dibanding pasien yang ditangani dokter umum.",
+  "Dokter Sp.KKLP lebih sering melakukan kunjungan rumah dan family conference dibanding dokter umum.",
+  "Kehadiran Sp.KKLP meningkatkan mutu rekam medis dan dokumentasi klinis.",
+  "Waktu konsultasi rata-rata yang diberikan Sp.KKLP per pasien lebih lama dan lebih mendalam."
 ];
 
 const layananDirujukItems = [

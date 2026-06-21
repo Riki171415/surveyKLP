@@ -30,22 +30,26 @@ const interviewQuestions = [
   "Menurut anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN Puskesmas / Klinik?",
   "Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB?",
   "Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di Puskesmas / Klinik?",
-  "Menurut Anda, bentuk dukungan apa yang diperlukan agar Puskesmas / Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?"
+  "Menurut Anda, bentuk dukungan apa yang diperlukan agar Puskesmas / Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?",
+  "Adakah Kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktek mandiri dalam program JKN, Ceritakan :"
 ];
 
 const relevansiItems = [
-  "Pengelolaan pasien dengan kondisi kronis dan multimorbiditas",
-  "Pendampingan pasien kronis melalui home care",
-  "Pelayanan paliatif di tingkat primer",
-  "Edukasi kelompok pasien kronis",
-  "Pendampingan keluarga pasien kronis",
-  "Pemantauan berkelanjutan pasien kronis di komunitas",
-  "Monitoring komunitas risiko tinggi penyakit kronis",
-  "Penguatan Program Rujuk Balik (PRB)",
-  "Koordinasi pelayanan lintas profesi dan kader kesehatan",
-  "Pembinaan Posbindu PTM",
-  "Pengelolaan pasien geriatri dengan kebutuhan pelayanan jangka panjang",
-  "Apakah keberadaan Sp.KKLP berpengaruh terhadap penurunan rujukan?"
+  "Dokter Sp.KKLP memberikan layanan promotif-preventif yang lebih komprehensif dibandingkan dokter umum.",
+  "Dokter Sp.KKLP mampu menangani pasien dengan multimorbiditas (lebih dari 2 penyakit kronis) tanpa harus merujuk, dibanding dokter umum.",
+  "Dalam manajemen pasien PRB, dokter Sp.KKLP lebih aktif melakukan pemantauan dan edukasi sehingga kepatuhan pasien lebih tinggi.",
+  "Angka rujukan ke rumah sakit pada pasien yang ditangani Sp.KKLP lebih rendah dibanding pasien yang ditangani dokter umum.",
+  "Dokter Sp.KKLP lebih sering melakukan kunjungan rumah dan family conference dibanding dokter umum.",
+  "Kehadiran Sp.KKLP meningkatkan mutu rekam medis dan dokumentasi klinis.",
+  "Waktu konsultasi rata-rata yang diberikan Sp.KKLP per pasien lebih lama dan lebih mendalam."
+];
+
+const peranSpkklpItems = [
+  "Kehadiran Sp.KKLP meningkatkan kualitas layanan promotif-preventif di FKTP saya.",
+  "Sp.KKLP mampu mengisi celah layanan yang selama ini tidak tertangani dokter umum (misal: konseling berhenti merokok, manajemen obesitas).",
+  "Sp.KKLP membuat proses rujukan menjadi lebih tepat sasaran.",
+  "Layanan yang sebelumnya tidak terakomodasi JKN dapat dioptimalkan dengan keterlibatan Sp.KKLP.",
+  "Secara keseluruhan, implementasi PMK 19/2024 menjadikan paket manfaat JKN lebih efektif dan efisien."
 ];
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -212,6 +216,9 @@ export default function DataManagement() {
           // Perspektif
           relevansiItems.forEach((rel, i) => {
             base[`Relevansi_Skala_${i+1}`] = row.relevansi_spkklp?.[i] || '-';
+          });
+          peranSpkklpItems.forEach((rel, i) => {
+            base[`Peran_SpKKLP_Skala_${i+1}`] = row.peran_spkklp?.[i] || '-';
           });
           base["Layanan Sering Dirujuk"] = row.layanan_dirujuk || '-';
           base["Alasan Dirujuk"] = row.alasan_dirujuk || '-';
@@ -478,6 +485,18 @@ export default function DataManagement() {
                         {Object.entries(selected.relevansi_spkklp).map(([idx, val]) => (
                           <div key={idx} className="flex justify-between items-center py-1.5 text-xs border-b border-slate-200/50 last:border-0">
                             <span className="text-slate-600 mr-2">{relevansiItems[idx]}</span>
+                            <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shrink-0">{val}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {selected.peran_spkklp && Object.keys(selected.peran_spkklp).length > 0 && (
+                      <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 mt-4">
+                        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-2">A.2 Peran Sp.KKLP dalam Optimalisasi Layanan (1-4):</p>
+                        {Object.entries(selected.peran_spkklp).map(([idx, val]) => (
+                          <div key={idx} className="flex justify-between items-center py-1.5 text-xs border-b border-slate-200/50 last:border-0">
+                            <span className="text-slate-600 mr-2">{peranSpkklpItems[idx]}</span>
                             <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shrink-0">{val}</span>
                           </div>
                         ))}
