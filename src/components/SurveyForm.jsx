@@ -1301,8 +1301,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                     <thead className="bg-slate-50 border-b border-slate-200">
                       <tr>
                         <th className="px-4 py-3 font-semibold text-slate-700 w-2/5">Layanan Belum Optimal</th>
-                        <th className="px-4 py-3 font-semibold text-slate-700 text-center w-1/6">Masuk JKN?</th>
                         <th className="px-4 py-3 font-semibold text-slate-700 text-center w-1/5">Skala (1-4)</th>
+                        <th className="px-4 py-3 font-semibold text-slate-700 text-center w-1/6">Masuk JKN?</th>
                         <th className="px-4 py-3 font-semibold text-slate-700 w-1/4">Catatan</th>
                       </tr>
                     </thead>
@@ -1310,16 +1310,6 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       {nonOptimalServices.map((item, idx) => (
                         <tr key={idx} className={`transition-colors ${showErrors && (!formData.nonOptimal[idx]?.masukJkn || !formData.nonOptimal[idx]?.skala) ? 'bg-rose-50/50' : 'hover:bg-slate-50'}`}>
                           <td className="px-4 py-3 text-slate-800 text-xs md:text-sm">{item}</td>
-                          <td className="px-4 py-3 text-center">
-                            <div className="flex justify-center gap-2">
-                              {['Ya', 'Tidak', 'Tidak Tahu'].map(pilihan => (
-                                <label key={pilihan} className={`cursor-pointer px-3 py-1.5 rounded-md text-xs font-semibold border transition-all text-center flex-1 ${formData.nonOptimal[idx]?.masukJkn === pilihan ? 'bg-primary-600 text-white border-primary-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'}`}>
-                                  <input type="radio" className="hidden" name={`masukJkn-${idx}`} value={pilihan} checked={formData.nonOptimal[idx]?.masukJkn === pilihan} onChange={(e) => handleNestedChange('nonOptimal', idx, 'masukJkn', e.target.value)} />
-                                  {pilihan}
-                                </label>
-                              ))}
-                            </div>
-                          </td>
                           <td className="px-4 py-3">
                             <div className="flex flex-col gap-2">
                               {[
@@ -1339,6 +1329,16 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                                   </label>
                                 );
                               })}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <div className="flex justify-center gap-2">
+                              {['Ya', 'Tidak', 'Tidak Tahu'].map(pilihan => (
+                                <label key={pilihan} className={`cursor-pointer px-3 py-1.5 rounded-md text-xs font-semibold border transition-all text-center flex-1 ${formData.nonOptimal[idx]?.masukJkn === pilihan ? 'bg-primary-600 text-white border-primary-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'}`}>
+                                  <input type="radio" className="hidden" name={`masukJkn-${idx}`} value={pilihan} checked={formData.nonOptimal[idx]?.masukJkn === pilihan} onChange={(e) => handleNestedChange('nonOptimal', idx, 'masukJkn', e.target.value)} />
+                                  {pilihan}
+                                </label>
+                              ))}
                             </div>
                           </td>
                           <td className="px-4 py-3"><input type="text" placeholder="Penjelasan..." className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-primary-500 outline-none text-sm placeholder:text-slate-300" value={formData.nonOptimal[idx]?.catatan || ''} onChange={(e) => handleNestedChange('nonOptimal', idx, 'catatan', e.target.value)} /></td>
