@@ -4,6 +4,7 @@ import {
   Target, AlertTriangle, Activity, Map, Users, Stethoscope, Briefcase, ChevronRight, 
   Database, RefreshCw, Layers, MessageSquare, Zap, FileText
 } from 'lucide-react';
+import DashboardEksekutif from './dashboards/DashboardEksekutif';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell
@@ -53,6 +54,7 @@ export default function KokpitKemenkes() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterProv, setFilterProv] = useState('Semua');
+  const [activeTab, setActiveTab] = useState('utama'); // 'utama', 'eksekutif'
 
   useEffect(() => {
     fetchData();
@@ -258,12 +260,31 @@ export default function KokpitKemenkes() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4 border-b border-slate-800 pb-6">
         <div>
           <div className="flex items-center gap-3 mb-2 text-primary-400">
-            <Target className="w-8 h-8" />
-            <h2 className="text-sm font-bold tracking-[0.2em] uppercase">Pusat Komando Kemenkes RI</h2>
+            <Zap className="w-8 h-8" />
+            <h1 className="text-3xl font-black tracking-tight text-white">Kokpit Kemenkes</h1>
           </div>
-          <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">Kokpit <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-emerald-400">Transformasi FKTP</span></h1>
-          <p className="text-slate-400 mt-2 text-lg">Peta Jalan Kebijakan Sp.KKLP & Optimalisasi JKN berbasis Data Empiris</p>
+          <p className="text-slate-400">Pusat kendali dan analisis optimalisasi Sp.KKLP & JKN secara nasional.</p>
+          
+          {/* Tab Navigation */}
+          <div className="flex flex-wrap gap-2 mt-6">
+            <button 
+              onClick={() => setActiveTab('utama')}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${activeTab === 'utama' ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'}`}
+            >
+              <Activity className="w-4 h-4 inline-block mr-2" />
+              Overview Nasional
+            </button>
+            <button 
+              onClick={() => setActiveTab('eksekutif')}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center ${activeTab === 'eksekutif' ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'}`}
+            >
+              <Target className="w-4 h-4 inline-block mr-2" />
+              Dashboard Eksekutif
+              <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-white/20 rounded text-white">NEW</span>
+            </button>
+          </div>
         </div>
+
         <div className="flex gap-3">
           <select 
             className="bg-slate-800 border border-slate-700 text-white px-4 py-2.5 rounded-xl outline-none focus:border-primary-500"
@@ -276,167 +297,174 @@ export default function KokpitKemenkes() {
         </div>
       </div>
 
-      {/* TOP METRICS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-slate-800/50 border border-slate-700/50 p-6 rounded-3xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-bl-full -z-10 group-hover:bg-primary-500/20 transition-colors"></div>
-          <p className="text-slate-400 text-sm font-bold tracking-wider uppercase mb-2">Indeks Kesiapan Nasional</p>
-          <div className="flex items-end gap-3">
-            <h3 className="text-6xl font-black text-white">{metrics.indeksKesiapan}</h3>
-            <span className="text-xl text-slate-500 mb-1 font-bold">/ 100</span>
-          </div>
-          <div className="w-full bg-slate-800 rounded-full h-2 mt-4 overflow-hidden">
-            <div className="bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 h-2 rounded-full" style={{ width: `${metrics.indeksKesiapan}%` }}></div>
-          </div>
-        </div>
-
-        <div className="bg-slate-800/50 border border-slate-700/50 p-6 rounded-3xl flex flex-col justify-between">
-          <div>
-            <p className="text-slate-400 text-sm font-bold tracking-wider uppercase mb-2">Kekurangan Sp.KKLP</p>
-            <h3 className="text-4xl font-black text-white">{100 - metrics.spkklpRatio}%</h3>
-            <p className="text-slate-400 mt-1">Dari {metrics.totalCount} FKTP disurvei belum memiliki Sp.KKLP</p>
-          </div>
-          <div className="flex items-center gap-2 mt-4 text-amber-400 text-sm font-bold bg-amber-400/10 px-3 py-2 rounded-lg w-fit">
-            <AlertTriangle className="w-4 h-4" /> Butuh Pemerataan
-          </div>
-        </div>
-
-        <div className="bg-slate-800/50 border border-slate-700/50 p-6 rounded-3xl">
-          <p className="text-slate-400 text-sm font-bold tracking-wider uppercase mb-4">Top 3 Layanan Rujukan Primer</p>
-          <div className="space-y-3">
-            {metrics.topRujukan.map((r, i) => (
-              <div key={i} className="flex justify-between items-center">
-                <span className="text-sm font-medium text-slate-300 truncate pr-4">{i+1}. {r.name}</span>
-                <span className="text-rose-400 font-bold bg-rose-400/10 px-2 py-1 rounded text-xs whitespace-nowrap">{r.value}% FKTP</span>
+      {/* TAB UTAMA: KOKPIT OVERVIEW */}
+      {activeTab === 'utama' && (
+        <>
+          {/* TOP METRICS */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-slate-800/50 border border-slate-700/50 p-6 rounded-3xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-bl-full -z-10 group-hover:bg-primary-500/20 transition-colors"></div>
+              <p className="text-slate-400 text-sm font-bold tracking-wider uppercase mb-2">Indeks Kesiapan Nasional</p>
+              <div className="flex items-end gap-3">
+                <h3 className="text-6xl font-black text-white">{metrics.indeksKesiapan}</h3>
+                <span className="text-xl text-slate-500 mb-1 font-bold">/ 100</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* RECOMMENDATION ALERT */}
-      <div className="bg-gradient-to-r from-primary-900/40 to-emerald-900/40 border border-primary-500/20 p-5 rounded-2xl mb-8 flex items-start gap-4 shadow-lg shadow-primary-900/20">
-        <div className="p-3 bg-primary-500/20 text-primary-400 rounded-xl shrink-0"><Zap className="w-6 h-6" /></div>
-        <div>
-          <h4 className="text-white font-bold text-lg mb-1">Rekomendasi Kebijakan Hari Ini</h4>
-          <p className="text-primary-100/80 leading-relaxed text-sm">
-            Terdapat <strong className="text-white">{100 - metrics.spkklpRatio}% FKTP</strong> tanpa Sp.KKLP, namun survei menunjukkan skor relevansi rata-rata tinggi. Di sisi lain, <strong className="text-rose-300">{metrics.topRujukan[0]?.name}</strong> masih terus dirujuk oleh {metrics.topRujukan[0]?.value}% FKTP. 
-            <br/><span className="text-emerald-400 mt-2 block font-medium">→ Tindakan: Prioritaskan pengangkatan Sp.KKLP di Provinsi merah dan masukan layanan prioritas ke pembiayaan JKN (Non-Kapitasi).</span>
-          </p>
-        </div>
-      </div>
-
-      {/* MID SECTION: HEATMAP & RADAR */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        
-        {/* Heatmap Provinsi */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Map className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-lg font-bold text-white">Peta Kesiapan Wilayah</h3>
-          </div>
-          <div className="overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-slate-400 uppercase bg-slate-800/50 sticky top-0">
-                <tr>
-                  <th className="px-4 py-3 rounded-tl-lg">Provinsi</th>
-                  <th className="px-4 py-3 text-center">Indeks</th>
-                  <th className="px-4 py-3 text-center rounded-tr-lg">Rasio Sp.KKLP</th>
-                </tr>
-              </thead>
-              <tbody>
-                {metrics.provArray.map((p, i) => (
-                  <tr key={i} className="border-b border-slate-700/30 hover:bg-slate-700/20">
-                    <td className="px-4 py-3 font-medium text-slate-200">{p.nama}</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={`px-2 py-1 rounded-lg font-bold ${p.indeks >= 70 ? 'text-emerald-400 bg-emerald-400/10' : p.indeks >= 40 ? 'text-amber-400 bg-amber-400/10' : 'text-rose-400 bg-rose-400/10'}`}>
-                        {p.indeks}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-slate-400">{p.spkklp} / {p.fktp}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Radar Gap Persepsi */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-6 flex flex-col">
-          <div className="flex items-center gap-2 mb-2">
-            <Users className="w-5 h-5 text-indigo-400" />
-            <h3 className="text-lg font-bold text-white">Gap Persepsi Antar Profesi</h3>
-          </div>
-          <p className="text-xs text-slate-400 mb-4">Mendeteksi perbedaan pandangan thd. peran Sp.KKLP (Skor 1-4)</p>
-          <div className="flex-1 min-h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={metrics.radarData}>
-                <PolarGrid stroke="#334155" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                <PolarRadiusAxis angle={30} domain={[0, 4]} tick={{ fill: '#475569' }} />
-                <Radar name="Kepala Puskesmas" dataKey="Kapus" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.2} />
-                <Radar name="Dokter Umum" dataKey="DUmum" stroke="#10b981" fill="#10b981" fillOpacity={0.2} />
-                <Radar name="Sp.KKLP" dataKey="SpKKLP" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.2} />
-                <Legend wrapperStyle={{ fontSize: '12px' }} />
-                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-      </div>
-
-      {/* BOTTOM SECTION: JKN & KUALITATIF */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Paket Manfaat JKN */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-6 flex flex-col">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-amber-400" />
-              <h3 className="text-lg font-bold text-white">Evaluasi Paket Manfaat JKN</h3>
+              <div className="w-full bg-slate-800 rounded-full h-2 mt-4 overflow-hidden">
+                <div className="bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 h-2 rounded-full" style={{ width: `${metrics.indeksKesiapan}%` }}></div>
+              </div>
             </div>
-            <span className="text-xs text-slate-400">Skor Penting (1-4)</span>
-          </div>
-          <div className="flex-1 min-h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={metrics.manfaatData} layout="vertical" margin={{ top: 0, right: 0, left: 30, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
-                <XAxis type="number" domain={[0, 4]} tick={{ fill: '#64748b' }} />
-                <YAxis dataKey="name" type="category" tick={{ fill: '#cbd5e1', fontSize: 11 }} width={100} />
-                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} cursor={{ fill: '#334155', opacity: 0.4 }} />
-                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-                <Bar dataKey="JKN" name="Existing JKN" fill="#0ea5e9" radius={[0, 4, 4, 0]} />
-                <Bar dataKey="Usulan" name="Usulan Prioritas Baru" fill="#f43f5e" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
 
-        {/* Suara Lapangan */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <MessageSquare className="w-5 h-5 text-pink-400" />
-            <h3 className="text-lg font-bold text-white">Suara Lapangan (Kualitatif)</h3>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {metrics.kwCounts.slice(0, 4).map((kw, i) => (
-              <div key={i} className="bg-slate-800 border border-slate-700 p-4 rounded-2xl flex justify-between items-center group hover:bg-slate-700 transition-colors">
-                <span className="text-slate-300 font-medium capitalize">{kw.word}</span>
-                <span className="bg-slate-900 text-primary-400 font-bold px-3 py-1 rounded-full text-sm shadow-inner">
-                  {kw.count} sebut
-                </span>
+            <div className="bg-slate-800/50 border border-slate-700/50 p-6 rounded-3xl flex flex-col justify-between">
+              <div>
+                <p className="text-slate-400 text-sm font-bold tracking-wider uppercase mb-2">Kekurangan Sp.KKLP</p>
+                <h3 className="text-4xl font-black text-white">{100 - metrics.spkklpRatio}%</h3>
+                <p className="text-slate-400 mt-1">Dari {metrics.totalCount} FKTP disurvei belum memiliki Sp.KKLP</p>
               </div>
-            ))}
-          </div>
-          <div className="mt-5 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
-            <p className="text-indigo-200 text-sm italic">
-              "Banyak FKTP menyinggung perlunya <span className="text-indigo-400 font-bold uppercase">{metrics.kwCounts[0]?.word}</span> dan perbaikan <span className="text-indigo-400 font-bold uppercase">{metrics.kwCounts[1]?.word}</span> agar peran Sp.KKLP bisa dioptimalkan secara nyata di lapangan."
-            </p>
-          </div>
-        </div>
+              <div className="flex items-center gap-2 mt-4 text-amber-400 text-sm font-bold bg-amber-400/10 px-3 py-2 rounded-lg w-fit">
+                <AlertTriangle className="w-4 h-4" /> Butuh Pemerataan
+              </div>
+            </div>
 
-      </div>
+            <div className="bg-slate-800/50 border border-slate-700/50 p-6 rounded-3xl">
+              <p className="text-slate-400 text-sm font-bold tracking-wider uppercase mb-4">Top 3 Layanan Rujukan Primer</p>
+              <div className="space-y-3">
+                {metrics.topRujukan.map((r, i) => (
+                  <div key={i} className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-slate-300 truncate pr-4">{i+1}. {r.name}</span>
+                    <span className="text-rose-400 font-bold bg-rose-400/10 px-2 py-1 rounded text-xs whitespace-nowrap">{r.value}% FKTP</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* RECOMMENDATION ALERT */}
+          <div className="bg-gradient-to-r from-primary-900/40 to-emerald-900/40 border border-primary-500/20 p-5 rounded-2xl mb-8 flex items-start gap-4 shadow-lg shadow-primary-900/20">
+            <div className="p-3 bg-primary-500/20 text-primary-400 rounded-xl shrink-0"><Zap className="w-6 h-6" /></div>
+            <div>
+              <h4 className="text-white font-bold text-lg mb-1">Rekomendasi Kebijakan Hari Ini</h4>
+              <p className="text-primary-100/80 leading-relaxed text-sm">
+                Terdapat <strong className="text-white">{100 - metrics.spkklpRatio}% FKTP</strong> tanpa Sp.KKLP, namun survei menunjukkan skor relevansi rata-rata tinggi. Di sisi lain, <strong className="text-rose-300">{metrics.topRujukan[0]?.name}</strong> masih terus dirujuk oleh {metrics.topRujukan[0]?.value}% FKTP. 
+                <br/><span className="text-emerald-400 mt-2 block font-medium">→ Tindakan: Prioritaskan pengangkatan Sp.KKLP di Provinsi merah dan masukan layanan prioritas ke pembiayaan JKN (Non-Kapitasi).</span>
+              </p>
+            </div>
+          </div>
+
+          {/* MID SECTION: HEATMAP & RADAR */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            
+            {/* Heatmap Provinsi */}
+            <div className="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <Map className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-lg font-bold text-white">Peta Kesiapan Wilayah</h3>
+              </div>
+              <div className="overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-slate-400 uppercase bg-slate-800/50 sticky top-0">
+                    <tr>
+                      <th className="px-4 py-3 rounded-tl-lg">Provinsi</th>
+                      <th className="px-4 py-3 text-center">Indeks</th>
+                      <th className="px-4 py-3 text-center rounded-tr-lg">Rasio Sp.KKLP</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {metrics.provArray.map((p, i) => (
+                      <tr key={i} className="border-b border-slate-700/30 hover:bg-slate-700/20">
+                        <td className="px-4 py-3 font-medium text-slate-200">{p.nama}</td>
+                        <td className="px-4 py-3 text-center">
+                          <span className={`px-2 py-1 rounded-lg font-bold ${p.indeks >= 70 ? 'text-emerald-400 bg-emerald-400/10' : p.indeks >= 40 ? 'text-amber-400 bg-amber-400/10' : 'text-rose-400 bg-rose-400/10'}`}>
+                            {p.indeks}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center text-slate-400">{p.spkklp} / {p.fktp}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Radar Gap Persepsi */}
+            <div className="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-6 flex flex-col">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="w-5 h-5 text-indigo-400" />
+                <h3 className="text-lg font-bold text-white">Gap Persepsi Antar Profesi</h3>
+              </div>
+              <p className="text-xs text-slate-400 mb-4">Mendeteksi perbedaan pandangan thd. peran Sp.KKLP (Skor 1-4)</p>
+              <div className="flex-1 min-h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={metrics.radarData}>
+                    <PolarGrid stroke="#334155" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                    <PolarRadiusAxis angle={30} domain={[0, 4]} tick={{ fill: '#475569' }} />
+                    <Radar name="Kepala Puskesmas" dataKey="Kapus" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.2} />
+                    <Radar name="Dokter Umum" dataKey="DUmum" stroke="#10b981" fill="#10b981" fillOpacity={0.2} />
+                    <Radar name="Sp.KKLP" dataKey="SpKKLP" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.2} />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* BOTTOM SECTION: JKN & KUALITATIF */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-6 flex flex-col">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <Briefcase className="w-5 h-5 text-amber-400" />
+                  <h3 className="text-lg font-bold text-white">Evaluasi Paket Manfaat JKN</h3>
+                </div>
+                <span className="text-xs text-slate-400">Skor Penting (1-4)</span>
+              </div>
+              <div className="flex-1 min-h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={metrics.manfaatData} layout="vertical" margin={{ top: 0, right: 0, left: 30, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
+                    <XAxis type="number" domain={[0, 4]} tick={{ fill: '#64748b' }} />
+                    <YAxis dataKey="name" type="category" tick={{ fill: '#cbd5e1', fontSize: 11 }} width={100} />
+                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} cursor={{ fill: '#334155', opacity: 0.4 }} />
+                    <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
+                    <Bar dataKey="JKN" name="Existing JKN" fill="#0ea5e9" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="Usulan" name="Usulan Prioritas Baru" fill="#f43f5e" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <MessageSquare className="w-5 h-5 text-pink-400" />
+                <h3 className="text-lg font-bold text-white">Suara Lapangan (Kualitatif)</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {metrics.kwCounts.slice(0, 4).map((kw, i) => (
+                  <div key={i} className="bg-slate-800 border border-slate-700 p-4 rounded-2xl flex justify-between items-center group hover:bg-slate-700 transition-colors">
+                    <span className="text-slate-300 font-medium capitalize">{kw.word}</span>
+                    <span className="bg-slate-900 text-primary-400 font-bold px-3 py-1 rounded-full text-sm shadow-inner">
+                      {kw.count} sebut
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
+                <p className="text-indigo-200 text-sm italic">
+                  "Banyak FKTP menyinggung perlunya <span className="text-indigo-400 font-bold uppercase">{metrics.kwCounts[0]?.word}</span> dan perbaikan <span className="text-indigo-400 font-bold uppercase">{metrics.kwCounts[1]?.word}</span> agar peran Sp.KKLP bisa dioptimalkan secara nyata di lapangan."
+                </p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* TAB EKSEKUTIF: KOMPREHENSIF */}
+      {activeTab === 'eksekutif' && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <DashboardEksekutif data={filteredData} />
+        </div>
+      )}
 
       {/* EXECUTIVE INSIGHT PANEL */}
       <div className="mt-8 bg-slate-800/80 border border-primary-500/30 rounded-3xl p-6 md:p-8 relative overflow-hidden shadow-2xl">
