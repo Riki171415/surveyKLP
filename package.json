@@ -11,7 +11,7 @@
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 vite build",
     "build:aapanel": "cross-env VITE_USE_LOCAL_API=true NODE_OPTIONS=--max-old-space-size=4096 vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "vite preview --host 0.0.0.0 --port 4174",
     "predeploy:jamkesfktp": "cross-env VITE_BASE_URL=/ NODE_OPTIONS=--max-old-space-size=4096 vite build",
     "deploy:jamkesfktp": "npm run predeploy:jamkesfktp && node -e \"require('fs').writeFileSync('dist/CNAME', 'jamkesfktp.web.id')\" && gh-pages -d dist",
     "predeploy:riki": "cross-env VITE_BASE_URL=/surveyKLP/ NODE_OPTIONS=--max-old-space-size=4096 vite build",

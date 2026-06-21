@@ -10,5 +10,9 @@ export default defineConfig({
   },
   server: {
     allowedHosts: ['jamkesfktp.web.id']
+  },
+  preview: {
+    port: 4174,
+    allowedHosts: ['jamkesfktp.web.id']
   }
 })
