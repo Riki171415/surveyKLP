@@ -128,16 +128,21 @@ export default function KokpitKemenkes() {
       let rowRelCount = 0;
 
       for (let i = 0; i < 11; i++) {
-        if (rel[i]) {
-          const val = Number(rel[i]);
-          totalRelevansiScore += val;
-          relevansiCount++;
-          rowRelSum += val;
-          rowRelCount++;
+        const valRaw = rel[i];
+        if (valRaw) {
+          const numStr = typeof valRaw === 'object' ? valRaw.skala : valRaw;
+          const valNum = Number(numStr || 0);
+          
+          if (!isNaN(valNum) && valNum > 0) {
+            totalRelevansiScore += valNum;
+            relevansiCount++;
+            rowRelSum += valNum;
+            rowRelCount++;
 
-          if (roleScores[role]) {
-            roleScores[role][i].sum += val;
-            roleScores[role][i].count++;
+            if (roleScores[role]) {
+              roleScores[role][i].sum += valNum;
+              roleScores[role][i].count++;
+            }
           }
         }
       }
@@ -160,11 +165,25 @@ export default function KokpitKemenkes() {
       // Paket Manfaat
       const jkn = row.jkn || {};
       for (let i=0; i<4; i++) {
-        if (jkn[i]) { jknScores[i].sum += Number(jkn[i]); jknScores[i].count++; }
+        const val = jkn[i];
+        if (val) {
+          const skala = typeof val === 'object' ? val.skala : val;
+          if (skala && !isNaN(Number(skala))) {
+            jknScores[i].sum += Number(skala);
+            jknScores[i].count++;
+          }
+        }
       }
       const non = row.non_optimal || {};
       for (let i=0; i<6; i++) {
-        if (non[i]) { usulanScores[i].sum += Number(non[i]); usulanScores[i].count++; }
+        const val = non[i];
+        if (val) {
+          const skala = typeof val === 'object' ? val.skala : val;
+          if (skala && !isNaN(Number(skala))) {
+            usulanScores[i].sum += Number(skala);
+            usulanScores[i].count++;
+          }
+        }
       }
 
       // Teks Kualitatif

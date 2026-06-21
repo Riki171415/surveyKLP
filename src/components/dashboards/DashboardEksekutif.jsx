@@ -95,9 +95,13 @@ export default function DashboardEksekutif({ data = [] }) {
       // JKN
       if (row.jkn && jnsFktp) {
         for (let i = 0; i < 4; i++) {
-          if (row.jkn[i] && row.jkn[i].skala) {
-            jknScores[jnsFktp][i].sum += Number(row.jkn[i].skala);
-            jknScores[jnsFktp][i].count++;
+          const val = row.jkn[i];
+          if (val) {
+            const skala = typeof val === 'object' ? val.skala : val;
+            if (skala) {
+              jknScores[jnsFktp][i].sum += Number(skala);
+              jknScores[jnsFktp][i].count++;
+            }
           }
         }
       }
@@ -105,9 +109,12 @@ export default function DashboardEksekutif({ data = [] }) {
       // Non-Optimal
       if (row.non_optimal) {
         for (let i = 0; i < 6; i++) {
-          if (row.non_optimal[i]) {
-            const val = row.non_optimal[i];
-            if (val === 'Sangat Setuju' || val === 'Setuju') usulanScores[i].sum += 1;
+          const val = row.non_optimal[i];
+          if (val) {
+            const skala = typeof val === 'object' ? val.skala : val;
+            if (skala === '3' || skala === '4' || skala === 'Setuju' || skala === 'Sangat Setuju') {
+              usulanScores[i].sum += 1;
+            }
             usulanScores[i].count++;
           }
         }
@@ -123,9 +130,13 @@ export default function DashboardEksekutif({ data = [] }) {
       if (row.relevansi_spkklp) {
         const group = row.doc_kklp === 'Ya' ? 'withSpkklp' : 'withoutSpkklp';
         for (let i = 0; i < 7; i++) {
-          if (row.relevansi_spkklp[i]) {
-            relevansiScores[group][i].sum += Number(row.relevansi_spkklp[i]);
-            relevansiScores[group][i].count++;
+          const val = row.relevansi_spkklp[i];
+          if (val) {
+            const num = typeof val === 'object' ? Number(val.skala || 0) : Number(val);
+            if (!isNaN(num) && num > 0) {
+              relevansiScores[group][i].sum += num;
+              relevansiScores[group][i].count++;
+            }
           }
         }
       }
