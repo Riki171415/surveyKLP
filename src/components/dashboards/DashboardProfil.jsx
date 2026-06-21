@@ -10,7 +10,7 @@ export default function DashboardProfil({ filteredData, COLORS, isPrinting }) {
 
   const { roleChartData, spkklpCount, fktpTypeData, regionalData } = useMemo(() => {
     const roleCount = {}; 
-    const fktpTypeCount = { 'Puskesmas': 0, 'Klinik': 0, 'DPM': 0, 'Lainnya': 0 };
+    const fktpTypeCount = { 'Puskesmas': 0, 'Klinik': 0, 'Dokter Praktik Mandiri': 0 };
     const regionalCount = {};
     let spkklpCount = 0;
 
@@ -25,10 +25,13 @@ export default function DashboardProfil({ filteredData, COLORS, isPrinting }) {
 
       // FKTP Type (Puskesmas, Klinik, DPM)
       const fName = (row.fktp_name || '').toLowerCase();
-      if (fName.includes('puskesmas')) fktpTypeCount['Puskesmas']++;
-      else if (fName.includes('klinik')) fktpTypeCount['Klinik']++;
-      else if (role === 'Dokter Praktik Mandiri') fktpTypeCount['DPM']++;
-      else fktpTypeCount['Lainnya']++;
+      if (role === 'Dokter Praktik Mandiri') {
+        fktpTypeCount['Dokter Praktik Mandiri']++;
+      } else if (fName.includes('klinik')) {
+        fktpTypeCount['Klinik']++;
+      } else {
+        fktpTypeCount['Puskesmas']++;
+      }
 
       // Regional (Provinsi)
       const prov = row.provinsi || 'Lainnya';
@@ -64,7 +67,7 @@ export default function DashboardProfil({ filteredData, COLORS, isPrinting }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Total Responden" value={totalResponden} icon={Users} colorClass="bg-blue-500 text-blue-600 bg-blue-100" />
         <StatCard title="Total Puskesmas" value={fktpTypeData.find(d => d.name === 'Puskesmas')?.value || 0} icon={Building} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
-        <StatCard title="Dokter Praktik Mandiri" value={fktpTypeData.find(d => d.name === 'DPM')?.value || 0} icon={Stethoscope} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
+        <StatCard title="Dokter Praktik Mandiri" value={fktpTypeData.find(d => d.name === 'Dokter Praktik Mandiri')?.value || 0} icon={Stethoscope} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
         <StatCard title="FKTP dengan Sp.KKLP" value={spkklpCount || 0} subtitle={`${totalResponden > 0 ? Math.round((spkklpCount / totalResponden) * 100) : 0}% dari total`} icon={Stethoscope} colorClass="bg-primary-500 text-primary-600 bg-primary-100" />
       </div>
 
