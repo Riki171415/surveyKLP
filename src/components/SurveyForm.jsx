@@ -391,6 +391,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     setIsSubmitting(true);
     try {
       const payload = {
+        jenis_faskes: formData.jenisFaskes,
         fktp_name: formData.fktpName,
         provinsi: formData.provinsi,
         kab_kota: formData.kabKota,
@@ -590,8 +591,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       {(formData.kabKota || isPrintMode) && (
                         <div className="md:col-span-2">
                           <label className="block text-sm font-semibold text-slate-700 mb-3">Jenis Faskes / Responden</label>
-                          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${showErrors && !formData.jenisFaskes ? 'p-2 ring-2 ring-rose-500 rounded-xl bg-rose-50/50' : ''}`}>
-                            {['Puskesmas / Klinik', 'Dokter Praktik Mandiri'].map(jf => (
+                          <div className={`grid grid-cols-1 sm:grid-cols-3 gap-4 ${showErrors && !formData.jenisFaskes ? 'p-2 ring-2 ring-rose-500 rounded-xl bg-rose-50/50' : ''}`}>
+                            {['Puskesmas', 'Klinik', 'Dokter Praktik Mandiri'].map(jf => (
                               <label key={jf} className={`relative flex items-center justify-center px-4 py-4 border-2 rounded-2xl cursor-pointer transition-all duration-300 text-center leading-tight group ${
                                 formData.jenisFaskes === jf ? 'border-primary-500 bg-primary-50/50 text-primary-700 font-bold shadow-md shadow-primary-500/10 scale-[1.02]' : 'border-slate-100 bg-white hover:border-primary-300 hover:bg-slate-50 text-slate-600'
                               }`}>
@@ -641,7 +642,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       )}
                     </>
                   )}
-                  {((formData.jenisFaskes === 'Puskesmas / Klinik') || isPrintMode) && (
+                  {((['Puskesmas', 'Klinik'].includes(formData.jenisFaskes)) || isPrintMode) && (
                   <>
                   <div className="md:col-span-2">
                     <div className="mb-3"><label className="block text-sm font-semibold text-slate-700 mb-1">Jabatan <span className="text-xs text-slate-400 font-normal ml-1">(Pilih salah satu)</span></label></div>

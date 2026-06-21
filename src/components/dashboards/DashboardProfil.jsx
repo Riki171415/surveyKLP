@@ -25,12 +25,16 @@ export default function DashboardProfil({ filteredData, COLORS, isPrinting }) {
 
       // FKTP Type (Puskesmas, Klinik, DPM)
       const fName = (row.fktp_name || '').toLowerCase();
-      if (role === 'Dokter Praktik Mandiri') {
-        fktpTypeCount['Dokter Praktik Mandiri']++;
-      } else if (fName.includes('klinik')) {
-        fktpTypeCount['Klinik']++;
+      if (row.jenis_faskes === 'Puskesmas' || row.jenis_faskes === 'Klinik' || row.jenis_faskes === 'Dokter Praktik Mandiri') {
+        fktpTypeCount[row.jenis_faskes]++;
       } else {
-        fktpTypeCount['Puskesmas']++;
+        if (role === 'Dokter Praktik Mandiri') {
+          fktpTypeCount['Dokter Praktik Mandiri']++;
+        } else if (fName.includes('klinik')) {
+          fktpTypeCount['Klinik']++;
+        } else {
+          fktpTypeCount['Puskesmas']++;
+        }
       }
 
       // Regional (Provinsi)
