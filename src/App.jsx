@@ -113,7 +113,7 @@ function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
           <NavItem to="/" icon={FileText} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Isi Survey</NavItem>
         )}
 
-        {['tim survey', 'admin'].includes(user.role) && (
+        {user.role === 'admin' && (
           <NavItem to="/wawancara" icon={ClipboardList} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Form Wawancara</NavItem>
         )}
 
