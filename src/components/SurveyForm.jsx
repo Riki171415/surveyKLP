@@ -322,10 +322,18 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
        })() : true))
     : true;
 
-  const isStep3Valid = (isRoleSpKklp ? true : relevansiItems.every((_, idx) => formData.relevansiSpkklp[idx])) &&
-    formData.prb?.jumlah && formData.prb?.peserta_dm && formData.prb?.peserta_ht &&
-    formData.prb?.mekanisme && formData.prb?.rataRujukan &&
-    (isRoleSpKklp ? true : peranSpkklpItems.every((_, idx) => formData.peranSpkklp[idx]));
+  const isStep3Valid = (() => {
+    if (!formData.prb?.jumlah || !formData.prb?.peserta_dm || !formData.prb?.peserta_ht || !formData.prb?.mekanisme || !formData.prb?.rataRujukan) return false;
+    if (!isRoleSpKklp && !relevansiItems.every((_, idx) => formData.relevansiSpkklp[idx])) return false;
+    if (!isRoleSpKklp && !peranSpkklpItems.every((_, idx) => formData.peranSpkklp[idx])) return false;
+    
+    const jumlahPRB = Number(formData.prb.jumlah) || 0;
+    const rutin = Number(formData.prb.rutinKunjungan) || 0;
+    const tidakBerkunjung = Number(formData.prb.tidakBerkunjung) || 0;
+    if (rutin + tidakBerkunjung > jumlahPRB) return false;
+
+    return true;
+  })();
 
   const isStep4Valid = (() => {
     if (!jknBenefits.every((_, idx) => formData.jkn[idx]?.skala)) return false;
@@ -1065,6 +1073,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                     <div className="w-1 h-5 bg-emerald-500 rounded-full"></div>
                     <h3 className="text-base font-bold text-slate-800">Program Rujuk Balik (PRB)</h3>
                   </div>
+                  {showErrors && (Number(formData.prb?.rutinKunjungan || 0) + Number(formData.prb?.tidakBerkunjung || 0) > Number(formData.prb?.jumlah || 0)) && (
+                    <div className="mb-4 p-3 bg-rose-50 text-rose-600 rounded-lg text-sm border border-rose-200">
+                      <strong>Anomali Data:</strong> Total "Peserta Rutin" ditambah "Peserta Tidak Berkunjung" tidak boleh melebihi "Jumlah peserta PRB saat ini".
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div><label className="block text-xs font-semibold text-slate-700 mb-1">Jumlah peserta PRB saat ini <span className="text-rose-500">*</span></label><input type="number" placeholder="Jumlah" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none ${showErrors && !formData.prb?.jumlah ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.prb?.jumlah || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, jumlah: e.target.value } }))} /></div>
                     <div><label className="block text-xs font-semibold text-slate-700 mb-1">Peserta PRB rutin kunjungan ≥1x/bulan (3 bln terakhir)</label><input type="number" placeholder="Jumlah" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none" value={formData.prb?.rutinKunjungan || ''} onChange={(e) => setFormData(prev => ({ ...prev, prb: { ...prev.prb, rutinKunjungan: e.target.value } }))} /></div>
