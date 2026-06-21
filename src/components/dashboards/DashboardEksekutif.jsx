@@ -37,6 +37,97 @@ const relevansiItems = [
   "Waktu konsultasi lebih lama & mendalam"
 ];
 
+
+const ExecutiveInsight = ({ tab }) => {
+  const insights = {
+    overview: {
+      title: "Executive Insight: Profil Kesiapan Fasilitas Primer",
+      iconColor: "text-blue-500",
+      bgLight: "bg-blue-50",
+      points: [
+        { title: "Dominasi Puskesmas", desc: "Sebagian besar data survei diisi oleh Puskesmas, yang merepresentasikan ujung tombak layanan primer pemerintah." },
+        { title: "Kesenjangan Distribusi", desc: "Terdapat gap yang signifikan antara ketersediaan Sp.KKLP di kota besar dibandingkan daerah rural. Ini mengindikasikan perlunya intervensi penempatan secara khusus." },
+        { title: "Potensi Skala Nasional", desc: "Jika 10% saja dari FKTP yang belum memiliki Sp.KKLP ini segera dipenuhi, kapasitas promotif-preventif JKN akan meningkat tajam." }
+      ]
+    },
+    ketersediaan: {
+      title: "Executive Insight: Optimalisasi & Perluasan JKN",
+      iconColor: "text-amber-500",
+      bgLight: "bg-amber-50",
+      points: [
+        { title: "Validasi Layanan Eksisting", desc: "Program PRB dan pemantauan penyakit kronis dinilai sebagai layanan JKN yang paling dirasakan manfaatnya saat ini." },
+        { title: "Urgensi Pembiayaan Baru", desc: "Layanan Lifestyle Medicine dan Promotif Berbasis Keluarga menduduki peringkat teratas usulan layanan yang HARUS dibiayai JKN." },
+        { title: "Transisi Paradigma", desc: "Sistem JKN perlu segera bertransisi dari 'Kuratif-Sentris' menjadi 'Preventif-Proaktif' dengan memberikan insentif khusus bagi FKTP yang aktif melakukan home care." }
+      ]
+    },
+    perbandingan: {
+      title: "Executive Insight: Dampak Nyata Sp.KKLP di Lapangan",
+      iconColor: "text-emerald-500",
+      bgLight: "bg-emerald-50",
+      points: [
+        { title: "Keunggulan Klinis", desc: "FKTP dengan Sp.KKLP terbukti memiliki skor penanganan multimorbiditas tanpa rujukan yang jauh lebih superior dibanding FKTP tanpa Sp.KKLP." },
+        { title: "Waktu Konsultasi Efektif", desc: "Meskipun memiliki beban manajerial, dokter Sp.KKLP secara konsisten memberikan waktu konsultasi yang lebih mendalam dan komprehensif bagi pasien." },
+        { title: "Efisiensi Sistem", desc: "Kemampuan menyelesaikan masalah kompleks di FKTP secara langsung berdampak pada penurunan angka rujukan yang tidak perlu ke rumah sakit." }
+      ]
+    },
+    rujukan: {
+      title: "Executive Insight: Menutup Kebocoran Rujukan Primer",
+      iconColor: "text-rose-500",
+      bgLight: "bg-rose-50",
+      points: [
+        { title: "Red Flag Rujukan PTM", desc: "Kasus Penyakit Tidak Menular (PTM) tanpa komplikasi masih mendominasi rujukan, mengindikasikan fungsi gatekeeper belum optimal di banyak daerah." },
+        { title: "Tantangan Bedah Minor", desc: "Tingginya rujukan bedah minor menyoroti kurangnya ketersediaan alat medis dasar atau insentif tindakan bagi dokter di FKTP." },
+        { title: "Rekomendasi Kebijakan", desc: "Wajibkan pendampingan klinis oleh Sp.KKLP di puskesmas dengan rasio rujukan PTM tertinggi untuk menekan beban klaim BPJS secara drastis." }
+      ]
+    },
+    hambatan: {
+      title: "Executive Insight: Hambatan Operasional & Finansial",
+      iconColor: "text-orange-500",
+      bgLight: "bg-orange-50",
+      points: [
+        { title: "Krisis SDM & Sarana", desc: "Kurangnya SDM pendukung dan sarana prasarana menjadi batu sandungan utama bagi dokter Sp.KKLP untuk mengimplementasikan keilmuannya secara utuh." },
+        { title: "Regulasi Insentif", desc: "Tidak adanya skema kapitasi atau jasa medis spesifik untuk Sp.KKLP menurunkan motivasi dan menghambat distribusi spesialis ke daerah." },
+        { title: "Solusi Cepat", desc: "Kemenkes perlu berkoordinasi dengan BPJS untuk menerbitkan regulasi insentif 'Top-Up' berbasis performa kualitas layanan preventif." }
+      ]
+    },
+    kualitatif: {
+      title: "Executive Insight: Aspirasi & Sentimen Akar Rumput",
+      iconColor: "text-indigo-500",
+      bgLight: "bg-indigo-50",
+      points: [
+        { title: "Kebingungan Kewenangan", desc: "Banyak nakes di puskesmas masih bingung membedakan kewenangan klinis antara dokter umum dan Sp.KKLP. Perlu pedoman klinis (PNPK) yang tegas." },
+        { title: "Tuntutan Realistis", desc: "Permintaan terbanyak di lapangan bukanlah insentif mewah, melainkan kejelasan regulasi JKN dan ketersediaan obat kronis PRB yang sering kosong." },
+        { title: "Moral Kerja", desc: "Dukungan moril dari Dinas Kesehatan sangat dibutuhkan agar program kedokteran keluarga tidak dilihat sebagai beban administratif tambahan semata." }
+      ]
+    }
+  };
+
+  const current = insights[tab];
+  if (!current) return null;
+
+  return (
+    <div className="mt-8 bg-white border border-slate-200 rounded-3xl p-6 md:p-8 relative overflow-hidden shadow-lg">
+      <div className={`absolute top-0 right-0 w-64 h-64 ${current.bgLight} rounded-full blur-3xl -z-10`}></div>
+      <div className="flex items-center gap-3 mb-6 border-b border-slate-200 pb-4">
+        <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-wide uppercase">{current.title}</h2>
+      </div>
+      
+      <div className="space-y-6 text-slate-600 leading-relaxed text-sm md:text-base">
+        {current.points.map((pt, i) => (
+          <div key={i} className="flex items-start gap-4">
+            <div className={`w-8 h-8 rounded-full ${current.bgLight} ${current.iconColor} flex items-center justify-center shrink-0 font-bold`}>{i+1}</div>
+            <div>
+              <h4 className="text-slate-800 font-bold mb-1">{pt.title}</h4>
+              <p>{pt.desc}</p>
+            </div>
+          </div>
+        ))}
+        <ExecutiveInsight tab={activeTab} />
+      </div>
+    </div>
+  );
+};
+
 export default function DashboardEksekutif({ data = [] }) {
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -258,7 +349,7 @@ export default function DashboardEksekutif({ data = [] }) {
   return (
     <div className="flex flex-col gap-6">
       {/* Tab Navigation Internal */}
-      <div className="flex flex-wrap gap-2 border-b border-slate-700/50 pb-4">
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
         {tabs.map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -269,7 +360,7 @@ export default function DashboardEksekutif({ data = [] }) {
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                 isActive 
                   ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/25' 
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                  : 'bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-700'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -285,8 +376,8 @@ export default function DashboardEksekutif({ data = [] }) {
         {activeTab === 'overview' && (
           <div className="flex flex-col gap-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
-                <h3 className="text-lg font-bold text-slate-200 mb-4">Proporsi Jenis FKTP</h3>
+              <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200">
+                <h3 className="text-lg font-bold text-slate-700 mb-4">Proporsi Jenis FKTP</h3>
                 <div className="h-64 min-h-[250px]">
                   <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                     <PieChart>
@@ -295,37 +386,37 @@ export default function DashboardEksekutif({ data = [] }) {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <RechartsTooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} />
+                      <RechartsTooltip contentStyle={{ backgroundColor: '#ffffff', border: 'none', borderRadius: '8px', color: '#334155' }} />
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
               </div>
               
-              <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50 flex flex-col justify-center">
-                <h3 className="text-lg font-bold text-slate-200 mb-4">Ketersediaan Sp.KKLP</h3>
+              <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col justify-center">
+                <h3 className="text-lg font-bold text-slate-700 mb-4">Ketersediaan Sp.KKLP</h3>
                 <div className="flex items-end gap-4 mb-2">
                   <span className="text-5xl font-black text-emerald-400">{metrics.spkklpCount}</span>
-                  <span className="text-xl text-slate-400 pb-1">/ {metrics.total} FKTP</span>
+                  <span className="text-xl text-slate-500 pb-1">/ {metrics.total} FKTP</span>
                 </div>
-                <div className="w-full bg-slate-700 rounded-full h-4 overflow-hidden mt-4">
+                <div className="w-full bg-slate-100 rounded-full h-4 overflow-hidden mt-4">
                   <div className="bg-emerald-500 h-4 rounded-full" style={{ width: `${metrics.total ? (metrics.spkklpCount / metrics.total) * 100 : 0}%` }}></div>
                 </div>
-                <p className="text-slate-400 mt-4 text-sm">Masih terdapat {metrics.total - metrics.spkklpCount} fasilitas kesehatan tingkat pertama yang belum memiliki Spesialis Kedokteran Keluarga Layanan Primer.</p>
+                <p className="text-slate-500 mt-4 text-sm">Masih terdapat {metrics.total - metrics.spkklpCount} fasilitas kesehatan tingkat pertama yang belum memiliki Spesialis Kedokteran Keluarga Layanan Primer.</p>
               </div>
             </div>
 
             {/* Peta Sebaran (City Map Bar Chart) */}
-            <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
-              <h3 className="text-lg font-bold text-slate-200 mb-4">Sebaran FKTP per Kabupaten/Kota (Top 15)</h3>
-              <p className="text-sm text-slate-400 mb-4">Distribusi fasilitas kesehatan dan status kepemilikan Sp.KKLP di wilayah terbanyak.</p>
+            <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200">
+              <h3 className="text-lg font-bold text-slate-700 mb-4">Sebaran FKTP per Kabupaten/Kota (Top 15)</h3>
+              <p className="text-sm text-slate-500 mb-4">Distribusi fasilitas kesehatan dan status kepemilikan Sp.KKLP di wilayah terbanyak.</p>
               <div className="h-80 min-h-[300px]">
                 <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <BarChart data={metrics.cityData} layout="vertical" margin={{ top: 0, right: 30, left: 50, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
-                    <XAxis type="number" tick={{ fill: '#94a3b8' }} />
-                    <YAxis dataKey="name" type="category" tick={{ fill: '#cbd5e1', fontSize: 11 }} width={120} />
-                    <RechartsTooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} cursor={{ fill: '#334155', opacity: 0.4 }} />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />
+                    <XAxis type="number" tick={{ fill: '#64748b' }} />
+                    <YAxis dataKey="name" type="category" tick={{ fill: '#475569', fontSize: 11 }} width={120} />
+                    <RechartsTooltip contentStyle={{ backgroundColor: '#ffffff', border: 'none', borderRadius: '8px', color: '#334155' }} cursor={{ fill: '#334155', opacity: 0.4 }} />
                     <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
                     <Bar dataKey="withSpKKLP" name="Sudah Ada Sp.KKLP" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
                     <Bar dataKey="withoutSpKKLP" name="Belum Ada Sp.KKLP" stackId="a" fill="#94a3b8" radius={[0, 4, 4, 0]} />
@@ -340,44 +431,44 @@ export default function DashboardEksekutif({ data = [] }) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             {/* Radar Gap Layanan */}
-            <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50 flex flex-col">
+            <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col">
               <div className="flex items-center gap-2 mb-2">
                 <Activity className="w-5 h-5 text-indigo-400" />
-                <h3 className="text-lg font-bold text-white">Gap Layanan JKN Eksisting</h3>
+                <h3 className="text-lg font-bold text-slate-800">Gap Layanan JKN Eksisting</h3>
               </div>
-              <p className="text-xs text-slate-400 mb-4">Persepsi optimalisasi manfaat JKN berdasarkan Jenis FKTP (Skala 1-4)</p>
+              <p className="text-xs text-slate-500 mb-4">Persepsi optimalisasi manfaat JKN berdasarkan Jenis FKTP (Skala 1-4)</p>
               <div className="flex-1 min-h-[300px]">
                 <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <RadarChart cx="50%" cy="50%" outerRadius="70%" data={metrics.radarJkn}>
-                    <PolarGrid stroke="#334155" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                    <PolarGrid stroke="#e2e8f0" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10 }} />
                     <PolarRadiusAxis angle={30} domain={[0, 4]} tick={{ fill: '#475569' }} />
                     <Radar name="Puskesmas" dataKey="Puskesmas" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.2} />
                     <Radar name="Klinik" dataKey="Klinik" stroke="#10b981" fill="#10b981" fillOpacity={0.2} />
                     <Radar name="DPM" dataKey="DPM" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.2} />
                     <Legend wrapperStyle={{ fontSize: '12px' }} />
-                    <RechartsTooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} />
+                    <RechartsTooltip contentStyle={{ backgroundColor: '#ffffff', border: 'none', borderRadius: '8px', color: '#334155' }} />
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             {/* Usulan Prioritas Baru */}
-            <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50 flex flex-col">
+            <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <CheckSquare className="w-5 h-5 text-amber-400" />
-                  <h3 className="text-lg font-bold text-white">Usulan Layanan Baru JKN</h3>
+                  <h3 className="text-lg font-bold text-slate-800">Usulan Layanan Baru JKN</h3>
                 </div>
-                <span className="text-xs text-slate-400">% Persetujuan Tinggi</span>
+                <span className="text-xs text-slate-500">% Persetujuan Tinggi</span>
               </div>
               <div className="flex-1 min-h-[300px]">
                 <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <BarChart data={metrics.barUsulan} layout="vertical" margin={{ top: 0, right: 30, left: 30, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />
                     <XAxis type="number" domain={[0, 100]} tick={{ fill: '#64748b' }} />
-                    <YAxis dataKey="name" type="category" tick={{ fill: '#cbd5e1', fontSize: 11 }} width={120} />
-                    <RechartsTooltip formatter={(val) => [`${val}%`, 'Setuju / Sangat Setuju']} contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} cursor={{ fill: '#334155', opacity: 0.4 }} />
+                    <YAxis dataKey="name" type="category" tick={{ fill: '#475569', fontSize: 11 }} width={120} />
+                    <RechartsTooltip formatter={(val) => [`${val}%`, 'Setuju / Sangat Setuju']} contentStyle={{ backgroundColor: '#ffffff', border: 'none', borderRadius: '8px', color: '#334155' }} cursor={{ fill: '#334155', opacity: 0.4 }} />
                     <Bar dataKey="value" name="% Persetujuan" fill="#f43f5e" radius={[0, 4, 4, 0]}>
                       {metrics.barUsulan.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.value > 80 ? '#ef4444' : entry.value > 60 ? '#f59e0b' : '#3b82f6'} />
@@ -395,19 +486,19 @@ export default function DashboardEksekutif({ data = [] }) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             {/* Grouped Bar Relevansi */}
-            <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50 flex flex-col">
+            <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col">
               <div className="flex items-center gap-2 mb-2">
                 <Stethoscope className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-lg font-bold text-white">Persepsi Relevansi Sp.KKLP</h3>
+                <h3 className="text-lg font-bold text-slate-800">Persepsi Relevansi Sp.KKLP</h3>
               </div>
-              <p className="text-xs text-slate-400 mb-4">Membandingkan FKTP yang sudah ada Sp.KKLP vs Belum Ada (Skala 1-4)</p>
+              <p className="text-xs text-slate-500 mb-4">Membandingkan FKTP yang sudah ada Sp.KKLP vs Belum Ada (Skala 1-4)</p>
               <div className="flex-1 min-h-[400px]">
                 <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <BarChart data={metrics.barRelevansi} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />
                     <XAxis type="number" domain={[0, 4]} tick={{ fill: '#64748b' }} />
-                    <YAxis dataKey="name" type="category" tick={{ fill: '#cbd5e1', fontSize: 10 }} width={160} />
-                    <RechartsTooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} cursor={{ fill: '#334155', opacity: 0.4 }} />
+                    <YAxis dataKey="name" type="category" tick={{ fill: '#475569', fontSize: 10 }} width={160} />
+                    <RechartsTooltip contentStyle={{ backgroundColor: '#ffffff', border: 'none', borderRadius: '8px', color: '#334155' }} cursor={{ fill: '#334155', opacity: 0.4 }} />
                     <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
                     <Bar dataKey="withSpkklp" name="Ada Sp.KKLP" fill="#10b981" radius={[0, 4, 4, 0]} />
                     <Bar dataKey="withoutSpkklp" name="Belum Ada" fill="#94a3b8" radius={[0, 4, 4, 0]} />
@@ -417,20 +508,20 @@ export default function DashboardEksekutif({ data = [] }) {
             </div>
 
             {/* Scatter Waktu vs Proporsi */}
-            <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50 flex flex-col">
+            <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col">
               <div className="flex items-center gap-2 mb-2">
                 <Activity className="w-5 h-5 text-indigo-400" />
-                <h3 className="text-lg font-bold text-white">Waktu Poli vs Proporsi Layanan</h3>
+                <h3 className="text-lg font-bold text-slate-800">Waktu Poli vs Proporsi Layanan</h3>
               </div>
-              <p className="text-xs text-slate-400 mb-4">Melihat korelasi antara waktu layanan di poli dengan proporsi pelayanan dalam gedung.</p>
+              <p className="text-xs text-slate-500 mb-4">Melihat korelasi antara waktu layanan di poli dengan proporsi pelayanan dalam gedung.</p>
               <div className="flex-1 min-h-[400px]">
                 <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis type="number" dataKey="x" name="Waktu Poli" unit=" mnt" stroke="#cbd5e1" tick={{ fill: '#94a3b8' }} label={{ value: 'Rata-rata Waktu Poli (Menit)', position: 'insideBottom', offset: -10, fill: '#94a3b8', fontSize: 12 }} />
-                    <YAxis type="number" dataKey="y" name="Proporsi" unit="%" stroke="#cbd5e1" tick={{ fill: '#94a3b8' }} label={{ value: 'Proporsi Layanan Dalam Gedung (%)', angle: -90, position: 'insideLeft', fill: '#94a3b8', fontSize: 12 }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis type="number" dataKey="x" name="Waktu Poli" unit=" mnt" stroke="#cbd5e1" tick={{ fill: '#64748b' }} label={{ value: 'Rata-rata Waktu Poli (Menit)', position: 'insideBottom', offset: -10, fill: '#64748b', fontSize: 12 }} />
+                    <YAxis type="number" dataKey="y" name="Proporsi" unit="%" stroke="#cbd5e1" tick={{ fill: '#64748b' }} label={{ value: 'Proporsi Layanan Dalam Gedung (%)', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 12 }} />
                     <ZAxis type="category" dataKey="role" name="Profesi" />
-                    <RechartsTooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} formatter={(val, name, props) => [`${val}`, name]} />
+                    <RechartsTooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#ffffff', border: 'none', borderRadius: '8px', color: '#334155' }} formatter={(val, name, props) => [`${val}`, name]} />
                     <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
                     <Scatter name="Dokter Umum" data={metrics.scatterData.filter(d => d.role === 'Dokter Umum')} fill="#3b82f6" />
                     <Scatter name="Dokter Sp.KKLP" data={metrics.scatterData.filter(d => d.role === 'Dokter Sp.KKLP')} fill="#f59e0b" />
@@ -446,19 +537,19 @@ export default function DashboardEksekutif({ data = [] }) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             {/* Pareto Top Rujukan */}
-            <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50 flex flex-col">
+            <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col">
               <div className="flex items-center gap-2 mb-2">
                 <CheckSquare className="w-5 h-5 text-rose-400" />
-                <h3 className="text-lg font-bold text-white">Layanan Paling Sering Dirujuk</h3>
+                <h3 className="text-lg font-bold text-slate-800">Layanan Paling Sering Dirujuk</h3>
               </div>
-              <p className="text-xs text-slate-400 mb-4">Persentase FKTP yang rutin merujuk kasus-kasus primer ke Rumah Sakit.</p>
+              <p className="text-xs text-slate-500 mb-4">Persentase FKTP yang rutin merujuk kasus-kasus primer ke Rumah Sakit.</p>
               <div className="flex-1 min-h-[350px]">
                 <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <BarChart data={metrics.topRujukan} layout="vertical" margin={{ top: 0, right: 30, left: 20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />
                     <XAxis type="number" domain={[0, 100]} tick={{ fill: '#64748b' }} />
-                    <YAxis dataKey="name" type="category" tick={{ fill: '#cbd5e1', fontSize: 10 }} width={140} />
-                    <RechartsTooltip formatter={(val) => [`${val}% FKTP`, 'Merujuk']} contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} cursor={{ fill: '#334155', opacity: 0.4 }} />
+                    <YAxis dataKey="name" type="category" tick={{ fill: '#475569', fontSize: 10 }} width={140} />
+                    <RechartsTooltip formatter={(val) => [`${val}% FKTP`, 'Merujuk']} contentStyle={{ backgroundColor: '#ffffff', border: 'none', borderRadius: '8px', color: '#334155' }} cursor={{ fill: '#334155', opacity: 0.4 }} />
                     <Bar dataKey="value" name="% FKTP" fill="#ef4444" radius={[0, 4, 4, 0]}>
                       {metrics.topRujukan.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={index < 3 ? '#ef4444' : '#f59e0b'} />
@@ -471,12 +562,12 @@ export default function DashboardEksekutif({ data = [] }) {
 
             {/* Kinerja PRB */}
             <div className="flex flex-col gap-6">
-              <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
+              <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200">
                 <div className="flex items-center gap-2 mb-2">
                   <Activity className="w-5 h-5 text-emerald-400" />
-                  <h3 className="text-lg font-bold text-white">Kinerja Program Rujuk Balik (PRB)</h3>
+                  <h3 className="text-lg font-bold text-slate-800">Kinerja Program Rujuk Balik (PRB)</h3>
                 </div>
-                <p className="text-xs text-slate-400 mb-6">Tingkat kepatuhan kunjungan pasien PRB secara nasional.</p>
+                <p className="text-xs text-slate-500 mb-6">Tingkat kepatuhan kunjungan pasien PRB secara nasional.</p>
                 
                 <div className="flex items-center justify-center py-4">
                   <div className="relative w-48 h-48 flex items-center justify-center">
@@ -499,20 +590,20 @@ export default function DashboardEksekutif({ data = [] }) {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-4xl font-black text-white">{metrics.prbKepatuhan}%</span>
-                      <span className="text-xs text-slate-400 font-bold tracking-widest uppercase mt-1">Kepatuhan</span>
+                      <span className="text-4xl font-black text-slate-800">{metrics.prbKepatuhan}%</span>
+                      <span className="text-xs text-slate-500 font-bold tracking-widest uppercase mt-1">Kepatuhan</span>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50 flex items-center gap-4">
+              <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex items-center gap-4">
                 <div className="bg-amber-500/20 p-4 rounded-xl text-amber-500">
                   <AlertTriangle className="w-8 h-8" />
                 </div>
                 <div>
-                  <h4 className="text-xl font-bold text-white">{metrics.avgRujukanPrb} Kasus/Bulan</h4>
-                  <p className="text-sm text-slate-400">Rata-rata rujukan balik per FKTP</p>
+                  <h4 className="text-xl font-bold text-slate-800">{metrics.avgRujukanPrb} Kasus/Bulan</h4>
+                  <p className="text-sm text-slate-500">Rata-rata rujukan balik per FKTP</p>
                 </div>
               </div>
             </div>
@@ -521,19 +612,19 @@ export default function DashboardEksekutif({ data = [] }) {
         )}
 
         {activeTab === 'hambatan' && (
-          <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50 flex flex-col">
+          <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col">
             <div className="flex items-center gap-2 mb-2">
               <AlertTriangle className="w-5 h-5 text-amber-500" />
-              <h3 className="text-lg font-bold text-white">Kendala Utama Implementasi Sp.KKLP</h3>
+              <h3 className="text-lg font-bold text-slate-800">Kendala Utama Implementasi Sp.KKLP</h3>
             </div>
-            <p className="text-xs text-slate-400 mb-6">Peringkat kendala berdasarkan jumlah keluhan dari FKTP.</p>
+            <p className="text-xs text-slate-500 mb-6">Peringkat kendala berdasarkan jumlah keluhan dari FKTP.</p>
             <div className="flex-1 min-h-[400px]">
               <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                 <BarChart data={metrics.barKendala} layout="vertical" margin={{ top: 0, right: 30, left: 30, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
+                  <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />
                   <XAxis type="number" tick={{ fill: '#64748b' }} />
-                  <YAxis dataKey="name" type="category" tick={{ fill: '#cbd5e1', fontSize: 11 }} width={120} />
-                  <RechartsTooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }} cursor={{ fill: '#334155', opacity: 0.4 }} />
+                  <YAxis dataKey="name" type="category" tick={{ fill: '#475569', fontSize: 11 }} width={120} />
+                  <RechartsTooltip contentStyle={{ backgroundColor: '#ffffff', border: 'none', borderRadius: '8px', color: '#334155' }} cursor={{ fill: '#334155', opacity: 0.4 }} />
                   <Bar dataKey="value" name="Jumlah Keluhan" fill="#f59e0b" radius={[0, 4, 4, 0]}>
                     {metrics.barKendala.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={index < 2 ? '#ef4444' : index < 4 ? '#f59e0b' : '#3b82f6'} />
@@ -546,30 +637,30 @@ export default function DashboardEksekutif({ data = [] }) {
         )}
 
         {activeTab === 'kualitatif' && (
-          <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50 flex flex-col h-[500px]">
+          <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 flex flex-col h-[500px]">
             <div className="flex items-center gap-2 mb-2">
               <MessageSquare className="w-5 h-5 text-sky-400" />
-              <h3 className="text-lg font-bold text-white">Suara dari Lapangan</h3>
+              <h3 className="text-lg font-bold text-slate-800">Suara dari Lapangan</h3>
             </div>
-            <p className="text-xs text-slate-400 mb-6">Feedback kualitatif langsung dari perwakilan puskesmas dan klinik mengenai kendala PRB maupun implementasi medis spesifik.</p>
+            <p className="text-xs text-slate-500 mb-6">Feedback kualitatif langsung dari perwakilan puskesmas dan klinik mengenai kendala PRB maupun implementasi medis spesifik.</p>
             
             <div className="flex-1 overflow-y-auto pr-4 space-y-4 custom-scrollbar">
               {metrics.textHambatan.length === 0 ? (
                 <div className="text-center py-10 text-slate-500">Belum ada feedback kualitatif yang terkumpul.</div>
               ) : (
                 metrics.textHambatan.map((item, idx) => (
-                  <div key={idx} className="bg-slate-700/30 p-4 rounded-xl border border-slate-600/50 flex gap-4 items-start">
-                    <div className="bg-slate-800 p-2 rounded-lg mt-1">
+                  <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex gap-4 items-start">
+                    <div className="bg-white p-2 rounded-lg mt-1">
                       <FileText className="w-4 h-4 text-sky-400" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-bold text-slate-200">{item.faskes}</span>
+                        <span className="text-sm font-bold text-slate-700">{item.faskes}</span>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${item.type === 'PRB' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-emerald-500/20 text-emerald-300'}`}>
                           {item.type}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-300 leading-relaxed">"{item.text}"</p>
+                      <p className="text-sm text-slate-600 leading-relaxed">"{item.text}"</p>
                     </div>
                   </div>
                 ))

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Search, Edit, Trash2, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, Search, Edit, Trash2, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
 import { useAuth } from './AuthContext';
@@ -114,6 +114,8 @@ export default function DataManagement() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selected, setSelected] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
   const navigate = useNavigate();
 
   useEffect(() => { fetchSurveys(); }, []);
@@ -159,11 +161,16 @@ export default function DataManagement() {
     } catch { alert('Gagal menghapus data.'); }
   };
 
+  
   const filtered = surveys.filter(s =>
     (s.fktp_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (s.provinsi || s.city || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (s.kab_kota || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginatedData = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
 
   const handleDownloadExcel = () => {
     try {
@@ -388,7 +395,7 @@ export default function DataManagement() {
                 type="text"
                 placeholder="Cari Puskesmas / Klinik atau Kota..."
                 value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
+                onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                 className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-xs"
               />
             </div>
@@ -399,7 +406,7 @@ export default function DataManagement() {
             ? <div className="p-8 text-center text-slate-400 text-sm">Tidak ada data ditemukan.</div>
             : (
               <div className="overflow-y-auto divide-y divide-slate-100" style={{ maxHeight: 'calc(100vh - 220px)' }}>
-                {filtered.map(row => (
+                {paginatedData.map(row => (
                   <div
                     key={row.id}
                     onClick={() => setSelected(selected?.id === row.id ? null : row)}
@@ -423,6 +430,31 @@ export default function DataManagement() {
                 ))}
               </div>
             )}
+            
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+              <span className="text-xs text-slate-500">
+                Halaman {currentPage} dari {totalPages}
+              </span>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-1.5 rounded bg-white border border-slate-200 text-slate-600 disabled:opacity-50 hover:bg-slate-100 transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-1.5 rounded bg-white border border-slate-200 text-slate-600 disabled:opacity-50 hover:bg-slate-100 transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ══════════ PANEL DETAIL KANAN ══════════ */}
