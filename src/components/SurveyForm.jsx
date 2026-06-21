@@ -582,12 +582,12 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Kabupaten/Kota</label>
                         <div className={showErrors && !formData.kabKota ? 'ring-2 ring-rose-500 rounded-lg shadow-sm' : ''}>
-                          <SearchableSelect name="kabKota" options={kabKotaList} value={formData.kabKota} onChange={(val) => { setFormData(prev => ({ ...prev, kabKota: val, fktpName: '' })); }} disabled={!formData.provinsi} placeholder="-- Pilih Kab/Kota --" allowManual={true} />
+                          <SearchableSelect name="kabKota" options={kabKotaList} value={formData.kabKota} onChange={(val) => { setFormData(prev => ({ ...prev, kabKota: val, fktpName: '' })); }} disabled={!formData.provinsi && !isPrintMode} placeholder="-- Pilih Kab/Kota --" allowManual={true} />
                         </div>
-                        {!formData.provinsi ? <p className="text-xs text-amber-600 mt-1">Pilih provinsi terlebih dahulu</p> : showErrors && !isPrintMode && !formData.kabKota ? <p className="text-xs text-rose-500 mt-1">Kab/Kota wajib diisi</p> : null}
+                        {(!formData.provinsi && !isPrintMode) ? <p className="text-xs text-amber-600 mt-1">Pilih provinsi terlebih dahulu</p> : showErrors && !isPrintMode && !formData.kabKota ? <p className="text-xs text-rose-500 mt-1">Kab/Kota wajib diisi</p> : null}
                       </div>
 
-                      {formData.kabKota && (
+                      {(formData.kabKota || isPrintMode) && (
                         <div className="md:col-span-2">
                           <label className="block text-sm font-semibold text-slate-700 mb-3">Jenis Faskes / Responden</label>
                           <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${showErrors && !formData.jenisFaskes ? 'p-2 ring-2 ring-rose-500 rounded-xl bg-rose-50/50' : ''}`}>
@@ -607,7 +607,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                         </div>
                       )}
 
-                      {formData.jenisFaskes && (
+                      {(formData.jenisFaskes || isPrintMode) && (
                       <>
                       <div className="md:col-span-2">
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">
@@ -620,12 +620,12 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                             options={faskesList} 
                             value={formData.fktpName} 
                             onChange={(val) => handleInputChange({ target: { name: 'fktpName', value: val } })} 
-                            disabled={!formData.kabKota} 
+                            disabled={!formData.kabKota && !isPrintMode} 
                             placeholder={isRoleDpm ? "-- Pilih atau Ketik Nama DPM --" : "-- Pilih atau Ketik Puskesmas / Klinik --"} 
                             allowManual={true} 
                           />
                         </div>
-                        {!formData.kabKota ? <p className="text-xs text-amber-600 mt-1">Pilih Kab/Kota terlebih dahulu</p> : showErrors && !isPrintMode && !formData.fktpName ? <p className="text-xs text-rose-500 mt-1">Nama Faskes wajib diisi</p> : null}
+                        {(!formData.kabKota && !isPrintMode) ? <p className="text-xs text-amber-600 mt-1">Pilih Kab/Kota terlebih dahulu</p> : showErrors && !isPrintMode && !formData.fktpName ? <p className="text-xs text-rose-500 mt-1">Nama Faskes wajib diisi</p> : null}
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5 mt-1 sm:mt-0">Kode Faskes BPJS</label>
@@ -641,7 +641,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       )}
                     </>
                   )}
-                  {formData.jenisFaskes === 'Puskesmas / Klinik' && (
+                  {((formData.jenisFaskes === 'Puskesmas / Klinik') || isPrintMode) && (
                   <>
                   <div className="md:col-span-2">
                     <div className="mb-3"><label className="block text-sm font-semibold text-slate-700 mb-1">Jabatan <span className="text-xs text-slate-400 font-normal ml-1">(Pilih salah satu)</span></label></div>
