@@ -172,12 +172,12 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     if (formData.jenisFaskes === 'Klinik') {
       list = list.filter(name => {
         const n = name.toLowerCase();
-        return n.includes('klinik') || n.includes('clinic');
+        return !n.includes('puskesmas') && !n.includes('pkm') && !n.includes('puseksmas') && !n.includes('puskes');
       });
     } else if (formData.jenisFaskes === 'Puskesmas') {
       list = list.filter(name => {
         const n = name.toLowerCase();
-        return !n.includes('klinik') && !n.includes('clinic');
+        return n.includes('puskesmas') || n.includes('pkm') || n.includes('puseksmas') || n.includes('puskes');
       });
     }
     
