@@ -696,7 +696,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                   <h2 className="text-xl font-bold text-slate-800">B. Kompetensi Dokter &amp; Beban Kerja</h2>
                 </div>
 
-                {!isRoleDoctor ? (
+                {(!isRoleDoctor && !isPrintMode) ? (
                   <div className="text-center py-16 bg-slate-50 border border-slate-100 rounded-xl">
                     <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4"><Info className="w-8 h-8" /></div>
                     <h3 className="text-xl font-bold text-slate-800 mb-2">Bagian Khusus Dokter</h3>
@@ -723,7 +723,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                     {/* Tabel Kompetensi */}
                     <div>
                       <p className="text-sm font-semibold text-slate-700 mb-3">
-                        {isRoleSpKklp ? '🩺 Kompetensi Layanan — Diisi oleh Dokter Sp.KKLP' : '🩺 Kompetensi Layanan — Diisi oleh Dokter Umum'}
+                        {(isRoleSpKklp || isPrintMode) ? '🩺 Kompetensi Layanan — Diisi oleh Dokter Umum / Dokter Sp.KKLP' : '🩺 Kompetensi Layanan — Diisi oleh Dokter Umum'}
                       </p>
                       <div className="border border-slate-200 rounded-lg overflow-hidden">
                         <table className="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
@@ -762,8 +762,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       })()}
                     </div>
 
-                    {/* Bagian Khusus Sp.KKLP */}
-                    {isRoleSpKklp && (
+                    {/* Kendala Implementasi (Khusus SpKKLP atau Print Mode) */}
+                    {(isRoleSpKklp || isPrintMode) && (
                       <div className="space-y-6 border-t border-blue-100 pt-6">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
@@ -873,7 +873,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
             {/* ===== STEP 3: PERSPEKTIF SPKKLP (SEMUA RESPONDEN) ===== */}
             {(isPrintMode || step === 3) && !isRoleDpm && (
               <div className="space-y-8">
-                {!isRoleSpKklp && (
+                {(!isRoleSpKklp || isPrintMode) && (
                   <>
                     <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                       <div className="w-1 h-6 bg-indigo-600 rounded-full"></div>
@@ -935,7 +935,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                 )}
 
                 {/* Peran SpKKLP dalam Optimalisasi Layanan (Khusus Non-SpKKLP) */}
-                {!isRoleSpKklp && (
+                {(!isRoleSpKklp || isPrintMode) && (
                   <div>
                     <h3 className="text-lg font-bold text-slate-800 mb-3 mt-6">A.2 Peran Sp.KKLP dalam Optimalisasi Layanan</h3>
                     <p className="text-sm text-slate-600 mb-4">Mohon berikan penilaian Anda terhadap peran Sp.KKLP di Fasilitas Kesehatan Anda:</p>
