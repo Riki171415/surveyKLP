@@ -3,6 +3,7 @@ import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate } from
 import { AuthProvider, useAuth } from './components/AuthContext';
 import Login from './components/Login';
 import SurveyForm from './components/SurveyForm';
+import ListResponden from './components/ListResponden';
 import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList, Loader2, ChevronRight, Target, Printer, Menu, X } from 'lucide-react';
 import logoKemenkes from './assets/logo-kemenkes.png';
 
@@ -117,6 +118,10 @@ function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
         )}
 
         {['tim survey', 'admin'].includes(user.role) && (
+          <NavItem to="/list-responden" icon={ClipboardList} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>List Responden</NavItem>
+        )}
+
+        {['tim survey', 'admin'].includes(user.role) && (
           <>
             <NavItem to="/kokpit" icon={Target} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Kokpit Kemenkes</NavItem>
             <NavItem to="/dashboard" icon={LayoutDashboard} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Dashboard Laporan</NavItem>
@@ -205,8 +210,9 @@ function AppContent() {
                 <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><Dashboard /></ProtectedRoute>} />
                 <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
                 <Route path="/cetak-form" element={<ProtectedRoute allowedRoles={['admin']}><SurveyForm isPrintMode={true} /></ProtectedRoute>} />
-                <Route path="/wawancara" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><TimSurveyList /></ProtectedRoute>} />
-                <Route path="/wawancara/form" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><SurveyForm isEdit={true} isInterview={true} /></ProtectedRoute>} />
+                <Route path="/list-responden" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><ListResponden /></ProtectedRoute>} />
+                <Route path="/wawancara" element={<ProtectedRoute allowedRoles={['admin']}><TimSurveyList /></ProtectedRoute>} />
+                <Route path="/wawancara/form" element={<ProtectedRoute allowedRoles={['admin']}><SurveyForm isEdit={true} isInterview={true} /></ProtectedRoute>} />
               </Routes>
             </Suspense>
           </div>
