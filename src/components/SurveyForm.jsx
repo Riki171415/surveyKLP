@@ -1302,7 +1302,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       <tr>
                         <th className="px-4 py-3 font-semibold text-slate-700 w-2/5">Layanan Belum Optimal</th>
                         <th className="px-4 py-3 font-semibold text-slate-700 text-center w-1/5">Skala (1-4)</th>
-                        <th className="px-4 py-3 font-semibold text-slate-700 text-center w-1/6">Masuk JKN?</th>
+                        <th className="px-4 py-3 font-semibold text-slate-700 text-center w-1/5">Apakah Saat ini Layanan tersebut Masuk dalam Program JKN?</th>
                         <th className="px-4 py-3 font-semibold text-slate-700 w-1/4">Catatan</th>
                       </tr>
                     </thead>
