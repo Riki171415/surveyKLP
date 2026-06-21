@@ -9,10 +9,22 @@ export default defineConfig({
     chunkSizeWarningLimit: 2000,
   },
   server: {
-    allowedHosts: ['jamkesfktp.web.id']
+    allowedHosts: ['jamkesfktp.web.id'],
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:4000',
+        changeOrigin: true
+      }
+    }
   },
   preview: {
     port: 4174,
-    allowedHosts: ['jamkesfktp.web.id']
+    allowedHosts: ['jamkesfktp.web.id'],
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:4000',
+        changeOrigin: true
+      }
+    }
   }
 })
