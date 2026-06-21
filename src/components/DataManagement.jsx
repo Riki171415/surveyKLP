@@ -121,10 +121,21 @@ export default function DataManagement() {
   const fetchSurveys = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/surveys');
-      const json = await response.json();
-      if (json.error) throw json.error;
-      setSurveys(json.data || []);
+      const useSupabase = import.meta.env.VITE_USE_SUPABASE === 'true';
+      let surveysData = [];
+      
+      if (useSupabase) {
+        const { data, error } = await supabase.from('surveys').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        surveysData = data || [];
+      } else {
+        const response = await fetch('/api/surveys');
+        const json = await response.json();
+        if (json.error) throw json.error;
+        surveysData = json.data || [];
+      }
+      
+      setSurveys(surveysData);
     } catch { alert('Gagal memuat data.'); }
     finally { setLoading(false); }
   };
@@ -132,9 +143,16 @@ export default function DataManagement() {
   const deleteSurvey = async (id, name) => {
     if (!window.confirm(`Hapus data survey dari "${name}"?`)) return;
     try {
-      const response = await fetch(`/api/surveys/${id}`, { method: 'DELETE' });
-      const json = await response.json();
-      if (json.error) throw json.error;
+      const useSupabase = import.meta.env.VITE_USE_SUPABASE === 'true';
+      
+      if (useSupabase) {
+        const { error } = await supabase.from('surveys').delete().eq('id', id);
+        if (error) throw error;
+      } else {
+        const response = await fetch(`/api/surveys/${id}`, { method: 'DELETE' });
+        const json = await response.json();
+        if (json.error) throw json.error;
+      }
       
       setSurveys(prev => prev.filter(item => item.id !== id));
       if (selected?.id === id) setSelected(null);

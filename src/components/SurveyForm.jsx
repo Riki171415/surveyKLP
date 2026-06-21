@@ -441,9 +441,21 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
         prb: formData.prb,
         dpm: formData.dpm
       };
+      const useSupabase = import.meta.env.VITE_USE_SUPABASE === 'true';
       let error;
-      if (formData.id) {
-        const response = await fetch(`/api/surveys/${formData.id}`, {
+      
+      if (useSupabase) {
+        if (formData.id) {
+          const { error: updateError } = await supabase.from('surveys').update(payload).eq('id', formData.id);
+          error = updateError;
+        } else {
+          const { data, error: insertError } = await supabase.from('surveys').insert([payload]).select();
+          error = insertError;
+          if (data && data.length > 0) setFormData(prev => ({ ...prev, id: data[0].id }));
+        }
+      } else {
+        if (formData.id) {
+          const response = await fetch(`/api/surveys/${formData.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)

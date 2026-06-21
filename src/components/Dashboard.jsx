@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { id as localeID } from 'date-fns/locale';
@@ -44,10 +45,21 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/surveys');
-      const json = await response.json();
-      if (json.error) throw json.error;
-      setData(json.data || []);
+      const useSupabase = import.meta.env.VITE_USE_SUPABASE === 'true';
+      let surveysData = [];
+      
+      if (useSupabase) {
+        const { data: surveys, error: sbError } = await supabase.from('surveys').select('*');
+        if (sbError) throw sbError;
+        surveysData = surveys || [];
+      } else {
+        const response = await fetch('/api/surveys');
+        const json = await response.json();
+        if (json.error) throw json.error;
+        surveysData = json.data || [];
+      }
+      
+      setData(surveysData);
     } catch (err) {
       console.error(err);
       setError("Terjadi kesalahan saat memuat data dari server lokal.");
