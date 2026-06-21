@@ -472,6 +472,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
         error = resData.error;
         if (resData.data && resData.data.length > 0) setFormData(prev => ({ ...prev, id: resData.data[0].id }));
       }
+    }
 
       if (error) throw error;
       if (isIntermediate) {
