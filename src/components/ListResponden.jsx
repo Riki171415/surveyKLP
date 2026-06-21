@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Building2, Calendar, FileText, Loader2 } from 'lucide-react';
+import { Search, MapPin, Building2, Calendar, FileText, Loader2, RefreshCw } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 export default function ListResponden() {
@@ -9,27 +9,29 @@ export default function ListResponden() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        let data = [];
-        if (import.meta.env.VITE_USE_LOCAL_API === 'true') {
-          const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-          const res = await fetch(`${baseUrl}/api/surveys`);
-          const json = await res.json();
-          data = json.data || [];
-        } else {
-          const { data: sbData, error } = await supabase.from('surveys').select('*').order('created_at', { ascending: false });
-          if (error) throw error;
-          data = sbData || [];
-        }
-        setSurveys(data);
-      } catch (err) {
-        console.error('Error fetching surveys:', err);
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      let data = [];
+      if (import.meta.env.VITE_USE_LOCAL_API === 'true') {
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+        const res = await fetch(`${baseUrl}/api/surveys`);
+        const json = await res.json();
+        data = json.data || [];
+      } else {
+        const { data: sbData, error } = await supabase.from('surveys').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        data = sbData || [];
       }
+      setSurveys(data);
+    } catch (err) {
+      console.error('Error fetching surveys:', err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -63,6 +65,14 @@ export default function ListResponden() {
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">List Responden</h1>
           <p className="text-slate-500 mt-2">Daftar FKTP yang sudah mengisi survei ({surveys.length} total)</p>
         </div>
+        <button
+          onClick={fetchData}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-600 font-medium rounded-xl hover:bg-primary-100 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+          Muat Ulang
+        </button>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
