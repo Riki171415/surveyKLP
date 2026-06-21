@@ -26,14 +26,19 @@ const layananDirujukItems = [
 ];
 
 const jknBenefits = [
-  "Kepatuhan terapi AIDS/TB", "Program Rujuk Balik (PRB)",
-  "Pengelolaan Hipertensi tanpa komplikasi", "Deprescribing polifarmasi"
+  "Pemantauan kepatuhan terapi pasien AIDS, TB, dan Malaria memberikan manfaat yang optimal bagi pasien.",
+  "Pelaksanaan Program Rujuk Balik (PRB) memberikan manfaat yang optimal bagi pasien.",
+  "Pengelolaan Hipertensi tanpa komplikasi memberikan manfaat yang optimal bagi pasien.",
+  "Deprescribing/pengurangan obat pada pasien polifarmasi memberikan manfaat yang optimal bagi pasien."
 ];
 
 const nonOptimalServices = [
-  "Lifestyle medicine", "Wellness & healthy aging",
-  "Konsultasi perjalanan/travel", "Manajemen geriatri frailty", 
-  "Precision medicine dasar", "Layanan promotif keluarga"
+  "Pelayanan lifestyle medicine penting untuk diakomodasi dalam layanan JKN.",
+  "Pelayanan wellness dan healthy aging penting untuk diakomodasi dalam layanan JKN.",
+  "Konsultasi perjalanan/travel medicine penting untuk diakomodasi dalam layanan JKN.",
+  "Manajemen pasien geriatri frailty penting untuk diakomodasi dalam layanan JKN.",
+  "Precision medicine/konseling genetik dasar penting untuk diakomodasi dalam layanan JKN.",
+  "Layanan promotif berbasis keluarga penting untuk diakomodasi dalam layanan JKN."
 ];
 
 const COLORS = {

@@ -3,17 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2, Search, Edit, Trash2, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
+import { useAuth } from './AuthContext';
 
 // ─── Data referensi (sama dengan SurveyForm) ───────────────────────────────
 const jknBenefits = [
-  "Pemantauan kepatuhan terapi pasien AIDS, TB, Malaria", "Pelaksanaan Program Rujuk Balik (PRB)",
-  "Pengelolaan Hipertensi tanpa komplikasi", "Deprescribing/pengurangan obat pada pasien polifarmasi"
+  "Pemantauan kepatuhan terapi pasien AIDS, TB, dan Malaria memberikan manfaat yang optimal bagi pasien.",
+  "Pelaksanaan Program Rujuk Balik (PRB) memberikan manfaat yang optimal bagi pasien.",
+  "Pengelolaan Hipertensi tanpa komplikasi memberikan manfaat yang optimal bagi pasien.",
+  "Deprescribing/pengurangan obat pada pasien polifarmasi memberikan manfaat yang optimal bagi pasien."
 ];
 
 const nonOptimalServices = [
-  "Pelayanan lifestyle medicine", "Pelayanan wellness dan healthy aging",
-  "Konsultasi perjalanan/travel medicine", "Manajemen pasien geriatri frailty", 
-  "Precision medicine/konseling genetik dasar", "Layanan promotif berbasis keluarga"
+  "Pelayanan lifestyle medicine penting untuk diakomodasi dalam layanan JKN.",
+  "Pelayanan wellness dan healthy aging penting untuk diakomodasi dalam layanan JKN.",
+  "Konsultasi perjalanan/travel medicine penting untuk diakomodasi dalam layanan JKN.",
+  "Manajemen pasien geriatri frailty penting untuk diakomodasi dalam layanan JKN.",
+  "Precision medicine/konseling genetik dasar penting untuk diakomodasi dalam layanan JKN.",
+  "Layanan promotif berbasis keluarga penting untuk diakomodasi dalam layanan JKN."
 ];
 
 const kompetensiLayanan = [
@@ -103,6 +109,7 @@ function Field({ label, value }) {
 
 // ─── Komponen utama ─────────────────────────────────────────────────────────
 export default function DataManagement() {
+  const { user } = useAuth();
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -751,20 +758,22 @@ export default function DataManagement() {
               )}
 
               {/* Footer aksi */}
-              <div className="pt-2 pb-2 flex gap-2">
-                <button
-                  onClick={() => deleteSurvey(selected.id, selected.fktp_name)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-rose-600 bg-rose-50 hover:bg-rose-100 text-xs font-semibold rounded-lg transition-colors border border-rose-100"
-                >
-                  <Trash2 className="w-3.5 h-3.5" /> Hapus Data
-                </button>
-                <button
-                  onClick={() => navigate('/wawancara/form', { state: { surveyData: selected } })}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-amber-700 bg-amber-50 hover:bg-amber-100 text-xs font-semibold rounded-lg transition-colors border border-amber-100"
-                >
-                  <Edit className="w-3.5 h-3.5" /> Edit Data
-                </button>
-              </div>
+              {user?.role === 'admin' && (
+                <div className="pt-2 pb-2 flex gap-2">
+                  <button
+                    onClick={() => deleteSurvey(selected.id, selected.fktp_name)}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-rose-600 bg-rose-50 hover:bg-rose-100 text-xs font-semibold rounded-lg transition-colors border border-rose-100"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Hapus Data
+                  </button>
+                  <button
+                    onClick={() => navigate('/wawancara/form', { state: { surveyData: selected } })}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-amber-700 bg-amber-50 hover:bg-amber-100 text-xs font-semibold rounded-lg transition-colors border border-amber-100"
+                  >
+                    <Edit className="w-3.5 h-3.5" /> Edit Data
+                  </button>
+                </div>
+              )}
 
             </div>
           </div>

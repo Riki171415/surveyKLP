@@ -10,14 +10,19 @@ import SearchableSelect from './SearchableSelect';
 import SurveiDPM from './SurveiDPM';
 
 const jknBenefits = [
-  "Pemantauan kepatuhan terapi pasien AIDS, TB, Malaria", "Pelaksanaan Program Rujuk Balik (PRB)",
-  "Pengelolaan Hipertensi tanpa komplikasi", "Deprescribing/pengurangan obat pada pasien polifarmasi"
+  "Pemantauan kepatuhan terapi pasien AIDS, TB, dan Malaria memberikan manfaat yang optimal bagi pasien.",
+  "Pelaksanaan Program Rujuk Balik (PRB) memberikan manfaat yang optimal bagi pasien.",
+  "Pengelolaan Hipertensi tanpa komplikasi memberikan manfaat yang optimal bagi pasien.",
+  "Deprescribing/pengurangan obat pada pasien polifarmasi memberikan manfaat yang optimal bagi pasien."
 ];
 
 const nonOptimalServices = [
-  "Pelayanan lifestyle medicine", "Pelayanan wellness dan healthy aging",
-  "Konsultasi perjalanan/travel medicine", "Manajemen pasien geriatri frailty", 
-  "Precision medicine/konseling genetik dasar", "Layanan promotif berbasis keluarga"
+  "Pelayanan lifestyle medicine penting untuk diakomodasi dalam layanan JKN.",
+  "Pelayanan wellness dan healthy aging penting untuk diakomodasi dalam layanan JKN.",
+  "Konsultasi perjalanan/travel medicine penting untuk diakomodasi dalam layanan JKN.",
+  "Manajemen pasien geriatri frailty penting untuk diakomodasi dalam layanan JKN.",
+  "Precision medicine/konseling genetik dasar penting untuk diakomodasi dalam layanan JKN.",
+  "Layanan promotif berbasis keluarga penting untuk diakomodasi dalam layanan JKN."
 ];
 
 const kompetensiLayanan = [
@@ -298,7 +303,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
        })() : true))
     : true;
 
-  const isStep3Valid = relevansiItems.every((_, idx) => formData.relevansiSpkklp[idx]) &&
+  const isStep3Valid = (isRoleSpKklp ? true : relevansiItems.every((_, idx) => formData.relevansiSpkklp[idx])) &&
     formData.prb?.jumlah && formData.prb?.peserta_dm && formData.prb?.peserta_ht &&
     formData.prb?.mekanisme && formData.prb?.rataRujukan &&
     (isRoleSpKklp ? true : peranSpkklpItems.every((_, idx) => formData.peranSpkklp[idx]));
@@ -859,19 +864,21 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
             {/* ===== STEP 3: PERSPEKTIF SPKKLP (SEMUA RESPONDEN) ===== */}
             {step === 3 && !isRoleDpm && (
               <div className="space-y-8">
-                <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
-                  <div className="w-1 h-6 bg-indigo-600 rounded-full"></div>
-                  <h2 className="text-xl font-bold text-slate-800">C. Perspektif terhadap Sp.KKLP di Puskesmas / Klinik</h2>
-                </div>
+                {!isRoleSpKklp && (
+                  <>
+                    <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
+                      <div className="w-1 h-6 bg-indigo-600 rounded-full"></div>
+                      <h2 className="text-xl font-bold text-slate-800">C. Perspektif terhadap Sp.KKLP di Puskesmas / Klinik</h2>
+                    </div>
 
-                {/* Relevansi SpKKLP */}
-                <div>
+                    {/* Relevansi SpKKLP */}
+                    <div>
                   <div className="border border-indigo-100 bg-indigo-50/50 rounded-lg p-4 flex items-start space-x-3 mb-4">
                     <Info className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
                     <div className="text-sm text-indigo-900">
                       <span className="font-semibold block mb-1">Panduan Penilaian Skala (1-4):</span>
                       <ul className="list-decimal pl-5 space-y-0.5">
-                        <li>Sangat Tdk Setuju/Pernah</li><li>Tidak Setuju/Jarang</li><li>Setuju/Sering</li><li>Sangat Setuju/Selalu</li>
+                        <li>Sangat Tidak Setuju</li><li>Tidak Setuju</li><li>Setuju</li><li>Sangat Setuju</li>
                       </ul>
                     </div>
                   </div>
@@ -891,10 +898,10 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                             <td className="px-4 py-3">
                               <div className="flex flex-col gap-2">
                                 {[
-                                  { val: 1, label: 'Sangat Tdk Setuju/Pernah' },
-                                  { val: 2, label: 'Tidak Setuju/Jarang' },
-                                  { val: 3, label: 'Setuju/Sering' },
-                                  { val: 4, label: 'Sangat Setuju/Selalu' }
+                                  { val: 1, label: 'Sangat Tidak Setuju' },
+                                  { val: 2, label: 'Tidak Setuju' },
+                                  { val: 3, label: 'Setuju' },
+                                  { val: 4, label: 'Sangat Setuju' }
                                 ].map(opt => {
                                   const isSelected = formData.relevansiSpkklp[idx] === opt.val.toString();
                                   return (
@@ -915,6 +922,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     </table>
                   </div>
                 </div>
+                  </>
+                )}
 
                 {/* Peran SpKKLP dalam Optimalisasi Layanan (Khusus Non-SpKKLP) */}
                 {!isRoleSpKklp && (
@@ -937,10 +946,10 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                               <td className="px-4 py-3">
                                 <div className="flex flex-col gap-2">
                                   {[
-                                    { val: 1, label: 'Sangat Tdk Setuju/Pernah' },
-                                    { val: 2, label: 'Tidak Setuju/Jarang' },
-                                    { val: 3, label: 'Setuju/Sering' },
-                                    { val: 4, label: 'Sangat Setuju/Selalu' }
+                                    { val: 1, label: 'Sangat Tidak Setuju' },
+                                    { val: 2, label: 'Tidak Setuju' },
+                                    { val: 3, label: 'Setuju' },
+                                    { val: 4, label: 'Sangat Setuju' }
                                   ].map(opt => {
                                     const isSelected = formData.peranSpkklp[idx] === opt.val.toString();
                                     return (
@@ -1348,7 +1357,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false }) {
                     {(() => { const b = kompetensiLayanan.filter((_, i) => !formData.kompetensi[i]?.status).length; return b > 0 ? <li>{b} layanan kompetensi belum dipilih status-nya</li> : null; })()}
                   </>)}
                   {step === 3 && (<>
-                    {(() => { const b = relevansiItems.filter((_, i) => !formData.relevansiSpkklp[i]).length; return b > 0 ? <li>{b} item relevansi Sp.KKLP belum diberi nilai</li> : null; })()}
+                    {!isRoleSpKklp && (() => { const b = relevansiItems.filter((_, i) => !formData.relevansiSpkklp[i]).length; return b > 0 ? <li>{b} item relevansi Sp.KKLP belum diberi nilai</li> : null; })()}
                     {!formData.prb?.mekanisme && <li>Mekanisme pemantauan PRB wajib dipilih minimal 1</li>}
                     {!formData.prb?.rataRujukan && <li>Rata-rata jumlah rujukan ke FKRTL belum diisi</li>}
                   </>)}

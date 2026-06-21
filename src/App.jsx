@@ -88,7 +88,7 @@ function Sidebar() {
       <div className="p-4 space-y-1 flex-1 overflow-y-auto hide-scrollbar">
         {!isCollapsed && <div className="text-xs font-bold text-primary-200 uppercase tracking-widest mb-3 px-4 mt-1">Menu Utama</div>}
 
-        {['puskesmas', 'admin'].includes(user.role) && (
+        {['puskesmas', 'admin', 'tim survey'].includes(user.role) && (
           <NavItem to="/" icon={FileText} collapsed={isCollapsed}>Isi Survey</NavItem>
         )}
 
@@ -96,13 +96,16 @@ function Sidebar() {
           <NavItem to="/wawancara" icon={ClipboardList} collapsed={isCollapsed}>Form Wawancara</NavItem>
         )}
 
-        {user.role === 'admin' && (
+        {['tim survey', 'admin'].includes(user.role) && (
           <>
             <NavItem to="/kokpit" icon={Target} collapsed={isCollapsed}>Kokpit Kemenkes</NavItem>
             <NavItem to="/dashboard" icon={LayoutDashboard} collapsed={isCollapsed}>Dashboard Laporan</NavItem>
             <NavItem to="/data" icon={Database} collapsed={isCollapsed}>Manajemen Data</NavItem>
-            <NavItem to="/users" icon={Users} collapsed={isCollapsed}>Kelola Akun</NavItem>
           </>
+        )}
+
+        {user.role === 'admin' && (
+          <NavItem to="/users" icon={Users} collapsed={isCollapsed}>Kelola Akun</NavItem>
         )}
       </div>
 
@@ -166,9 +169,9 @@ function AppContent() {
                 {/* Form Terbuka untuk Publik */}
                 <Route path="/" element={<SurveyForm />} />
                 {/* Halaman Admin / Tim Survey (Dilindungi) */}
-                <Route path="/kokpit" element={<ProtectedRoute allowedRoles={['admin']}><KokpitKemenkes /></ProtectedRoute>} />
-                <Route path="/data" element={<ProtectedRoute allowedRoles={['admin']}><DataManagement /></ProtectedRoute>} />
-                <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Dashboard /></ProtectedRoute>} />
+                <Route path="/kokpit" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><KokpitKemenkes /></ProtectedRoute>} />
+                <Route path="/data" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><DataManagement /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><Dashboard /></ProtectedRoute>} />
                 <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
                 <Route path="/wawancara" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><TimSurveyList /></ProtectedRoute>} />
                 <Route path="/wawancara/form" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><SurveyForm isEdit={true} isInterview={true} /></ProtectedRoute>} />
