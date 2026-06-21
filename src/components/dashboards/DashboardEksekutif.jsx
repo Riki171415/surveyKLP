@@ -287,8 +287,8 @@ export default function DashboardEksekutif({ data = [] }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
                 <h3 className="text-lg font-bold text-slate-200 mb-4">Proporsi Jenis FKTP</h3>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
+                <div className="h-64 min-h-[250px]">
+                  <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                     <PieChart>
                       <Pie data={metrics.pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
                         {metrics.pieData.map((entry, index) => (
@@ -319,8 +319,8 @@ export default function DashboardEksekutif({ data = [] }) {
             <div className="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
               <h3 className="text-lg font-bold text-slate-200 mb-4">Sebaran FKTP per Kabupaten/Kota (Top 15)</h3>
               <p className="text-sm text-slate-400 mb-4">Distribusi fasilitas kesehatan dan status kepemilikan Sp.KKLP di wilayah terbanyak.</p>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-80 min-h-[300px]">
+                <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <BarChart data={metrics.cityData} layout="vertical" margin={{ top: 0, right: 30, left: 50, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
                     <XAxis type="number" tick={{ fill: '#94a3b8' }} />
@@ -347,7 +347,7 @@ export default function DashboardEksekutif({ data = [] }) {
               </div>
               <p className="text-xs text-slate-400 mb-4">Persepsi optimalisasi manfaat JKN berdasarkan Jenis FKTP (Skala 1-4)</p>
               <div className="flex-1 min-h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <RadarChart cx="50%" cy="50%" outerRadius="70%" data={metrics.radarJkn}>
                     <PolarGrid stroke="#334155" />
                     <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
@@ -372,7 +372,7 @@ export default function DashboardEksekutif({ data = [] }) {
                 <span className="text-xs text-slate-400">% Persetujuan Tinggi</span>
               </div>
               <div className="flex-1 min-h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <BarChart data={metrics.barUsulan} layout="vertical" margin={{ top: 0, right: 30, left: 30, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
                     <XAxis type="number" domain={[0, 100]} tick={{ fill: '#64748b' }} />
@@ -402,7 +402,7 @@ export default function DashboardEksekutif({ data = [] }) {
               </div>
               <p className="text-xs text-slate-400 mb-4">Membandingkan FKTP yang sudah ada Sp.KKLP vs Belum Ada (Skala 1-4)</p>
               <div className="flex-1 min-h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <BarChart data={metrics.barRelevansi} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
                     <XAxis type="number" domain={[0, 4]} tick={{ fill: '#64748b' }} />
@@ -424,7 +424,7 @@ export default function DashboardEksekutif({ data = [] }) {
               </div>
               <p className="text-xs text-slate-400 mb-4">Melihat korelasi antara waktu layanan di poli dengan proporsi pelayanan dalam gedung.</p>
               <div className="flex-1 min-h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                     <XAxis type="number" dataKey="x" name="Waktu Poli" unit=" mnt" stroke="#cbd5e1" tick={{ fill: '#94a3b8' }} label={{ value: 'Rata-rata Waktu Poli (Menit)', position: 'insideBottom', offset: -10, fill: '#94a3b8', fontSize: 12 }} />
@@ -453,7 +453,7 @@ export default function DashboardEksekutif({ data = [] }) {
               </div>
               <p className="text-xs text-slate-400 mb-4">Persentase FKTP yang rutin merujuk kasus-kasus primer ke Rumah Sakit.</p>
               <div className="flex-1 min-h-[350px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <BarChart data={metrics.topRujukan} layout="vertical" margin={{ top: 0, right: 30, left: 20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
                     <XAxis type="number" domain={[0, 100]} tick={{ fill: '#64748b' }} />
@@ -528,7 +528,7 @@ export default function DashboardEksekutif({ data = [] }) {
             </div>
             <p className="text-xs text-slate-400 mb-6">Peringkat kendala berdasarkan jumlah keluhan dari FKTP.</p>
             <div className="flex-1 min-h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                 <BarChart data={metrics.barKendala} layout="vertical" margin={{ top: 0, right: 30, left: 30, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
                   <XAxis type="number" tick={{ fill: '#64748b' }} />

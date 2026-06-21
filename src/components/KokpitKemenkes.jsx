@@ -424,7 +424,7 @@ export default function KokpitKemenkes() {
               </div>
               <p className="text-xs text-slate-400 mb-4">Mendeteksi perbedaan pandangan thd. peran Sp.KKLP (Skor 1-4)</p>
               <div className="flex-1 min-h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <RadarChart cx="50%" cy="50%" outerRadius="70%" data={metrics.radarData}>
                     <PolarGrid stroke="#334155" />
                     <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
@@ -451,7 +451,7 @@ export default function KokpitKemenkes() {
                 <span className="text-xs text-slate-400">Skor Penting (1-4)</span>
               </div>
               <div className="flex-1 min-h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                   <BarChart data={metrics.manfaatData} layout="vertical" margin={{ top: 0, right: 0, left: 30, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" />
                     <XAxis type="number" domain={[0, 4]} tick={{ fill: '#64748b' }} />

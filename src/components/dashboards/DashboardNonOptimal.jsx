@@ -106,7 +106,7 @@ export default function DashboardNonOptimal({ filteredData, COLORS, isPrinting }
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><CheckCircle className="w-5 h-5 mr-2 text-rose-600" /> Proporsi Usulan Masuk JKN</h3>
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <PieChart>
                 <Pie data={jknData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ name, percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
                   <Cell fill="#10b981" /> {/* Diusulkan */}
@@ -122,7 +122,7 @@ export default function DashboardNonOptimal({ filteredData, COLORS, isPrinting }
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><TrendingDown className="w-5 h-5 mr-2 text-rose-600" /> Distribusi Skala Hambatan Pelaksanaan (1-4)</h3>
           <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={hambatanData} layout="vertical" margin={{ top: 10, right: 30, left: 100, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
                 <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
