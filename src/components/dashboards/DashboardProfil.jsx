@@ -30,7 +30,7 @@ export default function DashboardProfil({ filteredData, COLORS, isPrinting }) {
       } else {
         if (role === 'Dokter Praktik Mandiri') {
           fktpTypeCount['Dokter Praktik Mandiri']++;
-        } else if (fName.includes('klinik')) {
+        } else if (fName.includes('klinik') || fName.includes('clinic')) {
           fktpTypeCount['Klinik']++;
         } else {
           fktpTypeCount['Puskesmas']++;

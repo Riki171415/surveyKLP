@@ -170,9 +170,15 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
   const faskesList = (() => {
     let list = [...faskesListRaw];
     if (formData.jenisFaskes === 'Klinik') {
-      list = list.filter(name => name.toLowerCase().includes('klinik'));
+      list = list.filter(name => {
+        const n = name.toLowerCase();
+        return n.includes('klinik') || n.includes('clinic');
+      });
     } else if (formData.jenisFaskes === 'Puskesmas') {
-      list = list.filter(name => !name.toLowerCase().includes('klinik'));
+      list = list.filter(name => {
+        const n = name.toLowerCase();
+        return !n.includes('klinik') && !n.includes('clinic');
+      });
     }
     
     if (formData.jenisFaskes === 'Dokter Praktik Mandiri' || formData.jenisFaskes === 'Klinik') {
@@ -180,8 +186,10 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     }
     
     return list.sort((a, b) => {
-      const isAPusk = a.toLowerCase().startsWith('puskesmas');
-      const isBPusk = b.toLowerCase().startsWith('puskesmas');
+      const al = a.toLowerCase();
+      const bl = b.toLowerCase();
+      const isAPusk = al.startsWith('puskesmas') || al.startsWith('pkm') || al.includes('puskesmas') || al.includes('pkm');
+      const isBPusk = bl.startsWith('puskesmas') || bl.startsWith('pkm') || bl.includes('puskesmas') || bl.includes('pkm');
       if (isAPusk && !isBPusk) return -1;
       if (!isAPusk && isBPusk) return 1;
       return a.localeCompare(b);
