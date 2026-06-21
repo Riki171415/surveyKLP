@@ -45,7 +45,7 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const useSupabase = import.meta.env.VITE_USE_SUPABASE === 'true';
+      const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
       let surveysData = [];
       
       if (useSupabase) {

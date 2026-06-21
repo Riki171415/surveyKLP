@@ -441,7 +441,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
         prb: formData.prb,
         dpm: formData.dpm
       };
-      const useSupabase = import.meta.env.VITE_USE_SUPABASE === 'true';
+      const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
       let error;
       
       if (useSupabase) {

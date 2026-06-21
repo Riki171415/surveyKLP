@@ -121,7 +121,7 @@ export default function DataManagement() {
   const fetchSurveys = async () => {
     try {
       setLoading(true);
-      const useSupabase = import.meta.env.VITE_USE_SUPABASE === 'true';
+      const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
       let surveysData = [];
       
       if (useSupabase) {
@@ -143,7 +143,7 @@ export default function DataManagement() {
   const deleteSurvey = async (id, name) => {
     if (!window.confirm(`Hapus data survey dari "${name}"?`)) return;
     try {
-      const useSupabase = import.meta.env.VITE_USE_SUPABASE === 'true';
+      const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
       
       if (useSupabase) {
         const { error } = await supabase.from('surveys').delete().eq('id', id);
