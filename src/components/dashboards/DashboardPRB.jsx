@@ -82,14 +82,16 @@ export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
   );
 
   const GaugeChart = ({ value, label, color }) => {
+    // Prevent negative values for 'Empty' part which breaks the chart visual
+    const safeValue = Math.min(Math.max(value, 0), 100);
     const data = [
-      { name: 'Value', value: value },
-      { name: 'Empty', value: 100 - value }
+      { name: 'Value', value: safeValue },
+      { name: 'Empty', value: 100 - safeValue }
     ];
     return (
       <div className="flex flex-col items-center justify-center">
-        <div className="h-40 w-full relative">
-          <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+        <div className="h-32 sm:h-40 w-full relative">
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie data={data} cx="50%" cy="100%" startAngle={180} endAngle={0} innerRadius={60} outerRadius={80} paddingAngle={0} dataKey="value" stroke="none">
                 <Cell fill={color} />
@@ -101,7 +103,7 @@ export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
             <span className="text-3xl font-bold" style={{ color }}>{value.toFixed(1)}%</span>
           </div>
         </div>
-        <p className="text-sm font-semibold text-slate-600 mt-4 text-center">{label}</p>
+        <p className="text-sm font-semibold text-slate-600 mt-2 px-2 text-center">{label}</p>
       </div>
     );
   };
