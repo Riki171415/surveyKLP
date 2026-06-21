@@ -7,5 +7,8 @@ export default defineConfig({
   base: process.env.VITE_BASE_URL || '/',
   build: {
     chunkSizeWarningLimit: 2000,
+  },
+  server: {
+    allowedHosts: ['jamkesfktp.web.id']
   }
 })
