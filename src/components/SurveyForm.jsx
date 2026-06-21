@@ -1131,7 +1131,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                     <ul className="list-decimal pl-5 space-y-0.5"><li>Sangat Tidak Setuju</li><li>Tidak Setuju</li><li>Setuju</li><li>Sangat Setuju</li></ul>
                   </div>
                 </div>
-                <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                <div className="border border-slate-200 rounded-lg overflow-x-auto shadow-sm">
                   <table className="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
                     <thead className="bg-slate-50 border-b border-slate-200">
                       <tr>
@@ -1309,7 +1309,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                     <ul className="list-decimal pl-5 mt-1 space-y-0.5"><li>Sangat Tidak Setuju</li><li>Tidak Setuju</li><li>Setuju</li><li>Sangat Setuju</li></ul>
                   </div>
                 </div>
-                <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                <div className="border border-slate-200 rounded-lg overflow-x-auto shadow-sm">
                   <table className="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
                     <thead className="bg-slate-50 border-b border-slate-200">
                       <tr>
