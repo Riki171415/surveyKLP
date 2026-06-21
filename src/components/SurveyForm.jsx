@@ -1307,7 +1307,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
             )}
 
             {/* ===== PENDALAMAN KUALITATIF ===== */}
-            {((isRoleDpm && step === 3) || (!isRoleDpm && step === 6)) && (
+            {(isPrintMode || (isRoleDpm && step === 3) || (!isRoleDpm && step === 6)) && (
               <div className="space-y-8 animate-fade-in">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                   <div className="w-1 h-6 bg-emerald-600 rounded-full"></div>
