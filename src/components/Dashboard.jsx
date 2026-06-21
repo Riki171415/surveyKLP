@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { id as localeID } from 'date-fns/locale';
@@ -45,12 +44,13 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const { data: surveys, error: sbError } = await supabase.from('surveys').select('*');
-      if (sbError) throw sbError;
-      setData(surveys || []);
+      const response = await fetch('/api/surveys');
+      const json = await response.json();
+      if (json.error) throw json.error;
+      setData(json.data || []);
     } catch (err) {
       console.error(err);
-      setError("Terjadi kesalahan saat memuat data dari Supabase.");
+      setError("Terjadi kesalahan saat memuat data dari server lokal.");
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { supabase } from '../supabaseClient';
 import { 
   Target, AlertTriangle, Activity, Map, Users, Stethoscope, Briefcase, ChevronRight, 
   Database, RefreshCw, Layers, MessageSquare, Zap, FileText
@@ -63,9 +62,10 @@ export default function KokpitKemenkes() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const { data: surveys, error } = await supabase.from('surveys').select('*');
-      if (error) throw error;
-      setData(surveys || []);
+      const response = await fetch('/api/surveys');
+      const json = await response.json();
+      if (json.error) throw json.error;
+      setData(json.data || []);
     } catch (err) {
       console.error(err);
     } finally {

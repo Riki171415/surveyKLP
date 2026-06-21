@@ -121,9 +121,10 @@ export default function DataManagement() {
   const fetchSurveys = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.from('surveys').select('*').order('created_at', { ascending: false });
-      if (error) throw error;
-      setSurveys(data || []);
+      const response = await fetch('/api/surveys');
+      const json = await response.json();
+      if (json.error) throw json.error;
+      setSurveys(json.data || []);
     } catch { alert('Gagal memuat data.'); }
     finally { setLoading(false); }
   };
@@ -131,9 +132,11 @@ export default function DataManagement() {
   const deleteSurvey = async (id, name) => {
     if (!window.confirm(`Hapus data survey dari "${name}"?`)) return;
     try {
-      const { error } = await supabase.from('surveys').delete().eq('id', id);
-      if (error) throw error;
-      setSurveys(s => s.filter(x => x.id !== id));
+      const response = await fetch(`/api/surveys/${id}`, { method: 'DELETE' });
+      const json = await response.json();
+      if (json.error) throw json.error;
+      
+      setSurveys(prev => prev.filter(item => item.id !== id));
       if (selected?.id === id) setSelected(null);
     } catch { alert('Gagal menghapus data.'); }
   };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronRight, ChevronLeft, Save, CheckCircle, Info, ArrowLeft, Printer } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../supabaseClient'; // Akan dihapus nanti jika login dihapus, tapi sementara dipertahankan jika login butuh
 import { useAuth } from './AuthContext';
 import wilayahMapping from '../data/wilayahMapping.json';
 import logoKemenkes from '../assets/logo-kemenkes.png';
@@ -443,13 +443,24 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
       };
       let error;
       if (formData.id) {
-        const { error: updateError } = await supabase.from('surveys').update(payload).eq('id', formData.id);
-        error = updateError;
+        const response = await fetch(`/api/surveys/${formData.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const resData = await response.json();
+        error = resData.error;
       } else {
-        const { data, error: insertError } = await supabase.from('surveys').insert([payload]).select();
-        error = insertError;
-        if (data && data.length > 0) setFormData(prev => ({ ...prev, id: data[0].id }));
+        const response = await fetch('/api/surveys', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const resData = await response.json();
+        error = resData.error;
+        if (resData.data && resData.data.length > 0) setFormData(prev => ({ ...prev, id: resData.data[0].id }));
       }
+
       if (error) throw error;
       if (isIntermediate) {
         setShowTransition(true);
