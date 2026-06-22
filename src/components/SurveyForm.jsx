@@ -287,6 +287,9 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
   const isStep2Valid = isRoleDpm ? (() => {
     const dpm = formData.dpm;
     if (!dpm) return false;
+    // Informasi Poli KKLP
+    if (!dpm.poliKklp?.sejakKapanBeroperasi?.trim() || !dpm.poliKklp?.rataRataKunjungan?.trim() || !dpm.poliKklp?.namaDiagnosis?.trim() || !dpm.poliKklp?.tindakanProsedur?.trim() || !dpm.poliKklp?.indikasiRujukan?.trim()) return false;
+    if (!dpm.poliKklp?.luaranPelayanan || dpm.poliKklp.luaranPelayanan.length === 0) return false;
     // A
     if (!dpm.karakteristik?.lamaPraktik || !dpm.karakteristik?.jumlahKunjungan || !dpm.karakteristik?.kelompokUmur || !dpm.karakteristik?.statusPeserta) return false;
     // B

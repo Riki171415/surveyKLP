@@ -10,9 +10,10 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
     return filteredData.filter(row => row.role === 'Dokter Praktik Mandiri' || row.dpm);
   }, [filteredData]);
 
-  const { dpmStats, lamaPraktikData, bebanPasienData, rekamMedisData, kunjunganData, aspekData } = useMemo(() => {
+  const { dpmStats, lamaPraktikData, bebanPasienData, rekamMedisData, kunjunganData, aspekData, luaranPelayananData } = useMemo(() => {
     const lamaCount = {};
     const bebanCount = {};
+    const luaranCount = {};
     const rekamMedisCount = { 'Ya': 0, 'Tidak': 0 };
     const kunjunganCount = { 'Ya (Melakukan)': 0, 'Tidak': 0 };
     const aspekCount = {};
@@ -25,6 +26,7 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
       const pen = dpm.pendekatan || {};
       const kon = dpm.kontinuitas || {};
       const gam = dpm.gambaran || {};
+      const poli = dpm.poliKklp || {};
 
       if (kar.lamaPraktik) lamaCount[kar.lamaPraktik] = (lamaCount[kar.lamaPraktik] || 0) + 1;
       if (kar.kunjunganPerHari) bebanCount[kar.kunjunganPerHari] = (bebanCount[kar.kunjunganPerHari] || 0) + 1;
@@ -55,6 +57,13 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
           }
         });
       }
+
+      // Luaran Pelayanan
+      if (Array.isArray(poli.luaranPelayanan)) {
+        poli.luaranPelayanan.forEach(l => {
+          luaranCount[l] = (luaranCount[l] || 0) + 1;
+        });
+      }
     });
 
     const aspekArr = Object.keys(aspekCount).map(k => ({ name: k, value: aspekCount[k] })).sort((a,b) => b.value - a.value);
@@ -74,7 +83,8 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
         { name: 'Melakukan Kunjungan', value: kunjunganCount['Ya (Melakukan)'] },
         { name: 'Tidak Melakukan', value: kunjunganCount['Tidak'] }
       ].filter(d => d.value > 0),
-      aspekData: aspekArr.slice(0, 7) // Top 7 Kegiatan/Aspek
+      aspekData: aspekArr.slice(0, 7), // Top 7 Kegiatan/Aspek
+      luaranPelayananData: Object.keys(luaranCount).map(k => ({ name: k, value: luaranCount[k] })).sort((a,b) => b.value - a.value)
     };
   }, [dpmDataFiltered]);
 
@@ -180,6 +190,24 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
           </div>
         </div>
 
+        {luaranPelayananData.length > 0 && (
+          <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileText className="w-5 h-5 mr-2 text-indigo-600" /> Luaran Pelayanan Sp.KKLP</h3>
+            <div className="h-80">
+              <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+                <BarChart data={luaranPelayananData} layout="vertical" margin={{ top: 10, right: 30, left: 60, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={180} />
+                  <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} DPM`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                  <Bar dataKey="value" name="Jumlah DPM" fill="#6366f1" radius={[0, 6, 6, 0]} barSize={32}>
+                    <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
