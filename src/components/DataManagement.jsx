@@ -4,6 +4,7 @@ import { Loader2, Search, Edit, Trash2, X, ChevronDown, ChevronUp, ChevronLeft, 
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
 import { useAuth } from './AuthContext';
+import { penyakitPasienBulanan } from './SurveyForm';
 
 // ─── Data referensi (sama dengan SurveyForm) ───────────────────────────────
 const jknBenefits = [
@@ -223,6 +224,11 @@ export default function DataManagement() {
           base["DPM_Bentuk Pelayanan Keluarga"] = d.gambaran?.bentukPelayananKeluarga || '-';
           base["DPM_Contoh Kasus Keluarga"] = d.gambaran?.contohKasusKeluarga || '-';
           base["DPM_Contoh Layanan Holistik"] = d.gambaran?.contohLayananHolistik || '-';
+
+          // G. Data Pasien Bulanan
+          penyakitPasienBulanan.forEach(p => {
+            base[`DPM_Pasien_Bulanan_${p.label}`] = d.dataPasienBulanan?.[p.id] !== undefined ? d.dataPasienBulanan[p.id] : '-';
+          });
         }
 
         // Khusus Dokter / SpKKLP
@@ -248,6 +254,11 @@ export default function DataManagement() {
         }
 
         if (row.role !== 'Dokter Praktik Mandiri') {
+          // Data Pasien Bulanan
+          penyakitPasienBulanan.forEach(p => {
+            base[`Pasien_Bulanan_${p.label}`] = row.data_pasien_bulanan?.[p.id] !== undefined ? row.data_pasien_bulanan[p.id] : '-';
+          });
+
           // Perspektif
           relevansiItems.forEach((rel, i) => {
             base[`Relevansi_Skala_${i+1}`] = row.relevansi_spkklp?.[i] || '-';
@@ -421,11 +432,13 @@ export default function DataManagement() {
                         <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">{new Date(row.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                       </div>
                     </div>
-                    <div className="flex gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity md:opacity-100" onClick={e => e.stopPropagation()}>
-                      <button onClick={() => deleteSurvey(row.id, row.fktp_name)} className="p-2 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white rounded-lg transition-colors shadow-sm" title="Hapus">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    {user?.role === 'admin' && (
+                      <div className="flex gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity md:opacity-100" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => deleteSurvey(row.id, row.fktp_name)} className="p-2 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white rounded-lg transition-colors shadow-sm" title="Hapus">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

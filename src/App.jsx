@@ -113,7 +113,7 @@ function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
           <NavItem to="/" icon={FileText} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Isi Survey</NavItem>
         )}
 
-        {user.role === 'admin' && (
+        {['tim survey', 'admin'].includes(user.role) && (
           <NavItem to="/wawancara" icon={ClipboardList} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Form Wawancara</NavItem>
         )}
 
@@ -128,12 +128,15 @@ function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
           </>
         )}
 
-        {user.role === 'admin' && (
+        {['tim survey', 'admin'].includes(user.role) && (
           <>
             <NavItem to="/data" icon={Database} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Manajemen Data</NavItem>
-            <NavItem to="/users" icon={Users} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Kelola Akun</NavItem>
             <NavItem to="/cetak-form" icon={Printer} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Cetak Form</NavItem>
           </>
+        )}
+
+        {user.role === 'admin' && (
+          <NavItem to="/users" icon={Users} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Kelola Akun</NavItem>
         )}
       </div>
 
@@ -209,10 +212,10 @@ function AppContent() {
                 <Route path="/data" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><DataManagement /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><Dashboard /></ProtectedRoute>} />
                 <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
-                <Route path="/cetak-form" element={<ProtectedRoute allowedRoles={['admin']}><SurveyForm isPrintMode={true} /></ProtectedRoute>} />
+                <Route path="/cetak-form" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><SurveyForm isPrintMode={true} /></ProtectedRoute>} />
                 <Route path="/list-responden" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><ListResponden /></ProtectedRoute>} />
-                <Route path="/wawancara" element={<ProtectedRoute allowedRoles={['admin']}><TimSurveyList /></ProtectedRoute>} />
-                <Route path="/wawancara/form" element={<ProtectedRoute allowedRoles={['admin']}><SurveyForm isEdit={true} isInterview={true} /></ProtectedRoute>} />
+                <Route path="/wawancara" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><TimSurveyList /></ProtectedRoute>} />
+                <Route path="/wawancara/form" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><SurveyForm isEdit={true} isInterview={true} /></ProtectedRoute>} />
               </Routes>
             </Suspense>
           </div>

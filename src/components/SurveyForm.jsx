@@ -16,6 +16,21 @@ const jknBenefits = [
   "Deprescribing/pengurangan obat pada pasien polifarmasi memberikan manfaat yang optimal bagi pasien."
 ];
 
+export const penyakitPasienBulanan = [
+  { id: 'hipertensi', label: 'Hipertensi', required: true },
+  { id: 'diabetes_melitus', label: 'Diabetes melitus', required: true },
+  { id: 'asma', label: 'Asma', required: false },
+  { id: 'ppok', label: 'PPOK', required: false },
+  { id: 'jantung_koroner', label: 'Penyakit jantung koroner stabil', required: false },
+  { id: 'gagal_jantung', label: 'Gagal jantung kronik stabil', required: false },
+  { id: 'epilepsi', label: 'Epilepsi', required: false },
+  { id: 'jiwa_kronik', label: 'Gangguan kesehatan jiwa kronik', required: false },
+  { id: 'osteoartritis', label: 'Osteoartritis', required: false },
+  { id: 'ginjal_kronik', label: 'Penyakit ginjal kronik tahap awal', required: false },
+  { id: 'tuberkulosis', label: 'Tuberkulosis', required: false },
+  { id: 'hiv_aids', label: 'HIV/AIDS yang stabil', required: false }
+];
+
 const nonOptimalServices = [
   "Pelayanan lifestyle medicine penting untuk diakomodasi dalam layanan JKN.",
   "Pelayanan wellness dan healthy aging penting untuk diakomodasi dalam layanan JKN.",
@@ -123,7 +138,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     // Step 3 Perspektif
     relevansiSpkklp: {}, peranSpkklp: {}, layananDirujuk: {}, layananBelumBerjalan: {},
     prb: {},
-    dpm: {}
+    dpm: {},
+    dataPasienBulanan: {}
   });
 
   const isRoleDpm = formData?.role === 'Dokter Praktik Mandiri';
@@ -232,7 +248,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
         relevansiSpkklp: data.relevansi_spkklp || {},
         layananDirujuk: data.layanan_dirujuk || {},
         layananBelumBerjalan: data.layanan_belum_berjalan || {},
-        prb: data.prb || {}
+        prb: data.prb || {},
+        dataPasienBulanan: data.data_pasien_bulanan || {}
       });
       return;
     }
@@ -303,6 +320,12 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     // E
     if (!dpm.gambaran?.kegiatanDilakukan || dpm.gambaran.kegiatanDilakukan.length === 0) return false;
     if (!dpm.gambaran?.bentukPelayananKeluarga?.trim() || !dpm.gambaran?.contohKasusKeluarga?.trim() || !dpm.gambaran?.contohLayananHolistik?.trim()) return false;
+    
+    // Validasi data pasien bulanan DPM (Hipertensi dan DM wajib)
+    const hasHT = dpm.dataPasienBulanan?.hipertensi !== undefined && dpm.dataPasienBulanan?.hipertensi !== null && dpm.dataPasienBulanan?.hipertensi !== '';
+    const hasDM = dpm.dataPasienBulanan?.diabetes_melitus !== undefined && dpm.dataPasienBulanan?.diabetes_melitus !== null && dpm.dataPasienBulanan?.diabetes_melitus !== '';
+    if (!hasHT || !hasDM) return false;
+
     return true;
   })() : isRoleDoctor
     ? (formData.timeInPoli !== '' && formData.timeHomeVisit !== '' &&
@@ -347,27 +370,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
   const isStep4Valid = (() => {
     if (!jknBenefits.every((_, idx) => formData.jkn[idx]?.skala)) return false;
     
-    if (formData.homeCare?.screening === 'Ya') {
-      const hc = formData.homeCare;
-      if (!hc.tenaga?.trim() || !hc.diagnosis?.trim() || !hc.jumlahKunjungan || !hc.kolaborasi || !hc.kepatuhan || !hc.perbaikan) return false;
-      if (hc.kolaborasi === 'Ya' && !hc.bentukKolaborasi?.trim()) return false;
-      if (hc.perbaikan === 'Ya' && !hc.bentukPerbaikan?.trim()) return false;
-      const hasKondisi = ['Mandiri (independen)', 'Memerlukan bantuan sebagian', 'Memerlukan bantuan penuh', 'Tirah baring', 'Lainnya'].some(k => hc[`kondisi_${k}`]);
-      if (!hasKondisi) return false;
-      const hasJenis = ['Pemeriksaan kesehatan', 'Pemantauan penyakit kronis', 'Perawatan luka', 'Rehabilitasi sederhana', 'Edukasi keluarga', 'Lainnya'].some(j => hc[`jenis_${j}`]);
-      if (!hasJenis) return false;
-    }
-
-    if (formData.paliatif?.screening === 'Ya') {
-      const pl = formData.paliatif;
-      if (!pl.tenaga?.trim() || !pl.diagnosis?.trim() || !pl.terapi?.trim() || !pl.kolaborasi || !pl.kepatuhan || !pl.perbaikan) return false;
-      if (pl.kolaborasi === 'Ya' && !pl.bentukKolaborasi?.trim()) return false;
-      if (pl.perbaikan === 'Ya' && !pl.bentukPerbaikan?.trim()) return false;
-      const hasKondisiPl = ['Mandiri (independen)', 'Memerlukan bantuan sebagian', 'Memerlukan bantuan penuh', 'Tirah baring', 'Lainnya'].some(k => pl[`kondisi_${k}`]);
-      if (!hasKondisiPl) return false;
-      const hasTujuan = ['Pengendalian nyeri', 'Pengendalian gejala', 'Dukungan psikososial', 'Edukasi keluarga/caregiver', 'Perawatan akhir kehidupan', 'Lainnya'].some(t => pl[`tujuan_${t}`]);
-      if (!hasTujuan) return false;
-    }
+    // Validasi data pasien bulanan (Hipertensi dan DM wajib diinput)
+    const hasHT = formData.dataPasienBulanan?.hipertensi !== undefined && formData.dataPasienBulanan?.hipertensi !== null && formData.dataPasienBulanan?.hipertensi !== '';
+    const hasDM = formData.dataPasienBulanan?.diabetes_melitus !== undefined && formData.dataPasienBulanan?.diabetes_melitus !== null && formData.dataPasienBulanan?.diabetes_melitus !== '';
+    
+    if (!hasHT || !hasDM) return false;
 
     return true;
   })();
@@ -456,7 +463,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
         layanan_dirujuk: formData.layananDirujuk,
         layanan_belum_berjalan: formData.layananBelumBerjalan,
         prb: formData.prb,
-        dpm: formData.dpm
+        dpm: formData.dpm,
+        data_pasien_bulanan: formData.dataPasienBulanan
       };
       const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
       let error;
@@ -1179,6 +1187,43 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       ))}
                     </tbody>
                   </table>
+                 </div>
+
+                {/* Data Pasien Bulanan */}
+                <div className="border-t border-slate-100 pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-1 h-5 bg-primary-600 rounded-full"></div>
+                    <h3 className="text-base font-bold text-slate-800">Data Jumlah Pasien Dilayani (1 Bulan Terakhir)</h3>
+                  </div>
+                  <p className="text-xs text-slate-500 mb-4">Mohon isi jumlah pasien yang dilayani di Faskes Anda selama 1 bulan terakhir untuk diagnosis penyakit berikut. Hipertensi dan Diabetes Melitus wajib diisi (minimal 0).</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {penyakitPasienBulanan.map((p) => {
+                      const isRequired = p.required;
+                      const hasError = showErrors && isRequired && (formData.dataPasienBulanan?.[p.id] === undefined || formData.dataPasienBulanan?.[p.id] === null || formData.dataPasienBulanan?.[p.id] === '');
+                      return (
+                        <div key={p.id} className={`p-4 rounded-xl border transition-all ${hasError ? 'border-rose-300 bg-rose-50/50' : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'}`}>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                            {p.label} {isRequired && <span className="text-rose-500">*</span>}
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            className={`w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500 ${hasError ? 'border-rose-400 bg-white' : 'border-slate-200 bg-white'}`}
+                            value={formData.dataPasienBulanan?.[p.id] !== undefined ? formData.dataPasienBulanan?.[p.id] : ''}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              dataPasienBulanan: {
+                                ...prev.dataPasienBulanan,
+                                [p.id]: e.target.value
+                              }
+                            }))}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Home Care */}
@@ -1449,8 +1494,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                     </>)}
                     {step === 4 && (<>
                       {(() => { const b = jknBenefits.filter((_, i) => !formData.jkn[i]?.skala).length; return b > 0 ? <li>{b} layanan JKN belum diberi nilai skala</li> : null; })()}
-                      {!isStep4Valid && formData.homeCare?.screening === 'Ya' && <li>Ada isian Pelayanan Home Care yang belum lengkap</li>}
-                      {!isStep4Valid && formData.paliatif?.screening === 'Ya' && <li>Ada isian Pelayanan Paliatif yang belum lengkap</li>}
+                      {!(formData.dataPasienBulanan?.hipertensi !== undefined && formData.dataPasienBulanan?.hipertensi !== null && formData.dataPasienBulanan?.hipertensi !== '') && <li>Jumlah pasien Hipertensi (1 bulan terakhir) wajib diisi</li>}
+                      {!(formData.dataPasienBulanan?.diabetes_melitus !== undefined && formData.dataPasienBulanan?.diabetes_melitus !== null && formData.dataPasienBulanan?.diabetes_melitus !== '') && <li>Jumlah pasien Diabetes melitus (1 bulan terakhir) wajib diisi</li>}
                     </>)}
                     {step === 5 && (<>
                       {(() => { const b = nonOptimalServices.filter((_, i) => !formData.nonOptimal[i]?.masukJkn || !formData.nonOptimal[i]?.skala).length; return b > 0 ? <li>{b} layanan non-optimal belum diisi lengkap</li> : null; })()}
@@ -1499,10 +1544,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
               
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 text-sm text-amber-900 shadow-sm">
                 <span className="font-bold block mb-2 text-base text-amber-700">📋 Data yang Perlu Dipersiapkan Sebelum Mengisi Survei:</span>
-                <p className="mb-2">Untuk memperlancar pengisian survei, mohon siapkan data-data berikut dari faskes Anda (terutama untuk pertanyaan di Tahap 2 & 3):</p>
+                <p className="mb-2">Untuk memperlancar pengisian survei, mohon siapkan data-data berikut dari faskes Anda (terutama untuk pertanyaan di Tahap 2, 3, & 4):</p>
                 <ul className="list-disc pl-5 space-y-1.5">
                   <li><strong>Data Program Rujuk Balik (PRB):</strong> Total peserta PRB, peserta rutin berkunjung, dan yang tidak berkunjung dalam 3 bulan terakhir.</li>
                   <li><strong>Rincian Peserta PRB berdasarkan Diagnosis:</strong> Jumlah peserta untuk DM, Hipertensi, Jantung, PPOK, Asma, Stroke, Epilepsi, Skizofrenia, dan SLE.</li>
+                  <li><strong>Data Kunjungan Pasien Bulanan (Terbaru):</strong> Jumlah kunjungan pasien 1 bulan terakhir untuk 12 penyakit kronis (termasuk Hipertensi dan DM).</li>
                   <li><strong>Data Rujukan:</strong> Rata-rata jumlah rujukan pasien ke FKRTL per bulan.</li>
                   <li><strong>Data Beban Kerja (Khusus Dokter):</strong> Estimasi waktu pelayanan rata-rata per pasien di Poli dan Home Visit, serta proporsi layanan dalam gedung vs luar gedung.</li>
                   <li><strong>Data Home Care & Paliatif (Jika ada):</strong> Contoh diagnosis pasien, jenis layanan yang diberikan, jumlah kunjungan, serta tingkat kepatuhan/perbaikan.</li>
@@ -1512,7 +1558,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">📍 Tahap 1 — Identitas</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Pilih <strong>Provinsi</strong> terlebih dahulu, lalu pilih <strong>Nama Fasilitas Kesehatan</strong>.</li><li>Pilih <strong>Jabatan</strong> Anda saat ini.</li><li>Pilih apakah Faskes memiliki dokter Sp.KKLP.</li></ul></section>
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">⏱️ Tahap 2 — Kompetensi Dokter</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li><strong>Khusus Dokter Umum &amp; Sp.KKLP:</strong> isi beban kerja dan tabel kompetensi.</li><li><strong>Khusus Sp.KKLP:</strong> isi tambahan bagian praktik dan poli KKLP.</li><li>Kepala Puskesmas dan Nakes lainnya dapat melewati tahap ini.</li></ul></section>
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">🏥 Tahap 3 — Perspektif Sp.KKLP</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Nilai relevansi 12 kegiatan Sp.KKLP menggunakan skala 1–4 (Sangat Tidak Setuju s/d Sangat Setuju).</li><li>Centang layanan yang masih sering dirujuk ke RS dan layanan yang belum berjalan di Puskesmas / Klinik.</li><li>Isi informasi Program Rujuk Balik (PRB).</li></ul></section>
-              <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">💊 Tahap 4 — Manfaat JKN</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Beri nilai skala 1–4 untuk 8 layanan JKN.</li><li>Isi bagian Home Care dan Paliatif jika Puskesmas / Klinik pernah memberikan layanan tersebut.</li></ul></section>
+              <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">💊 Tahap 4 — Manfaat JKN</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Beri nilai skala 1–4 untuk 8 layanan JKN.</li><li>Input **Jumlah Kunjungan Pasien 1 Bulan Terakhir** untuk 12 penyakit kronis (Hipertensi dan DM wajib).</li><li>Isi bagian Home Care dan Paliatif (tidak wajib/opsional) jika pernah memberikan layanan tersebut.</li></ul></section>
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">🔧 Tahap 5 — Layanan Non-Optimal</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Untuk setiap layanan, pilih <strong>Masuk JKN</strong> (Ya/Tidak/Tidak Tahu) dan berikan <strong>nilai skala 1–4</strong>.</li></ul></section>
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">💬 Tahap 6 — Pendalaman Kualitatif</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Jawab 7 pertanyaan terbuka sesuai kondisi nyata di Puskesmas / Klinik Anda.</li><li>Semua pertanyaan wajib diisi sebelum mengirimkan survey.</li></ul></section>
             </div>

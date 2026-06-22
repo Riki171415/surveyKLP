@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
 import { motion, AnimatePresence } from 'framer-motion';
+import { penyakitPasienBulanan } from './SurveyForm';
 import { id as localeID } from 'date-fns/locale';
 import { format, parseISO } from 'date-fns';
 import { 
@@ -20,6 +21,7 @@ import DashboardSpKKLP from './dashboards/DashboardSpKKLP';
 import DashboardKendala from './dashboards/DashboardKendala';
 import DashboardKualitatif from './dashboards/DashboardKualitatif';
 import DashboardDPM from './dashboards/DashboardDPM';
+import DashboardPasienBulanan from './dashboards/DashboardPasienBulanan';
 
 const COLORS = ['#00857A', '#00A68A', '#45B669', '#00B4D5', '#F28322', '#D8C700', '#D5DF00', '#f43f5e', '#a855f7', '#3b82f6'];
 
@@ -85,13 +87,15 @@ export default function Dashboard() {
     const headers = [
       "No", "Tanggal Pengisian", "Provinsi", "Kabupaten/Kota", "Nama Puskesmas / Klinik", "Kode Faskes", "Nama Responden", "Jabatan", "Ada Sp.KKLP?",
       "Total Dokter Umum", "Total Dokter Gigi", "Waktu Poli (jam)", "Waktu Home Visit (jam)", "Beban Dalam Gedung (%)", "Beban Luar Gedung (%)",
-      "Kepatuhan PRB", "Kolaborasi Homecare", "Kolaborasi Paliatif"
+      "Kepatuhan PRB", "Kolaborasi Homecare", "Kolaborasi Paliatif",
+      ...penyakitPasienBulanan.map(p => `Pasien_Bulanan_${p.label}`)
     ];
     const rows = filteredData.map((row, index) => {
       return [
         index + 1, new Date(row.created_at).toLocaleString('id-ID'), row.provinsi || '', row.kab_kota || '', row.fktp_name || '', row.kode_faskes || '', row.nama_responden || '', row.role || '', row.doc_kklp || 'Tidak',
         row.doc_umum || '', row.doc_gigi || '', row.time_in_poli || '', row.time_home_visit || '', row.prop_in_fktp || '', row.prop_out_fktp || '',
-        row.prb?.rutinKunjungan || '', row.home_care?.kolaborasi || '', row.paliatif?.kolaborasi || ''
+        row.prb?.rutinKunjungan || '', row.home_care?.kolaborasi || '', row.paliatif?.kolaborasi || '',
+        ...penyakitPasienBulanan.map(p => row.data_pasien_bulanan?.[p.id] || '')
       ];
     });
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
@@ -111,7 +115,8 @@ export default function Dashboard() {
       "Lama Praktik", "Kunjungan/Hari", "Kelompok Umur", "Status Kepesertaan",
       "Masalah Kesehatan Terbanyak", "Proporsi Kronis", "Proporsi Kontrol", "Alasan Rujukan",
       "Sistem Pencatatan", "Jadwal Kunjungan Ulang", "Tindak Lanjut Tdk Datang",
-      "Bentuk Pelayanan Keluarga", "Kegiatan Dilakukan"
+      "Bentuk Pelayanan Keluarga", "Kegiatan Dilakukan",
+      ...penyakitPasienBulanan.map(p => `DPM_Pasien_Bulanan_${p.label}`)
     ];
     const rows = dpmData.map((row, index) => {
       const d = row.dpm || {};
@@ -121,7 +126,8 @@ export default function Dashboard() {
         Array.isArray(d.kasus?.masalahKesehatan) ? d.kasus.masalahKesehatan.join(', ') : (d.kasus?.masalahKesehatan || ''), 
         d.kasus?.persenKronis || '', d.kasus?.persenKontrol || '', d.kasus?.alasanRujukan || '',
         d.kontinuitas?.sistemPencatatan || '', d.kontinuitas?.jadwalkanKunjunganUlang || '', d.kontinuitas?.tindakLanjutTidakDatang || '',
-        d.gambaran?.bentukPelayananKeluarga || '', Array.isArray(d.gambaran?.kegiatanDilakukan) ? d.gambaran.kegiatanDilakukan.join(', ') : (d.gambaran?.kegiatanDilakukan || '')
+        d.gambaran?.bentukPelayananKeluarga || '', Array.isArray(d.gambaran?.kegiatanDilakukan) ? d.gambaran.kegiatanDilakukan.join(', ') : (d.gambaran?.kegiatanDilakukan || ''),
+        ...penyakitPasienBulanan.map(p => d.dataPasienBulanan?.[p.id] || '')
       ];
     });
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
@@ -168,6 +174,7 @@ export default function Dashboard() {
     { id: 'kendala', label: 'Kendala', icon: AlertTriangle },
     { id: 'kualitatif', label: 'Wawancara', icon: MessageSquare },
     { id: 'dpm', label: 'Khusus DPM', icon: Stethoscope },
+    { id: 'pasien_bulanan', label: 'Pasien Bulanan', icon: Activity },
     { id: 'data', label: 'Raw Data', icon: Database },
   ];
 
@@ -290,6 +297,7 @@ export default function Dashboard() {
                 <DashboardKendala filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
                 <DashboardDPM filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
                 <DashboardKualitatif filteredData={filteredData} isPrinting={true} />
+                <DashboardPasienBulanan filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
               </div>
             ) : (
               <AnimatePresence mode="wait">
@@ -304,6 +312,7 @@ export default function Dashboard() {
                   {activeTab === 'kendala' && <DashboardKendala filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
                   {activeTab === 'kualitatif' && <DashboardKualitatif filteredData={filteredData} isPrinting={false} />}
                   {activeTab === 'dpm' && <DashboardDPM filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
+                  {activeTab === 'pasien_bulanan' && <DashboardPasienBulanan filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
                   {activeTab === 'data' && renderDataGrid()}
                 </motion.div>
               </AnimatePresence>

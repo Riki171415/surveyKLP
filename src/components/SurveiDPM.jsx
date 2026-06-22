@@ -1,4 +1,5 @@
 import React from 'react';
+import { penyakitPasienBulanan } from './SurveyForm';
 
 export default function SurveiDPM({ formData, setFormData, showErrors }) {
   const data = formData.dpm || {};
@@ -243,6 +244,48 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
         <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.poliKklp?.indikasiRujukan ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
           <label className="block text-sm font-semibold text-slate-800 mb-2">Apabila pasien di rujuk, Apa indikasi atau alasan rujukan tersebut? <span className="text-rose-500">*</span></label>
           <textarea rows={3} required placeholder="Jelaskan indikasi atau alasan rujukan..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.poliKklp?.indikasiRujukan || ''} onChange={(e) => updateField('poliKklp', 'indikasiRujukan', e.target.value)}></textarea>
+        </div>
+      </section>
+
+      {/* G. Data Pasien Bulanan */}
+      <section>
+        <div className="flex items-center space-x-2 border-b border-slate-100 pb-3 mb-5 mt-8">
+          <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
+          <h2 className="text-lg font-bold text-slate-800">G. Data Jumlah Pasien Dilayani (1 Bulan Terakhir)</h2>
+        </div>
+        <p className="text-xs text-slate-500 mb-4">Mohon isi jumlah pasien yang dilayani di Praktik Mandiri Anda selama 1 bulan terakhir untuk diagnosis penyakit berikut. Hipertensi dan Diabetes Melitus wajib diisi (minimal 0).</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {penyakitPasienBulanan.map((p) => {
+            const isRequired = p.required;
+            const hasError = showErrors && isRequired && (data.dataPasienBulanan?.[p.id] === undefined || data.dataPasienBulanan?.[p.id] === null || data.dataPasienBulanan?.[p.id] === '');
+            return (
+              <div key={p.id} className={`p-4 rounded-xl border transition-all ${hasError ? 'border-rose-300 bg-rose-50/50' : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'}`}>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  {p.label} {isRequired && <span className="text-rose-500">*</span>}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  className={`w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500 ${hasError ? 'border-rose-400 bg-white' : 'border-slate-200 bg-white'}`}
+                  value={data.dataPasienBulanan?.[p.id] !== undefined ? data.dataPasienBulanan?.[p.id] : ''}
+                  onChange={(e) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      dpm: {
+                        ...prev.dpm,
+                        dataPasienBulanan: {
+                          ...prev.dpm?.dataPasienBulanan,
+                          [p.id]: e.target.value
+                        }
+                      }
+                    }));
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
       </section>
     </div>
