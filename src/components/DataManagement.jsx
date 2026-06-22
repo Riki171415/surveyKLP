@@ -635,6 +635,35 @@ export default function DataManagement() {
                         <div className="flex"><span className="text-slate-500 font-medium w-48 shrink-0">Contoh Layanan Holistik:</span> <span>{selected.dpm.gambaran.contohLayananHolistik || '-'}</span></div>
                       </div>
                     )}
+                    {/* Data Pasien Bulanan DPM */}
+                    {selected.dpm.dataPasienBulanan && Object.keys(selected.dpm.dataPasienBulanan).length > 0 && (
+                      <div className="p-3 border rounded-lg bg-slate-50 border-slate-100 mt-4">
+                        <div className="font-semibold text-slate-600 mb-3">F. Data Kunjungan Pasien Bulanan</div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {penyakitPasienBulanan.map(p => {
+                            if (selected.dpm.dataPasienBulanan[p.id] !== undefined) {
+                              return <Field key={p.id} label={p.label} value={selected.dpm.dataPasienBulanan[p.id]} />;
+                            }
+                            return null;
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Data Pasien Bulanan (Non-DPM) ── */}
+              {selected.role !== 'Dokter Praktik Mandiri' && selected.data_pasien_bulanan && Object.keys(selected.data_pasien_bulanan).length > 0 && (
+                <div>
+                  <SectionHeader label="Data Kunjungan Pasien Bulanan" />
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-3 text-sm">
+                    {penyakitPasienBulanan.map(p => {
+                      if (selected.data_pasien_bulanan[p.id] !== undefined) {
+                        return <Field key={p.id} label={p.label} value={selected.data_pasien_bulanan[p.id]} />;
+                      }
+                      return null;
+                    })}
                   </div>
                 </div>
               )}
