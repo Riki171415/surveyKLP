@@ -326,7 +326,13 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     : true;
 
   const isStep3Valid = (() => {
-    if (!formData.prb?.jumlah || !formData.prb?.peserta_dm || !formData.prb?.peserta_ht || !formData.prb?.mekanisme || !formData.prb?.rataRujukan) return false;
+    const hasJumlah = formData.prb?.jumlah !== undefined && formData.prb?.jumlah !== null && formData.prb?.jumlah !== '';
+    const hasDM = formData.prb?.peserta_dm !== undefined && formData.prb?.peserta_dm !== null && formData.prb?.peserta_dm !== '';
+    const hasHT = formData.prb?.peserta_ht !== undefined && formData.prb?.peserta_ht !== null && formData.prb?.peserta_ht !== '';
+    const hasMekanisme = !!formData.prb?.mekanisme;
+    const hasRataRujukan = formData.prb?.rataRujukan !== undefined && formData.prb?.rataRujukan !== null && formData.prb?.rataRujukan !== '';
+
+    if (!hasJumlah || !hasDM || !hasHT || !hasMekanisme || !hasRataRujukan) return false;
     if (!isRoleSpKklp && !relevansiItems.every((_, idx) => formData.relevansiSpkklp[idx])) return false;
     if (!isRoleSpKklp && !peranSpkklpItems.every((_, idx) => formData.peranSpkklp[idx])) return false;
     
@@ -1428,8 +1434,18 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                     </>)}
                     {step === 3 && (<>
                       {!isRoleSpKklp && (() => { const b = relevansiItems.filter((_, i) => !formData.relevansiSpkklp[i]).length; return b > 0 ? <li>{b} item relevansi Sp.KKLP belum diberi nilai</li> : null; })()}
+                      {!isRoleSpKklp && (() => { const b = peranSpkklpItems.filter((_, i) => !formData.peranSpkklp[i]).length; return b > 0 ? <li>{b} item peran Sp.KKLP belum diberi nilai</li> : null; })()}
+                      {!(formData.prb?.jumlah !== undefined && formData.prb?.jumlah !== null && formData.prb?.jumlah !== '') && <li>Jumlah peserta PRB wajib diisi</li>}
+                      {!(formData.prb?.peserta_dm !== undefined && formData.prb?.peserta_dm !== null && formData.prb?.peserta_dm !== '') && <li>Jumlah peserta PRB DM wajib diisi</li>}
+                      {!(formData.prb?.peserta_ht !== undefined && formData.prb?.peserta_ht !== null && formData.prb?.peserta_ht !== '') && <li>Jumlah peserta PRB Hipertensi wajib diisi</li>}
                       {!formData.prb?.mekanisme && <li>Mekanisme pemantauan PRB wajib dipilih minimal 1</li>}
-                      {!formData.prb?.rataRujukan && <li>Rata-rata jumlah rujukan ke FKRTL belum diisi</li>}
+                      {!(formData.prb?.rataRujukan !== undefined && formData.prb?.rataRujukan !== null && formData.prb?.rataRujukan !== '') && <li>Rata-rata jumlah rujukan ke FKRTL belum diisi</li>}
+                      {(() => {
+                        const jumlahPRB = Number(formData.prb?.jumlah) || 0;
+                        const rutin = Number(formData.prb?.rutinKunjungan) || 0;
+                        const tidakBerkunjung = Number(formData.prb?.tidakBerkunjung) || 0;
+                        return (rutin + tidakBerkunjung > jumlahPRB) ? <li>Total peserta rutin + tidak berkunjung melebihi jumlah peserta PRB</li> : null;
+                      })()}
                     </>)}
                     {step === 4 && (<>
                       {(() => { const b = jknBenefits.filter((_, i) => !formData.jkn[i]?.skala).length; return b > 0 ? <li>{b} layanan JKN belum diberi nilai skala</li> : null; })()}
