@@ -105,7 +105,7 @@ export default function KokpitKemenkes() {
 
     // Role-based Relevansi
     const roleScores = {
-      'Kepala Puskesmas': Array(11).fill(0).map(() => ({ sum: 0, count: 0 })),
+      'Kepala Puskesmas / klinik': Array(11).fill(0).map(() => ({ sum: 0, count: 0 })),
       'Dokter Umum': Array(11).fill(0).map(() => ({ sum: 0, count: 0 })),
       'Dokter Sp.KKLP': Array(11).fill(0).map(() => ({ sum: 0, count: 0 }))
     };
@@ -135,7 +135,8 @@ export default function KokpitKemenkes() {
 
       // Relevansi
       const rel = row.relevansi_spkklp || {};
-      const role = row.role;
+      const rawRole = row.role;
+      const role = rawRole === 'Kepala Puskesmas' ? 'Kepala Puskesmas / klinik' : rawRole;
       let rowRelSum = 0;
       let rowRelCount = 0;
 
@@ -216,7 +217,7 @@ export default function KokpitKemenkes() {
 
     // Radar Data
     const radarData = relevansiItems.slice(0, 7).map((item, i) => {
-      const kapus = roleScores['Kepala Puskesmas'][i];
+      const kapus = roleScores['Kepala Puskesmas / klinik'][i];
       const du = roleScores['Dokter Umum'][i];
       const sp = roleScores['Dokter Sp.KKLP'][i];
       return {
@@ -429,7 +430,7 @@ export default function KokpitKemenkes() {
                     <PolarGrid stroke="#e2e8f0" />
                     <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10 }} />
                     <PolarRadiusAxis angle={30} domain={[0, 4]} tick={{ fill: '#475569' }} />
-                    <Radar name="Kepala Puskesmas" dataKey="Kapus" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.2} />
+                    <Radar name="Kepala Puskesmas / klinik" dataKey="Kapus" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.2} />
                     <Radar name="Dokter Umum" dataKey="DUmum" stroke="#10b981" fill="#10b981" fillOpacity={0.2} />
                     <Radar name="Sp.KKLP" dataKey="SpKKLP" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.2} />
                     <Legend wrapperStyle={{ fontSize: '12px' }} />
