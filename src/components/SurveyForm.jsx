@@ -380,7 +380,12 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
   })();
 
   const isStep5Valid = nonOptimalServices.every((_, idx) => formData.nonOptimal[idx]?.masukJkn && formData.nonOptimal[idx]?.skala);
-  const isStep6Valid = interviewQuestions.every((_, idx) => (formData.wawancara[idx]?.trim() || '').length >= 10);
+  const isStep6Valid = (() => {
+    if (!isRoleDpm && formData.docKklp === 'Tidak') {
+      return (formData.wawancara[7]?.trim() || '').length >= 10;
+    }
+    return interviewQuestions.every((_, idx) => (formData.wawancara[idx]?.trim() || '').length >= 10);
+  })();
 
   const canProceed = () => {
     if (step === 1) return isStep1Valid;
@@ -1432,7 +1437,9 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                   </div>
                 </div>
                 <div className="space-y-6">
-                  {interviewQuestions.map((question, idx) => (
+                  {interviewQuestions.map((question, idx) => {
+                    if (!isRoleDpm && formData.docKklp === 'Tidak' && idx !== 7) return null;
+                    return (
                     <div key={idx} className="bg-slate-50 p-5 rounded-xl border border-slate-200">
                       <label className="block text-sm font-semibold text-slate-800 mb-3 leading-relaxed">{question}</label>
                       <textarea
@@ -1444,7 +1451,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                         onChange={(e) => handleWawancaraChange(idx, e.target.value)}
                       ></textarea>
                     </div>
-                  ))}
+                  )})}
                 </div>
               </div>
             )}
@@ -1501,7 +1508,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       {(() => { const b = nonOptimalServices.filter((_, i) => !formData.nonOptimal[i]?.masukJkn || !formData.nonOptimal[i]?.skala).length; return b > 0 ? <li>{b} layanan non-optimal belum diisi lengkap</li> : null; })()}
                     </>)}
                     {((isRoleDpm && step === 3) || (!isRoleDpm && step === 6)) && (<>
-                      {(() => { const b = interviewQuestions.filter((_, i) => (formData.wawancara[i]?.trim() || '').length < 10).length; return b > 0 ? <li>Ada {b} pertanyaan pendalaman kualitatif yang belum dijawab</li> : null; })()}
+                      {(() => { 
+                        const questionsToCheck = (!isRoleDpm && formData.docKklp === 'Tidak') ? [7] : interviewQuestions.map((_, i) => i);
+                        const b = questionsToCheck.filter(i => (formData.wawancara[i]?.trim() || '').length < 10).length; 
+                        return b > 0 ? <li>Ada {b} pertanyaan pendalaman kualitatif yang belum dijawab</li> : null; 
+                      })()}
                     </>)}
                   </ul>
                 </div>
