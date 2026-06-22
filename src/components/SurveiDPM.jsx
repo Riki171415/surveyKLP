@@ -64,53 +64,6 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
 
   return (
     <div className="space-y-8">
-      {/* Informasi Poli KKLP */}
-      <section>
-        <div className="flex items-center space-x-2 border-b border-slate-100 pb-3 mb-5">
-          <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
-          <h2 className="text-lg font-bold text-slate-800">Informasi Poli KKLP & Pelayanan</h2>
-        </div>
-
-        <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.poliKklp?.sejakKapanBeroperasi ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-          <label className="block text-sm font-semibold text-slate-800 mb-2">Sejak kapan poli KKLP beroperasi? <span className="text-rose-500">*</span></label>
-          <input type="text" required placeholder="Contoh: Januari 2024" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" value={data.poliKklp?.sejakKapanBeroperasi || ''} onChange={(e) => updateField('poliKklp', 'sejakKapanBeroperasi', e.target.value)} />
-        </div>
-
-        <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.poliKklp?.rataRataKunjungan ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-          <label className="block text-sm font-semibold text-slate-800 mb-2">Rata-rata jumlah kunjungan per bulan <span className="text-rose-500">*</span></label>
-          <input type="text" required placeholder="Jumlah" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" value={data.poliKklp?.rataRataKunjungan || ''} onChange={(e) => updateField('poliKklp', 'rataRataKunjungan', e.target.value)} />
-        </div>
-
-        <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.poliKklp?.namaDiagnosis ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-          <label className="block text-sm font-semibold text-slate-800 mb-2">Nama diagnosis yang ditangani Sp.KKLP (cantumkan Kode ICD-10) <span className="text-rose-500">*</span></label>
-          <input type="text" required placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" value={data.poliKklp?.namaDiagnosis || ''} onChange={(e) => updateField('poliKklp', 'namaDiagnosis', e.target.value)} />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className={`p-4 rounded-xl border ${showErrors && !data.poliKklp?.tindakanProsedur ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-            <label className="block text-sm font-semibold text-slate-800 mb-2">Tindakan/Prosedur yang dilakukan <span className="text-rose-500">*</span></label>
-            <textarea rows={7} required placeholder="Jelaskan..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.poliKklp?.tindakanProsedur || ''} onChange={(e) => updateField('poliKklp', 'tindakanProsedur', e.target.value)}></textarea>
-          </div>
-
-          <div className={`p-4 rounded-xl border ${showErrors && (!data.poliKklp?.luaranPelayanan || data.poliKklp?.luaranPelayanan.length === 0) ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-            <label className="block text-sm font-semibold text-slate-800 mb-3">Luaran pelayanan (centang semua yang sesuai)</label>
-            <div className="flex flex-col gap-2">
-              {['Selesai di Puskesmas / Klinik', 'Kontrol berkala di Puskesmas / Klinik', 'Home care', 'Paliatif', 'PRB', 'Rujukan ke FKRTL', 'Lainnya'].map(l => (
-                <label key={l} className="flex items-center gap-2 cursor-pointer text-sm">
-                  <input type="checkbox" checked={data.poliKklp?.luaranPelayanan?.includes(l) || false} onChange={(e) => updateArrayField('poliKklp', 'luaranPelayanan', l, e.target.checked)} className="rounded" />
-                  {l}
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.poliKklp?.indikasiRujukan ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-          <label className="block text-sm font-semibold text-slate-800 mb-2">Apabila pasien di rujuk, Apa indikasi atau alasan rujukan tersebut? <span className="text-rose-500">*</span></label>
-          <textarea rows={3} required placeholder="Jelaskan indikasi atau alasan rujukan..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.poliKklp?.indikasiRujukan || ''} onChange={(e) => updateField('poliKklp', 'indikasiRujukan', e.target.value)}></textarea>
-        </div>
-      </section>
-
       {/* A. Karakteristik Praktik */}
       <section>
         <div className="flex items-center space-x-2 border-b border-slate-100 pb-3 mb-5">
@@ -244,6 +197,53 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
           <textarea rows={4} required placeholder="Ceritakan pengalamannya..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.gambaran?.contohLayananHolistik || ''} onChange={(e) => updateField('gambaran', 'contohLayananHolistik', e.target.value)}></textarea>
         </div>
 
+      </section>
+
+      {/* Informasi Poli KKLP */}
+      <section>
+        <div className="flex items-center space-x-2 border-b border-slate-100 pb-3 mb-5 mt-8">
+          <div className="w-1 h-6 bg-primary-600 rounded-full"></div>
+          <h2 className="text-lg font-bold text-slate-800">F. Informasi Poli KKLP & Pelayanan</h2>
+        </div>
+
+        <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.poliKklp?.sejakKapanBeroperasi ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
+          <label className="block text-sm font-semibold text-slate-800 mb-2">Sejak kapan poli KKLP beroperasi? <span className="text-rose-500">*</span></label>
+          <input type="text" required placeholder="Contoh: Januari 2024" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" value={data.poliKklp?.sejakKapanBeroperasi || ''} onChange={(e) => updateField('poliKklp', 'sejakKapanBeroperasi', e.target.value)} />
+        </div>
+
+        <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.poliKklp?.rataRataKunjungan ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
+          <label className="block text-sm font-semibold text-slate-800 mb-2">Rata-rata jumlah kunjungan per bulan <span className="text-rose-500">*</span></label>
+          <input type="text" required placeholder="Jumlah" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" value={data.poliKklp?.rataRataKunjungan || ''} onChange={(e) => updateField('poliKklp', 'rataRataKunjungan', e.target.value)} />
+        </div>
+
+        <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.poliKklp?.namaDiagnosis ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
+          <label className="block text-sm font-semibold text-slate-800 mb-2">Nama diagnosis yang ditangani Sp.KKLP (cantumkan Kode ICD-10) <span className="text-rose-500">*</span></label>
+          <input type="text" required placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" value={data.poliKklp?.namaDiagnosis || ''} onChange={(e) => updateField('poliKklp', 'namaDiagnosis', e.target.value)} />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className={`p-4 rounded-xl border ${showErrors && !data.poliKklp?.tindakanProsedur ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
+            <label className="block text-sm font-semibold text-slate-800 mb-2">Tindakan/Prosedur yang dilakukan <span className="text-rose-500">*</span></label>
+            <textarea rows={7} required placeholder="Jelaskan..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.poliKklp?.tindakanProsedur || ''} onChange={(e) => updateField('poliKklp', 'tindakanProsedur', e.target.value)}></textarea>
+          </div>
+
+          <div className={`p-4 rounded-xl border ${showErrors && (!data.poliKklp?.luaranPelayanan || data.poliKklp?.luaranPelayanan.length === 0) ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
+            <label className="block text-sm font-semibold text-slate-800 mb-3">Luaran pelayanan (centang semua yang sesuai)</label>
+            <div className="flex flex-col gap-2">
+              {['Selesai di Puskesmas / Klinik', 'Kontrol berkala di Puskesmas / Klinik', 'Home care', 'Paliatif', 'PRB', 'Rujukan ke FKRTL', 'Lainnya'].map(l => (
+                <label key={l} className="flex items-center gap-2 cursor-pointer text-sm">
+                  <input type="checkbox" checked={data.poliKklp?.luaranPelayanan?.includes(l) || false} onChange={(e) => updateArrayField('poliKklp', 'luaranPelayanan', l, e.target.checked)} className="rounded" />
+                  {l}
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.poliKklp?.indikasiRujukan ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
+          <label className="block text-sm font-semibold text-slate-800 mb-2">Apabila pasien di rujuk, Apa indikasi atau alasan rujukan tersebut? <span className="text-rose-500">*</span></label>
+          <textarea rows={3} required placeholder="Jelaskan indikasi atau alasan rujukan..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.poliKklp?.indikasiRujukan || ''} onChange={(e) => updateField('poliKklp', 'indikasiRujukan', e.target.value)}></textarea>
+        </div>
       </section>
     </div>
   );
