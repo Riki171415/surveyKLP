@@ -65,7 +65,7 @@ const peranSpkklpItems = [
   "Secara keseluruhan, implementasi PMK 19/2024 menjadikan paket manfaat JKN lebih efektif dan efisien."
 ];
 
-const layananDirujukItems = [
+export const layananDirujukItems = [
   "Manajemen pasien dengan multimorbiditas kompleks (misalnya DM, hipertensi, penyakit jantung, dan kondisi kronis lainnya secara bersamaan)",
   "Home care dengan intervensi medis komprehensif untuk pasien kronis",
   "Pelayanan paliatif primer/komunitas",
@@ -77,7 +77,7 @@ const layananDirujukItems = [
   "Koordinasi rujuk balik FKRTL\u2013Puskesmas / Klinik untuk pasien kronis"
 ];
 
-const layananBelumBerjalanItems = [
+export const layananBelumBerjalanItems = [
   "Manajemen pasien dengan multimorbiditas kompleks",
   "Home care dengan intervensi medis komprehensif",
   "Pelayanan paliatif primer/komunitas",

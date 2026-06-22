@@ -4,7 +4,7 @@ import { Loader2, Search, Edit, Trash2, X, ChevronDown, ChevronUp, ChevronLeft, 
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
 import { useAuth } from './AuthContext';
-import { penyakitPasienBulanan } from './SurveyForm';
+import { penyakitPasienBulanan, layananDirujukItems, layananBelumBerjalanItems } from './SurveyForm';
 
 // ─── Data referensi (sama dengan SurveyForm) ───────────────────────────────
 const jknBenefits = [
@@ -266,9 +266,9 @@ export default function DataManagement() {
           peranSpkklpItems.forEach((rel, i) => {
             base[`Peran_SpKKLP_Skala_${i+1}`] = row.peran_spkklp?.[i] || '-';
           });
-          base["Layanan Sering Dirujuk"] = row.layanan_dirujuk || '-';
+          base["Layanan Sering Dirujuk"] = row.layanan_dirujuk ? Object.keys(row.layanan_dirujuk).filter(k => row.layanan_dirujuk[k]).map(k => layananDirujukItems[k] || k).join(', ') : '-';
           base["Alasan Dirujuk"] = row.alasan_dirujuk || '-';
-          base["Layanan Belum Berjalan"] = row.layanan_belum_berjalan || '-';
+          base["Layanan Belum Berjalan"] = row.layanan_belum_berjalan ? Object.keys(row.layanan_belum_berjalan).filter(k => row.layanan_belum_berjalan[k]).map(k => layananBelumBerjalanItems[k] || k).join(', ') : '-';
 
           // PRB
           const meks = [];
@@ -675,8 +675,8 @@ export default function DataManagement() {
                 <div>
                   <SectionHeader label="D. Layanan yang Dirujuk / Belum Optimal" />
                   <div className="grid grid-cols-1 gap-y-3 text-sm">
-                    <Field label="Layanan yang Masih Sering Dirujuk" value={selected.layanan_dirujuk ? Object.keys(selected.layanan_dirujuk).filter(k => selected.layanan_dirujuk[k]).join(', ') : '-'} />
-                    <Field label="Layanan yang Belum Berjalan Optimal" value={selected.layanan_belum_berjalan ? Object.keys(selected.layanan_belum_berjalan).filter(k => selected.layanan_belum_berjalan[k]).join(', ') : '-'} />
+                    <Field label="Layanan yang Masih Sering Dirujuk" value={selected.layanan_dirujuk ? Object.keys(selected.layanan_dirujuk).filter(k => selected.layanan_dirujuk[k]).map(k => layananDirujukItems[k] || k).join(', ') : '-'} />
+                    <Field label="Layanan yang Belum Berjalan Optimal" value={selected.layanan_belum_berjalan ? Object.keys(selected.layanan_belum_berjalan).filter(k => selected.layanan_belum_berjalan[k]).map(k => layananBelumBerjalanItems[k] || k).join(', ') : '-'} />
                   </div>
                 </div>
               )}
