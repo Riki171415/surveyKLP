@@ -19,7 +19,24 @@ app.get('/api/surveys', async (req, res) => {
   try {
     // SQL Injection Prevention: Tidak menerima input eksternal untuk klausa query statis
     const { rows } = await pool.query('SELECT * FROM surveys ORDER BY created_at DESC');
-    res.json({ data: rows, error: null });
+    
+    // Parse JSON strings to objects (karena Supabase menyimpan sebagai JSONB dan mengembalikannya sebagai object,
+    // sedangkan jika PostgreSQL lokal menggunakan kolom TEXT, dia akan mengembalikan string)
+    const parsedRows = rows.map(row => {
+      const newRow = { ...row };
+      for (const key in newRow) {
+        if (typeof newRow[key] === 'string' && (newRow[key].startsWith('{') || newRow[key].startsWith('['))) {
+          try {
+            newRow[key] = JSON.parse(newRow[key]);
+          } catch (e) {
+            // Biarkan saja jika gagal parse
+          }
+        }
+      }
+      return newRow;
+    });
+
+    res.json({ data: parsedRows, error: null });
   } catch (err) {
     console.error('Fetch error:', err);
     res.status(500).json({ data: null, error: { message: err.message } });
