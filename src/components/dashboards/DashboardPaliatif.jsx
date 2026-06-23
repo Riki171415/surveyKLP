@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LabelList
+  PieChart, Pie, Cell, LabelList, Legend
 } from 'recharts';
 import { HeartPulse, Users, CheckCircle, Heart, Stethoscope, CheckCircle2 } from 'lucide-react';
 
