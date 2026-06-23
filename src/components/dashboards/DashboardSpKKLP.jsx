@@ -6,13 +6,17 @@ import {
 import { Stethoscope, Award, FileSearch, CheckCircle } from 'lucide-react';
 
 const relevansiItems = [
-  "Dokter Sp.KKLP memberikan layanan promotif-preventif yang lebih komprehensif dibandingkan dokter umum.",
-  "Dokter Sp.KKLP mampu menangani pasien dengan multimorbiditas (lebih dari 2 penyakit kronis) tanpa harus merujuk, dibanding dokter umum.",
-  "Dalam manajemen pasien PRB, dokter Sp.KKLP lebih aktif melakukan pemantauan dan edukasi sehingga kepatuhan pasien lebih tinggi.",
-  "Angka rujukan ke rumah sakit pada pasien yang ditangani Sp.KKLP lebih rendah dibanding pasien yang ditangani dokter umum.",
-  "Dokter Sp.KKLP lebih sering melakukan kunjungan rumah dan family conference dibanding dokter umum.",
-  "Kehadiran Sp.KKLP meningkatkan mutu rekam medis dan dokumentasi klinis.",
-  "Waktu konsultasi rata-rata yang diberikan Sp.KKLP per pasien lebih lama dan lebih mendalam."
+  "Pengelolaan Multimorbiditas",
+  "Home Care Pasien Kronis",
+  "Paliatif Primer",
+  "Edukasi Kelompok Kronis",
+  "Pendampingan Keluarga",
+  "Pemantauan Komunitas",
+  "Monitoring Risiko Tinggi",
+  "Penguatan PRB",
+  "Koordinasi Lintas Profesi",
+  "Pembinaan Posbindu",
+  "Pengelolaan Geriatri"
 ];
 
 const layananDirujukItems = [
@@ -46,12 +50,8 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
 
       const rjk = row.layanan_dirujuk || {};
       Object.keys(rjk).forEach(k => {
-        if (rjk[k]) dirujukCounts[k] = (dirujukCounts[k] || 0) + 1;
-      });
-      // Handle legacy boolean mapping
-      layananDirujukItems.forEach((_, idx) => {
-        if (rjk[idx]) {
-          const name = layananDirujukItems[idx];
+        if (rjk[k] && k !== 'pengaruhPenurunanRujukan') {
+          const name = k === 'lainnya' ? rjk.lainnya : (isNaN(k) ? k : (layananDirujukItems[k] || `Layanan ${k}`));
           dirujukCounts[name] = (dirujukCounts[name] || 0) + 1;
         }
       });

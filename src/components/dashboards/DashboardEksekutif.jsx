@@ -28,13 +28,23 @@ const nonOptimalServices = [
 ];
 
 const relevansiItems = [
-  "Layanan promotif-preventif lebih komprehensif",
-  "Penanganan multimorbiditas tanpa rujukan",
-  "Manajemen PRB & kepatuhan pasien",
-  "Penurunan angka rujukan ke RS",
-  "Kunjungan rumah & family conference",
-  "Mutu rekam medis & dokumentasi klinis",
-  "Waktu konsultasi lebih lama & mendalam"
+  "Pengelolaan Multimorbiditas",
+  "Home Care Pasien Kronis",
+  "Paliatif Primer",
+  "Edukasi Kelompok Kronis",
+  "Pendampingan Keluarga",
+  "Pemantauan Komunitas",
+  "Monitoring Risiko Tinggi",
+  "Penguatan PRB",
+  "Koordinasi Lintas Profesi",
+  "Pembinaan Posbindu",
+  "Pengelolaan Geriatri"
+];
+
+const layananDirujukItems = [
+  "Kasus PTM tanpa komplikasi", "Penanganan luka diabetes", 
+  "Tindakan bedah minor", "Pelayanan paliatif akhir hayat", 
+  "Gangguan jiwa ringan-sedang", "Penanganan fraktur tertutup"
 ];
 
 
@@ -143,8 +153,8 @@ export default function DashboardEksekutif({ data = [] }) {
     
     // 3. Perbandingan
     const relevansiScores = {
-      withSpkklp: Array(7).fill(0).map(()=>({sum:0, count:0})),
-      withoutSpkklp: Array(7).fill(0).map(()=>({sum:0, count:0}))
+      withSpkklp: Array(11).fill(0).map(()=>({sum:0, count:0})),
+      withoutSpkklp: Array(11).fill(0).map(()=>({sum:0, count:0}))
     };
     const scatterData = [];
     
@@ -219,7 +229,7 @@ export default function DashboardEksekutif({ data = [] }) {
       // Perbandingan Relevansi
       if (row.relevansi_spkklp) {
         const group = row.doc_kklp === 'Ya' ? 'withSpkklp' : 'withoutSpkklp';
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 11; i++) {
           const val = row.relevansi_spkklp[i];
           if (val) {
             const num = typeof val === 'object' ? Number(val.skala || 0) : Number(val);
@@ -244,7 +254,10 @@ export default function DashboardEksekutif({ data = [] }) {
       // Rujukan
       if (row.layanan_dirujuk) {
         Object.keys(row.layanan_dirujuk).forEach(k => {
-          if (row.layanan_dirujuk[k]) rujukanMap[k] = (rujukanMap[k] || 0) + 1;
+          if (row.layanan_dirujuk[k] && k !== 'pengaruhPenurunanRujukan') {
+             const keyName = k === 'lainnya' ? row.layanan_dirujuk.lainnya : (isNaN(k) ? k : (layananDirujukItems[k] || `Layanan ${k}`));
+             rujukanMap[keyName] = (rujukanMap[keyName] || 0) + 1;
+          }
         });
       }
 

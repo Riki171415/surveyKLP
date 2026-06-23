@@ -11,13 +11,17 @@ import {
 } from 'recharts';
 
 const relevansiItems = [
-  "Dokter Sp.KKLP memberikan layanan promotif-preventif yang lebih komprehensif dibandingkan dokter umum.",
-  "Dokter Sp.KKLP mampu menangani pasien dengan multimorbiditas (lebih dari 2 penyakit kronis) tanpa harus merujuk, dibanding dokter umum.",
-  "Dalam manajemen pasien PRB, dokter Sp.KKLP lebih aktif melakukan pemantauan dan edukasi sehingga kepatuhan pasien lebih tinggi.",
-  "Angka rujukan ke rumah sakit pada pasien yang ditangani Sp.KKLP lebih rendah dibanding pasien yang ditangani dokter umum.",
-  "Dokter Sp.KKLP lebih sering melakukan kunjungan rumah dan family conference dibanding dokter umum.",
-  "Kehadiran Sp.KKLP meningkatkan mutu rekam medis dan dokumentasi klinis.",
-  "Waktu konsultasi rata-rata yang diberikan Sp.KKLP per pasien lebih lama dan lebih mendalam."
+  "Pengelolaan pasien dengan kondisi kronis dan multimorbiditas.",
+  "Pendampingan pasien kronis melalui home care.",
+  "Pelayanan paliatif di tingkat primer.",
+  "Edukasi kelompok pasien kronis.",
+  "Pendampingan keluarga pasien kronis.",
+  "Pemantauan berkelanjutan pasien kronis di komunitas.",
+  "Monitoring komunitas risiko tinggi penyakit kronis.",
+  "Penguatan Program Rujuk Balik (PRB).",
+  "Koordinasi pelayanan lintas profesi dan kader kesehatan.",
+  "Pembinaan Posbindu PTM.",
+  "Pengelolaan pasien geriatri dengan kebutuhan pelayanan jangka panjang."
 ];
 
 const layananDirujukItems = [
@@ -168,8 +172,8 @@ export default function KokpitKemenkes() {
       // Rujukan
       const rjk = row.layanan_dirujuk || {};
       Object.keys(rjk).forEach(k => {
-        if (rjk[k]) {
-          const name = isNaN(k) ? k : (layananDirujukItems[k] || `Layanan ${k}`);
+        if (rjk[k] && k !== 'pengaruhPenurunanRujukan') {
+          const name = k === 'lainnya' ? rjk.lainnya : (isNaN(k) ? k : (layananDirujukItems[k] || `Layanan ${k}`));
           rujukanMap[name] = (rujukanMap[name] || 0) + 1;
           totalRujukan++;
         }
@@ -216,12 +220,12 @@ export default function KokpitKemenkes() {
     const indeksKesiapan = Math.round((spkklpRatio * 40) + (relRatio * 40) + (rujukanRatio * 20));
 
     // Radar Data
-    const radarData = relevansiItems.slice(0, 7).map((item, i) => {
+    const radarData = relevansiItems.map((item, i) => {
       const kapus = roleScores['Kepala Puskesmas / klinik'][i];
       const du = roleScores['Dokter Umum'][i];
       const sp = roleScores['Dokter Sp.KKLP'][i];
       return {
-        subject: item.replace("Poli / Layanan khusus ", "").replace("Kegiatan ", "").substring(0, 15),
+        subject: `Q${i+1}`,
         Kapus: kapus.count > 0 ? Number((kapus.sum / kapus.count).toFixed(1)) : 0,
         DUmum: du.count > 0 ? Number((du.sum / du.count).toFixed(1)) : 0,
         SpKKLP: sp.count > 0 ? Number((sp.sum / sp.count).toFixed(1)) : 0,
