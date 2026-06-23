@@ -568,27 +568,33 @@ export default function DataManagement() {
                       ) : <p className="text-xs">{selected.spkklp_kendala?.hasKendala || '-'}</p>}
                     </div>
 
-                    {selected.relevansi_spkklp && Object.keys(selected.relevansi_spkklp).length > 0 && (
+                    {selected.relevansi_spkklp && (
                       <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 mt-4">
                         <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Skala Relevansi Sp.KKLP (1-4):</p>
-                        {Object.entries(selected.relevansi_spkklp).map(([idx, val]) => (
-                          <div key={idx} className="flex justify-between items-center py-1.5 text-xs border-b border-slate-200/50 last:border-0">
-                            <span className="text-slate-600 mr-2">{relevansiItems[idx]}</span>
-                            <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shrink-0">{val}</span>
-                          </div>
-                        ))}
+                        {relevansiItems.map((item, idx) => {
+                          const val = selected.relevansi_spkklp[idx];
+                          return (
+                            <div key={idx} className="flex justify-between items-center py-1.5 text-xs border-b border-slate-200/50 last:border-0">
+                              <span className="text-slate-600 mr-2">{item}</span>
+                              <span className={`font-bold px-2 py-0.5 rounded shrink-0 ${val ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 bg-slate-100'}`}>{val || '-'}</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 
-                    {selected.peran_spkklp && Object.keys(selected.peran_spkklp).length > 0 && (
+                    {selected.peran_spkklp && selected.doc_kklp === 'Ya' && (
                       <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 mt-4">
                         <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-2">A.2 Peran Sp.KKLP dalam Optimalisasi Layanan (1-4):</p>
-                        {Object.entries(selected.peran_spkklp).map(([idx, val]) => (
-                          <div key={idx} className="flex justify-between items-center py-1.5 text-xs border-b border-slate-200/50 last:border-0">
-                            <span className="text-slate-600 mr-2">{peranSpkklpItems[idx]}</span>
-                            <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shrink-0">{val}</span>
-                          </div>
-                        ))}
+                        {peranSpkklpItems.map((item, idx) => {
+                          const val = selected.peran_spkklp[idx];
+                          return (
+                            <div key={idx} className="flex justify-between items-center py-1.5 text-xs border-b border-slate-200/50 last:border-0">
+                              <span className="text-slate-600 mr-2">{item}</span>
+                              <span className={`font-bold px-2 py-0.5 rounded shrink-0 ${val ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 bg-slate-100'}`}>{val || '-'}</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 
@@ -727,8 +733,8 @@ export default function DataManagement() {
                 <div>
                   <SectionHeader label="D. Layanan yang Dirujuk / Belum Optimal" />
                   <div className="grid grid-cols-1 gap-y-3 text-sm">
-                    <Field label="Layanan yang Masih Sering Dirujuk" value={selected.layanan_dirujuk ? Object.keys(selected.layanan_dirujuk).filter(k => selected.layanan_dirujuk[k]).map(k => layananDirujukItems[k] || k).join(', ') : '-'} />
-                    <Field label="Layanan yang Belum Berjalan Optimal" value={selected.layanan_belum_berjalan ? Object.keys(selected.layanan_belum_berjalan).filter(k => selected.layanan_belum_berjalan[k]).map(k => layananBelumBerjalanItems[k] || k).join(', ') : '-'} />
+                    <Field label="Layanan yang Masih Sering Dirujuk" value={selected.layanan_dirujuk ? Object.keys(selected.layanan_dirujuk).filter(k => selected.layanan_dirujuk[k] && k !== 'pengaruhPenurunanRujukan').map(k => k === 'lainnya' ? selected.layanan_dirujuk.lainnya : (layananDirujukItems[k] || k)).join(', ') : '-'} />
+                    <Field label="Layanan yang Belum Berjalan Optimal" value={selected.layanan_belum_berjalan ? Object.keys(selected.layanan_belum_berjalan).filter(k => selected.layanan_belum_berjalan[k]).map(k => k === 'lainnya' ? selected.layanan_belum_berjalan.lainnya : (layananBelumBerjalanItems[k] || k)).join(', ') : '-'} />
                   </div>
                 </div>
               )}
