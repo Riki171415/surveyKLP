@@ -166,10 +166,15 @@ export default function SurveyDetailModal({ selected, onClose }) {
 
   try {
     const handlePrint = () => {
-      // Menambahkan class ke body agar komponen di belakang modal tidak ikut tercetak
       document.body.classList.add('printing-modal');
-      window.print();
-      document.body.classList.remove('printing-modal');
+      // Beri sedikit jeda agar DOM terupdate, lalu panggil print
+      setTimeout(() => {
+        window.print();
+        // Hapus class setelah dialog print ditutup
+        setTimeout(() => {
+          document.body.classList.remove('printing-modal');
+        }, 500);
+      }, 100);
     };
 
     return (
