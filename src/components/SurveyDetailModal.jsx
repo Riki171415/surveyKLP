@@ -18,9 +18,16 @@ export default function SurveyDetailModal({ selected, onClose }) {
   const scaleBadge = (skala) => {
     if (skala === '4' || skala === 'Sangat Setuju' || skala === 'Ya') return 'bg-emerald-100 text-emerald-700';
     if (skala === '3' || skala === 'Setuju') return 'bg-blue-100 text-blue-700';
-    if (skala === '2' || skala === 'Tidak Setuju' || skala === 'Tidak') return 'bg-amber-100 text-amber-700';
-    if (skala === '1' || skala === 'Sangat Tidak Setuju') return 'bg-rose-100 text-rose-700';
+    if (skala === '2' || skala === 'Kurang Setuju') return 'bg-amber-100 text-amber-700';
+    if (skala === '1' || skala === 'Tidak Setuju' || skala === 'Tidak') return 'bg-rose-100 text-rose-700';
     return 'bg-slate-100 text-slate-600';
+  };
+
+  const roleBadge = (role = '') => {
+    const r = (role || '').toLowerCase();
+    if (r === 'admin') return 'bg-purple-100 text-purple-800';
+    if (r.includes('survey')) return 'bg-blue-100 text-blue-800';
+    return 'bg-emerald-100 text-emerald-800';
   };
 
   const jknBadge = (status) => {
