@@ -269,7 +269,7 @@ export default function KokpitKemenkes() {
 
     return {
       indeksKesiapan,
-      spkklpRatio: Math.round(spkklpRatio * 100),
+      spkklpRatio: Math.round(spkklpRatio),
       topRujukan,
       radarData,
       manfaatData,
