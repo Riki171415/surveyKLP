@@ -86,8 +86,8 @@ function CheckBadge({ checked }) {
 
 function ScaleTable({ items, values, keyFn = (_, i) => i }) {
   return (
-    <div className="border border-slate-100 rounded-xl overflow-hidden">
-      <table className="w-full text-xs">
+    <div className="border border-slate-100 rounded-xl overflow-x-auto">
+      <table className="w-full text-xs min-w-[400px]">
         <tbody className="divide-y divide-slate-50">
           {items.map((label, idx) => {
             const val = values?.[keyFn(label, idx)];
@@ -247,8 +247,8 @@ export default function SurveyDetailModal({ selected, onClose }) {
                   {selected.kompetensi && Object.keys(selected.kompetensi).length > 0 && (
                     <div>
                       <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tabel Kompetensi Layanan</p>
-                      <div className="border border-slate-100 rounded-xl overflow-hidden">
-                        <table className="w-full text-xs">
+                      <div className="border border-slate-100 rounded-xl overflow-x-auto">
+                        <table className="w-full text-xs min-w-[500px]">
                           <thead className="bg-slate-50 border-b border-slate-100">
                             <tr>
                               <th className="px-4 py-2.5 text-left font-semibold text-slate-600">Layanan</th>
@@ -503,8 +503,8 @@ export default function SurveyDetailModal({ selected, onClose }) {
             {/* ═══ F. LAYANAN NON-OPTIMAL ═══ */}
             {selected.non_optimal && Object.keys(selected.non_optimal).length > 0 && (
               <SectionBlock title="F. Layanan Belum Optimal / Tidak Terakomodasi JKN" color="bg-rose-600">
-                <div className="border border-slate-100 rounded-xl overflow-hidden">
-                  <table className="w-full text-xs">
+                <div className="border border-slate-100 rounded-xl overflow-x-auto shadow-sm">
+                  <table className="w-full text-xs min-w-[500px]">
                     <thead className="bg-slate-50 border-b border-slate-100">
                       <tr>
                         <th className="px-4 py-2.5 text-left font-semibold text-slate-600">Layanan</th>

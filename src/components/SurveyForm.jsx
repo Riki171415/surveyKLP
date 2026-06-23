@@ -824,8 +824,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       <p className="text-sm font-semibold text-slate-700 mb-3">
                         {(isRoleSpKklp || isPrintMode) ? '🩺 Kompetensi Layanan — Diisi oleh Dokter Umum / Dokter Sp.KKLP' : '🩺 Kompetensi Layanan — Diisi oleh Dokter Umum'}
                       </p>
-                      <div className="border border-slate-200 rounded-lg overflow-hidden">
-                        <table className="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
+                      <div className="border border-slate-200 rounded-lg overflow-x-auto">
+                        <table className="w-full text-left text-sm whitespace-nowrap md:whitespace-normal min-w-[600px]">
                           <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
                               <th className="px-4 py-3 font-semibold text-slate-700 w-1/2">Jenis Kompetensi / Layanan</th>
@@ -995,8 +995,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       ? "Bagaimana harapan Bapak/Ibu terhadap dukungan yang dapat diberikan oleh kompetensi dokter Sp.KKLP pada kegiatan-kegiatan berikut?" 
                       : "Menurut Anda, seberapa relevan kegiatan berikut untuk didukung oleh kompetensi dokter Sp.KKLP di Puskesmas / Klinik?"}
                   </p>
-                  <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-                    <table className="w-full text-left text-sm">
+                  <div className="border border-slate-200 rounded-lg overflow-x-auto shadow-sm">
+                    <table className="w-full text-left text-sm min-w-[500px]">
                       <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
                           <th className="px-4 py-3 font-semibold text-slate-700 w-3/5">Kegiatan</th>
@@ -1043,8 +1043,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                     <h3 className="text-lg font-bold text-slate-800 mb-3 mt-6">A.2 Peran Sp.KKLP dalam Optimalisasi Layanan</h3>
                     <p className="text-sm text-slate-600 mb-4">Mohon berikan penilaian Anda terhadap peran Sp.KKLP di Fasilitas Kesehatan Anda:</p>
                     
-                    <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-                      <table className="w-full text-left text-sm">
+                    <div className="border border-slate-200 rounded-lg overflow-x-auto shadow-sm">
+                      <table className="w-full text-left text-sm min-w-[500px]">
                         <thead className="bg-slate-50 border-b border-slate-200">
                           <tr>
                             <th className="px-4 py-3 font-semibold text-slate-700 w-3/5">Pernyataan</th>
