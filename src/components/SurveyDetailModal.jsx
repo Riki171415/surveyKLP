@@ -36,10 +36,10 @@ const spkklpBadge = (val) =>
 function SectionBlock({ title, color = 'bg-primary-600', icon, children, defaultOpen = true }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm print:break-inside-avoid print:shadow-none print:border-slate-300">
+    <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm print:shadow-none print:border-slate-300 print:mb-4">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-3 px-5 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
+        className="w-full flex items-center gap-3 px-5 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left print:break-after-avoid print:bg-slate-100"
       >
         <div className={`w-1.5 h-5 ${color} rounded-full shrink-0`} />
         <span className="font-bold text-sm text-slate-800 flex-1">{title}</span>
