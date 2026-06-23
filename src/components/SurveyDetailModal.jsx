@@ -8,6 +8,7 @@ import { jknBenefits, nonOptimalServices } from './DataManagement';
 
 export default function SurveyDetailModal({ selected, onClose }) {
   if (!selected) return null;
+  // alert('SurveyDetailModal dijalankan untuk: ' + selected.fktp_name);
 
   const statusBadge = (status) => {
     if (status === 'sudah') return 'bg-emerald-100 text-emerald-700';
