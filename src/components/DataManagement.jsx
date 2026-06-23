@@ -120,7 +120,6 @@ export default function DataManagement() {
       setLoading(true);
       const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
       let surveysData = [];
-      
       if (useSupabase) {
         const { data, error } = await supabase.from('surveys').select('*').order('created_at', { ascending: false });
         if (error) throw error;
@@ -131,7 +130,6 @@ export default function DataManagement() {
         if (json.error) throw json.error;
         surveysData = json.data || [];
       }
-      
       setSurveys(surveysData);
     } catch { alert('Gagal memuat data.'); }
     finally { setLoading(false); }

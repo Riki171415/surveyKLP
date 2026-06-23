@@ -67,9 +67,8 @@ export default function KokpitKemenkes() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
       let surveysData = [];
-      
+      const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
       if (useSupabase) {
         const { data: surveys, error } = await supabase.from('surveys').select('*');
         if (error) throw error;

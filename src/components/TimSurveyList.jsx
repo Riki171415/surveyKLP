@@ -18,13 +18,22 @@ export default function TimSurveyList() {
   const fetchSurveys = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('surveys')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
-      setSurveys(data || []);
+      let surveysData = [];
+      const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
+      if (useSupabase) {
+        const { data, error } = await supabase
+          .from('surveys')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        surveysData = data || [];
+      } else {
+        const res = await fetch('/api/surveys');
+        const json = await res.json();
+        if (json.error) throw json.error;
+        surveysData = json.data || [];
+      }
+      setSurveys(surveysData);
     } catch (error) {
       console.error("Gagal memuat data:", error);
       alert("Gagal memuat daftar Puskesmas dari Supabase.");
