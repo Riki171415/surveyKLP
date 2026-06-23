@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 const MEDICAL_DATA = {
   faskes_tingkat_pertama: {
@@ -163,8 +164,8 @@ const ListSelectorModal = ({ isOpen, onClose, onSelect, type = 'diagnosa' }) => 
     };
   }).filter(category => category.filteredItems.length > 0);
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4 transition-all">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4 transition-all">
       <div className="bg-white w-full sm:w-full sm:max-w-xl h-[85vh] sm:h-auto sm:max-h-[85vh] rounded-t-2xl sm:rounded-2xl flex flex-col shadow-2xl animate-slide-up sm:animate-scale-in">
         
         {/* Header */}
@@ -294,7 +295,8 @@ const ListSelectorModal = ({ isOpen, onClose, onSelect, type = 'diagnosa' }) => 
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
