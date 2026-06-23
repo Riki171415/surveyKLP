@@ -114,15 +114,26 @@ const interviewQuestionsWithoutSpkklp = [
   "8. Adakah kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktik Mandiri dalam program JKN? Ceritakan. (Kendala yang disampaikan dapat disesuaikan dengan bidang profesi atau peran Bapak/Ibu, misalnya terkait aspek pelayanan klinis, rujukan, pembiayaan, administrasi, SDM, koordinasi antarprofesi, sistem informasi, sarana prasarana, regulasi, maupun kendala lain yang memengaruhi pelaksanaan program JKN.)"
 ];
 
-const interviewExamples = [
-  "Contoh: Pelayanan menjadi lebih family-oriented dan berbasis komunitas. Sangat terasa manfaatnya pada pasien geriatri yang dinilai secara holistik hingga dilakukan family meeting...",
-  "Contoh: Perlu ada kolaborasi dengan nakes lain (misal: penanganan gizi buruk balita, pasien depresi, KDRT, lansia) dan dukungan operasional yang memadai...",
-  "Contoh: Dilakukan bersama nakes lain. Edukasi butuh waktu konsultasi yang lebih lama (15-30 menit), akan sangat terbantu jika ada insentif khusus/non-kapitasi...",
-  "Contoh: Perlu, karena kasus paliatif di Faskes Primer cukup banyak, tidak hanya untuk kasus kanker tetapi juga lansia dan nyeri kronis...",
-  "Contoh: Perlu penambahan kewenangan agar Sp.KKLP bisa menyesuaikan terapi/obat tanpa harus selalu merujuk kembali ke RS, agar memudahkan pasien...",
-  "Contoh: Pendekatan medis menjadi lebih komprehensif, angka rujukan menurun, dan keluarga pasien lebih dilibatkan dalam proses terapi...",
-  "Contoh: Pengakuan kewenangan klinis yang lebih luas, kejelasan status kepegawaian, dan insentif yang sesuai dengan beban kerja pelayanan yang holistik...",
-  "Contoh: Terkadang ada pembatasan kuota rujukan atau ketersediaan obat PRB di apotek jejaring kurang stabil, sehingga pasien mengeluh ke faskes tingkat pertama..."
+const interviewExamplesWithSpkklp = [
+  "Contoh: Pelaksanaan layanan kronis saat ini jauh lebih komprehensif. Peran Sp.KKLP sangat terasa dalam tata laksana pasien multimorbiditas...",
+  "Contoh: Home visit kini mencakup penilaian holistik keluarga. Sp.KKLP menginisiasi family conference untuk menyelesaikan masalah...",
+  "Contoh: Edukasi sangat perlu dijadikan manfaat non-kapitasi karena intervensi gaya hidup butuh waktu ekstra. Sp.KKLP menyusun materi evidence-based...",
+  "Contoh: Sangat perlu dimasukkan. Sp.KKLP sangat kompeten memberikan konseling akhir hayat (end-of-life care) di faskes tingkat primer...",
+  "Contoh: Sp.KKLP sangat aktif memantau kepatuhan PRB. Perlu penambahan kewenangan agar Sp.KKLP bisa menyesuaikan dosis tanpa harus merujuk...",
+  "Contoh: Pendekatan medis menjadi jauh lebih holistik. Angka rujukan ke RS menurun drastis dan dokter umum merasa terbantu ada tempat konsul...",
+  "Contoh: Diperlukan pengakuan kewenangan klinis di sistem P-Care BPJS, serta penyesuaian insentif berbasis kinerja untuk layanan komprehensif...",
+  "Contoh: Kendala sistem P-Care yang belum mengakomodasi input intervensi family therapy Sp.KKLP. Stok obat PRB di apotek jejaring sering kosong..."
+];
+
+const interviewExamplesWithoutSpkklp = [
+  "Contoh: Kami berharap dengan hadirnya Sp.KKLP, penanganan pasien dengan komplikasi berat bisa selesai di Puskesmas tanpa buru-buru rujuk ke RS...",
+  "Contoh: Kami berharap Sp.KKLP dapat memberikan intervensi medis komprehensif berbasis rumah tangga, meningkatkan kualitas hidup pasien bedridden...",
+  "Contoh: Harapannya, Sp.KKLP memandu program preventif spesifik menargetkan perubahan perilaku (behavioural change) masyarakat...",
+  "Contoh: Kebutuhan pasien paliatif tinggi, tapi dokter umum sering kurang kompeten meresepkan anti-nyeri kuat. Hadirnya Sp.KKLP sangat kami harapkan...",
+  "Contoh: Kami berharap BPJS memberikan kewenangan khusus bagi Sp.KKLP untuk mengevaluasi resep dari RS agar perawatan lebih efektif...",
+  "Contoh: Turunnya angka rujukan, penyelesaian masalah ke akar keluarga, dan meningkatnya kepuasan pasien karena ditangani spesialis sedekat mungkin...",
+  "Contoh: Dukungan regulasi penempatan SDM yang kuat, pembiayaan JKN yang menguntungkan faskes, serta alat kesehatan yang mendukung...",
+  "Contoh: Beban kerja dokter umum yang tinggi tidak seimbang dengan kapitasi. Sistem rujukan BPJS terkadang kaku karena faskes terbentur restriksi obat..."
 ];
 
 export default function SurveyForm({ isEdit = false, isInterview = false, isPrintMode = false }) {
@@ -1453,7 +1464,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       <textarea
                         rows={6}
                         required
-                        placeholder={interviewExamples[idx] || "Tuliskan jawaban/alasan di sini..."}
+                        placeholder={((!isRoleDpm && formData.docKklp === 'Tidak') ? interviewExamplesWithoutSpkklp : interviewExamplesWithSpkklp)[idx] || "Tuliskan jawaban/alasan di sini..."}
                         className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-y ${showErrors && (formData.wawancara[idx]?.trim() || '').length < 10 ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`}
                         value={formData.wawancara[idx] || ''}
                         onChange={(e) => handleWawancaraChange(idx, e.target.value)}
