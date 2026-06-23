@@ -405,6 +405,8 @@ function FormContent({ withSpkklp }) {
           <div className="border border-slate-300 rounded-lg h-14" />
         </div>
       </div>
+    </div>
+  );
 }
 
 // ─── Form khusus Dokter Praktik Mandiri (DPM) ────────────────────────────────
