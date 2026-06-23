@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { penyakitPasienBulanan } from './SurveyForm';
+import ListSelectorModal from './ListSelectorModal';
 
 export default function SurveiDPM({ formData, setFormData, showErrors }) {
+  const [selectorConfig, setSelectorConfig] = useState({ isOpen: false, type: 'diagnosa' });
   const data = formData.dpm || {};
+
+  const handleSelectList = (selectedString) => {
+    const field = selectorConfig.type === 'diagnosa' ? 'namaDiagnosis' : 'tindakanProsedur';
+    const currentValue = data.poliKklp?.[field] || '';
+    const newValue = currentValue ? `${currentValue}, ${selectedString}` : selectedString;
+    updateField('poliKklp', field, newValue);
+  };
 
   const updateField = (category, field, value) => {
     setFormData(prev => ({
@@ -218,13 +227,23 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
         </div>
 
         <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.poliKklp?.namaDiagnosis ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-          <label className="block text-sm font-semibold text-slate-800 mb-2">Nama diagnosis apa saja yg ditangani SpKKLP dalam praktek sehari2 <span className="text-rose-500">*</span></label>
-          <input type="text" required placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" value={data.poliKklp?.namaDiagnosis || ''} onChange={(e) => updateField('poliKklp', 'namaDiagnosis', e.target.value)} />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+            <label className="block text-sm font-semibold text-slate-800">Nama diagnosis apa saja yg ditangani SpKKLP dalam praktek sehari2 <span className="text-rose-500">*</span></label>
+            <button type="button" onClick={() => setSelectorConfig({ isOpen: true, type: 'diagnosa' })} className="inline-flex items-center text-xs font-medium text-primary-600 hover:text-primary-800 bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-lg transition-colors border border-primary-200">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg> Pilih dari Daftar
+            </button>
+          </div>
+          <textarea rows={3} required placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.poliKklp?.namaDiagnosis || ''} onChange={(e) => updateField('poliKklp', 'namaDiagnosis', e.target.value)} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div className={`p-4 rounded-xl border ${showErrors && !data.poliKklp?.tindakanProsedur ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-            <label className="block text-sm font-semibold text-slate-800 mb-2">tindakan apa saja yg dilakukan Sp.KKLP <span className="text-rose-500">*</span></label>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+              <label className="block text-sm font-semibold text-slate-800">tindakan apa saja yg dilakukan Sp.KKLP <span className="text-rose-500">*</span></label>
+              <button type="button" onClick={() => setSelectorConfig({ isOpen: true, type: 'tindakan' })} className="inline-flex items-center text-xs font-medium text-primary-600 hover:text-primary-800 bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-lg transition-colors border border-primary-200">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg> Pilih dari Daftar
+              </button>
+            </div>
             <textarea rows={7} required placeholder="Jelaskan..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.poliKklp?.tindakanProsedur || ''} onChange={(e) => updateField('poliKklp', 'tindakanProsedur', e.target.value)}></textarea>
           </div>
 
@@ -288,6 +307,13 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
           })}
         </div>
       </section>
+      {/* List Selector Modal */}
+      <ListSelectorModal 
+        isOpen={selectorConfig.isOpen} 
+        onClose={() => setSelectorConfig({ ...selectorConfig, isOpen: false })} 
+        type={selectorConfig.type}
+        onSelect={handleSelectList} 
+      />
     </div>
   );
 }

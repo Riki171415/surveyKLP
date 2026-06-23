@@ -8,6 +8,7 @@ import wilayahMapping from '../data/wilayahMapping.json';
 import logoKemenkes from '../assets/logo-kemenkes.png';
 import SearchableSelect from './SearchableSelect';
 import SurveiDPM from './SurveiDPM';
+import ListSelectorModal from './ListSelectorModal';
 
 const jknBenefits = [
   "Pemantauan kepatuhan terapi pasien AIDS, TB, dan Malaria memberikan manfaat yang optimal bagi pasien.",
@@ -191,6 +192,24 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
   const [showPanduan, setShowPanduan] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
+
+  const [selectorConfig, setSelectorConfig] = useState({ isOpen: false, type: 'diagnosa', context: 'spkklpPoli' });
+
+  const handleSelectList = (selectedString) => {
+    const field = selectorConfig.type === 'diagnosa' ? 'diagnosis' : 'tindakan';
+    setFormData(prev => {
+      const currentObj = prev[selectorConfig.context] || {};
+      const currentValue = currentObj[field] || '';
+      const newValue = currentValue ? `${currentValue}, ${selectedString}` : selectedString;
+      return {
+        ...prev,
+        [selectorConfig.context]: {
+          ...currentObj,
+          [field]: newValue
+        }
+      };
+    });
+  };
 
   const combinedProvinsi = new Set([
     ...Object.keys(wilayahMapping.fktp || {}),
@@ -920,8 +939,24 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
 
                         {formData.spkklpPoli?.hasPoli && (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl mt-4">
-                            <div className="md:col-span-2"><label className="block text-xs font-semibold text-slate-700 mb-1">Nama diagnosis apa saja yg ditangani SpKKLP dalam praktek sehari2 <span className="text-rose-500">*</span></label><textarea rows={2} placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.diagnosis?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.diagnosis || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, diagnosis: e.target.value } }))} /></div>
-                            <div><label className="block text-xs font-semibold text-slate-700 mb-1">tindakan apa saja yg dilakukan Sp.KKLP <span className="text-rose-500">*</span></label><textarea rows={2} placeholder="Jelaskan..." className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.tindakan?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.tindakan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, tindakan: e.target.value } }))} /></div>
+                            <div className="md:col-span-2">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
+                                <label className="block text-xs font-semibold text-slate-700">Nama diagnosis apa saja yg ditangani SpKKLP dalam praktek sehari2 <span className="text-rose-500">*</span></label>
+                                <button type="button" onClick={() => setSelectorConfig({ isOpen: true, type: 'diagnosa', context: 'spkklpPoli' })} className="inline-flex items-center text-[11px] font-medium text-primary-600 hover:text-primary-800 bg-primary-50 hover:bg-primary-100 px-2 py-1 rounded transition-colors border border-primary-200">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg> Pilih
+                                </button>
+                              </div>
+                              <textarea rows={2} placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.diagnosis?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.diagnosis || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, diagnosis: e.target.value } }))} />
+                            </div>
+                            <div>
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
+                                <label className="block text-xs font-semibold text-slate-700">tindakan apa saja yg dilakukan Sp.KKLP <span className="text-rose-500">*</span></label>
+                                <button type="button" onClick={() => setSelectorConfig({ isOpen: true, type: 'tindakan', context: 'spkklpPoli' })} className="inline-flex items-center text-[11px] font-medium text-primary-600 hover:text-primary-800 bg-primary-50 hover:bg-primary-100 px-2 py-1 rounded transition-colors border border-primary-200">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg> Pilih
+                                </button>
+                              </div>
+                              <textarea rows={2} placeholder="Jelaskan..." className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.tindakan?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.tindakan || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, tindakan: e.target.value } }))} />
+                            </div>
                             <div><label className="block text-xs font-semibold text-slate-700 mb-1">Luaran pelayanan (centang semua yang sesuai)</label>
                               <div className="flex flex-col gap-1">{['Selesai di Puskesmas / Klinik', 'Kontrol berkala di Puskesmas / Klinik', 'Home care', 'Paliatif', 'PRB', 'Rujukan ke FKRTL', 'Lainnya'].map(l => (
                                 <label key={l} className="flex items-center gap-2 text-xs cursor-pointer"><input type="checkbox" checked={formData.spkklpPoli?.[`luaran_${l}`] || false} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, [`luaran_${l}`]: e.target.checked } }))} className="rounded" />{l}</label>
@@ -1631,6 +1666,13 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
           </div>
         </div>
       , document.body)}
+      {/* List Selector Modal for SurveyForm */}
+      <ListSelectorModal 
+        isOpen={selectorConfig.isOpen} 
+        onClose={() => setSelectorConfig(prev => ({ ...prev, isOpen: false }))} 
+        type={selectorConfig.type}
+        onSelect={handleSelectList} 
+      />
     </div>
   );
 }
