@@ -218,13 +218,13 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
         </div>
 
         <div className={`mb-6 p-4 rounded-xl border ${showErrors && !data.poliKklp?.namaDiagnosis ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-          <label className="block text-sm font-semibold text-slate-800 mb-2">Nama diagnosis yang ditangani Sp.KKLP (cantumkan Kode ICD-10) <span className="text-rose-500">*</span></label>
+          <label className="block text-sm font-semibold text-slate-800 mb-2">Nama diagnosis apa saja yg ditangani SpKKLP dalam praktek sehari2 <span className="text-rose-500">*</span></label>
           <input type="text" required placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" value={data.poliKklp?.namaDiagnosis || ''} onChange={(e) => updateField('poliKklp', 'namaDiagnosis', e.target.value)} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div className={`p-4 rounded-xl border ${showErrors && !data.poliKklp?.tindakanProsedur ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100 bg-slate-50'}`}>
-            <label className="block text-sm font-semibold text-slate-800 mb-2">Tindakan/Prosedur yang dilakukan <span className="text-rose-500">*</span></label>
+            <label className="block text-sm font-semibold text-slate-800 mb-2">tindakan apa saja yg dilakukan Sp.KKLP <span className="text-rose-500">*</span></label>
             <textarea rows={7} required placeholder="Jelaskan..." className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.poliKklp?.tindakanProsedur || ''} onChange={(e) => updateField('poliKklp', 'tindakanProsedur', e.target.value)}></textarea>
           </div>
 

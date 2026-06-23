@@ -565,8 +565,8 @@ function FormDPMContent() {
         <div className="grid grid-cols-2 gap-x-8 gap-y-4">
           <BlankLine label="Sejak kapan poli KKLP beroperasi?" />
           <BlankLine label="Rata-rata jumlah kunjungan per bulan" />
-          <BlankLine label="Nama diagnosis yang ditangani (dengan ICD-10)" />
-          <BlankLine label="Tindakan/Prosedur yang dilakukan" />
+          <BlankLine label="Nama diagnosis apa saja yg ditangani SpKKLP dalam praktek sehari2" />
+          <BlankLine label="tindakan apa saja yg dilakukan Sp.KKLP" />
         </div>
         <div className="mt-4">
           <p className="font-semibold mb-2 text-slate-700">Luaran pelayanan (centang semua yang sesuai):</p>
