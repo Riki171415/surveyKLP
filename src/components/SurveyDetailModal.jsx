@@ -354,11 +354,25 @@ export default function SurveyDetailModal({ selected, onClose }) {
                       <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                         {withSpkklp ? 'Pengaruh Keberadaan Sp.KKLP thd Penurunan Rujukan' : 'Harapan Sp.KKLP Kurangi Rujukan'}
                       </p>
-                      <span className="inline-block px-3 py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-sm font-bold rounded-xl">
-                        {selected.layanan_dirujuk.pengaruhPenurunanRujukan}
-                      </span>
+                      {(() => {
+                        const val = selected.layanan_dirujuk.pengaruhPenurunanRujukan;
+                        const labelMap = {
+                          '1': '1 — Sangat Tidak Setuju',
+                          '2': '2 — Tidak Setuju',
+                          '3': '3 — Setuju',
+                          '4': '4 — Sangat Setuju',
+                        };
+                        const c = scaleColor(val);
+                        const display = labelMap[val] || val;
+                        return (
+                          <span className={`inline-block px-3 py-1.5 rounded-xl font-bold text-sm border ${c.bg} ${c.text} ${c.border}`}>
+                            {display}
+                          </span>
+                        );
+                      })()}
                     </div>
                   )}
+
                 </div>
               </SectionBlock>
             )}
