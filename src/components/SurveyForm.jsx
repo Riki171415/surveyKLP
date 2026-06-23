@@ -946,7 +946,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg> Pilih
                                 </button>
                               </div>
-                              <textarea rows={2} placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.diagnosis?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.diagnosis || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, diagnosis: e.target.value } }))} />
+                              <textarea rows={2} placeholder="silahkan gunakan menu Pilih kode diagnosa" className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpPoli?.diagnosis?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpPoli?.diagnosis || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpPoli: { ...prev.spkklpPoli, diagnosis: e.target.value } }))} />
                             </div>
                             <div>
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">

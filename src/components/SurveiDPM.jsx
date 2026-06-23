@@ -233,7 +233,7 @@ export default function SurveiDPM({ formData, setFormData, showErrors }) {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg> Pilih dari Daftar
             </button>
           </div>
-          <textarea rows={3} required placeholder="Contoh: DM tipe 2 (E11), Hipertensi esensial (I10)" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.poliKklp?.namaDiagnosis || ''} onChange={(e) => updateField('poliKklp', 'namaDiagnosis', e.target.value)} />
+          <textarea rows={3} required placeholder="silahkan gunakan menu Pilih kode diagnosa" className="w-full px-3 py-2 border border-slate-200 bg-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-y" value={data.poliKklp?.namaDiagnosis || ''} onChange={(e) => updateField('poliKklp', 'namaDiagnosis', e.target.value)} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
