@@ -3,6 +3,7 @@ import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate } from
 import { AuthProvider, useAuth } from './components/AuthContext';
 import Login from './components/Login';
 import SurveyForm from './components/SurveyForm';
+import PrintForms from './components/PrintForms';
 import ListResponden from './components/ListResponden';
 import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList, Loader2, ChevronRight, Target, Printer, Menu, X } from 'lucide-react';
 import logoKemenkes from './assets/logo-kemenkes.png';
@@ -212,7 +213,7 @@ function AppContent() {
                 <Route path="/data" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><DataManagement /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><Dashboard /></ProtectedRoute>} />
                 <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
-                <Route path="/cetak-form" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><SurveyForm isPrintMode={true} /></ProtectedRoute>} />
+                <Route path="/cetak-form" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><PrintForms /></ProtectedRoute>} />
                 <Route path="/list-responden" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><ListResponden /></ProtectedRoute>} />
                 <Route path="/wawancara" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><TimSurveyList /></ProtectedRoute>} />
                 <Route path="/wawancara/form" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><SurveyForm isEdit={true} isInterview={true} /></ProtectedRoute>} />
