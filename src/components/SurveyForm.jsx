@@ -10,7 +10,7 @@ import SearchableSelect from './SearchableSelect';
 import SurveiDPM from './SurveiDPM';
 import ListSelectorModal from './ListSelectorModal';
 
-const jknBenefits = [
+export const jknBenefits = [
   "Pemantauan kepatuhan terapi pasien AIDS, TB, dan Malaria memberikan manfaat yang optimal bagi pasien.",
   "Pelaksanaan Program Rujuk Balik (PRB) memberikan manfaat yang optimal bagi pasien.",
   "Pengelolaan Hipertensi tanpa komplikasi memberikan manfaat yang optimal bagi pasien.",
@@ -32,7 +32,7 @@ export const penyakitPasienBulanan = [
   { id: 'hiv_aids', label: 'HIV/AIDS yang stabil', required: false }
 ];
 
-const nonOptimalServices = [
+export const nonOptimalServices = [
   "Pelayanan lifestyle medicine penting untuk diakomodasi dalam layanan JKN.",
   "Pelayanan wellness dan healthy aging penting untuk diakomodasi dalam layanan JKN.",
   "Konsultasi perjalanan/travel medicine penting untuk diakomodasi dalam layanan JKN.",

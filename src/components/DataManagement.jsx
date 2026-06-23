@@ -4,25 +4,10 @@ import { Loader2, Search, Edit, Trash2, X, ChevronLeft, ChevronRight } from 'luc
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
 import { useAuth } from './AuthContext';
-import { penyakitPasienBulanan, layananDirujukItems, layananBelumBerjalanItems, interviewQuestionsWithSpkklp, interviewQuestionsWithoutSpkklp } from './SurveyForm';
+import { penyakitPasienBulanan, layananDirujukItems, layananBelumBerjalanItems, interviewQuestionsWithSpkklp, interviewQuestionsWithoutSpkklp, jknBenefits, nonOptimalServices } from './SurveyForm';
 import SurveyDetailModal from './SurveyDetailModal';
 
 // ─── Data referensi (sama dengan SurveyForm) ───────────────────────────────
-export const jknBenefits = [
-  "Pemantauan kepatuhan terapi pasien AIDS, TB, dan Malaria memberikan manfaat yang optimal bagi pasien.",
-  "Pelaksanaan Program Rujuk Balik (PRB) memberikan manfaat yang optimal bagi pasien.",
-  "Pengelolaan Hipertensi tanpa komplikasi memberikan manfaat yang optimal bagi pasien.",
-  "Deprescribing/pengurangan obat pada pasien polifarmasi memberikan manfaat yang optimal bagi pasien."
-];
-
-export const nonOptimalServices = [
-  "Pelayanan lifestyle medicine penting untuk diakomodasi dalam layanan JKN.",
-  "Pelayanan wellness dan healthy aging penting untuk diakomodasi dalam layanan JKN.",
-  "Konsultasi perjalanan/travel medicine penting untuk diakomodasi dalam layanan JKN.",
-  "Manajemen pasien geriatri frailty penting untuk diakomodasi dalam layanan JKN.",
-  "Precision medicine/konseling genetik dasar penting untuk diakomodasi dalam layanan JKN.",
-  "Layanan promotif berbasis keluarga penting untuk diakomodasi dalam layanan JKN."
-];
 
 const kompetensiLayanan = [
   "Manajemen pasien dengan multimorbiditas kompleks", "Pemeriksaan USG Dasar untuk penegakan diagnosis",

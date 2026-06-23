@@ -5,7 +5,7 @@ import {
   interviewQuestionsWithSpkklp, interviewQuestionsWithoutSpkklp,
   relevansiItems, peranSpkklpItems, kompetensiLayanan
 } from './SurveyForm';
-import { jknBenefits, nonOptimalServices } from './DataManagement';
+import { jknBenefits, nonOptimalServices } from './SurveyForm';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
