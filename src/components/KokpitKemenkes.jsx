@@ -101,10 +101,12 @@ export default function KokpitKemenkes() {
   const metrics = useMemo(() => {
     if (filteredData.length === 0) return null;
 
-    let spkklpCount = 0;
-    let totalRelevansiScore = 0;
-    let relevansiCount = 0;
-    let totalRujukan = 0;
+    const acc = {
+      spkklpCount: 0,
+      totalRelevansiScore: 0,
+      relevansiCount: 0,
+      totalRujukan: 0
+    };
 
     // Role-based Relevansi
     const roleScores = {
@@ -132,7 +134,7 @@ export default function KokpitKemenkes() {
       provMap[prov].count++;
 
       if (row.doc_kklp === 'Ya') {
-        spkklpCount++;
+        acc.spkklpCount++;
         provMap[prov].spkklp++;
       }
 
@@ -150,8 +152,8 @@ export default function KokpitKemenkes() {
           const valNum = Number(numStr || 0);
           
           if (!isNaN(valNum) && valNum > 0) {
-            totalRelevansiScore += valNum;
-            relevansiCount++;
+            acc.totalRelevansiScore += valNum;
+            acc.relevansiCount++;
             rowRelSum += valNum;
             rowRelCount++;
 
@@ -175,7 +177,7 @@ export default function KokpitKemenkes() {
           if (!isNaN(k) && k !== 'lainnya' && !layananDirujukItems[k]) continue;
           const name = k === 'lainnya' ? rjk.lainnya : (isNaN(k) ? k : layananDirujukItems[k]);
           rujukanMap[name] = (rujukanMap[name] || 0) + 1;
-          totalRujukan++;
+          acc.totalRujukan++;
         }
       }
 
@@ -191,9 +193,9 @@ export default function KokpitKemenkes() {
           }
         }
       }
-      const non = row.non_optimal || {};
+      const opt = row.non_optimal || {};
       for (let i=0; i<6; i++) {
-        const val = non[i];
+        const val = opt[i];
         if (val) {
           const skala = typeof val === 'object' ? val.skala : val;
           if (skala && !isNaN(Number(skala))) {
@@ -203,21 +205,20 @@ export default function KokpitKemenkes() {
         }
       }
 
-      // Teks Kualitatif
+      // Kualitatif Text Extract
       const wawancara = row.wawancara || {};
       Object.values(wawancara).forEach(text => {
         if (typeof text === 'string') allText += " " + text.toLowerCase();
       });
     });
 
-    // Kalkulasi Indeks Kesiapan (0-100)
-    // Bobot: 40% SPKKLP, 40% Relevansi (skala 1-4 ke 0-100), 20% Rujukan (invers)
-    const spkklpRatio = spkklpCount / filteredData.length;
-    const avgRelevansi = relevansiCount > 0 ? (totalRelevansiScore / relevansiCount) : 0;
+    // Kalkulasi Skor Akhir
+    const spkklpRatio = Math.round((acc.spkklpCount / filteredData.length) * 100) || 0;
+    const avgRelevansi = acc.relevansiCount > 0 ? (acc.totalRelevansiScore / acc.relevansiCount) : 0;
     const relRatio = Math.max(0, (avgRelevansi - 1) / 3); 
-    const rujukanRatio = Math.max(0, 1 - (totalRujukan / (filteredData.length * 3))); // Asumsi max 3 rujukan rata2
+    const rujukanRatio = Math.max(0, 1 - (acc.totalRujukan / (filteredData.length * 3))); // Asumsi max 3 rujukan rata2
 
-    const indeksKesiapan = Math.round((spkklpRatio * 40) + (relRatio * 40) + (rujukanRatio * 20));
+    const indeksKesiapan = Math.round((spkklpRatio * 0.4) + (relRatio * 100 * 0.4) + (rujukanRatio * 100 * 0.2));
 
     // Radar Data
     const radarData = relevansiItems.map((item, i) => {
