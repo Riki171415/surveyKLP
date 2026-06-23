@@ -45,7 +45,7 @@ function SectionBlock({ title, color = 'bg-primary-600', icon, children, default
         <span className="font-bold text-sm text-slate-800 flex-1">{title}</span>
         {open ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
       </button>
-      {open && <div className="px-5 py-4 bg-white">{children}</div>}
+      <div className={`${open ? 'block' : 'hidden print:block'} px-5 py-4 bg-white`}>{children}</div>
     </div>
   );
 }
