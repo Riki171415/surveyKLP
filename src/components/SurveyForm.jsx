@@ -92,15 +92,26 @@ export const layananBelumBerjalanItems = [
   "Koordinasi rujuk balik FKRTL\u2013Puskesmas / Klinik"
 ];
 
-const interviewQuestions = [
-  "1. Bagaimana pelaksanaan layanan penyakit kronik di Puskesmas / Klinik saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya? (adakah aspek yang masih perlu diperkuat?)",
+const interviewQuestionsWithSpkklp = [
+  "1. Bagaimana pelaksanaan layanan penyakit kronik di Puskesmas/Klinik saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya? (Adakah aspek yang masih perlu diperkuat?)",
   "2. Bagaimana pelaksanaan home visit dan home care saat ini, serta dukungan yang diperlukan untuk optimalisasi layanan tersebut?",
-  "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini? apakah perlu menjadi manfaat non-kapitasi JKN? Atau ada opsi fund channeling lain? (bisa berikan contoh aktivitasnya apa saja yang biasanya dilakukan saat implementasi komunitas dan edukasi kelompok)",
-  "4. Menurut anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN Puskesmas / Klinik?",
-  "5. Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB dengan adanya sp.KKLP?",
-  "6. Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di Puskesmas / Klinik?",
-  "7. Menurut Anda, bentuk dukungan apa yang diperlukan agar Puskesmas / Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?",
-  "8. Adakah Kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktek mandiri dalam program JKN, Ceritakan :"
+  "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini? Apakah perlu menjadi manfaat non-kapitasi JKN? Atau ada opsi fund channeling lain? (Dapat diberikan contoh aktivitas yang biasanya dilakukan, seperti klub Prolanis, kelas edukasi diabetes dan hipertensi, edukasi gizi dan aktivitas fisik, kelompok berhenti merokok, pendampingan pasien lansia dan caregiver, kelompok ibu hamil, kunjungan komunitas, atau kegiatan promotif-preventif lainnya.)",
+  "4. Menurut Anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN Puskesmas/Klinik?",
+  "5. Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB dengan adanya Sp.KKLP?",
+  "6. Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di Puskesmas/Klinik?",
+  "7. Menurut Anda, bentuk dukungan apa yang diperlukan agar Puskesmas/Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?",
+  "8. Adakah kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktik Mandiri dalam program JKN? Ceritakan. (Kendala yang disampaikan dapat disesuaikan dengan bidang profesi atau peran Bapak/Ibu, misalnya terkait aspek pelayanan klinis, rujukan, pembiayaan, administrasi, SDM, koordinasi antarprofesi, sistem informasi, sarana prasarana, regulasi, maupun kendala lain yang memengaruhi pelaksanaan program JKN.)"
+];
+
+const interviewQuestionsWithoutSpkklp = [
+  "1. Apabila belum terdapat dokter Sp.KKLP di Puskesmas/Klinik, bagaimana pelaksanaan layanan penyakit kronik saat ini dan apa harapan Bapak/Ibu terhadap peran dokter Sp.KKLP dalam mendukung layanan tersebut?",
+  "2. Apabila belum terdapat dokter Sp.KKLP di Puskesmas/Klinik, bagaimana pelaksanaan home visit dan home care saat ini, serta apa harapan Bapak/Ibu terhadap dukungan yang dapat diberikan oleh dokter Sp.KKLP untuk optimalisasi layanan tersebut?",
+  "3. Apabila belum terdapat dokter Sp.KKLP di Puskesmas/Klinik, bagaimana implementasi komunitas dan edukasi kelompok saat ini, serta apa harapan Bapak/Ibu terhadap peran dokter Sp.KKLP dalam mendukung kegiatan tersebut?",
+  "4. Apabila belum terdapat dokter Sp.KKLP di Puskesmas/Klinik, bagaimana pandangan Bapak/Ibu mengenai kebutuhan layanan paliatif primer dan harapan terhadap peran dokter Sp.KKLP dalam penyelenggaraan layanan tersebut?",
+  "5. Apabila belum terdapat dokter Sp.KKLP di Puskesmas/Klinik, bagaimana pelaksanaan PRB saat ini dan apakah terdapat harapan mengenai peran, kewenangan, atau perluasan PRB apabila tersedia dokter Sp.KKLP?",
+  "6. Apabila belum terdapat dokter Sp.KKLP di Puskesmas/Klinik, perubahan atau manfaat apa yang diharapkan dapat dirasakan apabila tersedia dokter Sp.KKLP?",
+  "7. Apabila belum terdapat dokter Sp.KKLP di Puskesmas/Klinik, dukungan apa yang diperlukan agar peran dokter Sp.KKLP nantinya dapat diimplementasikan secara optimal?",
+  "8. Adakah kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktik Mandiri dalam program JKN? Ceritakan. (Kendala yang disampaikan dapat disesuaikan dengan bidang profesi atau peran Bapak/Ibu, misalnya terkait aspek pelayanan klinis, rujukan, pembiayaan, administrasi, SDM, koordinasi antarprofesi, sistem informasi, sarana prasarana, regulasi, maupun kendala lain yang memengaruhi pelaksanaan program JKN.)"
 ];
 
 const interviewExamples = [
@@ -381,10 +392,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
 
   const isStep5Valid = nonOptimalServices.every((_, idx) => formData.nonOptimal[idx]?.masukJkn && formData.nonOptimal[idx]?.skala);
   const isStep6Valid = (() => {
-    if (!isRoleDpm && formData.docKklp === 'Tidak') {
-      return (formData.wawancara[7]?.trim() || '').length >= 10;
-    }
-    return interviewQuestions.every((_, idx) => (formData.wawancara[idx]?.trim() || '').length >= 10);
+    const currentQuestions = (!isRoleDpm && formData.docKklp === 'Tidak') ? interviewQuestionsWithoutSpkklp : interviewQuestionsWithSpkklp;
+    return currentQuestions.every((_, idx) => (formData.wawancara[idx]?.trim() || '').length >= 10);
   })();
 
   const canProceed = () => {
@@ -1437,8 +1446,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                   </div>
                 </div>
                 <div className="space-y-6">
-                  {interviewQuestions.map((question, idx) => {
-                    if (!isRoleDpm && formData.docKklp === 'Tidak' && idx !== 7) return null;
+                  {((!isRoleDpm && formData.docKklp === 'Tidak') ? interviewQuestionsWithoutSpkklp : interviewQuestionsWithSpkklp).map((question, idx) => {
                     return (
                     <div key={idx} className="bg-slate-50 p-5 rounded-xl border border-slate-200">
                       <label className="block text-sm font-semibold text-slate-800 mb-3 leading-relaxed">{question}</label>
@@ -1509,7 +1517,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                     </>)}
                     {((isRoleDpm && step === 3) || (!isRoleDpm && step === 6)) && (<>
                       {(() => { 
-                        const questionsToCheck = (!isRoleDpm && formData.docKklp === 'Tidak') ? [7] : interviewQuestions.map((_, i) => i);
+                        const currentQuestions = (!isRoleDpm && formData.docKklp === 'Tidak') ? interviewQuestionsWithoutSpkklp : interviewQuestionsWithSpkklp;
+                        const questionsToCheck = currentQuestions.map((_, i) => i);
                         const b = questionsToCheck.filter(i => (formData.wawancara[i]?.trim() || '').length < 10).length; 
                         return b > 0 ? <li>Ada {b} pertanyaan pendalaman kualitatif yang belum dijawab</li> : null; 
                       })()}
