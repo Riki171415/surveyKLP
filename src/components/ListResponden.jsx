@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Building2, Calendar, FileText, Loader2, RefreshCw } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import SurveyDetailModal from './SurveyDetailModal';
 
 export default function ListResponden() {
   const [surveys, setSurveys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedSurvey, setSelectedSurvey] = useState(null);
   const itemsPerPage = 20;
 
   const fetchData = async () => {
@@ -103,7 +105,11 @@ export default function ListResponden() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {paginatedData.map((row, i) => (
-                <tr key={row.id || i} className="hover:bg-slate-50 transition-colors">
+                <tr 
+                  key={row.id || i} 
+                  className="hover:bg-slate-50 transition-colors cursor-pointer"
+                  onClick={() => setSelectedSurvey(row)}
+                >
                   <td className="px-6 py-4 text-sm text-slate-500 font-medium">
                     {(currentPage - 1) * itemsPerPage + i + 1}
                   </td>
@@ -175,6 +181,11 @@ export default function ListResponden() {
           </div>
         )}
       </div>
+
+      <SurveyDetailModal 
+        selected={selectedSurvey} 
+        onClose={() => setSelectedSurvey(null)} 
+      />
     </div>
   );
 }

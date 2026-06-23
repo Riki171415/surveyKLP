@@ -7,14 +7,14 @@ import { useAuth } from './AuthContext';
 import { penyakitPasienBulanan, layananDirujukItems, layananBelumBerjalanItems } from './SurveyForm';
 
 // ─── Data referensi (sama dengan SurveyForm) ───────────────────────────────
-export const jknBenefits = [
+const jknBenefits = [
   "Pemantauan kepatuhan terapi pasien AIDS, TB, dan Malaria memberikan manfaat yang optimal bagi pasien.",
   "Pelaksanaan Program Rujuk Balik (PRB) memberikan manfaat yang optimal bagi pasien.",
   "Pengelolaan Hipertensi tanpa komplikasi memberikan manfaat yang optimal bagi pasien.",
   "Deprescribing/pengurangan obat pada pasien polifarmasi memberikan manfaat yang optimal bagi pasien."
 ];
 
-export const nonOptimalServices = [
+const nonOptimalServices = [
   "Pelayanan lifestyle medicine penting untuk diakomodasi dalam layanan JKN.",
   "Pelayanan wellness dan healthy aging penting untuk diakomodasi dalam layanan JKN.",
   "Konsultasi perjalanan/travel medicine penting untuk diakomodasi dalam layanan JKN.",

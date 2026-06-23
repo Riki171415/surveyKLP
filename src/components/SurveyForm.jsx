@@ -40,14 +40,14 @@ const nonOptimalServices = [
   "Layanan promotif berbasis keluarga penting untuk diakomodasi dalam layanan JKN."
 ];
 
-const kompetensiLayanan = [
+export const kompetensiLayanan = [
   "Pemeriksaan USG Dasar untuk penegakan diagnosis",
   "Deprescribing (pengurangan/rasionalisasi obat pasien kronis)",
   "Family Conference (Konsultasi keluarga untuk penyelesaian masalah klinis/psikososial)",
   "Pemeriksaan Xray untuk penegakan diagnosis"
 ];
 
-const relevansiItems = [
+export const relevansiItems = [
   "Pengelolaan pasien dengan kondisi kronis dan multimorbiditas.",
   "Pendampingan pasien kronis melalui home care.",
   "Pelayanan paliatif di tingkat primer.",
@@ -61,7 +61,7 @@ const relevansiItems = [
   "Pengelolaan pasien geriatri dengan kebutuhan pelayanan jangka panjang."
 ];
 
-const peranSpkklpItems = [
+export const peranSpkklpItems = [
   "Kehadiran Sp.KKLP meningkatkan kualitas layanan promotif-preventif di FKTP saya.",
   "Sp.KKLP mampu mengisi celah layanan yang selama ini tidak tertangani dokter umum (misal: konseling berhenti merokok, manajemen obesitas).",
   "Sp.KKLP membuat proses rujukan menjadi lebih tepat sasaran.",
@@ -96,18 +96,18 @@ export const layananBelumBerjalanItems = [
   "Koordinasi rujuk balik FKRTL\u2013Puskesmas / Klinik"
 ];
 
-const interviewQuestionsWithSpkklp = [
-  "1. Bagaimana pelaksanaan layanan penyakit kronik di Puskesmas/Klinik saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya? (Adakah aspek yang masih perlu diperkuat?)",
+export const interviewQuestionsWithSpkklp = [
+  "1. Bagaimana pelaksanaan layanan penyakit kronik di Puskesmas/Klinik saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya?",
   "2. Bagaimana pelaksanaan home visit dan home care saat ini, serta dukungan yang diperlukan untuk optimalisasi layanan tersebut?",
-  "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini? Apakah perlu menjadi manfaat non-kapitasi JKN? Atau ada opsi fund channeling lain? (Dapat diberikan contoh aktivitas yang biasanya dilakukan, seperti klub Prolanis, kelas edukasi diabetes dan hipertensi, edukasi gizi dan aktivitas fisik, kelompok berhenti merokok, pendampingan pasien lansia dan caregiver, kelompok ibu hamil, kunjungan komunitas, atau kegiatan promotif-preventif lainnya.)",
-  "4. Menurut Anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN Puskesmas/Klinik?",
-  "5. Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB dengan adanya Sp.KKLP?",
+  "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini, serta apakah perlu menjadi manfaat non-kapitasi JKN?",
+  "4. Menurut pandangan Bapak/Ibu, apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN untuk Puskesmas/Klinik?",
+  "5. Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB?",
   "6. Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di Puskesmas/Klinik?",
-  "7. Menurut Anda, bentuk dukungan apa yang diperlukan agar Puskesmas/Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?",
+  "7. Bentuk dukungan apa yang diperlukan agar Puskesmas/Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?",
   "8. Adakah kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktik Mandiri dalam program JKN? Ceritakan. (Kendala yang disampaikan dapat disesuaikan dengan bidang profesi atau peran Bapak/Ibu, misalnya terkait aspek pelayanan klinis, rujukan, pembiayaan, administrasi, SDM, koordinasi antarprofesi, sistem informasi, sarana prasarana, regulasi, maupun kendala lain yang memengaruhi pelaksanaan program JKN.)"
 ];
 
-const interviewQuestionsWithoutSpkklp = [
+export const interviewQuestionsWithoutSpkklp = [
   "1. Bagaimana pelaksanaan layanan penyakit kronik saat ini dan apa harapan Bapak/Ibu terhadap peran dokter Sp.KKLP dalam mendukung layanan tersebut?",
   "2. Bagaimana pelaksanaan home visit dan home care saat ini, serta apa harapan Bapak/Ibu terhadap dukungan yang dapat diberikan oleh dokter Sp.KKLP untuk optimalisasi layanan tersebut?",
   "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini, serta apa harapan Bapak/Ibu terhadap peran dokter Sp.KKLP dalam mendukung kegiatan tersebut?",
@@ -118,7 +118,7 @@ const interviewQuestionsWithoutSpkklp = [
   "8. Adakah kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktik Mandiri dalam program JKN? Ceritakan. (Kendala yang disampaikan dapat disesuaikan dengan bidang profesi atau peran Bapak/Ibu, misalnya terkait aspek pelayanan klinis, rujukan, pembiayaan, administrasi, SDM, koordinasi antarprofesi, sistem informasi, sarana prasarana, regulasi, maupun kendala lain yang memengaruhi pelaksanaan program JKN.)"
 ];
 
-const interviewExamplesWithSpkklp = [
+export const interviewExamplesWithSpkklp = [
   "Contoh: Pelaksanaan layanan kronis saat ini jauh lebih komprehensif. Peran Sp.KKLP sangat terasa dalam tata laksana pasien multimorbiditas...",
   "Contoh: Home visit kini mencakup penilaian holistik keluarga. Sp.KKLP menginisiasi family conference untuk menyelesaikan masalah...",
   "Contoh: Edukasi sangat perlu dijadikan manfaat non-kapitasi karena intervensi gaya hidup butuh waktu ekstra. Sp.KKLP menyusun materi evidence-based...",
