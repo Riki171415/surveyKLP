@@ -30,25 +30,40 @@ const kompetensiLayanan = [
   "Pemeriksaan Xray untuk penegakan diagnosis"
 ];
 
-const interviewQuestions = [
-  "Bagaimana pelaksanaan layanan penyakit kronik di Puskesmas / Klinik saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya?",
-  "Bagaimana pelaksanaan home visit dan home care saat ini, serta dukungan yang diperlukan untuk optimalisasi layanan tersebut?",
-  "Bagaimana implementasi komunitas dan edukasi kelompok saat ini? apakah perlu menjadi manfaat non-kapitasi JKN?",
-  "Menurut anda apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN Puskesmas / Klinik?",
-  "Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB?",
-  "Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di Puskesmas / Klinik?",
-  "Menurut Anda, bentuk dukungan apa yang diperlukan agar Puskesmas / Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?",
-  "Adakah Kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktek mandiri dalam program JKN, Ceritakan :"
+const interviewQuestionsWithSpkklp = [
+  "1. Bagaimana pelaksanaan layanan penyakit kronik di Puskesmas/Klinik saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya?",
+  "2. Bagaimana pelaksanaan home visit dan home care saat ini, serta dukungan yang diperlukan untuk optimalisasi layanan tersebut?",
+  "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini, serta apakah perlu menjadi manfaat non-kapitasi JKN?",
+  "4. Menurut pandangan Bapak/Ibu, apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN untuk Puskesmas/Klinik?",
+  "5. Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB?",
+  "6. Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di Puskesmas/Klinik?",
+  "7. Bentuk dukungan apa yang diperlukan agar Puskesmas/Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?",
+  "8. Adakah kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktik Mandiri dalam program JKN? Ceritakan."
+];
+
+const interviewQuestionsWithoutSpkklp = [
+  "1. Bagaimana pelaksanaan layanan penyakit kronik saat ini dan apa harapan Bapak/Ibu terhadap peran dokter Sp.KKLP dalam mendukung layanan tersebut?",
+  "2. Bagaimana pelaksanaan home visit dan home care saat ini, serta apa harapan Bapak/Ibu terhadap dukungan yang dapat diberikan oleh dokter Sp.KKLP untuk optimalisasi layanan tersebut?",
+  "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini, serta apa harapan Bapak/Ibu terhadap peran dokter Sp.KKLP dalam mendukung kegiatan tersebut?",
+  "4. Bagaimana pandangan Bapak/Ibu mengenai kebutuhan layanan paliatif primer dan harapan terhadap peran dokter Sp.KKLP dalam penyelenggaraan layanan tersebut?",
+  "5. Bagaimana pelaksanaan PRB saat ini dan apakah terdapat harapan mengenai peran, kewenangan, atau perluasan PRB apabila tersedia dokter Sp.KKLP?",
+  "6. Perubahan atau manfaat apa yang diharapkan dapat dirasakan apabila tersedia dokter Sp.KKLP?",
+  "7. Dukungan apa yang diperlukan agar peran dokter Sp.KKLP nantinya dapat diimplementasikan secara optimal?",
+  "8. Adakah kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktik Mandiri dalam program JKN? Ceritakan."
 ];
 
 const relevansiItems = [
-  "Dokter Sp.KKLP memberikan layanan promotif-preventif yang lebih komprehensif dibandingkan dokter umum.",
-  "Dokter Sp.KKLP mampu menangani pasien dengan multimorbiditas (lebih dari 2 penyakit kronis) tanpa harus merujuk, dibanding dokter umum.",
-  "Dalam manajemen pasien PRB, dokter Sp.KKLP lebih aktif melakukan pemantauan dan edukasi sehingga kepatuhan pasien lebih tinggi.",
-  "Angka rujukan ke rumah sakit pada pasien yang ditangani Sp.KKLP lebih rendah dibanding pasien yang ditangani dokter umum.",
-  "Dokter Sp.KKLP lebih sering melakukan kunjungan rumah dan family conference dibanding dokter umum.",
-  "Kehadiran Sp.KKLP meningkatkan mutu rekam medis dan dokumentasi klinis.",
-  "Waktu konsultasi rata-rata yang diberikan Sp.KKLP per pasien lebih lama dan lebih mendalam."
+  "Pengelolaan pasien dengan kondisi kronis dan multimorbiditas.",
+  "Pendampingan pasien kronis melalui home care.",
+  "Pelayanan paliatif di tingkat primer.",
+  "Edukasi kelompok pasien kronis.",
+  "Pendampingan keluarga pasien kronis.",
+  "Pemantauan berkelanjutan pasien kronis di komunitas.",
+  "Monitoring komunitas risiko tinggi penyakit kronis.",
+  "Penguatan Program Rujuk Balik (PRB).",
+  "Koordinasi pelayanan lintas profesi dan kader kesehatan.",
+  "Pembinaan Posbindu PTM.",
+  "Pengelolaan pasien geriatri dengan kebutuhan pelayanan jangka panjang."
 ];
 
 const peranSpkklpItems = [
@@ -266,7 +281,8 @@ export default function DataManagement() {
           peranSpkklpItems.forEach((rel, i) => {
             base[`Peran_SpKKLP_Skala_${i+1}`] = row.peran_spkklp?.[i] || '-';
           });
-          base["Layanan Sering Dirujuk"] = row.layanan_dirujuk ? Object.keys(row.layanan_dirujuk).filter(k => row.layanan_dirujuk[k]).map(k => layananDirujukItems[k] || k).join(', ') : '-';
+          base["Pengaruh Penurunan Rujukan"] = row.layanan_dirujuk?.pengaruhPenurunanRujukan || '-';
+          base["Layanan Sering Dirujuk"] = row.layanan_dirujuk ? Object.keys(row.layanan_dirujuk).filter(k => row.layanan_dirujuk[k] && k !== 'pengaruhPenurunanRujukan').map(k => layananDirujukItems[k] || k).join(', ') : '-';
           base["Alasan Dirujuk"] = row.alasan_dirujuk || '-';
           base["Layanan Belum Berjalan"] = row.layanan_belum_berjalan ? Object.keys(row.layanan_belum_berjalan).filter(k => row.layanan_belum_berjalan[k]).map(k => layananBelumBerjalanItems[k] || k).join(', ') : '-';
 
@@ -352,8 +368,8 @@ export default function DataManagement() {
           });
         }
 
-        // Wawancara / Pendalaman (7 Pertanyaan)
-        interviewQuestions.forEach((q, i) => {
+        // Wawancara / Pendalaman (8 Pertanyaan)
+        [...Array(8)].forEach((_, i) => {
           base[`Wawancara_Q${i+1}`] = row.wawancara?.[i] || '-';
         });
 
@@ -573,6 +589,13 @@ export default function DataManagement() {
                             <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shrink-0">{val}</span>
                           </div>
                         ))}
+                      </div>
+                    )}
+
+                    {selected.layanan_dirujuk?.pengaruhPenurunanRujukan && (
+                      <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 mt-4">
+                        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Pengaruh Keberadaan Sp.KKLP Terhadap Penurunan Rujukan:</p>
+                        <p className="text-sm font-bold text-indigo-700">Skala {selected.layanan_dirujuk.pengaruhPenurunanRujukan}</p>
                       </div>
                     )}
                   </div>
@@ -834,7 +857,7 @@ export default function DataManagement() {
                     </div>
                   )}
                   <div className="space-y-3">
-                    {interviewQuestions.map((q, idx) => {
+                    {(selected.doc_kklp === 'Tidak' ? interviewQuestionsWithoutSpkklp : interviewQuestionsWithSpkklp).map((q, idx) => {
                       const jawaban = selected.wawancara[idx];
                       return (
                         <div key={idx} className="bg-slate-50 border border-slate-100 rounded-xl p-4">
