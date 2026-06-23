@@ -7,7 +7,7 @@ export const daftar_diagnosa = [
         "kode_icd_10": "A15.-, A16.-"
       },
       {
-        "nama_diagnosa": "Tuberkulosis",
+        "nama_diagnosa": "HIV + Tuberkulosis",
         "kode_icd_10": "B20.0"
       },
       {
