@@ -406,12 +406,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     return true;
   })();
 
-  const isStep5Valid = nonOptimalServices.every((_, idx) => {
-    const ans = formData.nonOptimal[idx];
-    if (!ans?.masukJkn) return false;
-    if (ans.masukJkn === 'Tidak Tahu') return true;
-    return !!ans.skala;
-  });
+  const isStep5Valid = nonOptimalServices.every((_, idx) => formData.nonOptimal[idx]?.masukJkn && formData.nonOptimal[idx]?.skala);
   const isStep6Valid = (() => {
     const currentQuestions = (!isRoleDpm && formData.docKklp === 'Tidak') ? interviewQuestionsWithoutSpkklp : interviewQuestionsWithSpkklp;
     return currentQuestions.every((_, idx) => (formData.wawancara[idx]?.trim() || '').length >= 10);
@@ -1563,7 +1558,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       {!(formData.dataPasienBulanan?.diabetes_melitus !== undefined && formData.dataPasienBulanan?.diabetes_melitus !== null && formData.dataPasienBulanan?.diabetes_melitus !== '') && <li>Jumlah pasien Diabetes melitus (1 bulan terakhir) wajib diisi</li>}
                     </>)}
                     {step === 5 && (<>
-                      {(() => { const b = nonOptimalServices.filter((_, i) => !formData.nonOptimal[i]?.masukJkn || (formData.nonOptimal[i]?.masukJkn !== 'Tidak Tahu' && !formData.nonOptimal[i]?.skala)).length; return b > 0 ? <li>{b} layanan non-optimal belum diisi lengkap</li> : null; })()}
+                      {(() => { const b = nonOptimalServices.filter((_, i) => !formData.nonOptimal[i]?.masukJkn || !formData.nonOptimal[i]?.skala).length; return b > 0 ? <li>{b} layanan non-optimal belum diisi lengkap</li> : null; })()}
                     </>)}
                     {((isRoleDpm && step === 3) || (!isRoleDpm && step === 6)) && (<>
                       {(() => { 

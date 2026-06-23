@@ -202,7 +202,7 @@ function AppContent() {
           </div>
         )}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto scroll-smooth">
-          <div className="animate-fade-in-up h-full">
+          <div className="max-w-[1600px] mx-auto space-y-6 animate-fade-in-up h-full">
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/login" element={<Login />} />
