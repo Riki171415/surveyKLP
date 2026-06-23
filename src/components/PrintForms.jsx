@@ -405,6 +405,205 @@ function FormContent({ withSpkklp }) {
           <div className="border border-slate-300 rounded-lg h-14" />
         </div>
       </div>
+}
+
+// ─── Form khusus Dokter Praktik Mandiri (DPM) ────────────────────────────────
+function FormDPMContent() {
+  return (
+    <div className="space-y-8 text-sm">
+      <div className="flex items-start gap-4 mb-6 pb-4 border-b-2 border-slate-300">
+        <img src={logoKemenkes} alt="Logo Kemenkes" className="h-16 object-contain" />
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 leading-tight">
+            Survey Optimalisasi Program JKN di Praktik Mandiri
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Kementerian Kesehatan RI — PMK 19 Tahun 2024 — Sp.KKLP
+          </p>
+          <div className="inline-block mt-2 px-4 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-800 border border-blue-300">
+            🩺 Formulir C — Khusus Dokter Praktik Mandiri (DPM)
+          </div>
+        </div>
+      </div>
+
+      <section>
+        <SectionHeader color="bg-primary-600" title="A. Identitas Responden" />
+        <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+          <BlankLine label="Provinsi" />
+          <BlankLine label="Kabupaten / Kota" />
+          <BlankLine label="Nama Praktik Mandiri" />
+          <BlankLine label="Kode Faskes BPJS" />
+          <BlankLine label="Nama Responden" />
+          <BlankLine label="Tanggal Pengisian" />
+        </div>
+      </section>
+
+      <section>
+        <SectionHeader color="bg-primary-600" title="B. Karakteristik Praktik & Kasus" />
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="font-semibold mb-2 text-slate-700">1. Lama praktik dokter saat ini:</p>
+              <RadioGroup options={['< 1 tahun', '1–5 tahun', '6–10 tahun', '> 10 tahun']} />
+            </div>
+            <div>
+              <p className="font-semibold mb-2 text-slate-700">2. Rata-rata kunjungan per hari:</p>
+              <RadioGroup options={['< 10 pasien', '10–20 pasien', '21–30 pasien', '> 30 pasien']} />
+            </div>
+            <div>
+              <p className="font-semibold mb-2 text-slate-700">3. Sebagian besar pasien yang datang:</p>
+              <RadioGroup options={['Anak', 'Dewasa', 'Lansia', 'Campuran semua umur']} />
+            </div>
+            <div>
+              <p className="font-semibold mb-2 text-slate-700">4. Status kepesertaan pasien:</p>
+              <RadioGroup options={['Mayoritas JKN', 'Mayoritas umum', 'Seimbang']} />
+            </div>
+          </div>
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">5. Masalah kesehatan paling sering ditangani (pilih max 5):</p>
+            <div className="grid grid-cols-3 gap-2">
+              {['ISPA', 'Hipertensi', 'Diabetes', 'Nyeri otot/sendi', 'Penyakit kulit', 'Gangguan lambung', 'Kesehatan ibu dan anak', 'Lainnya'].map(k => (
+                <CheckBox key={k} label={k} />
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="font-semibold mb-2 text-slate-700">6. Persen pasien kasus kronis:</p>
+              <RadioGroup options={['< 25%', '25–50%', '51–75%', '> 75%']} />
+            </div>
+            <div>
+              <p className="font-semibold mb-2 text-slate-700">7. Persen pasien kontrol:</p>
+              <RadioGroup options={['< 25%', '25–50%', '51–75%', '> 75%']} />
+            </div>
+          </div>
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">8. Apabila pasien dirujuk, indikasi/alasan:</p>
+            <div className="border border-slate-300 rounded h-16 w-full" />
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <SectionHeader color="bg-blue-600" title="C. Pendekatan Kedokteran Keluarga" />
+        <div className="space-y-4">
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">9. Seberapa sering dokter mengetahui anggota keluarga inti pasien?</p>
+            <RadioGroup options={['Tidak pernah', 'Jarang', 'Kadang-kadang', 'Sering', 'Selalu']} />
+          </div>
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">10. 1 bulan terakhir, pernah menangani {'>1'} anggota keluarga yang sama?</p>
+            <RadioGroup options={['Tidak pernah', '1–5 keluarga', '6–10 keluarga', '> 10 keluarga']} />
+          </div>
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">11. Untuk pasien kronis, apakah menanyakan kondisi keluarga lainnya?</p>
+            <RadioGroup options={['Tidak pernah', 'Jarang', 'Kadang-kadang', 'Sering', 'Selalu']} />
+          </div>
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">12. Aspek yang digali selain keluhan fisik:</p>
+            <div className="grid grid-cols-3 gap-2">
+              {['Pola makan', 'Aktivitas fisik', 'Kondisi pekerjaan', 'Kondisi ekonomi', 'Kondisi psikologis', 'Dukungan keluarga', 'Lingkungan tempat tinggal', 'Tidak ada'].map(a => (
+                <CheckBox key={a} label={a} />
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">13. Berapa kali masalah kesehatan pasien dipengaruhi kondisi keluarga?</p>
+            <RadioGroup options={['Tidak pernah', '1–5 kasus', '6–10 kasus', '> 10 kasus']} />
+          </div>
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">14. Contoh masalah keluarga yang sering memengaruhi:</p>
+            <div className="border-b border-slate-300 h-6 w-full" />
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <SectionHeader color="bg-teal-600" title="D. Kontinuitas & Praktik Kedokteran Keluarga" />
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="font-semibold mb-2 text-slate-700">15. Memiliki sistem pencatatan pemantauan jangka panjang?</p>
+              <RadioGroup options={['Ya', 'Tidak']} />
+            </div>
+            <div>
+              <p className="font-semibold mb-2 text-slate-700">17. Tindak lanjut pasien tidak datang kontrol?</p>
+              <RadioGroup options={['Ya', 'Tidak']} />
+            </div>
+          </div>
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">16. Aktif menjadwalkan kunjungan ulang untuk pasien kronis?</p>
+            <RadioGroup options={['Tidak pernah', 'Jarang', 'Kadang-kadang', 'Sering', 'Selalu']} />
+          </div>
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">18. Kegiatan yang pernah dilakukan (1 bulan terakhir):</p>
+            <div className="grid grid-cols-2 gap-2">
+              {['Edukasi keluarga', 'Konseling hidup sehat', 'Pemantauan penyakit kronis', 'Koordinasi rujukan', 'Home visit', 'Melibatkan keluarga terapi', 'Skrining risiko keluarga', 'Tidak pernah'].map(a => (
+                <CheckBox key={a} label={a} />
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">19. Bentuk pelayanan keluarga yang paling sering dilakukan:</p>
+            <div className="border border-slate-300 rounded h-12 w-full" />
+          </div>
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">20. Contoh kasus kondisi keluarga memengaruhi penanganan:</p>
+            <div className="border border-slate-300 rounded h-16 w-full" />
+          </div>
+          <div>
+            <p className="font-semibold mb-2 text-slate-700">21. Contoh kegiatan pelayanan holistik yang pernah dilakukan:</p>
+            <div className="border border-slate-300 rounded h-16 w-full" />
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <SectionHeader color="bg-amber-600" title="E. Informasi Poli KKLP & Pelayanan" />
+        <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+          <BlankLine label="Sejak kapan poli KKLP beroperasi?" />
+          <BlankLine label="Rata-rata jumlah kunjungan per bulan" />
+          <BlankLine label="Nama diagnosis yang ditangani (dengan ICD-10)" />
+          <BlankLine label="Tindakan/Prosedur yang dilakukan" />
+        </div>
+        <div className="mt-4">
+          <p className="font-semibold mb-2 text-slate-700">Luaran pelayanan (centang semua yang sesuai):</p>
+          <div className="grid grid-cols-3 gap-2">
+            {['Selesai di Praktik', 'Kontrol berkala di Praktik', 'Home care', 'Paliatif', 'PRB', 'Rujukan ke FKRTL', 'Lainnya'].map(l => (
+              <CheckBox key={l} label={l} />
+            ))}
+          </div>
+        </div>
+        <div className="mt-4">
+          <p className="font-semibold mb-2 text-slate-700">Apabila pasien dirujuk, indikasi atau alasan rujukan tersebut:</p>
+          <div className="border border-slate-300 rounded h-12 w-full" />
+        </div>
+      </section>
+
+      <section>
+        <SectionHeader color="bg-indigo-600" title="F. Data Jumlah Pasien Dilayani (1 Bulan Terakhir)" />
+        <div className="grid grid-cols-3 gap-x-6 gap-y-4">
+          {penyakitPasienBulanan.map(p => (
+            <BlankLine key={p.id} label={`${p.label}${p.required ? ' *' : ''}`} />
+          ))}
+        </div>
+      </section>
+
+      {/* Tanda tangan */}
+      <div className="mt-6 pt-4 border-t border-slate-300 grid grid-cols-2 gap-8">
+        <div>
+          <p className="text-xs text-slate-500 mb-1">Tanggal pengisian:</p>
+          <div className="border-b border-slate-400 h-6 mb-6" />
+          <p className="text-xs text-slate-500 mb-1">Tanda tangan responden:</p>
+          <div className="border-b border-slate-400 h-14" />
+        </div>
+        <div>
+          <p className="text-xs text-slate-500 mb-1">Nama lengkap & SIP:</p>
+          <div className="border-b border-slate-400 h-6 mb-6" />
+          <p className="text-xs text-slate-500 mb-1">Stempel / cap praktik:</p>
+          <div className="border border-slate-300 rounded-lg h-14" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -418,7 +617,7 @@ export default function PrintForms() {
       <div className="no-print sticky top-0 z-50 bg-slate-900 text-white px-6 py-3 flex items-center justify-between shadow-lg">
         <div>
           <h1 className="font-bold text-lg">Cetak Formulir Survey</h1>
-          <p className="text-slate-400 text-sm">Formulir A (dengan Sp.KKLP) + Formulir B (tanpa Sp.KKLP)</p>
+          <p className="text-slate-400 text-sm">Formulir A (dengan Sp.KKLP), Formulir B (tanpa Sp.KKLP) & Formulir C (Dokter Praktik Mandiri)</p>
         </div>
         <button
           onClick={() => window.print()}
@@ -432,12 +631,13 @@ export default function PrintForms() {
       {/* Info (tidak tercetak) */}
       <div className="no-print max-w-5xl mx-auto mt-4 mb-2 px-4">
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-          <strong>📋 Panduan:</strong> Halaman ini menampilkan dua formulir sekaligus:
+          <strong>📋 Panduan:</strong> Halaman ini menampilkan tiga formulir sekaligus:
           <ul className="list-disc pl-5 mt-1 space-y-0.5">
             <li><strong>Formulir A</strong> — untuk faskes yang <strong>MEMILIKI</strong> Sp.KKLP (pertanyaan dengan konteks keberadaan Sp.KKLP)</li>
             <li><strong>Formulir B</strong> — untuk faskes yang <strong>TIDAK MEMILIKI</strong> Sp.KKLP (pertanyaan dengan konteks harapan terhadap Sp.KKLP)</li>
+            <li><strong>Formulir C</strong> — khusus untuk isian <strong>Dokter Praktik Mandiri (DPM)</strong></li>
           </ul>
-          Klik <strong>"Cetak ke PDF"</strong> untuk mencetak atau menyimpan kedua formulir sebagai PDF.
+          Klik <strong>"Cetak ke PDF"</strong> untuk mencetak atau menyimpan semua formulir sebagai PDF.
         </div>
       </div>
 
@@ -455,6 +655,16 @@ export default function PrintForms() {
       <div className="max-w-5xl mx-auto px-4 pb-10">
         <div className="bg-white rounded-2xl shadow-lg p-8 print-page-break-inside-avoid">
           <FormContent withSpkklp={false} />
+        </div>
+      </div>
+
+      {/* Pemisah halaman (akan jadi page break saat cetak) */}
+      <div className="print-page-break" />
+
+      {/* FORM C — Dokter Praktik Mandiri */}
+      <div className="max-w-5xl mx-auto px-4 pb-10">
+        <div className="bg-white rounded-2xl shadow-lg p-8 print-page-break-inside-avoid">
+          <FormDPMContent />
         </div>
       </div>
     </div>
