@@ -29,7 +29,7 @@ export default function DashboardMonitoringPRB({ filteredData, COLORS, isPrintin
 
       if (prb.kendala && prb.kendala.trim().length > 3) {
         // Extract words for a simple "kendala" distribution (pseudo word cloud / bar chart)
-        const text = prb.kendala.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"");
+        const text = (prb.kendala || '').toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"");
         const words = text.split(/\s+/).filter(w => w.length > 3 && !['yang', 'dari', 'pada', 'untuk', 'dengan', 'dan', 'atau', 'ini', 'itu', 'karena', 'tidak', 'belum', 'kurang'].includes(w));
         words.forEach(w => {
           kendalaMap[w] = (kendalaMap[w] || 0) + 1;

@@ -22,7 +22,7 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
       interviewQuestions.forEach((q, idx) => {
         if (w[idx] && w[idx].trim().length > 0) {
           if (selectedQuestion !== 'Semua' && selectedQuestion !== q) return;
-          if (searchTerm && !w[idx].toLowerCase().includes(searchTerm.toLowerCase())) return;
+          if (searchTerm && !(w[idx] || '').toLowerCase().includes(searchTerm.toLowerCase())) return;
           
           results.push({
             id: `${row.id}-${idx}`,

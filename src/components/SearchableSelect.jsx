@@ -42,7 +42,7 @@ export default function SearchableSelect({ options = [], value, onChange, placeh
     }
   }, [isManual]);
 
-  const filteredOptions = options.filter(opt => opt.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredOptions = options.filter(opt => (opt || '').toLowerCase().includes(searchTerm.toLowerCase()));
 
   const handleManualMode = () => {
     setIsOpen(false);

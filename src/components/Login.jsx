@@ -56,9 +56,9 @@ export default function Login() {
       if (sbError || !data) {
         setError('Login gagal. Periksa kembali Username dan Password Anda.');
       } else {
-        login({ username: data.username, role: data.role.toLowerCase() });
-        if (data.role.toLowerCase() === 'admin') navigate('/dashboard');
-        else if (data.role.toLowerCase() === 'tim survey') navigate('/wawancara');
+        login({ username: data.username, role: (data.role || '').toLowerCase() });
+        if ((data.role || '').toLowerCase() === 'admin') navigate('/dashboard');
+        else if ((data.role || '').toLowerCase() === 'tim survey') navigate('/wawancara');
         else navigate('/'); // Puskesmas
       }
     } catch (err) {

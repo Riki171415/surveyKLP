@@ -97,7 +97,7 @@ const statusBadge = (s) => {
 };
 
 const roleBadge = (role = '') => {
-  const r = role.toLowerCase();
+  const r = (role || '').toLowerCase();
   if (r === 'admin') return 'bg-purple-100 text-purple-800';
   if (r.includes('survey')) return 'bg-blue-100 text-blue-800';
   return 'bg-emerald-100 text-emerald-800';
