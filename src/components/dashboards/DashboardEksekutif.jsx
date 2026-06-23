@@ -258,7 +258,6 @@ export default function DashboardEksekutif({ data = [] }) {
              if (k !== 'lainnya' && !isNaN(k) && !layananDirujukItems[k]) return;
              const keyName = k === 'lainnya' ? row.layanan_dirujuk.lainnya : (isNaN(k) ? k : layananDirujukItems[k]);
              rujukanMap[keyName] = (rujukanMap[keyName] || 0) + 1;
-             totalRujukan++;
           }
         });
       }
