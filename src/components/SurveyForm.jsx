@@ -48,13 +48,17 @@ const kompetensiLayanan = [
 ];
 
 const relevansiItems = [
-  "Dokter Sp.KKLP memberikan layanan promotif-preventif yang lebih komprehensif dibandingkan dokter umum.",
-  "Dokter Sp.KKLP mampu menangani pasien dengan multimorbiditas (lebih dari 2 penyakit kronis) tanpa harus merujuk, dibanding dokter umum.",
-  "Dalam manajemen pasien PRB, dokter Sp.KKLP lebih aktif melakukan pemantauan dan edukasi sehingga kepatuhan pasien lebih tinggi.",
-  "Angka rujukan ke rumah sakit pada pasien yang ditangani Sp.KKLP lebih rendah dibanding pasien yang ditangani dokter umum.",
-  "Dokter Sp.KKLP lebih sering melakukan kunjungan rumah dan family conference dibanding dokter umum.",
-  "Kehadiran Sp.KKLP meningkatkan mutu rekam medis dan dokumentasi klinis.",
-  "Waktu konsultasi rata-rata yang diberikan Sp.KKLP per pasien lebih lama dan lebih mendalam."
+  "Pengelolaan pasien dengan kondisi kronis dan multimorbiditas.",
+  "Pendampingan pasien kronis melalui home care.",
+  "Pelayanan paliatif di tingkat primer.",
+  "Edukasi kelompok pasien kronis.",
+  "Pendampingan keluarga pasien kronis.",
+  "Pemantauan berkelanjutan pasien kronis di komunitas.",
+  "Monitoring komunitas risiko tinggi penyakit kronis.",
+  "Penguatan Program Rujuk Balik (PRB).",
+  "Koordinasi pelayanan lintas profesi dan kader kesehatan.",
+  "Pembinaan Posbindu PTM.",
+  "Pengelolaan pasien geriatri dengan kebutuhan pelayanan jangka panjang."
 ];
 
 const peranSpkklpItems = [
@@ -379,7 +383,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
 
     if (!hasJumlah || !hasDM || !hasHT || !hasMekanisme || !hasRataRujukan) return false;
     if (!isRoleSpKklp && !relevansiItems.every((_, idx) => formData.relevansiSpkklp[idx])) return false;
-    if (!isRoleSpKklp && !peranSpkklpItems.every((_, idx) => formData.peranSpkklp[idx])) return false;
+    if (!isRoleSpKklp && formData.docKklp === 'Ya' && !peranSpkklpItems.every((_, idx) => formData.peranSpkklp[idx])) return false;
+    if (!formData.layananDirujuk?.pengaruhPenurunanRujukan) return false;
     
     const jumlahPRB = Number(formData.prb.jumlah) || 0;
     const rutin = Number(formData.prb.rutinKunjungan) || 0;
@@ -985,7 +990,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       </ul>
                     </div>
                   </div>
-                  <p className="text-sm font-semibold text-slate-800 mb-3">Menurut Anda, seberapa relevan kegiatan berikut untuk didukung oleh kompetensi dokter Sp.KKLP di Puskesmas / Klinik?</p>
+                  <p className="text-sm font-semibold text-slate-800 mb-3">
+                    {formData.docKklp === 'Tidak' 
+                      ? "Bagaimana harapan Bapak/Ibu terhadap dukungan yang dapat diberikan oleh kompetensi dokter Sp.KKLP pada kegiatan-kegiatan berikut?" 
+                      : "Menurut Anda, seberapa relevan kegiatan berikut untuk didukung oleh kompetensi dokter Sp.KKLP di Puskesmas / Klinik?"}
+                  </p>
                   <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
                     <table className="w-full text-left text-sm">
                       <thead className="bg-slate-50 border-b border-slate-200">
@@ -1029,7 +1038,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                 )}
 
                 {/* Peran SpKKLP dalam Optimalisasi Layanan (Khusus Non-SpKKLP) */}
-                {(!isRoleSpKklp || isPrintMode) && (
+                {((!isRoleSpKklp && formData.docKklp === 'Ya') || isPrintMode) && (
                   <div>
                     <h3 className="text-lg font-bold text-slate-800 mb-3 mt-6">A.2 Peran Sp.KKLP dalam Optimalisasi Layanan</h3>
                     <p className="text-sm text-slate-600 mb-4">Mohon berikan penilaian Anda terhadap peran Sp.KKLP di Fasilitas Kesehatan Anda:</p>
@@ -1074,6 +1083,30 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                     </div>
                   </div>
                 )}
+
+                {/* Pengaruh SPKKLP terhadap Penurunan Rujukan */}
+                <div className="mb-8">
+                  <p className="text-sm font-semibold text-slate-800 mb-3">Menurut FKTP, apakah keberadaan SPKKLP berpengaruh terhadap penurunan rujukan?</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    {[
+                      { val: 1, label: '1 - Sangat Tidak Setuju' },
+                      { val: 2, label: '2 - Tidak Setuju' },
+                      { val: 3, label: '3 - Setuju' },
+                      { val: 4, label: '4 - Sangat Setuju' }
+                    ].map(opt => {
+                      const isSelected = formData.layananDirujuk?.pengaruhPenurunanRujukan === opt.val.toString();
+                      return (
+                        <label key={opt.val} className={`flex-1 flex sm:flex-col items-center sm:justify-center p-3 border rounded-xl cursor-pointer transition-all text-left sm:text-center gap-3 sm:gap-2 ${isSelected ? 'border-indigo-600 bg-indigo-50 text-indigo-800 font-bold shadow-md shadow-indigo-500/10' : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:bg-slate-50'}`}>
+                          <input type="radio" className="hidden" name="pengaruhRujukan" value={opt.val} checked={isSelected} onChange={(e) => setFormData(prev => ({ ...prev, layananDirujuk: { ...prev.layananDirujuk, pengaruhPenurunanRujukan: e.target.value } }))} />
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'border-indigo-600' : 'border-slate-300'}`}>
+                            {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600"></div>}
+                          </div>
+                          <span className="text-xs md:text-sm leading-tight">{opt.label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
 
                 {/* Layanan yang masih sering dirujuk */}
                 <div>
@@ -1505,7 +1538,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                     </>)}
                     {step === 3 && (<>
                       {!isRoleSpKklp && (() => { const b = relevansiItems.filter((_, i) => !formData.relevansiSpkklp[i]).length; return b > 0 ? <li>{b} item relevansi Sp.KKLP belum diberi nilai</li> : null; })()}
-                      {!isRoleSpKklp && (() => { const b = peranSpkklpItems.filter((_, i) => !formData.peranSpkklp[i]).length; return b > 0 ? <li>{b} item peran Sp.KKLP belum diberi nilai</li> : null; })()}
+                      {!isRoleSpKklp && formData.docKklp === 'Ya' && (() => { const b = peranSpkklpItems.filter((_, i) => !formData.peranSpkklp[i]).length; return b > 0 ? <li>{b} item peran Sp.KKLP belum diberi nilai</li> : null; })()}
+                      {!formData.layananDirujuk?.pengaruhPenurunanRujukan && <li>Pertanyaan pengaruh keberadaan Sp.KKLP terhadap penurunan rujukan belum diisi</li>}
                       {!(formData.prb?.jumlah !== undefined && formData.prb?.jumlah !== null && formData.prb?.jumlah !== '') && <li>Jumlah peserta PRB wajib diisi</li>}
                       {!(formData.prb?.peserta_dm !== undefined && formData.prb?.peserta_dm !== null && formData.prb?.peserta_dm !== '') && <li>Jumlah peserta PRB DM wajib diisi</li>}
                       {!(formData.prb?.peserta_ht !== undefined && formData.prb?.peserta_ht !== null && formData.prb?.peserta_ht !== '') && <li>Jumlah peserta PRB Hipertensi wajib diisi</li>}
