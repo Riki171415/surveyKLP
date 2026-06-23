@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ChevronDown, ChevronUp, CheckCircle, XCircle, MinusCircle, AlertCircle } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, CheckCircle, XCircle, MinusCircle, AlertCircle, Printer } from 'lucide-react';
 import {
   penyakitPasienBulanan, layananDirujukItems, layananBelumBerjalanItems,
   interviewQuestionsWithSpkklp, interviewQuestionsWithoutSpkklp,
@@ -165,9 +165,16 @@ export default function SurveyDetailModal({ selected, onClose }) {
     : interviewQuestionsWithSpkklp;
 
   try {
+    const handlePrint = () => {
+      // Menambahkan class ke body agar komponen di belakang modal tidak ikut tercetak
+      document.body.classList.add('printing-modal');
+      window.print();
+      document.body.classList.remove('printing-modal');
+    };
+
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div className="bg-white w-full max-w-3xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm print:absolute print:inset-0 print:p-0 print:bg-transparent print:backdrop-blur-none print-modal-content">
+        <div className="bg-white w-full max-w-3xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in print:shadow-none print:max-w-none print:max-h-none print:h-auto print:overflow-visible">
 
           {/* ── Header ── */}
           <div className="px-6 py-5 bg-gradient-to-r from-primary-700 to-primary-600 text-white flex items-start justify-between gap-4 shrink-0">
@@ -188,13 +195,19 @@ export default function SurveyDetailModal({ selected, onClose }) {
                 </span>
               </div>
             </div>
-            <button onClick={onClose} className="p-2 text-white/70 hover:text-white hover:bg-white/20 rounded-xl shrink-0 transition-all">
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2 shrink-0 print:hidden">
+              <button onClick={handlePrint} className="flex items-center gap-2 px-3 py-1.5 text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-sm font-medium transition-all shadow-sm">
+                <Printer className="w-4 h-4" />
+                <span>Cetak PDF</span>
+              </button>
+              <button onClick={onClose} className="p-2 text-white/70 hover:text-white hover:bg-white/20 rounded-xl transition-all">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* ── Body ── */}
-          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4 bg-slate-50">
+          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4 bg-slate-50 print:overflow-visible print:bg-white print:p-0 print:space-y-6">
 
             {/* ═══ A. IDENTITAS ═══ */}
             <SectionBlock title="A. Identitas Responden" color="bg-primary-600">
