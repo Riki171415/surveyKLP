@@ -631,7 +631,7 @@ function FormDPMContent() {
 
 export default function PrintForms() {
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-100 print:bg-white">
       {/* Toolbar (tidak tercetak) */}
       <div className="no-print sticky top-0 z-50 bg-slate-900 text-white px-6 py-3 flex items-center justify-between shadow-lg">
         <div>
@@ -661,8 +661,8 @@ export default function PrintForms() {
       </div>
 
       {/* FORM A — Dengan Sp.KKLP */}
-      <div className="max-w-5xl mx-auto px-4 mb-6">
-        <div className="bg-white rounded-2xl shadow-lg p-8 print-page-break-inside-avoid">
+      <div className="max-w-5xl mx-auto px-4 mb-6 print:max-w-none print:px-0 print:mx-0 print:mb-0">
+        <div className="bg-white rounded-2xl shadow-lg p-8 print:shadow-none print:rounded-none print:p-0 print-page-break-inside-avoid">
           <FormContent withSpkklp={true} />
         </div>
       </div>
@@ -671,8 +671,8 @@ export default function PrintForms() {
       <div className="print-page-break" />
 
       {/* FORM B — Tanpa Sp.KKLP */}
-      <div className="max-w-5xl mx-auto px-4 pb-10">
-        <div className="bg-white rounded-2xl shadow-lg p-8 print-page-break-inside-avoid">
+      <div className="max-w-5xl mx-auto px-4 pb-10 print:max-w-none print:px-0 print:mx-0 print:pb-0">
+        <div className="bg-white rounded-2xl shadow-lg p-8 print:shadow-none print:rounded-none print:p-0 print-page-break-inside-avoid">
           <FormContent withSpkklp={false} />
         </div>
       </div>
@@ -681,8 +681,8 @@ export default function PrintForms() {
       <div className="print-page-break" />
 
       {/* FORM C — Dokter Praktik Mandiri */}
-      <div className="max-w-5xl mx-auto px-4 pb-10">
-        <div className="bg-white rounded-2xl shadow-lg p-8 print-page-break-inside-avoid">
+      <div className="max-w-5xl mx-auto px-4 pb-10 print:max-w-none print:px-0 print:mx-0 print:pb-0">
+        <div className="bg-white rounded-2xl shadow-lg p-8 print:shadow-none print:rounded-none print:p-0 print-page-break-inside-avoid">
           <FormDPMContent />
         </div>
       </div>
