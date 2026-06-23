@@ -170,14 +170,14 @@ export default function KokpitKemenkes() {
 
       // Rujukan
       const rjk = row.layanan_dirujuk || {};
-      Object.keys(rjk).forEach(k => {
+      for (const k in rjk) {
         if (rjk[k] && k !== 'pengaruhPenurunanRujukan') {
-          if (!isNaN(k) && k !== 'lainnya' && !layananDirujukItems[k]) return;
+          if (!isNaN(k) && k !== 'lainnya' && !layananDirujukItems[k]) continue;
           const name = k === 'lainnya' ? rjk.lainnya : (isNaN(k) ? k : layananDirujukItems[k]);
           rujukanMap[name] = (rujukanMap[name] || 0) + 1;
           totalRujukan++;
         }
-      });
+      }
 
       // Paket Manfaat
       const jkn = row.jkn || {};
