@@ -853,10 +853,10 @@ export default function DataManagement() {
               )}
 
               {/* ── F. Wawancara ── */}
-              {selected.wawancara && Object.keys(selected.wawancara).some(k => k !== 'pewawancara') && (
+              {true && (
                 <div>
                   <SectionHeader label="K. Hasil Wawancara" />
-                  {selected.wawancara.pewawancara && (
+                  {selected.wawancara?.pewawancara && (
                     <div className="mb-3 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-lg text-xs flex gap-2">
                       <span className="font-semibold text-emerald-800">Diwawancarai oleh:</span>
                       <span className="text-emerald-700 capitalize">{selected.wawancara.pewawancara}</span>
@@ -864,7 +864,7 @@ export default function DataManagement() {
                   )}
                   <div className="space-y-3">
                     {(selected.doc_kklp === 'Tidak' ? interviewQuestionsWithoutSpkklp : interviewQuestionsWithSpkklp).map((q, idx) => {
-                      const jawaban = selected.wawancara[idx];
+                      const jawaban = selected.wawancara?.[idx];
                       return (
                         <div key={idx} className="bg-slate-50 border border-slate-100 rounded-xl p-4">
                           <p className="font-semibold text-slate-700 text-xs mb-2 flex gap-2">
