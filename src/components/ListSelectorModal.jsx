@@ -1,46 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { daftar_diagnosa } from '../data/diagnosaData';
 
 const MEDICAL_DATA = {
   faskes_tingkat_pertama: {
     deskripsi: "Daftar Diagnosa dan Tindakan di PPK 1 (Puskesmas / Klinik Pratama)",
-    daftar_diagnosa: [
-      {
-        kategori: "Penyakit Infeksi dan Sistem Pernapasan",
-        penyakit: [
-          { nama_diagnosa: "Tuberkulosis (TB) Paru tanpa komplikasi", kode_icd_10: "A15.0, A16.0" },
-          { nama_diagnosa: "Infeksi Saluran Pernapasan Akut (ISPA) / Nasofaringitis Akut", kode_icd_10: "J00" },
-          { nama_diagnosa: "Asma Bronkial (Asthma)", kode_icd_10: "J45" },
-          { nama_diagnosa: "Demam Dengue / DHF", kode_icd_10: "A91" },
-          { nama_diagnosa: "Demam Tifoid / Typhus", kode_icd_10: "A01" }
-        ]
-      },
-      {
-        kategori: "Penyakit Sistem Pencernaan dan Metabolik",
-        penyakit: [
-          { nama_diagnosa: "Gastroenteritis / Diare", kode_icd_10: "A09" },
-          { nama_diagnosa: "Diabetes Melitus Tipe 2 Tanpa Komplikasi", kode_icd_10: "E11" },
-          { nama_diagnosa: "Hipertensi Esensial", kode_icd_10: "I10" },
-          { nama_diagnosa: "Obesitas", kode_icd_10: "E66" }
-        ]
-      },
-      {
-        kategori: "Penyakit Mata, Telinga, dan Saraf",
-        penyakit: [
-          { nama_diagnosa: "Konjungtivitis", kode_icd_10: "H10" },
-          { nama_diagnosa: "Otitis Eksterna", kode_icd_10: "H60" },
-          { nama_diagnosa: "Tension Headache", kode_icd_10: "G44.8" },
-          { nama_diagnosa: "Migrain", kode_icd_10: "G43.9" }
-        ]
-      },
-      {
-        kategori: "Penyakit Kulit dan Kelamin",
-        penyakit: [
-          { nama_diagnosa: "Scabies / Kudis", kode_icd_10: "B86" },
-          { nama_diagnosa: "Kusta Tipe Kering/Basah", kode_icd_10: "A30.1, A30.5" }
-        ]
-      }
-    ],
+    daftar_diagnosa: daftar_diagnosa,
     daftar_tindakan: [
       {
         kategori: "Tindakan Medik Umum & Kegawatdaruratan",
