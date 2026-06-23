@@ -108,14 +108,7 @@ export default function ListResponden() {
                 <tr 
                   key={row.id || i} 
                   className="hover:bg-slate-50 transition-colors cursor-pointer"
-                  onClick={() => {
-                    alert('Anda mengklik: ' + (row.fktp_name || 'Tidak ada nama'));
-                    try {
-                      setSelectedSurvey(row);
-                    } catch (err) {
-                      alert('Error setting survey: ' + err.message);
-                    }
-                  }}
+                  onClick={() => setSelectedSurvey(row)}
                 >
                   <td className="px-6 py-4 text-sm text-slate-500 font-medium">
                     {(currentPage - 1) * itemsPerPage + i + 1}
