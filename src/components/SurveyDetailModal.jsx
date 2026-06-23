@@ -16,10 +16,9 @@ export default function SurveyDetailModal({ selected, onClose }) {
   };
 
   const scaleBadge = (skala) => {
-    if (skala === '4' || skala === 'Sangat Setuju' || skala === 'Ya') return 'bg-emerald-100 text-emerald-700';
-    if (skala === '3' || skala === 'Setuju') return 'bg-blue-100 text-blue-700';
-    if (skala === '2' || skala === 'Kurang Setuju') return 'bg-amber-100 text-amber-700';
-    if (skala === '1' || skala === 'Tidak Setuju' || skala === 'Tidak') return 'bg-rose-100 text-rose-700';
+    const s = parseInt(skala);
+    if (s >= 3) return 'bg-emerald-100 text-emerald-700';
+    if (s <= 2) return 'bg-rose-100 text-rose-700';
     return 'bg-slate-100 text-slate-600';
   };
 
@@ -30,9 +29,9 @@ export default function SurveyDetailModal({ selected, onClose }) {
     return 'bg-emerald-100 text-emerald-800';
   };
 
-  const jknBadge = (status) => {
-    if (status === 'Sudah Masuk') return 'bg-emerald-100 text-emerald-700';
-    if (status === 'Perlu Dimasukkan') return 'bg-blue-100 text-blue-700';
+  const jknBadge = (val) => {
+    if (val === 'Ya') return 'bg-emerald-100 text-emerald-700';
+    if (val === 'Tidak') return 'bg-rose-100 text-rose-700';
     return 'bg-slate-100 text-slate-600';
   };
 
@@ -43,14 +42,18 @@ export default function SurveyDetailModal({ selected, onClose }) {
     </h4>
   );
 
-  const Field = ({ label, value }) => (
-    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100/50">
-      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
-      <p className="text-xs font-medium text-slate-800">{value || '-'}</p>
-    </div>
-  );
+  const Field = ({ label, value }) => {
+    if (!value && value !== 0) return null;
+    return (
+      <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100/50">
+        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
+        <p className="text-xs font-medium text-slate-800">{value}</p>
+      </div>
+    );
+  };
 
-  return (
+  try {
+    return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
       <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in relative">
         <div className="px-6 py-5 bg-gradient-to-r from-primary-600 to-primary-700 text-white flex items-start justify-between gap-4 shrink-0 shadow-inner">
@@ -441,5 +444,24 @@ export default function SurveyDetailModal({ selected, onClose }) {
               </div>
       </div>
     </div>
-  );
+    );
+  } catch (error) {
+    console.error("SurveyDetailModal Render Error:", error);
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+        <div className="bg-white w-full max-w-2xl rounded-2xl p-6 shadow-2xl relative">
+          <button onClick={onClose} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 rounded-full">
+            <X className="w-5 h-5" />
+          </button>
+          <h2 className="text-xl font-bold text-red-600 mb-4">Terjadi Kesalahan Render</h2>
+          <p className="text-sm text-slate-700 mb-4">Maaf, ada data yang formatnya tidak sesuai sehingga pop-up gagal ditampilkan. Kirimkan error di bawah ini ke developer:</p>
+          <div className="bg-red-50 text-red-800 p-4 rounded-lg overflow-x-auto text-xs font-mono">
+            {error.message}
+            <br/><br/>
+            {error.stack}
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
