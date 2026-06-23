@@ -317,12 +317,11 @@ export default function SurveyDetailModal({ selected, onClose }) {
                   <div className="space-y-2">
                     {kompetensiLayanan.map((nama, idx) => {
                       const item = selected.kompetensi[idx];
-                      if (!item) return null;
                       return (
                         <div key={idx} className="flex items-center justify-between gap-3 py-2 border-b border-slate-50 last:border-0">
                           <span className="text-xs text-slate-700 flex-1">{nama}</span>
-                          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 ${statusBadge(item.status)}`}>
-                            Status {item.status === 'sudah' ? 'Sudah' : item.status === 'belum' ? 'Belum' : '-'}
+                          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 ${statusBadge(item?.status)}`}>
+                            {item?.status ? `Status ${item.status === 'sudah' ? 'Sudah' : 'Belum'}` : '-'}
                           </span>
                         </div>
                       );
@@ -338,12 +337,11 @@ export default function SurveyDetailModal({ selected, onClose }) {
                   <div className="space-y-2">
                     {jknBenefits.map((nama, idx) => {
                       const item = selected.jkn[idx];
-                      if (!item) return null;
                       return (
                         <div key={idx} className="flex items-center justify-between gap-3 py-2 border-b border-slate-50 last:border-0">
                           <span className="text-xs text-slate-700 flex-1">{nama}</span>
-                          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 ${scaleBadge(item.skala)}`}>
-                            Skala {item.skala}
+                          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 ${scaleBadge(item?.skala)}`}>
+                            {item?.skala ? `Skala ${item.skala}` : '-'}
                           </span>
                         </div>
                       );
@@ -392,8 +390,7 @@ export default function SurveyDetailModal({ selected, onClose }) {
                   <SectionHeader label="J. Layanan Belum Optimal / Belum Tersedia" />
                   <div className="space-y-2">
                     {nonOptimalServices.map((nama, idx) => {
-                      const item = selected.non_optimal[idx];
-                      if (!item) return null;
+                      const item = selected.non_optimal[idx] || {};
                       return (
                         <div key={idx} className="flex items-start justify-between gap-3 py-2 border-b border-slate-50 last:border-0">
                           <span className="text-xs text-slate-700 flex-1">{nama}</span>
@@ -402,7 +399,7 @@ export default function SurveyDetailModal({ selected, onClose }) {
                               {item.masukJkn || '-'}
                             </span>
                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${scaleBadge(item.skala)}`}>
-                              Skala {item.skala}
+                              {item.skala ? `Skala ${item.skala}` : '-'}
                             </span>
                           </div>
                         </div>

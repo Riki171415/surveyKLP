@@ -4,7 +4,7 @@ import { Loader2, Search, Edit, Trash2, X, ChevronDown, ChevronUp, ChevronLeft, 
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
 import { useAuth } from './AuthContext';
-import { penyakitPasienBulanan, layananDirujukItems, layananBelumBerjalanItems } from './SurveyForm';
+import { penyakitPasienBulanan, layananDirujukItems, layananBelumBerjalanItems, interviewQuestionsWithSpkklp, interviewQuestionsWithoutSpkklp } from './SurveyForm';
 
 // ─── Data referensi (sama dengan SurveyForm) ───────────────────────────────
 const jknBenefits = [
@@ -30,27 +30,6 @@ const kompetensiLayanan = [
   "Pemeriksaan Xray untuk penegakan diagnosis"
 ];
 
-const interviewQuestionsWithSpkklp = [
-  "1. Bagaimana pelaksanaan layanan penyakit kronik di Puskesmas/Klinik saat ini dan bagaimana peran Sp.KKLP dalam mendukungnya?",
-  "2. Bagaimana pelaksanaan home visit dan home care saat ini, serta dukungan yang diperlukan untuk optimalisasi layanan tersebut?",
-  "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini, serta apakah perlu menjadi manfaat non-kapitasi JKN?",
-  "4. Menurut pandangan Bapak/Ibu, apakah layanan paliatif primer perlu dimasukkan ke manfaat JKN untuk Puskesmas/Klinik?",
-  "5. Bagaimana keterlibatan Sp.KKLP dalam PRB? Apakah perlu penambahan kewenangan atau perluasan PRB?",
-  "6. Bagaimana pengalaman atau perubahan yang dirasakan setelah adanya dokter Sp.KKLP di Puskesmas/Klinik?",
-  "7. Bentuk dukungan apa yang diperlukan agar Puskesmas/Klinik yang memiliki dokter Sp.KKLP dapat menjalankan perannya secara optimal?",
-  "8. Adakah kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktik Mandiri dalam program JKN? Ceritakan."
-];
-
-const interviewQuestionsWithoutSpkklp = [
-  "1. Bagaimana pelaksanaan layanan penyakit kronik saat ini dan apa harapan Bapak/Ibu terhadap peran dokter Sp.KKLP dalam mendukung layanan tersebut?",
-  "2. Bagaimana pelaksanaan home visit dan home care saat ini, serta apa harapan Bapak/Ibu terhadap dukungan yang dapat diberikan oleh dokter Sp.KKLP untuk optimalisasi layanan tersebut?",
-  "3. Bagaimana implementasi komunitas dan edukasi kelompok saat ini, serta apa harapan Bapak/Ibu terhadap peran dokter Sp.KKLP dalam mendukung kegiatan tersebut?",
-  "4. Bagaimana pandangan Bapak/Ibu mengenai kebutuhan layanan paliatif primer dan harapan terhadap peran dokter Sp.KKLP dalam penyelenggaraan layanan tersebut?",
-  "5. Bagaimana pelaksanaan PRB saat ini dan apakah terdapat harapan mengenai peran, kewenangan, atau perluasan PRB apabila tersedia dokter Sp.KKLP?",
-  "6. Perubahan atau manfaat apa yang diharapkan dapat dirasakan apabila tersedia dokter Sp.KKLP?",
-  "7. Dukungan apa yang diperlukan agar peran dokter Sp.KKLP nantinya dapat diimplementasikan secara optimal?",
-  "8. Adakah kendala yang dihadapi oleh Bapak/Ibu di Puskesmas/Klinik/Dokter Praktik Mandiri dalam program JKN? Ceritakan."
-];
 
 const relevansiItems = [
   "Pengelolaan pasien dengan kondisi kronis dan multimorbiditas.",
