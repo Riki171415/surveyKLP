@@ -51,7 +51,8 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
       const rjk = row.layanan_dirujuk || {};
       Object.keys(rjk).forEach(k => {
         if (rjk[k] && k !== 'pengaruhPenurunanRujukan') {
-          const name = k === 'lainnya' ? rjk.lainnya : (isNaN(k) ? k : (layananDirujukItems[k] || `Layanan ${k}`));
+          if (!isNaN(k) && k !== 'lainnya' && !layananDirujukItems[k]) return;
+          const name = k === 'lainnya' ? rjk.lainnya : (isNaN(k) ? k : layananDirujukItems[k]);
           dirujukCounts[name] = (dirujukCounts[name] || 0) + 1;
         }
       });

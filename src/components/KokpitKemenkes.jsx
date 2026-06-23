@@ -173,7 +173,8 @@ export default function KokpitKemenkes() {
       const rjk = row.layanan_dirujuk || {};
       Object.keys(rjk).forEach(k => {
         if (rjk[k] && k !== 'pengaruhPenurunanRujukan') {
-          const name = k === 'lainnya' ? rjk.lainnya : (isNaN(k) ? k : (layananDirujukItems[k] || `Layanan ${k}`));
+          if (!isNaN(k) && k !== 'lainnya' && !layananDirujukItems[k]) return;
+          const name = k === 'lainnya' ? rjk.lainnya : (isNaN(k) ? k : layananDirujukItems[k]);
           rujukanMap[name] = (rujukanMap[name] || 0) + 1;
           totalRujukan++;
         }
@@ -438,7 +439,16 @@ export default function KokpitKemenkes() {
                     <Radar name="Dokter Umum" dataKey="DUmum" stroke="#10b981" fill="#10b981" fillOpacity={0.2} />
                     <Radar name="Sp.KKLP" dataKey="SpKKLP" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.2} />
                     <Legend wrapperStyle={{ fontSize: '12px' }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: 'none', borderRadius: '8px', color: '#334155' }} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#ffffff', border: 'none', borderRadius: '8px', color: '#334155' }} 
+                      labelFormatter={(label) => {
+                        const qIndex = parseInt(label.replace('Q', '')) - 1;
+                        if (qIndex >= 0 && qIndex < relevansiItems.length) {
+                          return `${label} - ${relevansiItems[qIndex]}`;
+                        }
+                        return label;
+                      }}
+                    />
                   </RadarChart>
                 </ResponsiveContainer>
               </div>

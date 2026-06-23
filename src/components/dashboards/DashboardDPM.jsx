@@ -75,14 +75,14 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
       },
       lamaPraktikData: Object.keys(lamaCount).map(k => ({ name: k, value: lamaCount[k] })).sort((a,b) => b.value - a.value),
       bebanPasienData: Object.keys(bebanCount).map(k => ({ name: k, value: bebanCount[k] })).sort((a,b) => b.value - a.value),
-      rekamMedisData: [
+      rekamMedisData: rekamMedisCount['Ya'] || rekamMedisCount['Tidak'] ? [
         { name: 'Menerapkan RM Terintegrasi', value: rekamMedisCount['Ya'] },
         { name: 'Belum Menerapkan', value: rekamMedisCount['Tidak'] }
-      ].filter(d => d.value > 0),
-      kunjunganData: [
+      ].filter(d => d.value > 0) : [{ name: 'Belum Ada Data', value: 1 }],
+      kunjunganData: kunjunganCount['Ya (Melakukan)'] || kunjunganCount['Tidak'] ? [
         { name: 'Melakukan Kunjungan', value: kunjunganCount['Ya (Melakukan)'] },
         { name: 'Tidak Melakukan', value: kunjunganCount['Tidak'] }
-      ].filter(d => d.value > 0),
+      ].filter(d => d.value > 0) : [{ name: 'Belum Ada Data', value: 1 }],
       aspekData: aspekArr.slice(0, 7), // Top 7 Kegiatan/Aspek
       luaranPelayananData: Object.keys(luaranCount).map(k => ({ name: k, value: luaranCount[k] })).sort((a,b) => b.value - a.value)
     };
@@ -129,11 +129,12 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <PieChart>
-                <Pie data={kunjunganData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ name, percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
-                  <Cell fill="#10b981" />
-                  <Cell fill="#f43f5e" />
+                <Pie data={kunjunganData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ name, percent }) => name !== 'Belum Ada Data' && percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
+                  {kunjunganData.map((entry, index) => (
+                    <Cell key={index} fill={entry.name === 'Belum Ada Data' ? '#e2e8f0' : ['#10b981', '#f43f5e'][index % 2]} />
+                  ))}
                 </Pie>
-                <RechartsTooltip formatter={(value) => [`${value} DPM`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <RechartsTooltip formatter={(value, name) => name === 'Belum Ada Data' ? ['-', 'Data Kosong'] : [`${value} DPM`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                 <Legend verticalAlign="bottom" height={36} />
               </PieChart>
             </ResponsiveContainer>
@@ -145,11 +146,12 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <PieChart>
-                <Pie data={rekamMedisData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ name, percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
-                  <Cell fill="#6366f1" />
-                  <Cell fill="#94a3b8" />
+                <Pie data={rekamMedisData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ name, percent }) => name !== 'Belum Ada Data' && percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
+                  {rekamMedisData.map((entry, index) => (
+                    <Cell key={index} fill={entry.name === 'Belum Ada Data' ? '#e2e8f0' : ['#6366f1', '#94a3b8'][index % 2]} />
+                  ))}
                 </Pie>
-                <RechartsTooltip formatter={(value) => [`${value} DPM`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <RechartsTooltip formatter={(value, name) => name === 'Belum Ada Data' ? ['-', 'Data Kosong'] : [`${value} DPM`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                 <Legend verticalAlign="bottom" height={36} />
               </PieChart>
             </ResponsiveContainer>

@@ -255,8 +255,10 @@ export default function DashboardEksekutif({ data = [] }) {
       if (row.layanan_dirujuk) {
         Object.keys(row.layanan_dirujuk).forEach(k => {
           if (row.layanan_dirujuk[k] && k !== 'pengaruhPenurunanRujukan') {
-             const keyName = k === 'lainnya' ? row.layanan_dirujuk.lainnya : (isNaN(k) ? k : (layananDirujukItems[k] || `Layanan ${k}`));
+             if (k !== 'lainnya' && !isNaN(k) && !layananDirujukItems[k]) return;
+             const keyName = k === 'lainnya' ? row.layanan_dirujuk.lainnya : (isNaN(k) ? k : layananDirujukItems[k]);
              rujukanMap[keyName] = (rujukanMap[keyName] || 0) + 1;
+             totalRujukan++;
           }
         });
       }
