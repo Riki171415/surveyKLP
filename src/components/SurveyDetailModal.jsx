@@ -36,7 +36,7 @@ const spkklpBadge = (val) =>
 function SectionBlock({ title, color = 'bg-primary-600', icon, children, defaultOpen = true }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+    <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm print:break-inside-avoid print:shadow-none print:border-slate-300">
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center gap-3 px-5 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
@@ -173,14 +173,14 @@ export default function SurveyDetailModal({ selected, onClose }) {
     };
 
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm print:absolute print:inset-0 print:p-0 print:bg-transparent print:backdrop-blur-none print-modal-content">
-        <div className="bg-white w-full max-w-3xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in print:shadow-none print:max-w-none print:max-h-none print:h-auto print:overflow-visible">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm print:block print:absolute print:inset-0 print:p-0 print:bg-transparent print:backdrop-blur-none print-modal-content">
+        <div className="bg-white w-full max-w-3xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in print:shadow-none print:max-w-none print:w-full print:max-h-none print:h-auto print:overflow-visible print:rounded-none">
 
           {/* ── Header ── */}
-          <div className="px-6 py-5 bg-gradient-to-r from-primary-700 to-primary-600 text-white flex items-start justify-between gap-4 shrink-0">
+          <div className="px-6 py-5 bg-gradient-to-r from-primary-700 to-primary-600 text-white flex items-start justify-between gap-4 shrink-0 print:bg-none print:bg-white print:text-black print:border-b print:border-slate-300 print:px-0">
             <div className="min-w-0">
-              <p className="text-[11px] font-bold tracking-widest text-primary-200 uppercase mb-1">Detail Isian Survey</p>
-              <h3 className="font-extrabold text-xl leading-tight tracking-tight">{selected.fktp_name || 'Responden'}</h3>
+              <p className="text-[11px] font-bold tracking-widest text-primary-200 uppercase mb-1 print:text-slate-500">Detail Isian Survey</p>
+              <h3 className="font-extrabold text-xl leading-tight tracking-tight print:text-slate-900">{selected.fktp_name || 'Responden'}</h3>
               <div className="flex flex-wrap items-center gap-2 mt-2">
                 {selected.provinsi && (
                   <span className="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-medium">
