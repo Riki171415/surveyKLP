@@ -589,6 +589,23 @@ function FormDPMContent() {
             <BlankLine key={p.id} label={`${p.label}${p.required ? ' *' : ''}`} />
           ))}
         </div>
+    </section>
+
+      {/* BAGIAN G: PENDALAMAN KUALITATIF */}
+      <section>
+        <SectionHeader color="bg-emerald-600" title="G. Pendalaman Kualitatif (Jawab semua pertanyaan)" />
+        <div className="space-y-5">
+          {interviewQuestionsWithoutSpkklp.map((question, idx) => (
+            <div key={idx} className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+              <p className="text-xs font-semibold text-slate-800 mb-2 leading-relaxed">{question}</p>
+              <div className="space-y-1.5">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="border-b border-slate-300 h-6" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Tanda tangan */}
