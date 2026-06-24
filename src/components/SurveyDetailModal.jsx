@@ -228,6 +228,7 @@ export default function SurveyDetailModal({ selected, onClose }) {
                 { label: 'Jabatan', value: selected.role },
                 { label: 'Jenis Faskes', value: selected.jenis_faskes },
                 { label: 'Waktu Submit', value: selected.created_at ? new Date(selected.created_at).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : null },
+                { label: 'Waktu Terakhir Diedit', value: selected.updated_at ? new Date(selected.updated_at).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : null },
               ]} />
             </SectionBlock>
 
@@ -623,6 +624,27 @@ export default function SurveyDetailModal({ selected, onClose }) {
                 })}
               </div>
             </SectionBlock>
+
+            {/* ═══ RIWAYAT EDIT ═══ */}
+            {selected.edit_history && selected.edit_history.length > 0 && (
+              <SectionBlock title="Riwayat Edit" color="bg-amber-600">
+                <div className="space-y-3">
+                  {selected.edit_history.map((history, idx) => (
+                    <div key={idx} className="flex items-center gap-3 bg-white border border-slate-200 p-3 rounded-xl shadow-sm">
+                      <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                        <span className="text-amber-600 text-xs font-bold">{idx + 1}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-slate-500 font-medium">Data diedit pada:</p>
+                        <p className="text-sm font-bold text-slate-800">
+                          {new Date(history.edited_at).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'long' })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </SectionBlock>
+            )}
 
           </div>
         </div>

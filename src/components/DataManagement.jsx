@@ -417,7 +417,7 @@ export default function DataManagement() {
       <div className="flex gap-5 items-start">
 
         {/* ══════════ TABEL KIRI ══════════ */}
-        <div className={`bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-shrink-0 transition-all duration-300 ${selected ? 'w-[42%]' : 'w-full'}`}>
+        <div className={`bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-shrink-0 transition-all duration-300 ${selected ? 'w-full md:w-[42%]' : 'w-full'}`}>
           <div className="p-4 border-b border-slate-200 flex items-center gap-3 bg-slate-50">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -448,11 +448,18 @@ export default function DataManagement() {
                       <p className="text-xs text-slate-500 font-medium truncate mt-0.5">{row.kab_kota || row.city || '-'}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md ${roleBadge(row.role)}`}>{row.role}</span>
-                        <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">{new Date(row.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                        <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md" title={`Waktu Submit: ${new Date(row.created_at).toLocaleString('id-ID')}`}>
+                          {new Date(row.updated_at || row.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                        {(row.updated_at || (row.edit_history && row.edit_history.length > 0)) && (
+                          <span className="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200">
+                            Pernah Diedit
+                          </span>
+                        )}
                       </div>
                     </div>
                     {user?.role === 'admin' && (
-                      <div className="flex gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity md:opacity-100" onClick={e => e.stopPropagation()}>
+                      <div className="flex gap-1.5 shrink-0 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
                         <button 
                           onClick={() => toggleEditAccess(row.id, row.is_editable)} 
                           className={`p-2 rounded-lg transition-colors shadow-sm ${row.is_editable ? 'bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white' : 'bg-slate-50 text-slate-400 hover:bg-slate-500 hover:text-white'}`}
@@ -502,7 +509,7 @@ export default function DataManagement() {
             <SurveyDetailModal selected={selected} onClose={() => setSelected(null)} />
             {/* Tombol aksi admin tampil di atas modal */}
             {user?.role === 'admin' && (
-              <div className="fixed bottom-6 right-6 z-[200] flex gap-3">
+              <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[200] flex flex-wrap justify-end gap-2 md:gap-3 max-w-[calc(100vw-32px)]">
                 <button
                   onClick={() => toggleEditAccess(selected.id, selected.is_editable)}
                   className={`flex items-center gap-2 px-4 py-2.5 text-white text-sm font-bold rounded-xl shadow-xl transition-all hover:-translate-y-0.5 ${selected.is_editable ? 'bg-amber-600 hover:bg-amber-700' : 'bg-slate-600 hover:bg-slate-700'}`}

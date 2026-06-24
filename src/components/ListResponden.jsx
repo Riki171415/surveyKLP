@@ -133,13 +133,22 @@ export default function ListResponden() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-1.5 text-slate-600 text-sm">
-                      <Calendar className="w-4 h-4 text-slate-400" />
-                      <span>
-                        {row.created_at ? new Date(row.created_at).toLocaleDateString('id-ID', {
-                          day: 'numeric', month: 'short', year: 'numeric'
-                        }) : '-'}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 text-slate-600 text-sm">
+                        <Calendar className="w-4 h-4 text-slate-400" />
+                        <span title={`Waktu Submit: ${row.created_at ? new Date(row.created_at).toLocaleString('id-ID') : '-'}`}>
+                          {row.updated_at 
+                            ? new Date(row.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+                            : row.created_at 
+                              ? new Date(row.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) 
+                              : '-'}
+                        </span>
+                      </div>
+                      {(row.updated_at || (row.edit_history && row.edit_history.length > 0)) && (
+                        <span className="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200">
+                          Diedit
+                        </span>
+                      )}
                     </div>
                   </td>
                 </tr>

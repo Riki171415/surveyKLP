@@ -216,7 +216,18 @@ export default function Dashboard() {
                     <td className="px-6 py-4 text-slate-600">{row.provinsi || row.city}</td>
                     <td className="px-6 py-4"><span className="inline-block px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium border border-slate-200">{row.role}</span></td>
                     <td className="px-6 py-4 text-center">{row.doc_kklp === 'Ya' ? <span className="inline-block px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold">Ya</span> : <span className="inline-block px-3 py-1 bg-slate-100 text-slate-500 rounded-lg text-xs font-bold">Tidak</span>}</td>
-                    <td className="px-6 py-4 text-center text-slate-500 text-xs">{new Date(row.created_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'})}</td>
+                    <td className="px-6 py-4 text-center text-slate-500 text-xs">
+                      <div className="flex flex-col items-center gap-1">
+                        <span title={`Waktu Submit: ${new Date(row.created_at).toLocaleString('id-ID')}`}>
+                          {new Date(row.updated_at || row.created_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'})}
+                        </span>
+                        {(row.updated_at || (row.edit_history && row.edit_history.length > 0)) && (
+                          <span className="text-[9px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-200">
+                            Diedit
+                          </span>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 )) : (<tr><td colSpan="5" className="px-6 py-12 text-center text-slate-400 font-medium">Tidak ada data ditemukan</td></tr>)}
               </tbody>
