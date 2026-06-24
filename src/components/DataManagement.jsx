@@ -345,7 +345,7 @@ export default function DataManagement() {
       XLSX.writeFile(workbook, `Data_Survey_KKLP_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (err) {
       console.error(err);
-      alert('Gagal membuat file Excel.');
+      alert('Gagal membuat file Excel: ' + (err.message || err));
     }
   };
 

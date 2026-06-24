@@ -54,9 +54,12 @@ export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
 
     return {
       prbStats: {
-        totalJumlah,
-        totalRutin,
-        totalTidakBerkunjung,
+        totalJumlah: Math.round(totalJumlah),
+        totalRutin: Math.round(totalRutin),
+        totalTidakBerkunjung: Math.round(totalTidakBerkunjung),
+        avgJumlah: filteredData.length > 0 ? Math.round(totalJumlah / filteredData.length) : 0,
+        avgRutin: filteredData.length > 0 ? Math.round(totalRutin / filteredData.length) : 0,
+        avgTidakBerkunjung: filteredData.length > 0 ? Math.round(totalTidakBerkunjung / filteredData.length) : 0,
         avgRujukan: countRujukan > 0 ? Math.round(totalRujukan / countRujukan) : 0
       },
       kepatuhanRate: kepatuhan,
@@ -111,9 +114,9 @@ export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Peserta PRB Aktif" value={prbStats.totalJumlah} icon={Users} colorClass="bg-blue-500 text-blue-600 bg-blue-100" />
-        <StatCard title="Peserta Rutin Berkunjung" value={prbStats.totalRutin} subtitle="Dalam 3 bulan terakhir" icon={Activity} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
-        <StatCard title="Peserta Tidak Berkunjung" value={prbStats.totalTidakBerkunjung} subtitle="> 3 bulan terakhir" icon={AlertTriangle} colorClass="bg-rose-500 text-rose-600 bg-rose-100" />
+        <StatCard title="Total Peserta PRB Aktif" value={prbStats.totalJumlah} subtitle={`Rata-rata: ${prbStats.avgJumlah} per FKTP`} icon={Users} colorClass="bg-blue-500 text-blue-600 bg-blue-100" />
+        <StatCard title="Peserta Rutin Berkunjung" value={prbStats.totalRutin} subtitle={`Rata-rata: ${prbStats.avgRutin} per FKTP (dalam 3 bln)`} icon={Activity} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
+        <StatCard title="Peserta Tidak Berkunjung" value={prbStats.totalTidakBerkunjung} subtitle={`Rata-rata: ${prbStats.avgTidakBerkunjung} per FKTP (> 3 bln)`} icon={AlertTriangle} colorClass="bg-rose-500 text-rose-600 bg-rose-100" />
         <StatCard title="Rata-rata Rujukan FKRTL" value={prbStats.avgRujukan} subtitle="Per bulan per FKTP" icon={FileText} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
       </div>
 
