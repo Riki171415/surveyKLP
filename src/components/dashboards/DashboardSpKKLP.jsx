@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
 } from 'recharts';
-import { Stethoscope, Award, FileSearch, CheckCircle } from 'lucide-react';
+import { Stethoscope, Award, FileSearch, CheckCircle, Activity, HeartPulse } from 'lucide-react';
 
 const relevansiItems = [
   "Pengelolaan Multimorbiditas",
@@ -34,6 +34,13 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
 
     const relScores = relevansiItems.map(r => ({ name: r, totalScore: 0, count: 0 }));
     const dirujukCounts = {};
+    const diagnosisCounts = {};
+    const tindakanCounts = {};
+
+    const extractTags = (text) => {
+      if (!text) return [];
+      return text.split(/[,;\n]+/).map(s => s.trim()).filter(s => s.length > 2);
+    };
 
     filteredData.forEach(row => {
       if (row.doc_kklp === 'Ya') spkklpYa++; else spkklpTidak++;
@@ -56,6 +63,21 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
           dirujukCounts[name] = (dirujukCounts[name] || 0) + 1;
         }
       });
+
+      if (row.spkklp_poli?.diagnosis) {
+        extractTags(row.spkklp_poli.diagnosis).forEach(tag => {
+          // Normalize capitalization for grouping (e.g. "hipertensi" and "Hipertensi")
+          const normalized = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
+          diagnosisCounts[normalized] = (diagnosisCounts[normalized] || 0) + 1;
+        });
+      }
+
+      if (row.spkklp_poli?.tindakan) {
+        extractTags(row.spkklp_poli.tindakan).forEach(tag => {
+          const normalized = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
+          tindakanCounts[normalized] = (tindakanCounts[normalized] || 0) + 1;
+        });
+      }
     });
 
     const relData = relScores.map(s => ({
@@ -68,12 +90,30 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
       value: dirujukCounts[k]
     })).filter(d => isNaN(d.name) && d.name !== 'undefined').sort((a,b) => b.value - a.value).slice(0, 5);
 
+    const diagData = Object.keys(diagnosisCounts).map(k => ({ name: k, value: diagnosisCounts[k] }))
+      .sort((a,b) => b.value - a.value).slice(0, 10);
+
+    const tindData = Object.keys(tindakanCounts).map(k => ({ name: k, value: tindakanCounts[k] }))
+      .sort((a,b) => b.value - a.value).slice(0, 10);
+
+    let analysisText = "Belum ada data diagnosis atau tindakan yang diinput oleh responden.";
+    if (diagData.length > 0 && tindData.length > 0) {
+      analysisText = `Berdasarkan data input terbaru, mayoritas Sp.KKLP menangani kasus dengan diagnosis utama **${diagData[0].name}** (ditemukan di ${diagData[0].value} FKTP)${diagData[1] ? ` dan **${diagData[1].name}** (${diagData[1].value} FKTP)` : ''}. ` + 
+      `Hal ini sejalan dengan prosedur atau tindakan terbanyak yang dilakukan yaitu **${tindData[0].name}** (${tindData[0].value} pelaporan). ` +
+      `Fokus layanan Sp.KKLP tampaknya sangat relevan dengan kebutuhan pengendalian penyakit-penyakit kronis dan komprehensif di tingkat primer, memperkuat peran mereka sebagai *gatekeeper* utama sebelum dirujuk ke FKRTL.`;
+    } else if (diagData.length > 0) {
+      analysisText = `Diagnosis utama yang paling sering dilaporkan adalah **${diagData[0].name}**. Menunggu data tindakan untuk analisis lebih komprehensif.`;
+    }
+
     return {
       docStats: {
         spkklpYa, spkklpTidak, totalDocUmum, totalDocGigi
       },
       relevansiData: relData,
       dirujukData: rjkData,
+      diagData,
+      tindData,
+      analysisText,
       topRelevansi: relData.slice(0, 3)
     };
   }, [filteredData]);
@@ -157,6 +197,48 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
               </BarChart>
             </ResponsiveContainer>
           </div>
+        </div>
+
+        {/* Diagnosis & Tindakan */}
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-rose-500" /> Top 10 Diagnosis Sp.KKLP</h3>
+          <div className="h-72">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <BarChart data={diagData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={120} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} Kasus`, 'Frekuensi']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="value" name="Frekuensi" fill="#f43f5e" radius={[0, 6, 6, 0]} barSize={24}>
+                  <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><HeartPulse className="w-5 h-5 mr-2 text-indigo-500" /> Top 10 Tindakan/Prosedur</h3>
+          <div className="h-72">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <BarChart data={tindData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={120} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} Tindakan`, 'Frekuensi']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="value" name="Frekuensi" fill="#6366f1" radius={[0, 6, 6, 0]} barSize={24}>
+                  <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className={`bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-2xl border border-indigo-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <h3 className="text-lg font-bold text-indigo-900 mb-3 flex items-center">
+            <Stethoscope className="w-5 h-5 mr-2 text-indigo-600" /> Analisis Eksekutif: Diagnosis & Tindakan
+          </h3>
+          <p className="text-indigo-800 leading-relaxed text-sm md:text-base" dangerouslySetInnerHTML={{ __html: analysisText.replace(/\*\*(.*?)\*\*/g, '<span class="font-bold text-indigo-900">$1</span>').replace(/\*(.*?)\*/g, '<em class="italic">$1</em>') }}></p>
         </div>
       </div>
     </div>
