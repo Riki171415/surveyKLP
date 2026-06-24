@@ -121,6 +121,30 @@ export default function DataManagement() {
     finally { setLoading(false); }
   };
 
+  const toggleEditAccess = async (id, currentStatus) => {
+    try {
+      const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
+      if (useSupabase) {
+        const { error } = await supabase.from('surveys').update({ is_editable: !currentStatus }).eq('id', id);
+        if (error) throw error;
+      } else {
+        const response = await fetch(`/api/surveys/${id}/toggle-edit`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_editable: !currentStatus })
+        });
+        const resData = await response.json();
+        if (resData.error) throw new Error(resData.error.message || 'Error');
+      }
+      setSurveys(prev => prev.map(s => s.id === id ? { ...s, is_editable: !currentStatus } : s));
+      if (selected && selected.id === id) {
+        setSelected(prev => ({ ...prev, is_editable: !currentStatus }));
+      }
+    } catch (err) {
+      alert('Gagal mengubah akses edit: ' + err.message);
+    }
+  };
+
   const deleteSurvey = async (id, name) => {
     if (!window.confirm(`Hapus data survey dari "${name}"?`)) return;
     try {
