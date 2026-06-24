@@ -171,8 +171,6 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
     return results;
   }, [filteredData]);
 
-  }, [filteredData]);
-
   // Extract Keywords for Word Cloud and AI Insight
   const { topWords, wordCloudData } = useMemo(() => {
     const wordCounts = {};
