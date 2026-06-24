@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ChevronDown, ChevronUp, CheckCircle, XCircle, MinusCircle, AlertCircle, Printer } from 'lucide-react';
 import {
   penyakitPasienBulanan, layananDirujukItems, layananBelumBerjalanItems,
@@ -179,7 +180,7 @@ export default function SurveyDetailModal({ selected, onClose }) {
       }, 100);
     };
 
-    return (
+    return createPortal(
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm print:block print:absolute print:inset-0 print:p-0 print:bg-transparent print:backdrop-blur-none print-modal-content">
         <div className="bg-white w-full max-w-3xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in print:shadow-none print:max-w-none print:w-full print:max-h-none print:h-auto print:overflow-visible print:rounded-none">
 
@@ -625,11 +626,12 @@ export default function SurveyDetailModal({ selected, onClose }) {
 
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   } catch (error) {
     console.error('SurveyDetailModal Render Error:', error);
-    return (
+    return createPortal(
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
         <div className="bg-white w-full max-w-2xl rounded-2xl p-6 shadow-2xl relative">
           <button onClick={onClose} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 rounded-full">
@@ -641,7 +643,8 @@ export default function SurveyDetailModal({ selected, onClose }) {
             {error.message}<br /><br />{error.stack}
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 }
