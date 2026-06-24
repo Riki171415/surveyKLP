@@ -233,7 +233,13 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
         setSearchError('Data tidak ditemukan dengan Kode Faskes tersebut.');
         setSearchResults([]);
       } else {
-        setSearchResults(data);
+        const editableData = data.filter(d => d.is_editable === true);
+        if (editableData.length === 0) {
+          setSearchError('Data Anda terkunci 🔒. Silakan hubungi Admin untuk meminta akses pengeditan.');
+          setSearchResults([]);
+        } else {
+          setSearchResults(editableData);
+        }
       }
     } catch (err) {
       setSearchError('Terjadi kesalahan saat mencari data.');

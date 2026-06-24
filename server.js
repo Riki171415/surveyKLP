@@ -14,6 +14,20 @@ const pool = new pg.Pool({
   // Di aaPanel/VPS PostgreSQL, Anda bisa memberikan URL misal: postgres://user:pass@localhost:5432/dbname
 });
 
+// Initialize new columns
+const initDB = async () => {
+  try {
+    await pool.query('ALTER TABLE surveys ADD COLUMN IF NOT EXISTS is_editable BOOLEAN DEFAULT false');
+    await pool.query("ALTER TABLE surveys ADD COLUMN IF NOT EXISTS edit_history JSONB DEFAULT '[]'::jsonb");
+    await pool.query('ALTER TABLE surveys ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE');
+    console.log('Database schema verified: edit_history, updated_at, is_editable are ready.');
+  } catch (err) {
+    console.log('Skipping schema init: ', err.message);
+  }
+};
+initDB();
+
+
 // GET /api/surveys
 app.get('/api/surveys', async (req, res) => {
   try {
@@ -65,6 +79,18 @@ app.post('/api/surveys', async (req, res) => {
     res.json({ data: rows, error: null });
   } catch (err) {
     console.error('Insert error:', err);
+    res.status(500).json({ data: null, error: { message: err.message } });
+  }
+});
+
+// PUT /api/surveys/:id/toggle-edit
+app.put('/api/surveys/:id/toggle-edit', async (req, res) => {
+  const { id } = req.params;
+  const { is_editable } = req.body;
+  try {
+    const { rows } = await pool.query('UPDATE surveys SET is_editable = $1 WHERE id = $2 RETURNING *', [is_editable, id]);
+    res.json({ data: rows, error: null });
+  } catch (err) {
     res.status(500).json({ data: null, error: { message: err.message } });
   }
 });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Search, Edit, Trash2, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Search, Edit, Trash2, X, ChevronLeft, ChevronRight, Lock, Unlock } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
 import { useAuth } from './AuthContext';
@@ -429,6 +429,13 @@ export default function DataManagement() {
                     </div>
                     {user?.role === 'admin' && (
                       <div className="flex gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity md:opacity-100" onClick={e => e.stopPropagation()}>
+                        <button 
+                          onClick={() => toggleEditAccess(row.id, row.is_editable)} 
+                          className={`p-2 rounded-lg transition-colors shadow-sm ${row.is_editable ? 'bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white' : 'bg-slate-50 text-slate-400 hover:bg-slate-500 hover:text-white'}`}
+                          title={row.is_editable ? "Kunci Akses Edit" : "Buka Akses Edit"}
+                        >
+                          {row.is_editable ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                        </button>
                         <button onClick={() => deleteSurvey(row.id, row.fktp_name)} className="p-2 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white rounded-lg transition-colors shadow-sm" title="Hapus">
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -472,6 +479,12 @@ export default function DataManagement() {
             {/* Tombol aksi admin tampil di atas modal */}
             {user?.role === 'admin' && (
               <div className="fixed bottom-6 right-6 z-[200] flex gap-3">
+                <button
+                  onClick={() => toggleEditAccess(selected.id, selected.is_editable)}
+                  className={`flex items-center gap-2 px-4 py-2.5 text-white text-sm font-bold rounded-xl shadow-xl transition-all hover:-translate-y-0.5 ${selected.is_editable ? 'bg-amber-600 hover:bg-amber-700' : 'bg-slate-600 hover:bg-slate-700'}`}
+                >
+                  {selected.is_editable ? <><Unlock className="w-4 h-4" /> Kunci Akses</> : <><Lock className="w-4 h-4" /> Buka Akses Edit</>}
+                </button>
                 <button
                   onClick={() => { deleteSurvey(selected.id, selected.fktp_name); setSelected(null); }}
                   className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-xl shadow-xl transition-all hover:-translate-y-0.5"
