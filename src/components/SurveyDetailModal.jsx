@@ -360,6 +360,19 @@ export default function SurveyDetailModal({ selected, onClose }) {
                       { label: 'Contoh Layanan Holistik', value: selected.dpm?.gambaran?.contohLayananHolistik, wide: true },
                     ]} />
                   </div>
+
+                  {/* F. Informasi Poli KKLP & Pelayanan */}
+                  <div className="pt-2 border-t border-slate-100">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">F. Informasi Poli KKLP & Pelayanan</p>
+                    <InfoGrid items={[
+                      { label: 'Sejak kapan beroperasi', value: selected.dpm?.poliKklp?.sejakKapanBeroperasi },
+                      { label: 'Rata-rata Kunjungan/Bulan', value: selected.dpm?.poliKklp?.rataRataKunjungan },
+                      { label: 'Diagnosis ditangani Sp.KKLP', value: selected.dpm?.poliKklp?.namaDiagnosis, wide: true },
+                      { label: 'Tindakan yang dilakukan Sp.KKLP', value: selected.dpm?.poliKklp?.tindakanProsedur, wide: true },
+                      { label: 'Luaran Pelayanan', value: Array.isArray(selected.dpm?.poliKklp?.luaranPelayanan) ? selected.dpm.poliKklp.luaranPelayanan.join(', ') : selected.dpm?.poliKklp?.luaranPelayanan, wide: true },
+                      { label: 'Indikasi Rujukan', value: selected.dpm?.poliKklp?.indikasiRujukan, wide: true },
+                    ]} />
+                  </div>
                 </div>
               </SectionBlock>
             )}
