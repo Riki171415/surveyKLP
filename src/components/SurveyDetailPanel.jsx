@@ -416,7 +416,7 @@ export default function DataManagement() {
                   <div
                     key={row.id}
                     onClick={() => setSelected(selected?.id === row.id ? null : row)}
-                    className={`flex items-center gap-3 px-4 py-3.5 cursor-pointer transition-all duration-200
+                    className={`group flex items-center gap-3 px-4 py-3.5 cursor-pointer transition-all duration-200
                       ${selected?.id === row.id ? 'bg-primary-50/50 border-l-4 border-l-primary-500 shadow-sm' : 'border-l-4 border-l-transparent hover:bg-slate-50 hover:shadow-sm hover:border-l-slate-300'}`}
                   >
                     <div className="flex-1 min-w-0">
