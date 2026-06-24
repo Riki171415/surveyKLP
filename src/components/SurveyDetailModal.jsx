@@ -307,6 +307,7 @@ export default function SurveyDetailModal({ selected, onClose }) {
             {/* ═══ B. DATA DPM ═══ */}
             {isDpm && selected.dpm && (
               <SectionBlock title="B. Data Dokter Praktik Mandiri" color="bg-violet-600">
+                <div className="space-y-4">
                   {/* A. Karakteristik Praktik */}
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">A. Karakteristik Praktik</p>
                   <InfoGrid items={[
