@@ -66,8 +66,17 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
 
       if (row.spkklp_poli?.diagnosis) {
         extractTags(row.spkklp_poli.diagnosis).forEach(tag => {
-          // Normalize capitalization for grouping (e.g. "hipertensi" and "Hipertensi")
-          const normalized = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
+          let normalized = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
+          const lower = normalized.toLowerCase();
+          
+          if (lower.includes('i10') || lower.includes('hipertensi esensial')) normalized = 'Hipertensi Esensial (I10)';
+          else if (lower.includes('e11') || lower.includes('diabetes')) normalized = 'Diabetes Mellitus Tipe 2 (E11)';
+          else if (lower.includes('a15') || lower.includes('a16') || lower.includes('tuberkulosis')) normalized = 'Tuberkulosis (A15-A16)';
+          else if (lower.includes('h10') || lower.includes('konjungtivitis')) normalized = 'Konjungtivitis (H10)';
+          else if (lower.includes('h65') || lower.includes('h66') || lower.includes('otitis')) normalized = 'Otitis Media Akut (H65-H66)';
+          else if (lower.includes('ispa') || lower.includes('j06')) normalized = 'ISPA (J06.9)';
+          else if (lower.includes('k30') || lower.includes('dispepsia')) normalized = 'Dispepsia (K30)';
+
           diagnosisCounts[normalized] = (diagnosisCounts[normalized] || 0) + 1;
         });
       }
