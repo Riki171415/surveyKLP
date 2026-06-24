@@ -68,9 +68,10 @@ export default function DashboardProfil({ filteredData, COLORS, isPrinting }) {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         <StatCard title="Total Responden" value={totalResponden} icon={Users} colorClass="bg-blue-500 text-blue-600 bg-blue-100" />
         <StatCard title="Total Puskesmas" value={fktpTypeData.find(d => d.name === 'Puskesmas')?.value || 0} icon={Building} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
+        <StatCard title="Total Klinik" value={fktpTypeData.find(d => d.name === 'Klinik')?.value || 0} icon={Building} colorClass="bg-rose-500 text-rose-600 bg-rose-100" />
         <StatCard title="Dokter Praktik Mandiri" value={fktpTypeData.find(d => d.name === 'Dokter Praktik Mandiri')?.value || 0} icon={Stethoscope} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
         <StatCard title="FKTP dengan Sp.KKLP" value={spkklpCount || 0} subtitle={`${totalResponden > 0 ? Math.round((spkklpCount / totalResponden) * 100) : 0}% dari total`} icon={Stethoscope} colorClass="bg-primary-500 text-primary-600 bg-primary-100" />
       </div>
