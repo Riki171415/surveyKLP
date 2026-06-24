@@ -103,17 +103,42 @@ app.put('/api/surveys/:id', async (req, res) => {
   if (!payload || Object.keys(payload).length === 0) {
     return res.status(400).json({ data: null, error: { message: 'Payload is empty' } });
   }
-
-  const keys = Object.keys(payload);
-  const values = Object.values(payload);
-  
-  // SQL Injection Prevention: Menggunakan Parameterized Queries
-  const setString = keys.map((key, i) => `${key} = $${i + 1}`).join(', ');
-  values.push(id);
-  
-  const query = `UPDATE surveys SET ${setString} WHERE id = $${values.length} RETURNING *`;
-  
   try {
+    // Fetch existing row for history
+    const { rows: existingRows } = await pool.query('SELECT * FROM surveys WHERE id = $1', [id]);
+    if (existingRows.length > 0) {
+      const existingRow = existingRows[0];
+      const previousData = { ...existingRow };
+      delete previousData.id;
+      delete previousData.created_at;
+      delete previousData.updated_at;
+      delete previousData.edit_history;
+      
+      const newHistoryEntry = {
+        edited_at: new Date().toISOString(),
+        previous_data: previousData
+      };
+      
+      let currentHistory = existingRow.edit_history || [];
+      if (typeof currentHistory === 'string') {
+        try { currentHistory = JSON.parse(currentHistory); } catch(e) { currentHistory = []; }
+      }
+      currentHistory.push(newHistoryEntry);
+      
+      payload.edit_history = JSON.stringify(currentHistory);
+      payload.updated_at = new Date().toISOString();
+      payload.is_editable = false; // Auto-lock
+    }
+
+    const keys = Object.keys(payload);
+    const values = Object.values(payload);
+    
+    // SQL Injection Prevention: Menggunakan Parameterized Queries
+    const setString = keys.map((key, i) => `${key} = $${i + 1}`).join(', ');
+    values.push(id);
+    
+    const query = `UPDATE surveys SET ${setString} WHERE id = $${values.length} RETURNING *`;
+    
     const { rows } = await pool.query(query, values);
     res.json({ data: rows, error: null });
   } catch (err) {
