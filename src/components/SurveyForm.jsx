@@ -210,7 +210,23 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     setIsSearching(true);
     setSearchError('');
     try {
-      const { data, error } = await supabase.from('surveys').select('*').eq('kode_faskes', editSearchTerm);
+      const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
+      let data, error;
+      
+      if (useSupabase) {
+        const result = await supabase.from('surveys').select('*').eq('kode_faskes', editSearchTerm);
+        data = result.data;
+        error = result.error;
+      } else {
+        const response = await fetch('/api/surveys');
+        const resData = await response.json();
+        if (resData.error) {
+          error = resData.error;
+        } else {
+          data = resData.data.filter(item => item.kode_faskes === editSearchTerm);
+        }
+      }
+
       if (error) throw error;
       if (!data || data.length === 0) {
         setSearchError('Data tidak ditemukan dengan Kode Faskes tersebut.');
