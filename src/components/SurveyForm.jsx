@@ -214,7 +214,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
       let data, error;
       
       if (useSupabase) {
-        const result = await supabase.from('surveys').select('*').eq('kode_faskes', editSearchTerm);
+        const result = await supabase.from('surveys').select('*').ilike('kode_faskes', editSearchTerm);
         data = result.data;
         error = result.error;
       } else {
@@ -223,7 +223,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
         if (resData.error) {
           error = resData.error;
         } else {
-          data = resData.data.filter(item => item.kode_faskes === editSearchTerm);
+          const lowerTerm = editSearchTerm.toLowerCase();
+          data = resData.data.filter(item => item.kode_faskes && item.kode_faskes.toLowerCase() === lowerTerm);
         }
       }
 
