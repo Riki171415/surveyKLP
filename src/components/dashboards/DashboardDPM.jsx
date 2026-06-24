@@ -86,7 +86,20 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
         gam.kegiatanDilakukan.forEach(t => tindakanCount[t] = (tindakanCount[t] || 0) + 1);
       }
 
-      if (row.wawancara) wawancaraList.push(row.wawancara);
+      if (row.wawancara) {
+        for (let idx = 1; idx <= 8; idx++) {
+          const key = `w${idx}`;
+          if (row.wawancara[key]) {
+            wawancaraList.push({
+              faskes: row.fktp_name || 'DPM',
+              role: row.role || 'DPM',
+              provinsi: row.provinsi || 'Lainnya',
+              question: `Pertanyaan G${idx}`,
+              answer: row.wawancara[key]
+            });
+          }
+        }
+      }
 
       if (kon.sistemPencatatan) rekamMedisCount[kon.sistemPencatatan] = (rekamMedisCount[kon.sistemPencatatan] || 0) + 1;
       if (pen.menanganiKeluargaSama) keluargaSamaCount[pen.menanganiKeluargaSama] = (keluargaSamaCount[pen.menanganiKeluargaSama] || 0) + 1;
