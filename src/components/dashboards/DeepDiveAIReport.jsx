@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Sparkles, BarChart2, Filter, FileText, Check, AlertCircle, RefreshCw, Layers, Users, Zap, Target, Activity, Key, Cpu, X } from 'lucide-react';
 
 export default function DeepDiveAIReport({ rawData }) {
@@ -169,8 +170,8 @@ ${JSON.stringify(answers)}
         <Sparkles className="w-64 h-64 text-indigo-600" />
       </div>
 
-      {showKeyModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      {showKeyModal && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
             <button onClick={() => setShowKeyModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><X className="w-5 h-5"/></button>
             <div className="flex items-center gap-3 mb-4">
@@ -181,7 +182,8 @@ ${JSON.stringify(answers)}
             <input type="password" value={tempKey} onChange={e => setTempKey(e.target.value)} placeholder="AIzaSy..." className="w-full border border-slate-200 rounded-xl px-4 py-2 mb-4 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
             <button onClick={handleSaveKey} className="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl hover:bg-indigo-700 transition">Simpan & Mulai Analisis</button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       
       <div className="relative z-10">
