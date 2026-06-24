@@ -6,10 +6,10 @@ export default function DeepDiveAIReport({ rawData }) {
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [isGeneratingGemini, setIsGeneratingGemini] = useState(false);
   const [geminiApiKey, setGeminiApiKey] = useState(localStorage.getItem('GEMINI_API_KEY') || '');
-  const [geminiModel, setGeminiModel] = useState(localStorage.getItem('GEMINI_MODEL') || 'gemini-3.5-pro');
+  const [geminiModel, setGeminiModel] = useState(localStorage.getItem('GEMINI_MODEL') || 'gemini-3.5-flash');
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
-  const [tempModel, setTempModel] = useState('gemini-3.5-pro');
+  const [tempModel, setTempModel] = useState('gemini-3.5-flash');
   const [geminiError, setGeminiError] = useState('');
   const [geminiReport, setGeminiReport] = useState(null);
 
