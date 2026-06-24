@@ -10,12 +10,12 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
     return filteredData.filter(row => row.role === 'Dokter Praktik Mandiri' || row.dpm);
   }, [filteredData]);
 
-  const { dpmStats, lamaPraktikData, bebanPasienData, rekamMedisData, kunjunganData, aspekData, luaranPelayananData } = useMemo(() => {
+  const { dpmStats, lamaPraktikData, bebanPasienData, rekamMedisData, keluargaSamaData, aspekData, luaranPelayananData } = useMemo(() => {
     const lamaCount = {};
     const bebanCount = {};
     const luaranCount = {};
     const rekamMedisCount = { 'Ya': 0, 'Tidak': 0 };
-    const kunjunganCount = { 'Ya (Melakukan)': 0, 'Tidak': 0 };
+    const keluargaSamaCount = {};
     const aspekCount = {};
 
     let totalLayanan = 0;
@@ -29,14 +29,17 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
       const poli = dpm.poliKklp || {};
 
       if (kar.lamaPraktik) lamaCount[kar.lamaPraktik] = (lamaCount[kar.lamaPraktik] || 0) + 1;
-      if (kar.kunjunganPerHari) bebanCount[kar.kunjunganPerHari] = (bebanCount[kar.kunjunganPerHari] || 0) + 1;
+      if (kar.jumlahKunjungan) bebanCount[kar.jumlahKunjungan] = (bebanCount[kar.jumlahKunjungan] || 0) + 1;
 
-      // Rekam Medis (dari Kontinuitas: sistemPencatatan)
-      if (kon.sistemPencatatan) rekamMedisCount[kon.sistemPencatatan]++;
+      // Rekam Medis Jangka Panjang
+      if (kon.sistemPencatatan) {
+        rekamMedisCount[kon.sistemPencatatan] = (rekamMedisCount[kon.sistemPencatatan] || 0) + 1;
+      }
 
-      // Kunjungan Keluarga (dari Pendekatan: melakukanKunjunganRumah)
-      if (pen.melakukanKunjunganRumah === 'Ya') kunjunganCount['Ya (Melakukan)']++;
-      else if (pen.melakukanKunjunganRumah === 'Tidak') kunjunganCount['Tidak']++;
+      // Menangani Keluarga yang sama
+      if (pen.menanganiKeluargaSama) {
+        keluargaSamaCount[pen.menanganiKeluargaSama] = (keluargaSamaCount[pen.menanganiKeluargaSama] || 0) + 1;
+      }
 
       // Aspek Digali
       if (Array.isArray(pen.aspekDigali)) {
@@ -58,7 +61,7 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
         });
       }
 
-      // Luaran Pelayanan
+      // Luaran Pelayanan Sp.KKLP
       if (Array.isArray(poli.luaranPelayanan)) {
         poli.luaranPelayanan.forEach(l => {
           luaranCount[l] = (luaranCount[l] || 0) + 1;
@@ -75,14 +78,11 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
       },
       lamaPraktikData: Object.keys(lamaCount).map(k => ({ name: k, value: lamaCount[k] })).sort((a,b) => b.value - a.value),
       bebanPasienData: Object.keys(bebanCount).map(k => ({ name: k, value: bebanCount[k] })).sort((a,b) => b.value - a.value),
-      rekamMedisData: rekamMedisCount['Ya'] || rekamMedisCount['Tidak'] ? [
-        { name: 'Menerapkan RM Terintegrasi', value: rekamMedisCount['Ya'] },
-        { name: 'Belum Menerapkan', value: rekamMedisCount['Tidak'] }
+      rekamMedisData: (rekamMedisCount['Ya'] || rekamMedisCount['Tidak']) ? [
+        { name: 'Sistem Terintegrasi', value: rekamMedisCount['Ya'] || 0 },
+        { name: 'Belum Ada Sistem', value: rekamMedisCount['Tidak'] || 0 }
       ].filter(d => d.value > 0) : [{ name: 'Belum Ada Data', value: 1 }],
-      kunjunganData: kunjunganCount['Ya (Melakukan)'] || kunjunganCount['Tidak'] ? [
-        { name: 'Melakukan Kunjungan', value: kunjunganCount['Ya (Melakukan)'] },
-        { name: 'Tidak Melakukan', value: kunjunganCount['Tidak'] }
-      ].filter(d => d.value > 0) : [{ name: 'Belum Ada Data', value: 1 }],
+      keluargaSamaData: Object.keys(keluargaSamaCount).length > 0 ? Object.keys(keluargaSamaCount).map(k => ({ name: k, value: keluargaSamaCount[k] })).sort((a,b) => b.value - a.value) : [{ name: 'Belum Ada Data', value: 1 }],
       aspekData: aspekArr.slice(0, 7), // Top 7 Kegiatan/Aspek
       luaranPelayananData: Object.keys(luaranCount).map(k => ({ name: k, value: luaranCount[k] })).sort((a,b) => b.value - a.value)
     };
@@ -125,13 +125,13 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Users className="w-5 h-5 mr-2 text-blue-600" /> Proporsi Kunjungan Keluarga</h3>
+          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Users className="w-5 h-5 mr-2 text-blue-600" /> Menangani Keluarga yang Sama</h3>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <PieChart>
-                <Pie data={kunjunganData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ name, percent }) => name !== 'Belum Ada Data' && percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
-                  {kunjunganData.map((entry, index) => (
-                    <Cell key={index} fill={entry.name === 'Belum Ada Data' ? '#e2e8f0' : ['#10b981', '#f43f5e'][index % 2]} />
+                <Pie data={keluargaSamaData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ name, percent }) => name !== 'Belum Ada Data' && percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
+                  {keluargaSamaData.map((entry, index) => (
+                    <Cell key={index} fill={entry.name === 'Belum Ada Data' ? '#e2e8f0' : ['#3b82f6', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6'][index % 5]} />
                   ))}
                 </Pie>
                 <RechartsTooltip formatter={(value, name) => name === 'Belum Ada Data' ? ['-', 'Data Kosong'] : [`${value} DPM`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
