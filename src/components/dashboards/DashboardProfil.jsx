@@ -97,73 +97,73 @@ export default function DashboardProfil({ filteredData, COLORS, isPrinting }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Building className="w-5 h-5 mr-2 text-primary-600" /> Proporsi Responden per FKTP</h3>
             {!isPrinting && <ExportButton fileName="Proporsi Responden per FKTP" />}
           </div>
-          <div className="h-72">
-            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+          <div className="flex-1 min-h-[300px]">
+            <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <PieChart>
                 <Pie data={fktpTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
                   {fktpTypeData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
                 <RechartsTooltip formatter={(value) => [`${value} Responden`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                <Legend verticalAlign="bottom" wrapperStyle={{ fontSize: '12px', paddingTop: '15px' }} iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Building className="w-5 h-5 mr-2 text-indigo-600" /> Proporsi FKTP Unik</h3>
             {!isPrinting && <ExportButton fileName="Proporsi FKTP Unik" />}
           </div>
-          <div className="h-72">
-            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+          <div className="flex-1 min-h-[300px]">
+            <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <PieChart>
                 <Pie data={uniqueFktpTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
                   {uniqueFktpTypeData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />)}
                 </Pie>
                 <RechartsTooltip formatter={(value) => [`${value} Institusi`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                <Legend verticalAlign="bottom" wrapperStyle={{ fontSize: '12px', paddingTop: '15px' }} iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Users className="w-5 h-5 mr-2 text-primary-600" /> Proporsi Jabatan Responden</h3>
             {!isPrinting && <ExportButton fileName="Proporsi Jabatan Responden" />}
           </div>
-          <div className="h-72">
-            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+          <div className="flex-1 min-h-[300px]">
+            <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <PieChart>
                 <Pie data={roleChartData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
                   {roleChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
                 <RechartsTooltip formatter={(value) => [`${value} Responden`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                <Legend verticalAlign="bottom" wrapperStyle={{ fontSize: '11px', paddingTop: '15px', paddingBottom: '10px' }} iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 flex flex-col ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Map className="w-5 h-5 mr-2 text-primary-600" /> 10 Provinsi Terbanyak</h3>
             {!isPrinting && <ExportButton fileName="10 Provinsi Terbanyak" />}
           </div>
-          <div className="h-80">
-            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+          <div className="flex-1 min-h-[350px]">
+            <ResponsiveContainer width="100%" height="100%" minHeight={350}>
               <BarChart data={regionalData} margin={{ top: 20, right: 30, left: 0, bottom: 50 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} angle={-45} textAnchor="end" />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
                 <RechartsTooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Bar dataKey="value" name="Jumlah Responden" fill="#00857A" radius={[6, 6, 0, 0]} maxBarSize={50}>
+                <Bar dataKey="value" name="Jumlah Responden" fill="#00857A" radius={[6, 6, 0, 0]} maxBarSize={60}>
                   <LabelList dataKey="value" position="top" fill="#475569" fontSize={12} fontWeight={600} />
                 </Bar>
               </BarChart>
