@@ -55,11 +55,13 @@ function InfoGrid({ items }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       {items.map(({ label, value, wide }, i) => {
-        if (value === null || value === undefined || value === '') return null;
+        const isEmpty = value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0);
         return (
           <div key={i} className={`bg-slate-50 border border-slate-100 rounded-xl p-3 ${wide ? 'col-span-2' : ''}`}>
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">{label}</p>
-            <p className="text-sm font-semibold text-slate-800 leading-snug break-words">{value}</p>
+            <p className={`text-sm font-semibold leading-snug break-words ${isEmpty ? 'text-slate-400 italic font-normal' : 'text-slate-800'}`}>
+              {isEmpty ? 'Tidak diisi' : value}
+            </p>
           </div>
         );
       })}
