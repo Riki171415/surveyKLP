@@ -26,7 +26,7 @@ const layananDirujukItems = [
 ];
 
 export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
-  const { docStats, relevansiData, dirujukData, topRelevansi } = useMemo(() => {
+  const { docStats, relevansiData, dirujukData, topRelevansi, diagData, tindData, analysisText } = useMemo(() => {
     let spkklpYa = 0;
     let spkklpTidak = 0;
     let totalDocUmum = 0;
