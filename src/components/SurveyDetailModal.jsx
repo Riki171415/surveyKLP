@@ -305,63 +305,59 @@ export default function SurveyDetailModal({ selected, onClose }) {
             {/* ═══ B. DATA DPM ═══ */}
             {isDpm && selected.dpm && (
               <SectionBlock title="B. Data Dokter Praktik Mandiri" color="bg-violet-600">
-                <div className="space-y-4">
-                  {selected.dpm.karakteristik && (
-                    <>
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">A. Karakteristik Praktik</p>
-                      <InfoGrid items={[
-                        { label: 'Lama Praktik', value: selected.dpm.karakteristik.lamaPraktik },
-                        { label: 'Rata-rata Kunjungan', value: selected.dpm.karakteristik.jumlahKunjungan },
-                        { label: 'Mayoritas Kelompok Umur', value: selected.dpm.karakteristik.kelompokUmur },
-                        { label: 'Status Kepesertaan', value: selected.dpm.karakteristik.statusPeserta },
-                      ]} />
-                    </>
-                  )}
-                  {selected.dpm.kasus && (
-                    <div className="pt-2 border-t border-slate-100">
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">B. Gambaran Kasus</p>
-                      <InfoGrid items={[
-                        { label: 'Masalah Kesehatan Terbanyak', value: Array.isArray(selected.dpm.kasus.masalahKesehatan) ? selected.dpm.kasus.masalahKesehatan.join(', ') : selected.dpm.kasus.masalahKesehatan, wide: true },
-                        { label: 'Proporsi Kasus Kronis', value: selected.dpm.kasus.persenKronis },
-                        { label: 'Proporsi Pasien Kontrol', value: selected.dpm.kasus.persenKontrol },
-                        { label: 'Alasan Rujukan', value: selected.dpm.kasus.alasanRujukan, wide: true },
-                      ]} />
-                    </div>
-                  )}
-                  {selected.dpm.pendekatan && (
-                    <div className="pt-2 border-t border-slate-100">
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">C. Pendekatan Kedokteran Keluarga</p>
-                      <InfoGrid items={[
-                        { label: 'Tahu Keluarga Inti', value: selected.dpm.pendekatan.tahuKeluargaInti },
-                        { label: 'Menangani Keluarga Yg Sama', value: selected.dpm.pendekatan.menanganiKeluargaSama },
-                        { label: 'Tanya Kondisi Keluarga Lain', value: selected.dpm.pendekatan.tanyaKondisiKeluargaLain },
-                        { label: 'Aspek Digali', value: Array.isArray(selected.dpm.pendekatan.aspekDigali) ? selected.dpm.pendekatan.aspekDigali.join(', ') : selected.dpm.pendekatan.aspekDigali, wide: true },
-                        { label: 'Pengaruh Keluarga pd Kasus', value: selected.dpm.pendekatan.pengaruhKeluargaKasus },
-                        { label: 'Contoh Masalah Keluarga', value: selected.dpm.pendekatan.contohMasalahKeluarga + (selected.dpm.pendekatan.contohMasalahLainnya ? ` (${selected.dpm.pendekatan.contohMasalahLainnya})` : ''), wide: true },
-                      ]} />
-                    </div>
-                  )}
-                  {selected.dpm.kontinuitas && (
-                    <div className="pt-2 border-t border-slate-100">
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">D. Kontinuitas Pelayanan</p>
-                      <InfoGrid items={[
-                        { label: 'Sistem Pencatatan JK Panjang', value: selected.dpm.kontinuitas.sistemPencatatan },
-                        { label: 'Jadwalkan Kunjungan Ulang', value: selected.dpm.kontinuitas.jadwalkanKunjunganUlang },
-                        { label: 'Tindak Lanjut Tdk Datang', value: selected.dpm.kontinuitas.tindakLanjutTidakDatang, wide: true },
-                      ]} />
-                    </div>
-                  )}
-                  {selected.dpm.gambaran && (
-                    <div className="pt-2 border-t border-slate-100">
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">E. Gambaran Komprehensif</p>
-                      <InfoGrid items={[
-                        { label: 'Kegiatan Dilakukan', value: Array.isArray(selected.dpm.gambaran.kegiatanDilakukan) ? selected.dpm.gambaran.kegiatanDilakukan.join(', ') : selected.dpm.gambaran.kegiatanDilakukan, wide: true },
-                        { label: 'Bentuk Pelayanan Keluarga', value: selected.dpm.gambaran.bentukPelayananKeluarga },
-                        { label: 'Contoh Kasus Keluarga', value: selected.dpm.gambaran.contohKasusKeluarga, wide: true },
-                        { label: 'Contoh Layanan Holistik', value: selected.dpm.gambaran.contohLayananHolistik, wide: true },
-                      ]} />
-                    </div>
-                  )}
+                  {/* A. Karakteristik Praktik */}
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">A. Karakteristik Praktik</p>
+                  <InfoGrid items={[
+                    { label: 'Lama Praktik', value: selected.dpm?.karakteristik?.lamaPraktik },
+                    { label: 'Rata-rata Kunjungan', value: selected.dpm?.karakteristik?.jumlahKunjungan },
+                    { label: 'Mayoritas Kelompok Umur', value: selected.dpm?.karakteristik?.kelompokUmur },
+                    { label: 'Status Kepesertaan', value: selected.dpm?.karakteristik?.statusPeserta },
+                  ]} />
+
+                  {/* B. Gambaran Kasus */}
+                  <div className="pt-2 border-t border-slate-100">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">B. Gambaran Kasus</p>
+                    <InfoGrid items={[
+                      { label: 'Masalah Kesehatan Terbanyak', value: Array.isArray(selected.dpm?.kasus?.masalahKesehatan) ? selected.dpm.kasus.masalahKesehatan.join(', ') : selected.dpm?.kasus?.masalahKesehatan, wide: true },
+                      { label: 'Proporsi Kasus Kronis', value: selected.dpm?.kasus?.persenKronis },
+                      { label: 'Proporsi Pasien Kontrol', value: selected.dpm?.kasus?.persenKontrol },
+                      { label: 'Alasan Rujukan', value: selected.dpm?.kasus?.alasanRujukan, wide: true },
+                    ]} />
+                  </div>
+
+                  {/* C. Pendekatan Kedokteran Keluarga */}
+                  <div className="pt-2 border-t border-slate-100">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">C. Pendekatan Kedokteran Keluarga</p>
+                    <InfoGrid items={[
+                      { label: 'Tahu Keluarga Inti', value: selected.dpm?.pendekatan?.tahuKeluargaInti },
+                      { label: 'Menangani Keluarga Yg Sama', value: selected.dpm?.pendekatan?.menanganiKeluargaSama },
+                      { label: 'Tanya Kondisi Keluarga Lain', value: selected.dpm?.pendekatan?.tanyaKondisiKeluargaLain },
+                      { label: 'Aspek Digali', value: Array.isArray(selected.dpm?.pendekatan?.aspekDigali) ? selected.dpm.pendekatan.aspekDigali.join(', ') : selected.dpm?.pendekatan?.aspekDigali, wide: true },
+                      { label: 'Pengaruh Keluarga pd Kasus', value: selected.dpm?.pendekatan?.pengaruhKeluargaKasus },
+                      { label: 'Contoh Masalah Keluarga', value: selected.dpm?.pendekatan?.contohMasalahKeluarga ? (selected.dpm.pendekatan.contohMasalahKeluarga + (selected.dpm.pendekatan.contohMasalahLainnya ? ` (${selected.dpm.pendekatan.contohMasalahLainnya})` : '')) : null, wide: true },
+                    ]} />
+                  </div>
+
+                  {/* D. Kontinuitas Pelayanan */}
+                  <div className="pt-2 border-t border-slate-100">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">D. Kontinuitas Pelayanan</p>
+                    <InfoGrid items={[
+                      { label: 'Sistem Pencatatan JK Panjang', value: selected.dpm?.kontinuitas?.sistemPencatatan },
+                      { label: 'Jadwalkan Kunjungan Ulang', value: selected.dpm?.kontinuitas?.jadwalkanKunjunganUlang },
+                      { label: 'Tindak Lanjut Tdk Datang', value: selected.dpm?.kontinuitas?.tindakLanjutTidakDatang, wide: true },
+                    ]} />
+                  </div>
+
+                  {/* E. Gambaran Komprehensif */}
+                  <div className="pt-2 border-t border-slate-100">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">E. Gambaran Komprehensif</p>
+                    <InfoGrid items={[
+                      { label: 'Kegiatan Dilakukan', value: Array.isArray(selected.dpm?.gambaran?.kegiatanDilakukan) ? selected.dpm.gambaran.kegiatanDilakukan.join(', ') : selected.dpm?.gambaran?.kegiatanDilakukan, wide: true },
+                      { label: 'Bentuk Pelayanan Keluarga', value: selected.dpm?.gambaran?.bentukPelayananKeluarga },
+                      { label: 'Contoh Kasus Keluarga', value: selected.dpm?.gambaran?.contohKasusKeluarga, wide: true },
+                      { label: 'Contoh Layanan Holistik', value: selected.dpm?.gambaran?.contohLayananHolistik, wide: true },
+                    ]} />
+                  </div>
                 </div>
               </SectionBlock>
             )}
