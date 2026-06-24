@@ -336,10 +336,19 @@ export default function DataManagement() {
           base[`Wawancara_Q${i+1}`] = row.wawancara?.[i] || '-';
         });
 
-        // Truncate to prevent Excel 32767 character limit crash
+        // Split long strings across multiple columns to prevent Excel crash without losing data
         Object.keys(base).forEach(key => {
           if (typeof base[key] === 'string' && base[key].length > 32700) {
-            base[key] = base[key].substring(0, 32700) + '... [TRUNCATED]';
+            let remainingText = base[key];
+            base[key] = remainingText.substring(0, 32700);
+            remainingText = remainingText.substring(32700);
+            let partNum = 2;
+            
+            while (remainingText.length > 0) {
+              base[`${key}_Lanjutan${partNum}`] = remainingText.substring(0, 32700);
+              remainingText = remainingText.substring(32700);
+              partNum++;
+            }
           }
         });
 
