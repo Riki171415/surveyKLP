@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronRight, ChevronLeft, Save, CheckCircle, Info, ArrowLeft, Printer } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Save, CheckCircle, Info, ArrowLeft, Printer, Search, X, AlertCircle } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient'; // Akan dihapus nanti jika login dihapus, tapi sementara dipertahankan jika login butuh
 import { useAuth } from './AuthContext';
@@ -192,6 +192,81 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
   const [showPanduan, setShowPanduan] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
+
+  const [showEditSearch, setShowEditSearch] = useState(false);
+  const [editSearchTerm, setEditSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
+
+  const maskName = (name) => {
+    if (!name) return 'Anonim';
+    const parts = name.split(' ');
+    return parts.map(p => p.length > 2 ? p.substring(0, 2) + '*'.repeat(p.length - 2) : p).join(' ');
+  };
+
+  const handleSearchEdit = async () => {
+    if (!editSearchTerm) return;
+    setIsSearching(true);
+    setSearchError('');
+    try {
+      const { data, error } = await supabase.from('surveys').select('*').eq('kode_faskes', editSearchTerm);
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        setSearchError('Data tidak ditemukan dengan Kode Faskes tersebut.');
+        setSearchResults([]);
+      } else {
+        setSearchResults(data);
+      }
+    } catch (err) {
+      setSearchError('Terjadi kesalahan saat mencari data.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSelectRecord = (record) => {
+    setFormData({
+      id: record.id,
+      jenisFaskes: record.jenis_faskes || '',
+      fktpName: record.fktp_name || '',
+      provinsi: record.provinsi || '',
+      kabKota: record.kab_kota || '',
+      city: record.city || '',
+      role: record.role || '',
+      kodeFaskes: record.kode_faskes || '',
+      namaResponden: record.nama_responden || '',
+      docUmum: record.doc_umum || '',
+      docGigi: record.doc_gigi || '',
+      docKklp: record.doc_kklp || '',
+      timeInPoli: record.time_in_poli || '',
+      timeHomeVisit: record.time_home_visit || '',
+      propInFktp: record.prop_in_fktp || '',
+      propOutFktp: record.prop_out_fktp || '',
+      kompetensi: record.kompetensi || {},
+      jkn: record.jkn || {},
+      nonOptimal: record.non_optimal || {},
+      wawancara: record.wawancara || {},
+      homeCare: record.home_care || {},
+      paliatif: record.paliatif || {},
+      spkklpBerpraktik: record.spkklp_berpraktik || '',
+      spkklpPoli: record.spkklp_poli || {},
+      spkklpKendala: record.spkklp_kendala || {},
+      relevansiSpkklp: record.relevansi_spkklp || {},
+      peranSpkklp: record.peran_spkklp || {},
+      layananDirujuk: record.layanan_dirujuk || {},
+      layananBelumBerjalan: record.layanan_belum_berjalan || {},
+      prb: record.prb || {},
+      dpm: record.dpm || {},
+      dataPasienBulanan: record.data_pasien_bulanan || {}
+    });
+    setShowEditSearch(false);
+    setSearchResults([]);
+    setEditSearchTerm('');
+    setStep(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
 
   const [selectorConfig, setSelectorConfig] = useState({ isOpen: false, type: 'diagnosa', context: 'spkklpPoli' });
 
@@ -635,6 +710,9 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
           <div className="flex flex-col gap-2 shrink-0">
             <button onClick={() => setShowPanduan(true)} className="bg-primary-600 border border-primary-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-primary-700 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm">📖 Panduan Pengisian</button>
             <button onClick={() => navigate('/login')} className="bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm">Login Petugas</button>
+
+            <button onClick={() => setShowEditSearch(true)} className="bg-amber-100 text-amber-800 px-6 py-3 rounded-xl font-bold hover:bg-amber-200 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-sm flex items-center justify-center border border-amber-200"><Info className="w-4 h-4 mr-1.5" /> Edit Data Survey</button>
+
           </div>
         )}
       </div>
@@ -1655,6 +1733,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                 </ul>
               </div>
 
+              <section><h3 className="font-bold text-lg text-amber-700 mb-2 border-b pb-2">✏️ Mengedit Data Survei</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Jika Anda ingin memperbaiki survei yang sudah dikirim, klik tombol <strong>Edit Data Survey</strong> di bagian atas.</li><li>Masukkan <strong>Kode Faskes BPJS</strong> Anda, klik cari, lalu pilih nama dan jabatan Anda.</li><li>Form akan terisi otomatis dengan jawaban lama Anda. Silakan perbaiki dan klik <strong>Kirim Survey</strong> untuk menyimpannya kembali tanpa menduplikasi data.</li></ul></section>
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">📍 Tahap 1 — Identitas</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Pilih <strong>Provinsi</strong> terlebih dahulu, lalu pilih <strong>Nama Fasilitas Kesehatan</strong>.</li><li>Pilih <strong>Jabatan</strong> Anda saat ini.</li><li>Pilih apakah Faskes memiliki dokter Sp.KKLP.</li></ul></section>
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">⏱️ Tahap 2 — Kompetensi Dokter</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li><strong>Khusus Dokter Umum &amp; Sp.KKLP:</strong> isi beban kerja dan tabel kompetensi.</li><li><strong>Khusus Sp.KKLP:</strong> isi tambahan bagian praktik dan poli KKLP.</li><li>Kepala Puskesmas / klinik dan Nakes lainnya dapat melewati tahap ini.</li></ul></section>
               <section><h3 className="font-bold text-lg text-primary-700 mb-2 border-b pb-2">🏥 Tahap 3 — Perspektif Sp.KKLP</h3><ul className="list-disc pl-5 space-y-1 text-sm"><li>Nilai relevansi 12 kegiatan Sp.KKLP menggunakan skala 1–4 (Sangat Tidak Setuju s/d Sangat Setuju).</li><li>Centang layanan yang masih sering dirujuk ke RS dan layanan yang belum berjalan di Puskesmas / Klinik.</li><li>Isi informasi Program Rujuk Balik (PRB).</li></ul></section>
@@ -1666,6 +1745,82 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
           </div>
         </div>
       , document.body)}
+      
+      {/* Edit Search Modal */}
+      {showEditSearch && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center p-5 border-b border-slate-100">
+              <h3 className="font-bold text-lg text-slate-800 flex items-center">
+                <Search className="w-5 h-5 mr-2 text-primary-600" /> Cari Data Untuk Diedit
+              </h3>
+              <button onClick={() => setShowEditSearch(false)} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto">
+              <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+                Masukkan <strong>Kode Faskes BPJS</strong> Anda untuk mencari data yang sudah pernah disubmit sebelumnya.
+              </p>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  placeholder="Contoh: 0123B456"
+                  className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
+                  value={editSearchTerm}
+                  onChange={(e) => setEditSearchTerm(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearchEdit()}
+                />
+                <button
+                  onClick={handleSearchEdit}
+                  disabled={isSearching || !editSearchTerm}
+                  className="bg-primary-600 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-primary-700 disabled:opacity-50 transition-colors flex items-center shadow-sm"
+                >
+                  {isSearching ? <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span> : 'Cari'}
+                </button>
+              </div>
+              
+              {searchError && (
+                <div className="p-3 bg-rose-50 text-rose-600 text-sm rounded-lg border border-rose-100 mt-4 flex items-start">
+                  <AlertCircle className="w-4 h-4 mr-2 mt-0.5 shrink-0" />
+                  <span>{searchError}</span>
+                </div>
+              )}
+              
+              {searchResults.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="text-sm font-bold text-slate-700 mb-3 border-b pb-2">Hasil Pencarian ({searchResults.length} data):</h4>
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                    {searchResults.map((res, i) => (
+                      <div 
+                        key={res.id || i}
+                        onClick={() => handleSelectRecord(res)}
+                        className="p-3 border border-slate-200 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-all group"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="font-bold text-slate-800 text-sm group-hover:text-primary-700">{maskName(res.nama_responden)}</div>
+                            <div className="text-xs text-slate-500 mt-1">{res.role || 'Tanpa Jabatan'}</div>
+                          </div>
+                          <div className="bg-slate-100 text-slate-600 text-[10px] px-2 py-1 rounded font-medium group-hover:bg-primary-100 group-hover:text-primary-700">
+                            {new Date(res.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="p-4 border-t border-slate-100 bg-slate-50 text-right">
+              <button onClick={() => setShowEditSearch(false)} className="bg-white border border-slate-300 text-slate-700 px-5 py-2 rounded-lg font-bold hover:bg-slate-50 transition-colors shadow-sm">Batal</button>
+            </div>
+          </div>
+        </div>
+      , document.body)}
+
       {/* List Selector Modal for SurveyForm */}
       <ListSelectorModal 
         isOpen={selectorConfig.isOpen} 
