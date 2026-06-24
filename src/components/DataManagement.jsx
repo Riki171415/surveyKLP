@@ -336,6 +336,13 @@ export default function DataManagement() {
           base[`Wawancara_Q${i+1}`] = row.wawancara?.[i] || '-';
         });
 
+        // Truncate to prevent Excel 32767 character limit crash
+        Object.keys(base).forEach(key => {
+          if (typeof base[key] === 'string' && base[key].length > 32700) {
+            base[key] = base[key].substring(0, 32700) + '... [TRUNCATED]';
+          }
+        });
+
         return base;
       });
 

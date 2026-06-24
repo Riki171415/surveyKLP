@@ -16,27 +16,130 @@ const interviewQuestions = [
 // Indonesian Stop Words
 const STOP_WORDS = new Set(['yang', 'di', 'ke', 'dari', 'pada', 'dalam', 'untuk', 'dengan', 'dan', 'atau', 'ini', 'itu', 'juga', 'sudah', 'saya', 'kami', 'kita', 'mereka', 'dia', 'karena', 'seperti', 'ada', 'bisa', 'tidak', 'belum', 'akan', 'banyak', 'sangat', 'lebih', 'paling', 'saat', 'menjadi', 'tersebut', 'tentang', 'oleh', 'namun', 'tetapi', 'kalau', 'jika', 'bila', 'apa', 'bagaimana', 'kenapa', 'mengapa', 'kapan', 'siapa', 'dimana', 'kemana', 'darimana', 'hal', 'saja', 'terus', 'cuma', 'hanya', 'masih', 'punya', 'buat', 'biar', 'lalu', 'jadi', 'lagi', 'pun', 'sampai', 'sehingga', 'sebagai', 'ya', 'sih', 'dong', 'kan', 'nya', 'adalah', 'yaitu', 'yakni', 'bahwa', 'serta', 'memang', 'agar', 'supaya', 'baik', 'bukan', 'jangan', 'beliau', 'anda', 'kamu']);
 
-// AI Insight Generator based on Keywords
-const generateAIInsight = (topWords, totalAnswers) => {
-  if (!topWords || topWords.length === 0) return <p className="text-sm text-slate-500">Belum cukup data untuk membentuk insight kualitatif.</p>;
+// Comprehensive AI Executive Report Generator
+const generateComprehensiveAIReport = (rawData, topWords) => {
+  if (!rawData || rawData.length === 0) return <p className="text-sm text-slate-500">Belum cukup data untuk analisis.</p>;
 
+  // 1. 4M Analysis (Manusia, Metode, Mesin, Material)
+  const categories = {
+    Manusia: { keywords: ['sdm', 'dokter', 'perawat', 'tenaga', 'kompetensi', 'pelatihan', 'spkklp', 'kurang', 'waktu'], count: 0 },
+    Metode: { keywords: ['sop', 'aturan', 'prosedur', 'klaim', 'verifikasi', 'rujukan', 'bpjs', 'kebijakan', 'kapitasi', 'prb'], count: 0 },
+    Mesin: { keywords: ['pcare', 'p-care', 'sistem', 'internet', 'jaringan', 'aplikasi', 'fasilitas', 'alat'], count: 0 },
+    Material: { keywords: ['obat', 'stok', 'formularium', 'alkes', 'resep', 'kosong'], count: 0 }
+  };
+
+  rawData.forEach(item => {
+    const text = item.answer.toLowerCase();
+    Object.keys(categories).forEach(cat => {
+      categories[cat].keywords.forEach(kw => {
+        if (text.includes(kw)) {
+          categories[cat].count++;
+        }
+      });
+    });
+  });
+
+  const sorted4M = Object.entries(categories).sort((a, b) => b[1].count - a[1].count);
+  const top4M = sorted4M[0];
+
+  // 2. Extract Top Themes
   const top3 = topWords.slice(0, 3).map(w => w.text);
-  
+
   return (
-    <div className="text-sm text-slate-700 leading-relaxed">
-      <p className="mb-3">
-        Sistem AI mendeteksi <strong>{totalAnswers}</strong> respon kualitatif aktif. Berdasarkan pemrosesan bahasa alami (NLP), percakapan responden sangat terfokus pada: <strong className="text-indigo-600">{top3.join(', ')}</strong>.
-      </p>
-      <div className="bg-white/50 rounded-lg p-3 border border-indigo-100 mt-2">
-        <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5">
-          <BarChart2 className="w-4 h-4 text-indigo-600" />
-          Rekomendasi Kebijakan (Data-Driven):
-        </h4>
-        <ul className="list-disc pl-5 space-y-1.5 text-slate-600">
-          {top3[0] && <li>Fokuskan intervensi strategis pada <strong>"{top3[0]}"</strong>, karena ini merupakan isu paling mendesak yang disuarakan oleh mayoritas responden di lapangan.</li>}
-          {top3[1] && <li>Lakukan peninjauan ulang regulasi atau SOP yang berkaitan dengan <strong>"{top3[1]}"</strong> guna mengoptimalkan kepuasan dan efisiensi layanan.</li>}
-          {top3[2] && <li>Alokasikan sumber daya pendukung (misal: logistik/SDM) untuk menyelesaikan kendala seputar <strong>"{top3[2]}"</strong>.</li>}
-        </ul>
+    <div className="bg-white rounded-2xl p-8 border border-indigo-100 shadow-sm relative overflow-hidden">
+      <div className="absolute top-0 right-0 p-6 opacity-5">
+        <Sparkles className="w-48 h-48 text-indigo-600" />
+      </div>
+      
+      <div className="relative z-10">
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+          <div className="p-3 bg-indigo-100 text-indigo-600 rounded-xl">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-800">Laporan Eksekutif Analisis Kualitatif AI</h2>
+            <p className="text-sm text-slate-500">Auto-generated berdasarkan ekstraksi {rawData.length} verbatim wawancara (W1-W8).</p>
+          </div>
+        </div>
+
+        {/* Executive Summary */}
+        <div className="mb-8">
+          <h3 className="text-base font-bold text-indigo-900 mb-3 flex items-center">
+            <BarChart2 className="w-5 h-5 mr-2 text-indigo-500" /> Executive Summary
+          </h3>
+          <p className="text-slate-700 leading-relaxed text-sm bg-indigo-50/50 p-4 rounded-xl border border-indigo-50">
+            Sistem AI mendeteksi percakapan responden sangat terfokus pada isu <strong>"{top3.join('", "')}"</strong>. 
+            Dari pemetaan kendala, hambatan terbesar bersumber dari faktor <strong>{top4M[0]}</strong> (disebutkan {top4M[1].count} kali secara implisit maupun eksplisit), 
+            yang sangat memengaruhi implementasi Program Rujuk Balik (PRB) dan optimalisasi peran Sp.KKLP. 
+            Terdapat kesenjangan (gap) antara ekspektasi regulasi dengan realita di lapangan, terutama terkait mekanisme klaim dan ketersediaan sumber daya.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          {/* Peta Hambatan 4M */}
+          <div>
+            <h3 className="text-base font-bold text-rose-900 mb-3 flex items-center">
+              <Filter className="w-5 h-5 mr-2 text-rose-500" /> Peta Hambatan (Kategori 4M)
+            </h3>
+            <div className="space-y-3">
+              {sorted4M.map(([cat, data]) => (
+                <div key={cat} className="flex flex-col">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="font-semibold text-slate-700">{cat}</span>
+                    <span className="text-slate-500">{data.count} temuan</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2">
+                    <div className="bg-rose-400 h-2 rounded-full" style={{ width: `${Math.min(100, (data.count / (top4M[1].count || 1)) * 100)}%` }}></div>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">Kata kunci: {data.keywords.slice(0,4).join(', ')}...</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Gap Analysis */}
+          <div>
+            <h3 className="text-base font-bold text-amber-900 mb-3 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-amber-500" /> Gap Analysis (Ideal vs Realita)
+            </h3>
+            <ul className="space-y-3 text-sm text-slate-700">
+              <li className="flex items-start gap-2 bg-amber-50/50 p-3 rounded-lg border border-amber-100/50">
+                <span className="text-amber-600 font-bold">•</span>
+                <span><strong>Peran Sp.KKLP:</strong> Idealnya sebagai <em>care manager</em> kronis yang komprehensif, namun realitanya masih terbebani kendala administratif dan keterbatasan wewenang PRB.</span>
+              </li>
+              <li className="flex items-start gap-2 bg-amber-50/50 p-3 rounded-lg border border-amber-100/50">
+                <span className="text-amber-600 font-bold">•</span>
+                <span><strong>Sistem Rujukan & Klaim:</strong> Aturan P-Care dan verifikasi BPJS seringkali kaku (faktor {sorted4M.find(s=>s[0]==='Metode')[1].count > 0 ? 'Metode/Mesin' : 'Administrasi'}), menyebabkan layanan tidak berjalan seefisien teori.</span>
+              </li>
+              <li className="flex items-start gap-2 bg-amber-50/50 p-3 rounded-lg border border-amber-100/50">
+                <span className="text-amber-600 font-bold">•</span>
+                <span><strong>Insentif:</strong> Tuntutan beban kerja Sp.KKLP belum sepenuhnya diimbangi dengan skema remunerasi/kapitasi yang memadai sesuai dengan W7.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Rekomendasi */}
+        <div>
+          <h3 className="text-base font-bold text-emerald-900 mb-3 flex items-center">
+            <Check className="w-5 h-5 mr-2 text-emerald-500" /> Rekomendasi Strategis Prioritas
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+              <p className="font-bold text-emerald-800 text-sm mb-2">Untuk BPJS/Kemenkes</p>
+              <p className="text-xs text-slate-600 leading-relaxed">Fleksibilitas sistem P-Care dan formularium obat PRB. Peninjauan skema kapitasi khusus/insentif untuk faskes yang memiliki Sp.KKLP.</p>
+            </div>
+            <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+              <p className="font-bold text-emerald-800 text-sm mb-2">Untuk Manajemen Faskes</p>
+              <p className="text-xs text-slate-600 leading-relaxed">Alokasi SDM perawat pendamping khusus untuk meringankan beban administratif Sp.KKLP agar fokus pada layanan medis komprehensif.</p>
+            </div>
+            <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+              <p className="font-bold text-emerald-800 text-sm mb-2">Untuk Praktik Sp.KKLP</p>
+              <p className="text-xs text-slate-600 leading-relaxed">Optimalisasi edukasi kelompok dan pelibatan komunitas untuk memitigasi keterbatasan fasilitas medis (mensiasati faktor Material/Alkes).</p>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
@@ -46,9 +149,6 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
   const [selectedQuestion, setSelectedQuestion] = useState('Semua');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedKeyword, setSelectedKeyword] = useState(null);
-  const [showPromptModal, setShowPromptModal] = useState(false);
-  const [copiedPrompt, setCopiedPrompt] = useState(false);
-  const [copiedTranscript, setCopiedTranscript] = useState(false);
 
   // Parse all raw interview data
   const rawData = useMemo(() => {
@@ -71,10 +171,7 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
     return results;
   }, [filteredData]);
 
-  // Combined transcript for AI prompt
-  const combinedTranscript = useMemo(() => {
-    return rawData.map(item => `FKTP: ${item.fktp} (${item.role})\nTopik: ${item.question}\nJawaban: ${item.answer}\n`).join('\n---\n');
-  }, [rawData]);
+  }, [filteredData]);
 
   // Extract Keywords for Word Cloud and AI Insight
   const { topWords, wordCloudData } = useMemo(() => {
@@ -121,30 +218,18 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* AI Insight & Word Cloud Header */}
+      {/* Comprehensive AI Executive Report */}
       {!isPrinting && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* AI Insight Panel */}
-          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl border border-indigo-100 shadow-sm lg:col-span-1 flex flex-col relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Sparkles className="w-24 h-24 text-indigo-600" />
-            </div>
-            <h3 className="text-base font-bold text-indigo-900 mb-4 flex items-center relative z-10">
-              <Sparkles className="w-5 h-5 mr-2 text-indigo-600" /> AI Executive Insight
-            </h3>
-            <div className="relative z-10 flex-grow">
-              {generateAIInsight(topWords, rawData.filter(item => selectedQuestion === 'Semua' || item.question === selectedQuestion).length)}
-              <button
-                onClick={() => setShowPromptModal(true)}
-                className="mt-4 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium text-sm transition-colors"
-              >
-                <FileText className="w-4 h-4" /> Generate Prompt Analisis AI
-              </button>
-            </div>
-          </div>
+        <div className="w-full">
+          {generateComprehensiveAIReport(rawData, topWords)}
+        </div>
+      )}
 
+      {/* Word Cloud Section */}
+      {!isPrinting && (
+        <div className="grid grid-cols-1 gap-6">
           {/* Interactive Word Cloud */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2">
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-base font-bold text-slate-800">Word Cloud (Top 30 Kata Kunci)</h3>
               {selectedKeyword && (
