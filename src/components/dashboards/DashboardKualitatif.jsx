@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, MessageSquare, Filter, User, Sparkles, BarChart2 } from 'lucide-react';
+import { Search, MessageSquare, Filter, User, Sparkles, BarChart2, FileText, Copy, X, Check } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
 
 const interviewQuestions = [
@@ -9,7 +9,8 @@ const interviewQuestions = [
   "[W4] Layanan paliatif primer masuk JKN?",
   "[W5] Keterlibatan Sp.KKLP dalam PRB",
   "[W6] Perubahan faskes dengan adanya Sp.KKLP",
-  "[W7] Insentif tambahan untuk Sp.KKLP?"
+  "[W7] Insentif tambahan untuk Sp.KKLP?",
+  "[W8] Kendala program JKN"
 ];
 
 // Indonesian Stop Words
@@ -45,6 +46,9 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
   const [selectedQuestion, setSelectedQuestion] = useState('Semua');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedKeyword, setSelectedKeyword] = useState(null);
+  const [showPromptModal, setShowPromptModal] = useState(false);
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
+  const [copiedTranscript, setCopiedTranscript] = useState(false);
 
   // Parse all raw interview data
   const rawData = useMemo(() => {
@@ -66,6 +70,11 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
     });
     return results;
   }, [filteredData]);
+
+  // Combined transcript for AI prompt
+  const combinedTranscript = useMemo(() => {
+    return rawData.map(item => `FKTP: ${item.fktp} (${item.role})\nTopik: ${item.question}\nJawaban: ${item.answer}\n`).join('\n---\n');
+  }, [rawData]);
 
   // Extract Keywords for Word Cloud and AI Insight
   const { topWords, wordCloudData } = useMemo(() => {
@@ -125,6 +134,12 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
             </h3>
             <div className="relative z-10 flex-grow">
               {generateAIInsight(topWords, rawData.filter(item => selectedQuestion === 'Semua' || item.question === selectedQuestion).length)}
+              <button
+                onClick={() => setShowPromptModal(true)}
+                className="mt-4 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium text-sm transition-colors"
+              >
+                <FileText className="w-4 h-4" /> Generate Prompt Analisis AI
+              </button>
             </div>
           </div>
 
