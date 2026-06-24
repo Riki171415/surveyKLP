@@ -61,22 +61,24 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
       if (!crossKunjungan[lp]) crossKunjungan[lp] = {};
       crossKunjungan[lp][jk] = (crossKunjungan[lp][jk] || 0) + 1;
 
-      let skor = 0;
-      if (pen.tahuKeluargaInti === 'Selalu' || pen.tahuKeluargaInti === 'Sering') skor += 25;
-      else if (pen.tahuKeluargaInti === 'Kadang-kadang') skor += 10;
-      if (pen.menanganiKeluargaSama && pen.menanganiKeluargaSama !== 'Tidak pernah') skor += 25;
-      if (pen.tanyaKondisiKeluargaLain === 'Selalu' || pen.tanyaKondisiKeluargaLain === 'Sering') skor += 25;
-      else if (pen.tanyaKondisiKeluargaLain === 'Kadang-kadang') skor += 10;
-      if (Array.isArray(pen.aspekDigali) && pen.aspekDigali.length > 1 && !pen.aspekDigali.includes('Tidak ada')) skor += 25;
+      if (row.dpm && Object.keys(row.dpm).length > 0) {
+        let skor = 0;
+        if (pen.tahuKeluargaInti === 'Selalu' || pen.tahuKeluargaInti === 'Sering') skor += 25;
+        else if (pen.tahuKeluargaInti === 'Kadang-kadang') skor += 10;
+        if (pen.menanganiKeluargaSama && pen.menanganiKeluargaSama !== 'Tidak pernah') skor += 25;
+        if (pen.tanyaKondisiKeluargaLain === 'Selalu' || pen.tanyaKondisiKeluargaLain === 'Sering') skor += 25;
+        else if (pen.tanyaKondisiKeluargaLain === 'Kadang-kadang') skor += 10;
+        if (Array.isArray(pen.aspekDigali) && pen.aspekDigali.length > 1 && !pen.aspekDigali.includes('Tidak ada')) skor += 25;
 
-      if (skor <= 20) skorDist['0-20']++;
-      else if (skor <= 40) skorDist['21-40']++;
-      else if (skor <= 60) skorDist['41-60']++;
-      else if (skor <= 80) skorDist['61-80']++;
-      else skorDist['81-100']++;
+        if (skor <= 20) skorDist['0-20']++;
+        else if (skor <= 40) skorDist['21-40']++;
+        else if (skor <= 60) skorDist['41-60']++;
+        else if (skor <= 80) skorDist['61-80']++;
+        else skorDist['81-100']++;
 
-      if (skor < 40) {
-        skorRendahList.push({ faskes: row.fktp_name || 'DPM', skor, provinsi: row.provinsi });
+        if (skor < 40) {
+          skorRendahList.push({ faskes: row.fktp_name || 'DPM', skor, provinsi: row.provinsi });
+        }
       }
 
       if (Array.isArray(kas.masalahKesehatan)) {
