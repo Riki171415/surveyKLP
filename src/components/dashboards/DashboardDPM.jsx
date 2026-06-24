@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import ExportButton from '../ExportButton';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
@@ -125,7 +126,10 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Users className="w-5 h-5 mr-2 text-blue-600" /> Menangani Keluarga yang Sama</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Users className="w-5 h-5 mr-2 text-blue-600" /> Menangani Keluarga yang Sama</h3>
+            {!isPrinting && <ExportButton fileName="Menangani Keluarga yang Sama" />}
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <PieChart>
@@ -142,7 +146,10 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileText className="w-5 h-5 mr-2 text-indigo-600" /> Penerapan RM / Family Folder</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileText className="w-5 h-5 mr-2 text-indigo-600" /> Penerapan RM / Family Folder</h3>
+            {!isPrinting && <ExportButton fileName="Penerapan RM / Family Folder" />}
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <PieChart>
@@ -159,7 +166,10 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Clock className="w-5 h-5 mr-2 text-amber-600" /> Distribusi Lama Praktik</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Clock className="w-5 h-5 mr-2 text-amber-600" /> Distribusi Lama Praktik</h3>
+            {!isPrinting && <ExportButton fileName="Distribusi Lama Praktik" />}
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={lamaPraktikData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
@@ -176,7 +186,10 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-emerald-600" /> Top Kegiatan Holistik & Aspek yang Digali</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-emerald-600" /> Top Kegiatan Holistik & Aspek yang Digali</h3>
+            {!isPrinting && <ExportButton fileName="Top Kegiatan Holistik & Aspek yang Digali" />}
+          </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={aspekData} layout="vertical" margin={{ top: 10, right: 30, left: 60, bottom: 0 }}>
@@ -194,7 +207,10 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
 
         {luaranPelayananData.length > 0 && (
           <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+            <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileText className="w-5 h-5 mr-2 text-indigo-600" /> Luaran Pelayanan Sp.KKLP</h3>
+            {!isPrinting && <ExportButton fileName="Luaran Pelayanan Sp.KKLP" />}
+          </div>
             <div className="h-80">
               <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                 <BarChart data={luaranPelayananData} layout="vertical" margin={{ top: 10, right: 30, left: 60, bottom: 0 }}>

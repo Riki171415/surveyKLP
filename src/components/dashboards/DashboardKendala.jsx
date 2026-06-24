@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import ExportButton from '../ExportButton';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
@@ -70,7 +71,10 @@ export default function DashboardKendala({ filteredData, COLORS, isPrinting }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><AlertTriangle className="w-5 h-5 mr-2 text-rose-600" /> Distribusi Kendala Pelayanan</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><AlertTriangle className="w-5 h-5 mr-2 text-rose-600" /> Distribusi Kendala Pelayanan</h3>
+            {!isPrinting && <ExportButton fileName="Distribusi Kendala Pelayanan" />}
+          </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={kendalaData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
@@ -87,7 +91,10 @@ export default function DashboardKendala({ filteredData, COLORS, isPrinting }) {
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Database className="w-5 h-5 mr-2 text-rose-600" /> Proporsi Kebutuhan Dukungan</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Database className="w-5 h-5 mr-2 text-rose-600" /> Proporsi Kebutuhan Dukungan</h3>
+            {!isPrinting && <ExportButton fileName="Proporsi Kebutuhan Dukungan" />}
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <PieChart>

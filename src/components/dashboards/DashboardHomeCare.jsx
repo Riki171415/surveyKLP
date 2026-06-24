@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import ExportButton from '../ExportButton';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
@@ -116,7 +117,10 @@ export default function DashboardHomeCare({ filteredData, COLORS, isPrinting }) 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-teal-600" /> Jenis Layanan Home Care</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-teal-600" /> Jenis Layanan Home Care</h3>
+            {!isPrinting && <ExportButton fileName="Jenis Layanan Home Care" />}
+          </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={jenisData} margin={{ top: 20, right: 30, left: 0, bottom: 50 }}>
@@ -133,7 +137,10 @@ export default function DashboardHomeCare({ filteredData, COLORS, isPrinting }) 
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Heart className="w-5 h-5 mr-2 text-teal-600" /> Kondisi Pasien Home Care</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Heart className="w-5 h-5 mr-2 text-teal-600" /> Kondisi Pasien Home Care</h3>
+            {!isPrinting && <ExportButton fileName="Kondisi Pasien Home Care" />}
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <PieChart>
@@ -148,7 +155,10 @@ export default function DashboardHomeCare({ filteredData, COLORS, isPrinting }) 
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><CheckCircle className="w-5 h-5 mr-2 text-teal-600" /> Tingkat Kepatuhan Pasien</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><CheckCircle className="w-5 h-5 mr-2 text-teal-600" /> Tingkat Kepatuhan Pasien</h3>
+            {!isPrinting && <ExportButton fileName="Tingkat Kepatuhan Pasien" />}
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={kepatuhanData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>

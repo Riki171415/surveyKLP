@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import ExportButton from '../ExportButton';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
@@ -104,7 +105,10 @@ export default function DashboardNonOptimal({ filteredData, COLORS, isPrinting }
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><CheckCircle className="w-5 h-5 mr-2 text-rose-600" /> Proporsi Usulan Masuk JKN</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><CheckCircle className="w-5 h-5 mr-2 text-rose-600" /> Proporsi Usulan Masuk JKN</h3>
+            {!isPrinting && <ExportButton fileName="Proporsi Usulan Masuk JKN" />}
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <PieChart>
@@ -120,7 +124,10 @@ export default function DashboardNonOptimal({ filteredData, COLORS, isPrinting }
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><TrendingDown className="w-5 h-5 mr-2 text-rose-600" /> Distribusi Skala Hambatan Pelaksanaan (1-4)</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><TrendingDown className="w-5 h-5 mr-2 text-rose-600" /> Distribusi Skala Hambatan Pelaksanaan (1-4)</h3>
+            {!isPrinting && <ExportButton fileName="Distribusi Skala Hambatan Pelaksanaan (1-4)" />}
+          </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={hambatanData} layout="vertical" margin={{ top: 10, right: 30, left: 100, bottom: 0 }}>

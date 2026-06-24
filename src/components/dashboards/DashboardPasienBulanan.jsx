@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import ExportButton from '../ExportButton';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   Legend, LabelList
@@ -107,7 +108,10 @@ export default function DashboardPasienBulanan({ filteredData, COLORS, isPrintin
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><BarChart3 className="w-5 h-5 mr-2 text-primary-600" /> Total Akumulasi Kasus per Penyakit</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><BarChart3 className="w-5 h-5 mr-2 text-primary-600" /> Total Akumulasi Kasus per Penyakit</h3>
+            {!isPrinting && <ExportButton fileName="Total Akumulasi Kasus per Penyakit" />}
+          </div>
           <div className="h-96">
             <ResponsiveContainer width="99%" height="100%">
               <BarChart data={totalPatientsByDisease} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 10 }}>
@@ -124,7 +128,10 @@ export default function DashboardPasienBulanan({ filteredData, COLORS, isPrintin
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-primary-600" /> Rata-rata Kunjungan per Jenis Faskes</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-primary-600" /> Rata-rata Kunjungan per Jenis Faskes</h3>
+            {!isPrinting && <ExportButton fileName="Rata-rata Kunjungan per Jenis Faskes" />}
+          </div>
           <p className="text-xs text-slate-400 mb-4">Perbandingan rata-rata pasien yang dilayani di Puskesmas, Klinik, dan DPM dalam 1 bulan terakhir.</p>
           <div className="h-96">
             <ResponsiveContainer width="99%" height="100%">

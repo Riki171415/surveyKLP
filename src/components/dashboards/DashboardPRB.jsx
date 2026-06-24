@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import ExportButton from '../ExportButton';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
@@ -122,7 +123,10 @@ export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-primary-600" /> Kepatuhan PRB</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-primary-600" /> Kepatuhan PRB</h3>
+            {!isPrinting && <ExportButton fileName="Kepatuhan PRB" />}
+          </div>
           <div className="grid grid-cols-2 gap-4 mt-8">
             <GaugeChart value={kepatuhanRate} label="Proporsi Peserta Rutin (Kepatuhan)" color="#10b981" />
             <GaugeChart value={prbStats.totalJumlah > 0 ? (prbStats.totalTidakBerkunjung / prbStats.totalJumlah) * 100 : 0} label="Proporsi Peserta Tidak Berkunjung" color="#f43f5e" />
@@ -130,7 +134,10 @@ export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileText className="w-5 h-5 mr-2 text-primary-600" /> Distribusi Diagnosis PRB</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileText className="w-5 h-5 mr-2 text-primary-600" /> Distribusi Diagnosis PRB</h3>
+            {!isPrinting && <ExportButton fileName="Distribusi Diagnosis PRB" />}
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <PieChart>
@@ -145,7 +152,10 @@ export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Clock className="w-5 h-5 mr-2 text-primary-600" /> Mekanisme Pemantauan PRB di FKTP</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Clock className="w-5 h-5 mr-2 text-primary-600" /> Mekanisme Pemantauan PRB di FKTP</h3>
+            {!isPrinting && <ExportButton fileName="Mekanisme Pemantauan PRB di FKTP" />}
+          </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={mekanismeData} margin={{ top: 20, right: 30, left: 0, bottom: 50 }}>

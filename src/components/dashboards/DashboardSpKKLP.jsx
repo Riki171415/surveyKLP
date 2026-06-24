@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import ExportButton from '../ExportButton';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
@@ -107,11 +108,11 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
 
     let analysisText = "Belum ada data diagnosis atau tindakan yang diinput oleh responden.";
     if (diagData.length > 0 && tindData.length > 0) {
-      analysisText = `Berdasarkan data input terbaru, mayoritas Sp.KKLP menangani kasus dengan diagnosis utama **${diagData[0].name}** (ditemukan di ${diagData[0].value} FKTP)${diagData[1] ? ` dan **${diagData[1].name}** (${diagData[1].value} FKTP)` : ''}. ` + 
-      `Hal ini sejalan dengan prosedur atau tindakan terbanyak yang dilakukan yaitu **${tindData[0].name}** (${tindData[0].value} pelaporan). ` +
-      `Fokus layanan Sp.KKLP tampaknya sangat relevan dengan kebutuhan pengendalian penyakit-penyakit kronis dan komprehensif di tingkat primer, memperkuat peran mereka sebagai *gatekeeper* utama sebelum dirujuk ke FKRTL.`;
+      analysisText = `Berdasarkan data input terbaru, diagnosis utama yang paling banyak dilaporkan oleh responden adalah **${diagData[0].name}** (ditemukan di ${diagData[0].value} FKTP)${diagData[1] ? ` dan **${diagData[1].name}** (${diagData[1].value} FKTP)` : ''}. ` + 
+      `Sementara itu, prosedur atau tindakan medis yang paling sering dilakukan adalah **${tindData[0].name}** (${tindData[0].value} pelaporan). ` +
+      `Data ini memberikan gambaran langsung mengenai pola morbiditas dan tindakan klinis aktual yang paling sering ditangani di tingkat primer.`;
     } else if (diagData.length > 0) {
-      analysisText = `Diagnosis utama yang paling sering dilaporkan adalah **${diagData[0].name}**. Menunggu data tindakan untuk analisis lebih komprehensif.`;
+      analysisText = `Diagnosis utama yang paling banyak dilaporkan adalah **${diagData[0].name}** (ditemukan di ${diagData[0].value} FKTP).`;
     }
 
     return {
@@ -159,7 +160,10 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-blue-600" /> Ketersediaan Dokter Sp.KKLP</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-blue-600" /> Ketersediaan Dokter Sp.KKLP</h3>
+            {!isPrinting && <ExportButton fileName="Ketersediaan Dokter Sp.KKLP" />}
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <PieChart>
@@ -175,7 +179,10 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileSearch className="w-5 h-5 mr-2 text-amber-600" /> Top 5 Layanan Sering Dirujuk ke FKRTL</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileSearch className="w-5 h-5 mr-2 text-amber-600" /> Top 5 Layanan Sering Dirujuk ke FKRTL</h3>
+            {!isPrinting && <ExportButton fileName="Top 5 Layanan Sering Dirujuk ke FKRTL" />}
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={dirujukData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
@@ -192,7 +199,10 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Award className="w-5 h-5 mr-2 text-emerald-600" /> Rata-Rata Skala Relevansi Peran Sp.KKLP (1-4)</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Award className="w-5 h-5 mr-2 text-emerald-600" /> Rata-Rata Skala Relevansi Peran Sp.KKLP (1-4)</h3>
+            {!isPrinting && <ExportButton fileName="Rata-Rata Skala Relevansi Peran Sp.KKLP (1-4)" />}
+          </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={relevansiData} margin={{ top: 20, right: 30, left: 0, bottom: 60 }}>
@@ -210,7 +220,10 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
 
         {/* Diagnosis & Tindakan */}
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-rose-500" /> Top 10 Diagnosis Sp.KKLP</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-rose-500" /> Top 10 Diagnosis Sp.KKLP</h3>
+            {!isPrinting && <ExportButton fileName="Top 10 Diagnosis Sp.KKLP" />}
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={diagData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
@@ -227,7 +240,10 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><HeartPulse className="w-5 h-5 mr-2 text-indigo-500" /> Top 10 Tindakan/Prosedur</h3>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><HeartPulse className="w-5 h-5 mr-2 text-indigo-500" /> Top 10 Tindakan/Prosedur</h3>
+            {!isPrinting && <ExportButton fileName="Top 10 Tindakan/Prosedur" />}
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={tindData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
