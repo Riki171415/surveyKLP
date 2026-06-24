@@ -6,8 +6,10 @@ export default function DeepDiveAIReport({ rawData }) {
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [isGeneratingGemini, setIsGeneratingGemini] = useState(false);
   const [geminiApiKey, setGeminiApiKey] = useState(localStorage.getItem('GEMINI_API_KEY') || '');
+  const [geminiModel, setGeminiModel] = useState(localStorage.getItem('GEMINI_MODEL') || 'gemini-3.5-pro');
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
+  const [tempModel, setTempModel] = useState('gemini-3.5-pro');
   const [geminiError, setGeminiError] = useState('');
   const [geminiReport, setGeminiReport] = useState(null);
 
@@ -21,13 +23,16 @@ export default function DeepDiveAIReport({ rawData }) {
 
   const handleSaveKey = () => {
     localStorage.setItem('GEMINI_API_KEY', tempKey);
+    localStorage.setItem('GEMINI_MODEL', tempModel);
     setGeminiApiKey(tempKey);
+    setGeminiModel(tempModel);
     setShowKeyModal(false);
   };
 
   const handleGenerateGemini = async () => {
     if (!geminiApiKey) {
-      setTempKey('');
+      setTempKey(geminiApiKey);
+      setTempModel(geminiModel);
       setShowKeyModal(true);
       return;
     }
@@ -62,7 +67,7 @@ Data:
 ${JSON.stringify(answers)}
 `;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -180,6 +185,8 @@ ${JSON.stringify(answers)}
             </div>
             <p className="text-sm text-slate-600 mb-4">Masukkan API Key Anda untuk menghubungkan data wawancara ini dengan mesin LLM Gemini secara langsung.</p>
             <input type="password" value={tempKey} onChange={e => setTempKey(e.target.value)} placeholder="AIzaSy..." className="w-full border border-slate-200 rounded-xl px-4 py-2 mb-4 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
+            <p className="text-sm text-slate-600 mb-2">Versi Model Gemini:</p>
+            <input type="text" value={tempModel} onChange={e => setTempModel(e.target.value)} placeholder="gemini-1.5-pro" className="w-full border border-slate-200 rounded-xl px-4 py-2 mb-6 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
             <button onClick={handleSaveKey} className="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl hover:bg-indigo-700 transition">Simpan & Mulai Analisis</button>
           </div>
         </div>,
