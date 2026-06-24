@@ -1,23 +1,39 @@
 import React, { useMemo } from 'react';
 import ExportButton from '../ExportButton';
+import DeepDiveAIReport from './DeepDiveAIReport';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend, LabelList
+  PieChart, Pie, Cell, Legend, LabelList, ScatterChart, Scatter, ZAxis
 } from 'recharts';
-import { Stethoscope, Users, Clock, FileText, CheckCircle } from 'lucide-react';
+import { Stethoscope, Users, Clock, FileText, CheckCircle, Map, Target, AlertTriangle, TrendingUp, Zap } from 'lucide-react';
 
 export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
   const dpmDataFiltered = useMemo(() => {
     return filteredData.filter(row => row.role === 'Dokter Praktik Mandiri' || row.dpm);
   }, [filteredData]);
 
-  const { dpmStats, lamaPraktikData, bebanPasienData, rekamMedisData, keluargaSamaData, aspekData, luaranPelayananData } = useMemo(() => {
+  const { 
+    dpmStats, lamaPraktikData, bebanPasienData, rekamMedisData, keluargaSamaData, aspekData, luaranPelayananData,
+    provinsiData, crossTabKronis, crossTabKunjungan, skorHistogram, skorRendah,
+    gapData, wawancaraTexts
+  } = useMemo(() => {
     const lamaCount = {};
     const bebanCount = {};
     const luaranCount = {};
     const rekamMedisCount = { 'Ya': 0, 'Tidak': 0 };
     const keluargaSamaCount = {};
     const aspekCount = {};
+    const provCount = {};
+    
+    const crossKronis = {};
+    const crossKunjungan = {};
+    
+    const skorDist = { '0-20': 0, '21-40': 0, '41-60': 0, '61-80': 0, '81-100': 0 };
+    const skorRendahList = [];
+    
+    const penyakitCount = {};
+    const tindakanCount = {};
+    const wawancaraList = [];
 
     let totalLayanan = 0;
 
@@ -28,64 +44,106 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
       const kon = dpm.kontinuitas || {};
       const gam = dpm.gambaran || {};
       const poli = dpm.poliKklp || {};
+      const kas = dpm.kasus || {};
 
+      const prov = row.provinsi || 'Lainnya';
+      provCount[prov] = (provCount[prov] || 0) + 1;
+
+      const lp = kar.lamaPraktik || 'Tidak Diisi';
+      const jk = kar.jumlahKunjungan || 'Tidak Diisi';
       if (kar.lamaPraktik) lamaCount[kar.lamaPraktik] = (lamaCount[kar.lamaPraktik] || 0) + 1;
       if (kar.jumlahKunjungan) bebanCount[kar.jumlahKunjungan] = (bebanCount[kar.jumlahKunjungan] || 0) + 1;
 
-      // Rekam Medis Jangka Panjang
-      if (kon.sistemPencatatan) {
-        rekamMedisCount[kon.sistemPencatatan] = (rekamMedisCount[kon.sistemPencatatan] || 0) + 1;
+      const pk = kas.persenKronis || 'Tidak Diisi';
+      if (!crossKronis[lp]) crossKronis[lp] = {};
+      crossKronis[lp][pk] = (crossKronis[lp][pk] || 0) + 1;
+
+      if (!crossKunjungan[lp]) crossKunjungan[lp] = {};
+      crossKunjungan[lp][jk] = (crossKunjungan[lp][jk] || 0) + 1;
+
+      let skor = 0;
+      if (pen.tahuKeluargaInti === 'Selalu' || pen.tahuKeluargaInti === 'Sering') skor += 25;
+      else if (pen.tahuKeluargaInti === 'Kadang-kadang') skor += 10;
+      if (pen.menanganiKeluargaSama && pen.menanganiKeluargaSama !== 'Tidak pernah') skor += 25;
+      if (pen.tanyaKondisiKeluargaLain === 'Selalu' || pen.tanyaKondisiKeluargaLain === 'Sering') skor += 25;
+      else if (pen.tanyaKondisiKeluargaLain === 'Kadang-kadang') skor += 10;
+      if (Array.isArray(pen.aspekDigali) && pen.aspekDigali.length > 1 && !pen.aspekDigali.includes('Tidak ada')) skor += 25;
+
+      if (skor <= 20) skorDist['0-20']++;
+      else if (skor <= 40) skorDist['21-40']++;
+      else if (skor <= 60) skorDist['41-60']++;
+      else if (skor <= 80) skorDist['61-80']++;
+      else skorDist['81-100']++;
+
+      if (skor < 40) {
+        skorRendahList.push({ faskes: row.fktp_name || 'DPM', skor, provinsi: row.provinsi });
       }
 
-      // Menangani Keluarga yang sama
-      if (pen.menanganiKeluargaSama) {
-        keluargaSamaCount[pen.menanganiKeluargaSama] = (keluargaSamaCount[pen.menanganiKeluargaSama] || 0) + 1;
+      if (Array.isArray(kas.masalahKesehatan)) {
+        kas.masalahKesehatan.forEach(m => penyakitCount[m] = (penyakitCount[m] || 0) + 1);
+      }
+      if (Array.isArray(gam.kegiatanDilakukan)) {
+        gam.kegiatanDilakukan.forEach(t => tindakanCount[t] = (tindakanCount[t] || 0) + 1);
       }
 
-      // Aspek Digali
+      if (row.wawancara) wawancaraList.push(row.wawancara);
+
+      if (kon.sistemPencatatan) rekamMedisCount[kon.sistemPencatatan] = (rekamMedisCount[kon.sistemPencatatan] || 0) + 1;
+      if (pen.menanganiKeluargaSama) keluargaSamaCount[pen.menanganiKeluargaSama] = (keluargaSamaCount[pen.menanganiKeluargaSama] || 0) + 1;
+
       if (Array.isArray(pen.aspekDigali)) {
         pen.aspekDigali.forEach(a => {
-          if (a !== 'Tidak ada') {
-            aspekCount[a] = (aspekCount[a] || 0) + 1;
-            totalLayanan++;
-          }
+          if (a !== 'Tidak ada') { aspekCount[a] = (aspekCount[a] || 0) + 1; totalLayanan++; }
         });
       }
-      
-      // Kegiatan Dilakukan
       if (Array.isArray(gam.kegiatanDilakukan)) {
         gam.kegiatanDilakukan.forEach(k => {
-          if (!k.includes('Tidak pernah')) {
-            aspekCount[k] = (aspekCount[k] || 0) + 1;
-            totalLayanan++;
-          }
+          if (!k.includes('Tidak pernah')) { aspekCount[k] = (aspekCount[k] || 0) + 1; totalLayanan++; }
         });
       }
-
-      // Luaran Pelayanan Sp.KKLP
       if (Array.isArray(poli.luaranPelayanan)) {
-        poli.luaranPelayanan.forEach(l => {
-          luaranCount[l] = (luaranCount[l] || 0) + 1;
-        });
+        poli.luaranPelayanan.forEach(l => luaranCount[l] = (luaranCount[l] || 0) + 1);
       }
     });
 
-    const aspekArr = Object.keys(aspekCount).map(k => ({ name: k, value: aspekCount[k] })).sort((a,b) => b.value - a.value);
+    const crossKronisData = Object.keys(crossKronis).map(lp => ({
+      name: lp,
+      '< 25%': crossKronis[lp]['< 25%'] || 0,
+      '25–50%': crossKronis[lp]['25–50%'] || 0,
+      '51–75%': crossKronis[lp]['51–75%'] || 0,
+      '> 75%': crossKronis[lp]['> 75%'] || 0,
+    }));
+    
+    const crossKunjunganData = Object.keys(crossKunjungan).map(lp => ({
+      name: lp,
+      '< 10 pasien': crossKunjungan[lp]['< 10 pasien'] || 0,
+      '10–20 pasien': crossKunjungan[lp]['10–20 pasien'] || 0,
+      '21–30 pasien': crossKunjungan[lp]['21–30 pasien'] || 0,
+      '> 30 pasien': crossKunjungan[lp]['> 30 pasien'] || 0,
+    }));
+
+    const gapDataArr = Object.keys(penyakitCount).map(p => ({
+      name: p,
+      Penyakit: penyakitCount[p],
+      Edukasi: tindakanCount['Edukasi keluarga pasien'] || 0,
+      HomeVisit: tindakanCount['Home visit/kunjungan rumah'] || 0
+    })).sort((a,b) => b.Penyakit - a.Penyakit).slice(0, 5);
 
     return {
-      dpmStats: {
-        totalDpm: dpmDataFiltered.length,
-        top3Layanan: aspekArr.slice(0, 3)
-      },
+      dpmStats: { totalDpm: dpmDataFiltered.length, top3Layanan: Object.keys(aspekCount).map(k => ({ name: k, value: aspekCount[k] })).sort((a,b) => b.value - a.value).slice(0, 3) },
       lamaPraktikData: Object.keys(lamaCount).map(k => ({ name: k, value: lamaCount[k] })).sort((a,b) => b.value - a.value),
       bebanPasienData: Object.keys(bebanCount).map(k => ({ name: k, value: bebanCount[k] })).sort((a,b) => b.value - a.value),
-      rekamMedisData: (rekamMedisCount['Ya'] || rekamMedisCount['Tidak']) ? [
-        { name: 'Sistem Terintegrasi', value: rekamMedisCount['Ya'] || 0 },
-        { name: 'Belum Ada Sistem', value: rekamMedisCount['Tidak'] || 0 }
-      ].filter(d => d.value > 0) : [{ name: 'Belum Ada Data', value: 1 }],
+      rekamMedisData: (rekamMedisCount['Ya'] || rekamMedisCount['Tidak']) ? [{ name: 'Sistem Terintegrasi', value: rekamMedisCount['Ya'] || 0 }, { name: 'Belum Ada Sistem', value: rekamMedisCount['Tidak'] || 0 }].filter(d => d.value > 0) : [{ name: 'Belum Ada Data', value: 1 }],
       keluargaSamaData: Object.keys(keluargaSamaCount).length > 0 ? Object.keys(keluargaSamaCount).map(k => ({ name: k, value: keluargaSamaCount[k] })).sort((a,b) => b.value - a.value) : [{ name: 'Belum Ada Data', value: 1 }],
-      aspekData: aspekArr.slice(0, 7), // Top 7 Kegiatan/Aspek
-      luaranPelayananData: Object.keys(luaranCount).map(k => ({ name: k, value: luaranCount[k] })).sort((a,b) => b.value - a.value)
+      aspekData: Object.keys(aspekCount).map(k => ({ name: k, value: aspekCount[k] })).sort((a,b) => b.value - a.value).slice(0, 7),
+      luaranPelayananData: Object.keys(luaranCount).map(k => ({ name: k, value: luaranCount[k] })).sort((a,b) => b.value - a.value),
+      provinsiData: Object.keys(provCount).map(k => ({ name: k, value: provCount[k] })).sort((a,b) => b.value - a.value).slice(0, 10),
+      crossTabKronis: crossKronisData,
+      crossTabKunjungan: crossKunjunganData,
+      skorHistogram: Object.keys(skorDist).map(k => ({ name: k, value: skorDist[k] })),
+      skorRendah: skorRendahList,
+      gapData: gapDataArr,
+      wawancaraTexts: wawancaraList
     };
   }, [dpmDataFiltered]);
 
@@ -226,7 +284,116 @@ export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
             </div>
           </div>
         )}
+
+        {/* NEW CHARTS */}
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Map className="w-5 h-5 mr-2 text-primary-600" /> Distribusi Provinsi</h3>
+            {!isPrinting && <ExportButton fileName="Distribusi Provinsi DPM" />}
+          </div>
+          <div className="h-80">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <BarChart data={provinsiData} margin={{ top: 20, right: 30, left: 0, bottom: 50 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} angle={-45} textAnchor="end" />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="value" name="Jumlah DPM" fill="#3b82f6" radius={[6, 6, 0, 0]} maxBarSize={50}>
+                  <LabelList dataKey="value" position="top" fill="#475569" fontSize={12} fontWeight={600} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><TrendingUp className="w-5 h-5 mr-2 text-indigo-600" /> Cross-Tab: Lama Praktik vs % Kasus Kronis</h3>
+            {!isPrinting && <ExportButton fileName="CrossTab Kronis" />}
+          </div>
+          <div className="h-80">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <BarChart data={crossTabKronis} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                <Bar dataKey="< 25%" stackId="a" fill="#94a3b8" />
+                <Bar dataKey="25–50%" stackId="a" fill="#3b82f6" />
+                <Bar dataKey="51–75%" stackId="a" fill="#f59e0b" />
+                <Bar dataKey="> 75%" stackId="a" fill="#ef4444" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Target className="w-5 h-5 mr-2 text-emerald-600" /> Skor Indeks Pelayanan KKLP</h3>
+            {!isPrinting && <ExportButton fileName="Skor Indeks KKLP" />}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-80">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <BarChart data={skorHistogram} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} DPM`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="value" name="Jumlah DPM" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={50}>
+                  <LabelList dataKey="value" position="top" fill="#475569" fontSize={12} fontWeight={600} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="bg-slate-50 rounded-xl p-4 overflow-y-auto border border-slate-100 h-full">
+              <h4 className="font-bold text-slate-700 mb-3 flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-rose-500"/> Need Improvement (Skor &lt; 40)</h4>
+              {skorRendah.length > 0 ? (
+                <ul className="space-y-3">
+                  {skorRendah.map((s, i) => (
+                    <li key={i} className="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200">
+                      <div>
+                        <p className="font-semibold text-slate-800 text-sm truncate max-w-[200px]">{s.faskes}</p>
+                        <p className="text-xs text-slate-500">{s.provinsi}</p>
+                      </div>
+                      <span className="font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded text-sm">{s.skor}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-slate-500 italic">Semua DPM memiliki skor di atas 40. Sangat baik!</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Zap className="w-5 h-5 mr-2 text-amber-500" /> Gap Analysis (Penyakit vs Tindakan)</h3>
+            {!isPrinting && <ExportButton fileName="Gap Analysis" />}
+          </div>
+          <div className="h-80">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <BarChart data={gapData} margin={{ top: 20, right: 30, left: 0, bottom: 50 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} angle={-15} textAnchor="end" />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Legend verticalAlign="top" height={36} iconType="circle" />
+                <Bar dataKey="Penyakit" fill="#ef4444" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="Edukasi" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="HomeVisit" fill="#10b981" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
+      
+      {/* Qualitative Deep Dive Khusus DPM */}
+      {wawancaraTexts.length > 0 && (
+        <div className="mt-12">
+          <DeepDiveAIReport rawData={wawancaraTexts} />
+        </div>
+      )}
     </div>
   );
 }

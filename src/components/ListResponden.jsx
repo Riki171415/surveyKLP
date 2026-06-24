@@ -129,7 +129,7 @@ export default function ListResponden() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1.5 text-slate-600 text-sm">
                       <MapPin className="w-4 h-4 text-slate-400" />
-                      <span>{row.city || '-'}, {row.provinsi || '-'}</span>
+                      <span>{row.provinsi || '-'}, {row.kab_kota || '-'}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">

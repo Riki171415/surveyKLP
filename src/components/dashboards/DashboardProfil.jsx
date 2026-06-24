@@ -9,13 +9,14 @@ import { Users, Stethoscope, Building, Map } from 'lucide-react';
 export default function DashboardProfil({ filteredData, COLORS, isPrinting }) {
   const totalResponden = filteredData.length;
 
-  const { roleChartData, spkklpCount, fktpTypeData, regionalData } = useMemo(() => {
+  const { roleChartData, spkklpCount, fktpTypeData, uniqueFktpTypeData, regionalData } = useMemo(() => {
     const roleCount = {}; 
     const fktpTypeCount = { 'Puskesmas': 0, 'Klinik': 0, 'Dokter Praktik Mandiri': 0 };
+    const uniqueFktp = { 'Puskesmas': new Set(), 'Klinik': new Set(), 'Dokter Praktik Mandiri': new Set() };
     const regionalCount = {};
     let spkklpCount = 0;
 
-    filteredData.forEach(row => {
+    filteredData.forEach((row, index) => {
       // Role
       const role = row.role || 'Lainnya'; 
       roleCount[role] = (roleCount[role] || 0) + 1;
@@ -26,15 +27,21 @@ export default function DashboardProfil({ filteredData, COLORS, isPrinting }) {
 
       // FKTP Type (Puskesmas, Klinik, DPM)
       const fName = (row.fktp_name || '').toLowerCase();
+      const uniqueName = fName.trim() || `Unnamed-${index}`;
+      
       if (row.jenis_faskes === 'Puskesmas' || row.jenis_faskes === 'Klinik' || row.jenis_faskes === 'Dokter Praktik Mandiri') {
         fktpTypeCount[row.jenis_faskes]++;
+        uniqueFktp[row.jenis_faskes].add(uniqueName);
       } else {
         if (role === 'Dokter Praktik Mandiri') {
           fktpTypeCount['Dokter Praktik Mandiri']++;
+          uniqueFktp['Dokter Praktik Mandiri'].add(uniqueName);
         } else if (fName.includes('puskesmas') || fName.includes('pkm') || fName.includes('puseksmas') || fName.includes('puskes')) {
           fktpTypeCount['Puskesmas']++;
+          uniqueFktp['Puskesmas'].add(uniqueName);
         } else {
           fktpTypeCount['Klinik']++;
+          uniqueFktp['Klinik'].add(uniqueName);
         }
       }
 
@@ -47,6 +54,7 @@ export default function DashboardProfil({ filteredData, COLORS, isPrinting }) {
       roleChartData: Object.keys(roleCount).map(key => ({ name: key, value: roleCount[key] })).sort((a,b) => b.value - a.value),
       spkklpCount,
       fktpTypeData: Object.keys(fktpTypeCount).filter(k => fktpTypeCount[k] > 0).map(key => ({ name: key, value: fktpTypeCount[key] })),
+      uniqueFktpTypeData: Object.keys(uniqueFktp).filter(k => uniqueFktp[k].size > 0).map(key => ({ name: key, value: uniqueFktp[key].size })),
       regionalData: Object.keys(regionalCount).map(key => ({ name: key, value: regionalCount[key] })).sort((a,b) => b.value - a.value).slice(0, 10)
     };
   }, [filteredData]);
@@ -77,11 +85,22 @@ export default function DashboardProfil({ filteredData, COLORS, isPrinting }) {
         <StatCard title="FKTP dengan Sp.KKLP" value={spkklpCount || 0} subtitle={`${totalResponden > 0 ? Math.round((spkklpCount / totalResponden) * 100) : 0}% dari total`} icon={Stethoscope} colorClass="bg-primary-500 text-primary-600 bg-primary-100" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="mt-8 border-t border-slate-100 pt-8">
+        <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center">
+          <Building className="w-6 h-6 mr-2 text-indigo-600" /> Institusi FKTP Berpartisipasi (Unik Berdasarkan Nama)
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+          <StatCard title="Puskesmas Unik" value={uniqueFktpTypeData.find(d => d.name === 'Puskesmas')?.value || 0} icon={Building} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
+          <StatCard title="Klinik Unik" value={uniqueFktpTypeData.find(d => d.name === 'Klinik')?.value || 0} icon={Building} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
+          <StatCard title="DPM Unik" value={uniqueFktpTypeData.find(d => d.name === 'Dokter Praktik Mandiri')?.value || 0} icon={Stethoscope} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
-            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Building className="w-5 h-5 mr-2 text-primary-600" /> Proporsi Jenis FKTP</h3>
-            {!isPrinting && <ExportButton fileName="Proporsi Jenis FKTP" />}
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Building className="w-5 h-5 mr-2 text-primary-600" /> Proporsi Responden per FKTP</h3>
+            {!isPrinting && <ExportButton fileName="Proporsi Responden per FKTP" />}
           </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
@@ -89,7 +108,25 @@ export default function DashboardProfil({ filteredData, COLORS, isPrinting }) {
                 <Pie data={fktpTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
                   {fktpTypeData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
-                <RechartsTooltip formatter={(value) => [`${value} FKTP`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <RechartsTooltip formatter={(value) => [`${value} Responden`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Legend verticalAlign="bottom" height={36} iconType="circle" />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Building className="w-5 h-5 mr-2 text-indigo-600" /> Proporsi FKTP Unik</h3>
+            {!isPrinting && <ExportButton fileName="Proporsi FKTP Unik" />}
+          </div>
+          <div className="h-72">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <PieChart>
+                <Pie data={uniqueFktpTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                  {uniqueFktpTypeData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />)}
+                </Pie>
+                <RechartsTooltip formatter={(value) => [`${value} Institusi`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                 <Legend verticalAlign="bottom" height={36} iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
