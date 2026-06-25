@@ -1,13 +1,14 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import wilayahMapping from '../../data/wilayahMapping.json';
 import ExportButton from '../ExportButton';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList
 } from 'recharts';
-import { Users, Stethoscope, Building, Map } from 'lucide-react';
+import { Users, Stethoscope, Building, Map, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
+  const [expandedProv, setExpandedProv] = useState(null);
   const totalResponden = filteredData.length;
   const totalFktp = uniqueFktpData.length;
 
@@ -53,43 +54,90 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
     const normalizeProv = (p) => p ? p.toLowerCase().replace(/[^a-z0-9]/g, '') : 'lainnya';
     const regionalTargetNormalized = {};
     const originalProvNames = {};
+    const kabKotaTargetNormalized = {};
+    const originalKabNames = {};
 
     if (wilayahMapping.fktp) {
       Object.keys(wilayahMapping.fktp).forEach(prov => {
         let count = 0;
-        Object.values(wilayahMapping.fktp[prov]).forEach(arr => count += arr.length);
-        const norm = normalizeProv(prov);
-        regionalTargetNormalized[norm] = (regionalTargetNormalized[norm] || 0) + count;
-        originalProvNames[norm] = prov;
+        const normProv = normalizeProv(prov);
+        regionalTargetNormalized[normProv] = regionalTargetNormalized[normProv] || 0;
+        kabKotaTargetNormalized[normProv] = kabKotaTargetNormalized[normProv] || {};
+        originalProvNames[normProv] = prov;
+        originalKabNames[normProv] = originalKabNames[normProv] || {};
+
+        Object.keys(wilayahMapping.fktp[prov]).forEach(kab => {
+          const arr = wilayahMapping.fktp[prov][kab];
+          const c = arr.length;
+          count += c;
+          const normKab = normalizeProv(kab);
+          kabKotaTargetNormalized[normProv][normKab] = (kabKotaTargetNormalized[normProv][normKab] || 0) + c;
+          originalKabNames[normProv][normKab] = kab;
+        });
+        regionalTargetNormalized[normProv] += count;
       });
     }
     
     if (wilayahMapping.dpm) {
       Object.keys(wilayahMapping.dpm).forEach(prov => {
         let count = 0;
-        Object.values(wilayahMapping.dpm[prov]).forEach(arr => count += arr.length);
-        const norm = normalizeProv(prov);
-        regionalTargetNormalized[norm] = (regionalTargetNormalized[norm] || 0) + count;
-        if (!originalProvNames[norm]) originalProvNames[norm] = prov;
+        const normProv = normalizeProv(prov);
+        regionalTargetNormalized[normProv] = regionalTargetNormalized[normProv] || 0;
+        kabKotaTargetNormalized[normProv] = kabKotaTargetNormalized[normProv] || {};
+        if (!originalProvNames[normProv]) originalProvNames[normProv] = prov;
+        originalKabNames[normProv] = originalKabNames[normProv] || {};
+
+        Object.keys(wilayahMapping.dpm[prov]).forEach(kab => {
+          const arr = wilayahMapping.dpm[prov][kab];
+          const c = arr.length;
+          count += c;
+          const normKab = normalizeProv(kab);
+          kabKotaTargetNormalized[normProv][normKab] = (kabKotaTargetNormalized[normProv][normKab] || 0) + c;
+          if (!originalKabNames[normProv][normKab]) originalKabNames[normProv][normKab] = kab;
+        });
+        regionalTargetNormalized[normProv] += count;
       });
     }
 
     const uniqueRegionalCountNormalized = {};
+    const uniqueKabKotaCountNormalized = {};
+
     uniqueFktpData.forEach(row => {
       const prov = row.provinsi || 'Lainnya';
-      const norm = prov !== 'Lainnya' ? normalizeProv(prov) : prov;
-      uniqueRegionalCountNormalized[norm] = (uniqueRegionalCountNormalized[norm] || 0) + 1;
-      if (!originalProvNames[norm]) {
-        originalProvNames[norm] = prov;
-      }
+      const normProv = prov !== 'Lainnya' ? normalizeProv(prov) : prov;
+      uniqueRegionalCountNormalized[normProv] = (uniqueRegionalCountNormalized[normProv] || 0) + 1;
+      if (!originalProvNames[normProv]) originalProvNames[normProv] = prov;
+
+      const kab = row.kab_kota || row.city || 'Lainnya';
+      const normKab = kab !== 'Lainnya' ? normalizeProv(kab) : kab;
+      
+      uniqueKabKotaCountNormalized[normProv] = uniqueKabKotaCountNormalized[normProv] || {};
+      uniqueKabKotaCountNormalized[normProv][normKab] = (uniqueKabKotaCountNormalized[normProv][normKab] || 0) + 1;
+
+      originalKabNames[normProv] = originalKabNames[normProv] || {};
+      if (!originalKabNames[normProv][normKab]) originalKabNames[normProv][normKab] = kab;
     });
 
-    const partisipasiData = Object.keys(originalProvNames).map(norm => {
-      const target = regionalTargetNormalized[norm] || 0;
-      const capaian = uniqueRegionalCountNormalized[norm] || 0;
+    const partisipasiData = Object.keys(originalProvNames).map(normProv => {
+      const target = regionalTargetNormalized[normProv] || 0;
+      const capaian = uniqueRegionalCountNormalized[normProv] || 0;
       if (target === 0 && capaian === 0) return null;
       const persentase = target > 0 ? (capaian / target) * 100 : (capaian > 0 ? 100 : 0);
-      return { provinsi: originalProvNames[norm], target, capaian, persentase };
+
+      const kabKotaList = Object.keys(originalKabNames[normProv] || {}).map(normKab => {
+        const kTarget = kabKotaTargetNormalized[normProv]?.[normKab] || 0;
+        const kCapaian = uniqueKabKotaCountNormalized[normProv]?.[normKab] || 0;
+        if (kTarget === 0 && kCapaian === 0) return null;
+        const kPersentase = kTarget > 0 ? (kCapaian / kTarget) * 100 : (kCapaian > 0 ? 100 : 0);
+        return {
+          kabKota: originalKabNames[normProv][normKab],
+          target: kTarget,
+          capaian: kCapaian,
+          persentase: kPersentase
+        };
+      }).filter(Boolean).sort((a, b) => b.capaian - a.capaian);
+
+      return { provinsi: originalProvNames[normProv], target, capaian, persentase, kabKotaList };
     }).filter(Boolean).sort((a, b) => b.capaian - a.capaian);
 
     return {
@@ -127,6 +175,17 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
         <StatCard title="FKTP dengan Sp.KKLP" value={spkklpCount || 0} subtitle={`${uniqueFktpData.length > 0 ? Math.round((spkklpCount / uniqueFktpData.length) * 100) : 0}% dari total FKTP`} icon={Stethoscope} colorClass="bg-primary-500 text-primary-600 bg-primary-100" />
       </div>
 
+      <div className="mt-8 border-t border-slate-100 pt-8 mb-8">
+        <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center">
+          <Building className="w-6 h-6 mr-2 text-indigo-600" /> Institusi FKTP Berpartisipasi (Unik Berdasarkan Nama)
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <StatCard title="Puskesmas Unik" value={uniqueFktpTypeData.find(d => d.name === 'Puskesmas')?.value || 0} icon={Building} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
+          <StatCard title="Klinik Unik" value={uniqueFktpTypeData.find(d => d.name === 'Klinik')?.value || 0} icon={Building} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
+          <StatCard title="DPM Unik" value={uniqueFktpTypeData.find(d => d.name === 'Dokter Praktik Mandiri')?.value || 0} icon={Stethoscope} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
@@ -136,7 +195,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
           <div className="flex-1 min-h-[300px]">
             <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <PieChart>
-                <Pie data={fktpTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                <Pie data={fktpTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
                   {fktpTypeData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
                 <RechartsTooltip formatter={(value) => [`${value} Responden`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
@@ -154,7 +213,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
           <div className="flex-1 min-h-[300px]">
             <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <PieChart>
-                <Pie data={uniqueFktpTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                <Pie data={uniqueFktpTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
                   {uniqueFktpTypeData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />)}
                 </Pie>
                 <RechartsTooltip formatter={(value) => [`${value} Institusi`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
@@ -221,24 +280,77 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
             </thead>
             <tbody className="divide-y divide-slate-50">
               {partisipasiData.map((row, i) => (
-                <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-slate-800">{row.provinsi}</td>
-                  <td className="px-6 py-4 text-center text-slate-600">{row.target.toLocaleString('id-ID')}</td>
-                  <td className="px-6 py-4 text-center font-bold text-primary-700">{row.capaian.toLocaleString('id-ID')}</td>
-                  <td className="px-6 py-4 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full ${row.persentase >= 80 ? 'bg-emerald-500' : row.persentase >= 50 ? 'bg-amber-500' : 'bg-rose-500'}`} 
-                          style={{ width: `${Math.min(row.persentase, 100)}%` }}
-                        ></div>
+                <React.Fragment key={i}>
+                  <tr 
+                    onClick={() => setExpandedProv(expandedProv === row.provinsi ? null : row.provinsi)}
+                    className="hover:bg-slate-50/50 transition-colors cursor-pointer group"
+                  >
+                    <td className="px-6 py-4 font-medium text-slate-800 flex items-center gap-2">
+                      <div className={`p-1 rounded-md transition-colors ${expandedProv === row.provinsi ? 'bg-primary-100 text-primary-600' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
+                        {expandedProv === row.provinsi ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </div>
-                      <span className={`text-xs font-bold ${row.persentase >= 80 ? 'text-emerald-700' : row.persentase >= 50 ? 'text-amber-700' : 'text-rose-700'}`}>
-                        {row.persentase.toFixed(1)}%
-                      </span>
-                    </div>
-                  </td>
-                </tr>
+                      {row.provinsi}
+                    </td>
+                    <td className="px-6 py-4 text-center text-slate-600">{row.target.toLocaleString('id-ID')}</td>
+                    <td className="px-6 py-4 text-center font-bold text-primary-700">{row.capaian.toLocaleString('id-ID')}</td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full ${row.persentase >= 80 ? 'bg-emerald-500' : row.persentase >= 50 ? 'bg-amber-500' : 'bg-rose-500'}`} 
+                            style={{ width: `${Math.min(row.persentase, 100)}%` }}
+                          ></div>
+                        </div>
+                        <span className={`text-xs font-bold ${row.persentase >= 80 ? 'text-emerald-700' : row.persentase >= 50 ? 'text-amber-700' : 'text-rose-700'}`}>
+                          {row.persentase.toFixed(1)}%
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                  {expandedProv === row.provinsi && (
+                    <tr className="bg-slate-50/30">
+                      <td colSpan="4" className="px-0 py-0">
+                        <div className="px-10 py-4 border-l-4 border-l-primary-400 ml-8 mb-4 mt-2 bg-white rounded-r-xl shadow-sm border-t border-b border-r border-slate-100">
+                          <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center">
+                            <Map className="w-4 h-4 mr-2 text-primary-500" />
+                            Detail Kabupaten/Kota di {row.provinsi}
+                          </h4>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs">
+                              <thead className="text-slate-500 border-b border-slate-100">
+                                <tr>
+                                  <th className="py-2 font-medium">Kabupaten/Kota</th>
+                                  <th className="py-2 font-medium text-center">Target</th>
+                                  <th className="py-2 font-medium text-center">Capaian</th>
+                                  <th className="py-2 font-medium text-center">Persentase</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-50">
+                                {row.kabKotaList.map((kabRow, j) => (
+                                  <tr key={j} className="hover:bg-slate-50">
+                                    <td className="py-2 text-slate-700 font-medium">{kabRow.kabKota}</td>
+                                    <td className="py-2 text-slate-500 text-center">{kabRow.target.toLocaleString('id-ID')}</td>
+                                    <td className="py-2 text-primary-600 font-bold text-center">{kabRow.capaian.toLocaleString('id-ID')}</td>
+                                    <td className="py-2 text-center">
+                                      <span className={`px-2 py-1 rounded-md font-bold ${kabRow.persentase >= 80 ? 'bg-emerald-100 text-emerald-700' : kabRow.persentase >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'}`}>
+                                        {kabRow.persentase.toFixed(1)}%
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                                {row.kabKotaList.length === 0 && (
+                                  <tr>
+                                    <td colSpan="4" className="py-4 text-center text-slate-400">Tidak ada data detail wilayah.</td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
