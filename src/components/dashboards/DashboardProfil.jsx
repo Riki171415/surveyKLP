@@ -106,8 +106,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
       const prov = row.provinsi || 'Lainnya';
       const normProv = prov !== 'Lainnya' ? normalizeProv(prov) : prov;
       uniqueRegionalCountNormalized[normProv] = (uniqueRegionalCountNormalized[normProv] || 0) + 1;
-      if (!originalProvNames[normProv]) originalProvNames[normProv] = prov;
-
+      
       const kab = row.kab_kota || row.city || 'Lainnya';
       const normKab = kab !== 'Lainnya' ? normalizeProv(kab) : kab;
       
