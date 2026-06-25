@@ -5,10 +5,36 @@ import {
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList
 } from 'recharts';
-import { Users, Stethoscope, Building, Map, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, Stethoscope, Building, Map, ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
+
+const normalizeStr = (s) => s ? s.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+const normalizeProv = (p) => p ? p.toLowerCase().replace(/[^a-z0-9]/g, '') : 'lainnya';
+
+// Precompute reverse lookup map once
+const faskesToKabMap = {};
+if (wilayahMapping.fktp) {
+  for (const prov in wilayahMapping.fktp) {
+    for (const kab in wilayahMapping.fktp[prov]) {
+      wilayahMapping.fktp[prov][kab].forEach(faskes => {
+        faskesToKabMap[normalizeStr(faskes)] = { prov, kab, type: 'FKTP/Klinik' };
+      });
+    }
+  }
+}
+if (wilayahMapping.dpm) {
+  for (const prov in wilayahMapping.dpm) {
+    for (const kab in wilayahMapping.dpm[prov]) {
+      wilayahMapping.dpm[prov][kab].forEach(faskes => {
+        faskesToKabMap[normalizeStr(faskes)] = { prov, kab, type: 'DPM' };
+      });
+    }
+  }
+}
 
 export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const [expandedProv, setExpandedProv] = useState(null);
+  const [expandedKab, setExpandedKab] = useState(null);
+  
   const totalResponden = filteredData.length;
   const totalFktp = uniqueFktpData.length;
 
@@ -50,8 +76,6 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
       uniqueFktpTypeCount[type]++;
     });
 
-
-    const normalizeProv = (p) => p ? p.toLowerCase().replace(/[^a-z0-9]/g, '') : 'lainnya';
     const regionalTargetNormalized = {};
     const originalProvNames = {};
     const kabKotaTargetNormalized = {};
@@ -101,13 +125,29 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
 
     const uniqueRegionalCountNormalized = {};
     const uniqueKabKotaCountNormalized = {};
+    
+    // Group uniqueFktpData by originalProv and originalKab for faster drill-down mapping
+    const groupedFktpData = {};
 
     uniqueFktpData.forEach(row => {
-      const prov = row.provinsi || 'Lainnya';
+      let prov = row.provinsi || 'Lainnya';
+      let kab = row.kab_kota || row.city || 'Lainnya';
+      const nf = normalizeStr(row.fktp_name);
+      
+      // REVERSE LOOKUP: Force official Province and Kab/Kota if Faskes matches
+      const officialRegion = faskesToKabMap[nf];
+      if (officialRegion) {
+         prov = officialRegion.prov;
+         kab = officialRegion.kab;
+      }
+      
+      if (!groupedFktpData[prov]) groupedFktpData[prov] = {};
+      if (!groupedFktpData[prov][kab]) groupedFktpData[prov][kab] = [];
+      groupedFktpData[prov][kab].push({ name: row.fktp_name, nf });
+
       const normProv = prov !== 'Lainnya' ? normalizeProv(prov) : prov;
       uniqueRegionalCountNormalized[normProv] = (uniqueRegionalCountNormalized[normProv] || 0) + 1;
       
-      const kab = row.kab_kota || row.city || 'Lainnya';
       const normKab = kab !== 'Lainnya' ? normalizeProv(kab) : kab;
       
       uniqueKabKotaCountNormalized[normProv] = uniqueKabKotaCountNormalized[normProv] || {};
@@ -123,16 +163,50 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
       if (target === 0 && capaian === 0) return null;
       const persentase = target > 0 ? (capaian / target) * 100 : (capaian > 0 ? 100 : 0);
 
+      const originalProv = originalProvNames[normProv];
+
       const kabKotaList = Object.keys(originalKabNames[normProv] || {}).map(normKab => {
         const kTarget = kabKotaTargetNormalized[normProv]?.[normKab] || 0;
         const kCapaian = uniqueKabKotaCountNormalized[normProv]?.[normKab] || 0;
         if (kTarget === 0 && kCapaian === 0) return null;
+        
+        const originalKab = originalKabNames[normProv][normKab];
+        
+        // Build Target list for this kab
+        const faskesListMap = {}; // name -> { name, type, target, capaian }
+        
+        if (wilayahMapping.fktp[originalProv] && wilayahMapping.fktp[originalProv][originalKab]) {
+           wilayahMapping.fktp[originalProv][originalKab].forEach(f => {
+              faskesListMap[normalizeStr(f)] = { name: f, type: 'FKTP/Klinik', target: 1, capaian: 0 };
+           });
+        }
+        if (wilayahMapping.dpm[originalProv] && wilayahMapping.dpm[originalProv][originalKab]) {
+           wilayahMapping.dpm[originalProv][originalKab].forEach(f => {
+              faskesListMap[normalizeStr(f)] = { name: f, type: 'DPM', target: 1, capaian: 0 };
+           });
+        }
+
+        const respondentsInKab = groupedFktpData[originalProv]?.[originalKab] || [];
+        respondentsInKab.forEach(r => {
+           if (faskesListMap[r.nf]) {
+              faskesListMap[r.nf].capaian = 1;
+           } else {
+              faskesListMap[r.nf] = { name: r.name || 'Lainnya', type: 'Unmapped', target: 0, capaian: 1 };
+           }
+        });
+        
+        const faskesList = Object.values(faskesListMap).sort((a,b) => {
+           if (b.capaian !== a.capaian) return b.capaian - a.capaian;
+           return a.name.localeCompare(b.name);
+        });
+
         const kPersentase = kTarget > 0 ? (kCapaian / kTarget) * 100 : (kCapaian > 0 ? 100 : 0);
         return {
-          kabKota: originalKabNames[normProv][normKab],
+          kabKota: originalKab,
           target: kTarget,
           capaian: kCapaian,
-          persentase: kPersentase
+          persentase: kPersentase,
+          faskesList
         };
       }).filter(Boolean).sort((a, b) => b.capaian - a.capaian);
 
@@ -281,7 +355,10 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
               {partisipasiData.map((row, i) => (
                 <React.Fragment key={i}>
                   <tr 
-                    onClick={() => setExpandedProv(expandedProv === row.provinsi ? null : row.provinsi)}
+                    onClick={() => {
+                      setExpandedProv(expandedProv === row.provinsi ? null : row.provinsi);
+                      setExpandedKab(null);
+                    }}
                     className="hover:bg-slate-50/50 transition-colors cursor-pointer group"
                   >
                     <td className="px-6 py-4 font-medium text-slate-800 flex items-center gap-2">
@@ -309,33 +386,88 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
                   {expandedProv === row.provinsi && (
                     <tr className="bg-slate-50/30">
                       <td colSpan="4" className="px-0 py-0">
-                        <div className="px-10 py-4 border-l-4 border-l-primary-400 ml-8 mb-4 mt-2 bg-white rounded-r-xl shadow-sm border-t border-b border-r border-slate-100">
+                        <div className="px-6 py-4 border-l-4 border-l-primary-400 ml-8 mb-4 mt-2 bg-white rounded-r-xl shadow-sm border-t border-b border-r border-slate-100">
                           <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center">
                             <Map className="w-4 h-4 mr-2 text-primary-500" />
                             Detail Kabupaten/Kota di {row.provinsi}
                           </h4>
                           <div className="overflow-x-auto">
                             <table className="w-full text-left text-xs">
-                              <thead className="text-slate-500 border-b border-slate-100">
+                              <thead className="text-slate-500 border-b border-slate-100 bg-slate-50">
                                 <tr>
-                                  <th className="py-2 font-medium">Kabupaten/Kota</th>
-                                  <th className="py-2 font-medium text-center">Target</th>
-                                  <th className="py-2 font-medium text-center">Capaian</th>
-                                  <th className="py-2 font-medium text-center">Persentase</th>
+                                  <th className="px-4 py-2 font-medium">Kabupaten/Kota</th>
+                                  <th className="px-4 py-2 font-medium text-center">Target</th>
+                                  <th className="px-4 py-2 font-medium text-center">Capaian</th>
+                                  <th className="px-4 py-2 font-medium text-center">Persentase</th>
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-50">
                                 {row.kabKotaList.map((kabRow, j) => (
-                                  <tr key={j} className="hover:bg-slate-50">
-                                    <td className="py-2 text-slate-700 font-medium">{kabRow.kabKota}</td>
-                                    <td className="py-2 text-slate-500 text-center">{kabRow.target.toLocaleString('id-ID')}</td>
-                                    <td className="py-2 text-primary-600 font-bold text-center">{kabRow.capaian.toLocaleString('id-ID')}</td>
-                                    <td className="py-2 text-center">
-                                      <span className={`px-2 py-1 rounded-md font-bold ${kabRow.persentase >= 80 ? 'bg-emerald-100 text-emerald-700' : kabRow.persentase >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'}`}>
-                                        {kabRow.persentase.toFixed(1)}%
-                                      </span>
-                                    </td>
-                                  </tr>
+                                  <React.Fragment key={j}>
+                                    <tr 
+                                      className="hover:bg-slate-100 cursor-pointer"
+                                      onClick={() => setExpandedKab(expandedKab === kabRow.kabKota ? null : kabRow.kabKota)}
+                                    >
+                                      <td className="px-4 py-3 text-slate-700 font-medium flex items-center gap-2">
+                                        <div className={`p-0.5 rounded transition-colors ${expandedKab === kabRow.kabKota ? 'bg-primary-100 text-primary-600' : 'bg-slate-200 text-slate-500'}`}>
+                                          {expandedKab === kabRow.kabKota ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                        </div>
+                                        {kabRow.kabKota}
+                                      </td>
+                                      <td className="px-4 py-3 text-slate-500 text-center">{kabRow.target.toLocaleString('id-ID')}</td>
+                                      <td className="px-4 py-3 text-primary-600 font-bold text-center">{kabRow.capaian.toLocaleString('id-ID')}</td>
+                                      <td className="px-4 py-3 text-center">
+                                        <span className={`px-2 py-1 rounded-md font-bold ${kabRow.persentase >= 80 ? 'bg-emerald-100 text-emerald-700' : kabRow.persentase >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'}`}>
+                                          {kabRow.persentase.toFixed(1)}%
+                                        </span>
+                                      </td>
+                                    </tr>
+                                    {expandedKab === kabRow.kabKota && (
+                                      <tr className="bg-slate-50/50">
+                                        <td colSpan="4" className="px-0 py-0">
+                                          <div className="px-4 py-3 ml-8 border-l-2 border-l-indigo-300 bg-white shadow-inner max-h-[300px] overflow-y-auto">
+                                            <table className="w-full text-left text-xs">
+                                              <thead className="text-slate-400 border-b border-slate-100 sticky top-0 bg-white">
+                                                <tr>
+                                                  <th className="py-2 px-2 font-medium">Nama Faskes</th>
+                                                  <th className="py-2 px-2 font-medium">Jenis</th>
+                                                  <th className="py-2 px-2 font-medium text-center">Status</th>
+                                                </tr>
+                                              </thead>
+                                              <tbody className="divide-y divide-slate-50">
+                                                {kabRow.faskesList.map((f, k) => (
+                                                  <tr key={k} className="hover:bg-slate-50">
+                                                    <td className={`py-2 px-2 font-medium ${f.capaian > 0 ? 'text-slate-800' : 'text-slate-500'}`}>{f.name}</td>
+                                                    <td className="py-2 px-2 text-slate-500">
+                                                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${f.type === 'Unmapped' ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-600'}`}>
+                                                        {f.type}
+                                                      </span>
+                                                    </td>
+                                                    <td className="py-2 px-2 text-center">
+                                                      {f.capaian > 0 ? (
+                                                        <div className="flex items-center justify-center text-emerald-600 font-medium">
+                                                          <CheckCircle className="w-3.5 h-3.5 mr-1" /> Sudah Isi
+                                                        </div>
+                                                      ) : (
+                                                        <div className="flex items-center justify-center text-rose-500">
+                                                          <XCircle className="w-3.5 h-3.5 mr-1 opacity-70" /> Belum
+                                                        </div>
+                                                      )}
+                                                    </td>
+                                                  </tr>
+                                                ))}
+                                                {kabRow.faskesList.length === 0 && (
+                                                  <tr>
+                                                    <td colSpan="3" className="py-3 text-center text-slate-400">Tidak ada daftar Faskes target.</td>
+                                                  </tr>
+                                                )}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    )}
+                                  </React.Fragment>
                                 ))}
                                 {row.kabKotaList.length === 0 && (
                                   <tr>
