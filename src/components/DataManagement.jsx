@@ -447,10 +447,16 @@ export default function DataManagement() {
                       ${selected?.id === row.id ? 'bg-primary-50/50 border-l-4 border-l-primary-500 shadow-sm' : 'border-l-4 border-l-transparent hover:bg-slate-50 hover:shadow-sm hover:border-l-slate-300'}`}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className={`font-bold text-sm truncate ${selected?.id === row.id ? 'text-primary-700' : 'text-slate-800'}`}>{row.fktp_name}</p>
-                      <p className="text-xs text-slate-500 font-medium truncate mt-0.5">{row.kab_kota || row.city || '-'}</p>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                        <p className={`font-bold text-sm truncate ${selected?.id === row.id ? 'text-primary-700' : 'text-slate-800'}`}>{row.fktp_name}</p>
+                        <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono border border-slate-200" title="Kode Faskes">{row.kode_faskes || 'Tanpa Kode'}</span>
+                      </div>
+                      <p className="text-xs text-slate-500 font-medium truncate">{row.kab_kota || row.city || '-'}</p>
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
                         <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md ${roleBadge(row.role)}`}>{row.role}</span>
+                        <span className="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200 truncate max-w-[120px]" title={`Responden: ${row.nama_responden || 'Tanpa Nama'}`}>
+                          👤 {row.nama_responden || 'Tanpa Nama'}
+                        </span>
                         <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md" title={`Waktu Submit: ${new Date(row.created_at).toLocaleString('id-ID')}`}>
                           {new Date(row.updated_at || row.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>
