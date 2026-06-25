@@ -41,15 +41,32 @@ export default function DeepDiveAIReport({ rawData }) {
     setGeminiError('');
     
     try {
-      // Limit to 500 verbatim responses to prevent 429 Too Many Requests (Token per minute limits)
-      let answers = rawData.map(d => d.answer).filter(a => a && a.trim().length > 5);
+      // Smart Filtering & Deduplication
+      let validAnswers = rawData.map(d => d.answer).filter(a => a && a.trim().length > 3);
       
-      // Shuffle and slice if it exceeds 500
-      if (answers.length > 500) {
-         answers = answers.sort(() => 0.5 - Math.random()).slice(0, 500);
+      const counts = {};
+      validAnswers.forEach(a => {
+         const norm = a.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+         if (!norm) return;
+         if (!counts[norm]) {
+            counts[norm] = { original: a.trim(), count: 0, length: a.length };
+         }
+         counts[norm].count++;
+      });
+      
+      let smartAnswers = Object.values(counts)
+         .sort((a, b) => {
+            if (b.count !== a.count) return b.count - a.count; // Prioritaskan yg sering muncul
+            return b.length - a.length; // Prioritaskan kalimat panjang (lebih kaya konteks)
+         })
+         .map(c => c.count > 1 ? c.original + ' (Muncul ' + c.count + ' kali)' : c.original);
+      
+      // Batas aman API Gemini Free Tier (3000 verbatim unik)
+      if (smartAnswers.length > 3000) {
+         smartAnswers = smartAnswers.slice(0, 3000);
       }
       
-      const prompt = `Kamu adalah Senior Qualitative Data Analyst. Berdasarkan sampel acak ${answers.length} verbatim responden (dari total ${rawData.length}), berikan analisis terstruktur dalam format JSON MURNI. 
+      const prompt = `Kamu adalah Senior Qualitative Data Analyst. Berdasarkan ${smartAnswers.length} verbatim responden unik (telah dikelompokkan dari total ${rawData.length} data asli), berikan analisis terstruktur dalam format JSON MURNI. 
 Struktur JSON yang wajib diikuti:
 {
   "coOccurrence": [
@@ -71,7 +88,7 @@ Struktur JSON yang wajib diikuti:
   }
 }
 Data:
-${JSON.stringify(answers)}
+${JSON.stringify(smartAnswers)}
 `;
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`, {
