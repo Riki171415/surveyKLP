@@ -1002,7 +1002,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-3">Status Kualifikasi Dokter Sp.KKLP <span className="text-rose-500">*</span></label>
                           <div className={`flex flex-col gap-3 ${showErrors && !formData.spkklpStatus ? 'p-2 ring-2 ring-rose-500 rounded-xl bg-rose-50/50' : ''}`}>
-                            {['PPDS', 'RKL Kolegium', 'RKL universitas'].map(opt => (
+                            {['PPDS', 'Rekognisi Kompetensi Lulusan (RKL) Kolegium', 'Rekognisi Kompetensi Lulusan (RKL) Universitas'].map(opt => (
                               <label key={opt} className={`flex items-center gap-3 px-5 py-3 border-2 rounded-xl cursor-pointer transition-all ${
                                 formData.spkklpStatus === opt ? 'border-blue-500 bg-blue-50 text-blue-700 font-bold' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'
                               }`}>
