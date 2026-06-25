@@ -41,8 +41,15 @@ export default function DeepDiveAIReport({ rawData }) {
     setGeminiError('');
     
     try {
-      const answers = rawData.map(d => d.answer);
-      const prompt = `Kamu adalah Senior Qualitative Data Analyst. Berdasarkan ${answers.length} verbatim responden, berikan analisis terstruktur dalam format JSON MURNI. 
+      // Limit to 500 verbatim responses to prevent 429 Too Many Requests (Token per minute limits)
+      let answers = rawData.map(d => d.answer).filter(a => a && a.trim().length > 5);
+      
+      // Shuffle and slice if it exceeds 500
+      if (answers.length > 500) {
+         answers = answers.sort(() => 0.5 - Math.random()).slice(0, 500);
+      }
+      
+      const prompt = `Kamu adalah Senior Qualitative Data Analyst. Berdasarkan sampel acak ${answers.length} verbatim responden (dari total ${rawData.length}), berikan analisis terstruktur dalam format JSON MURNI. 
 Struktur JSON yang wajib diikuti:
 {
   "coOccurrence": [
