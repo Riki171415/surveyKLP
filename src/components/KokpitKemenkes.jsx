@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import { 
-  Target, AlertTriangle, Activity, Map, Users, Stethoscope, Briefcase, ChevronRight, 
+  Target, AlertTriangle, Activity, Map as MapIcon, Users, Stethoscope, Briefcase, ChevronRight, 
   Database, RefreshCw, Layers, MessageSquare, Zap, FileText
 } from 'lucide-react';
 import DashboardEksekutif from './dashboards/DashboardEksekutif';
@@ -414,7 +414,7 @@ export default function KokpitKemenkes() {
             {/* Heatmap Provinsi */}
             <div className="bg-white shadow-sm border border-slate-200 rounded-3xl p-6">
               <div className="flex items-center gap-2 mb-6">
-                <Map className="w-5 h-5 text-emerald-600" />
+                <MapIcon className="w-5 h-5 text-emerald-600" />
                 <h3 className="text-lg font-bold text-slate-800">Peta Kesiapan Wilayah</h3>
               </div>
               <div className="overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
