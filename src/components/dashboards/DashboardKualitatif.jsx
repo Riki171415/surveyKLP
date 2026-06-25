@@ -149,37 +149,37 @@ const generateComprehensiveAIReport = (rawData, topWords) => {
 
 export default function DashboardKualitatif({ filteredData, isPrinting }) {
   const [isInitializing, setIsInitializing] = useState(true);
+  const [rawData, setRawData] = useState([]);
   const [selectedQuestion, setSelectedQuestion] = useState('Semua');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedKeyword, setSelectedKeyword] = useState(null);
 
   React.useEffect(() => {
+    setIsInitializing(true);
     // Beri jeda sejenak agar animasi loading tampil duluan sebelum thread diblokir komputasi berat
-    const timer = setTimeout(() => setIsInitializing(false), 50);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Parse all raw interview data
-  const rawData = useMemo(() => {
-    if (isInitializing) return []; // Skip di render pertama
-    const results = [];
-    filteredData.forEach(row => {
-      const w = row.wawancara || {};
-      interviewQuestions.forEach((q, idx) => {
-        if (w[idx] && w[idx].trim().length > 0) {
-          results.push({
-            id: `${row.id}-${idx}`,
-            fktp: row.fktp_name || 'Tidak diketahui',
-            role: row.role || 'Lainnya',
-            provinsi: row.provinsi || 'Lainnya',
-            question: q,
-            answer: w[idx]
-          });
-        }
+    const timer = setTimeout(() => {
+      const results = [];
+      filteredData.forEach(row => {
+        const w = row.wawancara || {};
+        interviewQuestions.forEach((q, idx) => {
+          if (w[idx] && w[idx].trim().length > 0) {
+            results.push({
+              id: `${row.id}-${idx}`,
+              fktp: row.fktp_name || 'Tidak diketahui',
+              role: row.role || 'Lainnya',
+              provinsi: row.provinsi || 'Lainnya',
+              question: q,
+              answer: w[idx]
+            });
+          }
+        });
       });
-    });
-    return results;
-  }, [filteredData, isInitializing]);
+      setRawData(results);
+      setIsInitializing(false);
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [filteredData]);
 
   // Extract Keywords for Word Cloud and AI Insight
   const { topWords, wordCloudData } = useMemo(() => {
