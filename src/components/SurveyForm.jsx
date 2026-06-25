@@ -640,7 +640,11 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
         }
       } else {
         if (formData.id) {
-          const isFirstTimeFlow = !isEdit && !isInterview;
+          const surveyData = location.state?.surveyData || {};
+          // Check if this is the first time the interview portion is being saved
+          const isFirstTimeInterview = isInterview && !surveyData.spkklp_kendala && !surveyData.relevansi_spkklp && !surveyData.dpm;
+          const isFirstTimeFlow = (!isEdit && !isInterview) || isFirstTimeInterview;
+          
           const queryString = isFirstTimeFlow ? '?skip_history=true' : '';
           const response = await fetch(`/api/surveys/${formData.id}${queryString}`, {
           method: 'PUT',
