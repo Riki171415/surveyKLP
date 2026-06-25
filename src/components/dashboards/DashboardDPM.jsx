@@ -3,14 +3,26 @@ import ExportButton from '../ExportButton';
 import DeepDiveAIReport from './DeepDiveAIReport';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend, LabelList, ScatterChart, Scatter, ZAxis
+  PieChart, Pie, Cell, Legend, LabelList, ScatterChart, Scatter, ZAxis 
 } from 'recharts';
 import { Stethoscope, Users, Clock, FileText, CheckCircle, Map, Target, AlertTriangle, TrendingUp, Zap } from 'lucide-react';
+import { normalizeStr, faskesToKabMap } from './DashboardProfil';
 
 export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const dpmDataFiltered = useMemo(() => {
     const dataSource = uniqueFktpData || filteredData;
-    return dataSource.filter(row => row.role === 'Dokter Praktik Mandiri' || row.dpm);
+    return dataSource.filter(row => {
+      const fName = normalizeStr(row.fktp_name || '');
+      let type = faskesToKabMap[fName]?.type;
+      
+      if (type !== 'Puskesmas' && type !== 'Klinik' && type !== 'Dokter Praktik Mandiri' && type !== 'DPM') {
+        if (row.role === 'Dokter Praktik Mandiri') type = 'Dokter Praktik Mandiri';
+        else if (fName.includes('puskesmas') || fName.includes('pkm') || fName.includes('puseksmas') || fName.includes('puskes')) type = 'Puskesmas';
+        else type = 'Klinik';
+      }
+
+      return type === 'Dokter Praktik Mandiri' || type === 'DPM';
+    });
   }, [uniqueFktpData, filteredData]);
 
   const { 

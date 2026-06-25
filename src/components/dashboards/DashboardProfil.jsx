@@ -7,11 +7,11 @@ import {
 } from 'recharts';
 import { Users, Stethoscope, Building, Map, ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
 
-const normalizeStr = (s) => s ? s.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
-const normalizeProv = (p) => p ? p.toLowerCase().replace(/[^a-z0-9]/g, '') : 'lainnya';
+export const normalizeStr = (s) => s ? s.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+export const normalizeProv = (p) => p ? p.toLowerCase().replace(/[^a-z0-9]/g, '') : 'lainnya';
 
 // Precompute reverse lookup map once
-const faskesToKabMap = {};
+export const faskesToKabMap = {};
 if (wilayahMapping.fktp) {
   for (const prov in wilayahMapping.fktp) {
     for (const kab in wilayahMapping.fktp[prov]) {
