@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Search, Edit, Trash2, X, ChevronLeft, ChevronRight, Lock, Unlock } from 'lucide-react';
 import { supabase } from '../supabaseClient';
@@ -167,6 +168,8 @@ export default function DataManagement() {
   
   const filtered = surveys.filter(s =>
     (s.fktp_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.kode_faskes || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.nama_responden || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (s.provinsi || s.city || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (s.kab_kota || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -508,7 +511,7 @@ export default function DataManagement() {
           <>
             <SurveyDetailModal selected={selected} onClose={() => setSelected(null)} />
             {/* Tombol aksi admin tampil di atas modal */}
-            {user?.role === 'admin' && (
+            {user?.role === 'admin' && createPortal(
               <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[200] flex flex-wrap justify-end gap-2 md:gap-3 max-w-[calc(100vw-32px)]">
                 <button
                   onClick={() => toggleEditAccess(selected.id, selected.is_editable)}
@@ -528,7 +531,8 @@ export default function DataManagement() {
                 >
                   <Edit className="w-4 h-4" /> Edit
                 </button>
-              </div>
+              </div>,
+              document.body
             )}
           </>
         )}

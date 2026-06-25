@@ -161,6 +161,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     kompetensi: {}, jkn: {}, nonOptimal: {}, wawancara: {},
     homeCare: {}, paliatif: {},
     // Step 2 SpKKLP extra
+    spkklpStatus: '', spkklpObatKhusus: '',
     spkklpBerpraktik: '', spkklpPoli: {}, spkklpKendala: {},
     // Step 3 Perspektif
     relevansiSpkklp: {}, peranSpkklp: {}, layananDirujuk: {}, layananBelumBerjalan: {},
@@ -272,6 +273,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
       wawancara: record.wawancara || {},
       homeCare: record.home_care || {},
       paliatif: record.paliatif || {},
+      spkklpStatus: record.spkklp_status || '',
+      spkklpObatKhusus: record.spkklp_obat_khusus || '',
       spkklpBerpraktik: record.spkklp_berpraktik || '',
       spkklpPoli: record.spkklp_poli || {},
       spkklpKendala: record.spkklp_kendala || {},
@@ -385,6 +388,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
         paliatif: data.paliatif || {},
         kodeFaskes: data.kode_faskes || '',
         namaResponden: data.nama_responden || '',
+        spkklpStatus: data.spkklp_status || '',
+        spkklpObatKhusus: data.spkklp_obat_khusus || '',
         spkklpBerpraktik: data.spkklp_berpraktik || '',
         spkklpPoli: data.spkklp_poli || {},
         spkklpKendala: data.spkklp_kendala || {},
@@ -475,6 +480,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
        isPropValid &&
        kompetensiLayanan.every((_, idx) => formData.kompetensi[idx]?.status) &&
        (formData.role === 'Dokter Sp.KKLP' ? (() => {
+         if (!formData.spkklpStatus) return false;
+         if (!formData.spkklpObatKhusus?.trim()) return false;
          if (!formData.spkklpBerpraktik) return false;
          if (!formData.spkklpPoli?.hasPoli) return false;
          if (formData.spkklpPoli?.hasPoli === 'Ya') {
@@ -602,6 +609,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
         home_care: formData.homeCare,
         paliatif: formData.paliatif,
         wawancara: user ? { ...formData.wawancara, pewawancara: user.username } : formData.wawancara,
+        spkklp_status: formData.spkklpStatus,
+        spkklp_obat_khusus: formData.spkklpObatKhusus,
         spkklp_berpraktik: formData.spkklpBerpraktik,
         spkklp_poli: formData.spkklpPoli,
         spkklp_kendala: formData.spkklpKendala,
@@ -987,6 +996,30 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
                           <h3 className="text-base font-bold text-blue-800">Bagian Khusus Dokter Sp.KKLP</h3>
+                        </div>
+
+                        {/* Status Kualifikasi Dokter Sp.KKLP */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">Status Kualifikasi Dokter Sp.KKLP <span className="text-rose-500">*</span></label>
+                          <div className={`flex flex-col gap-3 ${showErrors && !formData.spkklpStatus ? 'p-2 ring-2 ring-rose-500 rounded-xl bg-rose-50/50' : ''}`}>
+                            {['PPDS', 'RKL Kolegium', 'RKL universitas'].map(opt => (
+                              <label key={opt} className={`flex items-center gap-3 px-5 py-3 border-2 rounded-xl cursor-pointer transition-all ${
+                                formData.spkklpStatus === opt ? 'border-blue-500 bg-blue-50 text-blue-700 font-bold' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'
+                              }`}>
+                                <input type="radio" name="spkklpStatus" value={opt} checked={formData.spkklpStatus === opt} onChange={handleInputChange} className="hidden" />
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${formData.spkklpStatus === opt ? 'border-blue-500' : 'border-slate-300'}`}>
+                                  {formData.spkklpStatus === opt && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
+                                </div>
+                                <span className="text-sm">{opt}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Obat yang hanya bisa diberikan hanya oleh Sp.KKLP */}
+                        <div className="mt-6 mb-6">
+                          <label className="block text-sm font-semibold text-slate-700 mb-2">Obat yang hanya bisa diberikan hanya oleh Sp.KKLP <span className="text-rose-500">*</span></label>
+                          <textarea rows={3} placeholder="Sebutkan obat..." className={`w-full px-4 py-3 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none ${showErrors && !formData.spkklpObatKhusus?.trim() ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white'}`} value={formData.spkklpObatKhusus || ''} onChange={(e) => setFormData(prev => ({ ...prev, spkklpObatKhusus: e.target.value }))} />
                         </div>
 
                         {/* Apakah berpraktik */}
