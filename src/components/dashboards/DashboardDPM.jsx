@@ -7,10 +7,11 @@ import {
 } from 'recharts';
 import { Stethoscope, Users, Clock, FileText, CheckCircle, Map, Target, AlertTriangle, TrendingUp, Zap } from 'lucide-react';
 
-export default function DashboardDPM({ filteredData, COLORS, isPrinting }) {
+export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const dpmDataFiltered = useMemo(() => {
-    return filteredData.filter(row => row.role === 'Dokter Praktik Mandiri' || row.dpm);
-  }, [filteredData]);
+    const dataSource = uniqueFktpData || filteredData;
+    return dataSource.filter(row => row.role === 'Dokter Praktik Mandiri' || row.dpm);
+  }, [uniqueFktpData, filteredData]);
 
   const { 
     dpmStats, lamaPraktikData, bebanPasienData, rekamMedisData, keluargaSamaData, aspekData, luaranPelayananData,
