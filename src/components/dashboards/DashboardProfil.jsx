@@ -58,31 +58,39 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
         let count = 0;
         Object.values(wilayahMapping.fktp[prov]).forEach(arr => count += arr.length);
         regionalTarget[prov] = (regionalTarget[prov] || 0) + count;
-        combinedProvinces.add(prov);
+        const norm = normalizeProv(prov);
+        regionalTargetNormalized[norm] = (regionalTargetNormalized[norm] || 0) + count;
+        originalProvNames[norm] = prov;
       });
     }
+    
     if (wilayahMapping.dpm) {
       Object.keys(wilayahMapping.dpm).forEach(prov => {
         let count = 0;
         Object.values(wilayahMapping.dpm[prov]).forEach(arr => count += arr.length);
-        regionalTarget[prov] = (regionalTarget[prov] || 0) + count;
-        combinedProvinces.add(prov);
+        const norm = normalizeProv(prov);
+        regionalTargetNormalized[norm] = (regionalTargetNormalized[norm] || 0) + count;
+        if (!originalProvNames[norm]) originalProvNames[norm] = prov;
       });
     }
 
-    const uniqueRegionalCount = {};
+    const uniqueRegionalCountNormalized = {};
     uniqueFktpData.forEach(row => {
       const prov = row.provinsi || 'Lainnya';
-      uniqueRegionalCount[prov] = (uniqueRegionalCount[prov] || 0) + 1;
-      combinedProvinces.add(prov);
+      const norm = prov !== 'Lainnya' ? normalizeProv(prov) : prov;
+      uniqueRegionalCountNormalized[norm] = (uniqueRegionalCountNormalized[norm] || 0) + 1;
+      if (!originalProvNames[norm]) {
+        originalProvNames[norm] = prov;
+      }
     });
 
-    const partisipasiData = Array.from(combinedProvinces).map(prov => {
-      const target = regionalTarget[prov] || 0;
-      const capaian = uniqueRegionalCount[prov] || 0;
+    const partisipasiData = Object.keys(originalProvNames).map(norm => {
+      const target = regionalTargetNormalized[norm] || 0;
+      const capaian = uniqueRegionalCountNormalized[norm] || 0;
+      if (target === 0 && capaian === 0) return null;
       const persentase = target > 0 ? (capaian / target) * 100 : (capaian > 0 ? 100 : 0);
-      return { provinsi: prov, target, capaian, persentase };
-    }).sort((a, b) => b.capaian - a.capaian); // sort by capaian descending
+      return { provinsi: originalProvNames[norm], target, capaian, persentase };
+    }).filter(Boolean).sort((a, b) => b.capaian - a.capaian);
 
     return {
       roleChartData: Object.keys(roleCount).map(key => ({ name: key, value: roleCount[key] })).sort((a,b) => b.value - a.value),
@@ -99,36 +107,24 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
       <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full ${colorClass} opacity-10`}></div>
       <div className="flex items-start justify-between relative z-10">
         <div>
-          <p className="text-slate-500 text-sm font-medium mb-1">{title}</p>
-          <h3 className="text-3xl font-bold text-slate-800 tracking-tight">{value}</h3>
-          {subtitle && <p className="text-xs text-slate-400 mt-2 font-medium">{subtitle}</p>}
+          <p className="text-slate-500 font-medium mb-1 text-sm">{title}</p>
+          <h4 className="text-3xl font-black text-slate-800 tracking-tight">{value}</h4>
+          {subtitle && <p className="text-sm font-medium mt-3 text-slate-500">{subtitle}</p>}
         </div>
-        <div className={`p-3 rounded-xl ${colorClass.replace('bg-', 'bg-opacity-20 text-').replace('-500', '-600')}`}>
-          <Icon className="w-6 h-6" />
+        <div className={`p-4 rounded-2xl ${colorClass}`}>
+          <Icon className="w-7 h-7" />
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-        <StatCard title="Total Responden" value={totalResponden} icon={Users} colorClass="bg-blue-500 text-blue-600 bg-blue-100" />
-        <StatCard title="Total Puskesmas" value={uniqueFktpTypeData.find(d => d.name === 'Puskesmas')?.value || 0} icon={Building} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
-        <StatCard title="Total Klinik" value={uniqueFktpTypeData.find(d => d.name === 'Klinik')?.value || 0} icon={Building} colorClass="bg-rose-500 text-rose-600 bg-rose-100" />
-        <StatCard title="Dokter Praktik Mandiri" value={uniqueFktpTypeData.find(d => d.name === 'Dokter Praktik Mandiri')?.value || 0} icon={Stethoscope} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
-        <StatCard title="FKTP dengan Sp.KKLP" value={spkklpCount || 0} subtitle={`${totalFktp > 0 ? Math.round((spkklpCount / totalFktp) * 100) : 0}% dari total FKTP`} icon={Stethoscope} colorClass="bg-primary-500 text-primary-600 bg-primary-100" />
-      </div>
-
-      <div className="mt-8 border-t border-slate-100 pt-8">
-        <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center">
-          <Building className="w-6 h-6 mr-2 text-indigo-600" /> Institusi FKTP Berpartisipasi (Unik Berdasarkan Nama)
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-          <StatCard title="Puskesmas Unik" value={uniqueFktpTypeData.find(d => d.name === 'Puskesmas')?.value || 0} icon={Building} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
-          <StatCard title="Klinik Unik" value={uniqueFktpTypeData.find(d => d.name === 'Klinik')?.value || 0} icon={Building} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
-          <StatCard title="DPM Unik" value={uniqueFktpTypeData.find(d => d.name === 'Dokter Praktik Mandiri')?.value || 0} icon={Stethoscope} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
-        </div>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatCard title="Total Responden" value={filteredData.length} subtitle="Partisipan Medis" icon={Users} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
+        <StatCard title="Total Institusi FKTP" value={uniqueFktpData.length} subtitle="Unik Berdasarkan Nama FKTP" icon={Building} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
+        <StatCard title="Provinsi Terjangkau" value={new Set(uniqueFktpData.map(d => d.provinsi).filter(Boolean)).size} subtitle="Wilayah Sebaran FKTP" icon={Map} colorClass="bg-blue-500 text-blue-600 bg-blue-100" />
+        <StatCard title="FKTP dengan Sp.KKLP" value={spkklpCount || 0} subtitle={`${uniqueFktpData.length > 0 ? Math.round((spkklpCount / uniqueFktpData.length) * 100) : 0}% dari total FKTP`} icon={Stethoscope} colorClass="bg-primary-500 text-primary-600 bg-primary-100" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
