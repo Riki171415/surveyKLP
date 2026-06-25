@@ -179,7 +179,7 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
       });
     });
     return results;
-  }, [filteredData]);
+  }, [filteredData, isInitializing]);
 
   // Extract Keywords for Word Cloud and AI Insight
   const { topWords, wordCloudData } = useMemo(() => {
