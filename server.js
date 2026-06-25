@@ -114,18 +114,20 @@ app.put('/api/surveys/:id', async (req, res) => {
       delete previousData.updated_at;
       delete previousData.edit_history;
       
-      const newHistoryEntry = {
-        edited_at: new Date().toISOString(),
-        previous_data: previousData
-      };
-      
-      let currentHistory = existingRow.edit_history || [];
-      if (typeof currentHistory === 'string') {
-        try { currentHistory = JSON.parse(currentHistory); } catch(e) { currentHistory = []; }
+      if (req.query.skip_history !== 'true') {
+        const newHistoryEntry = {
+          edited_at: new Date().toISOString(),
+          previous_data: previousData
+        };
+        
+        let currentHistory = existingRow.edit_history || [];
+        if (typeof currentHistory === 'string') {
+          try { currentHistory = JSON.parse(currentHistory); } catch(e) { currentHistory = []; }
+        }
+        currentHistory.push(newHistoryEntry);
+        
+        payload.edit_history = JSON.stringify(currentHistory);
       }
-      currentHistory.push(newHistoryEntry);
-      
-      payload.edit_history = JSON.stringify(currentHistory);
       payload.updated_at = new Date().toISOString();
       payload.is_editable = false; // Auto-lock
     }

@@ -640,7 +640,9 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
         }
       } else {
         if (formData.id) {
-          const response = await fetch(`/api/surveys/${formData.id}`, {
+          const isFirstTimeFlow = !isEdit && !isInterview;
+          const queryString = isFirstTimeFlow ? '?skip_history=true' : '';
+          const response = await fetch(`/api/surveys/${formData.id}${queryString}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
