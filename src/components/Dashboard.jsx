@@ -85,14 +85,14 @@ export default function Dashboard() {
 
   const exportToExcel = () => {
     const headers = [
-      "No", "Tanggal Pengisian", "Provinsi", "Kabupaten/Kota", "Nama Puskesmas / Klinik", "Kode Faskes", "Nama Responden", "Jabatan", "Ada Sp.KKLP?",
+      "No", "Tanggal Pengisian", "Provinsi", "Kabupaten/Kota", "Nama Puskesmas / Klinik", "Kode Faskes", "Nama Responden", "Jabatan", "Ada Sp.KKLP?", "Status Sp.KKLP", "Obat Khusus Sp.KKLP",
       "Total Dokter Umum", "Total Dokter Gigi", "Waktu Poli (jam)", "Waktu Home Visit (jam)", "Beban Dalam Gedung (%)", "Beban Luar Gedung (%)",
       "Kepatuhan PRB", "Kolaborasi Homecare", "Kolaborasi Paliatif",
       ...penyakitPasienBulanan.map(p => `Pasien_Bulanan_${p.label}`)
     ];
     const rows = filteredData.map((row, index) => {
       return [
-        index + 1, new Date(row.created_at).toLocaleString('id-ID'), row.provinsi || '', row.kab_kota || '', row.fktp_name || '', row.kode_faskes || '', row.nama_responden || '', row.role || '', row.doc_kklp || 'Tidak',
+        index + 1, new Date(row.created_at).toLocaleString('id-ID'), row.provinsi || '', row.kab_kota || '', row.fktp_name || '', row.kode_faskes || '', row.nama_responden || '', row.role || '', row.doc_kklp || 'Tidak', row.spkklp_status || '', row.spkklp_obat_khusus || '',
         row.doc_umum || '', row.doc_gigi || '', row.time_in_poli || '', row.time_home_visit || '', row.prop_in_fktp || '', row.prop_out_fktp || '',
         row.prb?.rutinKunjungan || '', row.home_care?.kolaborasi || '', row.paliatif?.kolaborasi || '',
         ...penyakitPasienBulanan.map(p => row.data_pasien_bulanan?.[p.id] || '')

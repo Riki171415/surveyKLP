@@ -27,7 +27,7 @@ const layananDirujukItems = [
 ];
 
 export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
-  const { docStats, relevansiData, dirujukData, topRelevansi, diagData, tindData, analysisText } = useMemo(() => {
+  const { docStats, statusData, relevansiData, dirujukData, topRelevansi, diagData, tindData, analysisText } = useMemo(() => {
     let spkklpYa = 0;
     let spkklpTidak = 0;
     let totalDocUmum = 0;
@@ -37,6 +37,7 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
     const dirujukCounts = {};
     const diagnosisCounts = {};
     const tindakanCounts = {};
+    const statusCounts = {};
 
     const extractTags = (text) => {
       if (!text) return [];
@@ -45,6 +46,11 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
 
     filteredData.forEach(row => {
       if (row.doc_kklp === 'Ya') spkklpYa++; else spkklpTidak++;
+      
+      if (row.spkklp_status) {
+        statusCounts[row.spkklp_status] = (statusCounts[row.spkklp_status] || 0) + 1;
+      }
+
       totalDocUmum += Number(row.doc_umum) || 0;
       totalDocGigi += Number(row.doc_gigi) || 0;
 
@@ -115,10 +121,16 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
       analysisText = `Diagnosis utama yang paling banyak dilaporkan adalah **${diagData[0].name}** (ditemukan di ${diagData[0].value} FKTP).`;
     }
 
+    const statusData = Object.keys(statusCounts).map(k => ({
+      name: k,
+      value: statusCounts[k]
+    })).sort((a,b) => b.value - a.value);
+
     return {
       docStats: {
         spkklpYa, spkklpTidak, totalDocUmum, totalDocGigi
       },
+      statusData,
       relevansiData: relData,
       dirujukData: rjkData,
       diagData,
@@ -158,7 +170,7 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
         <StatCard title="Layanan Sering Dirujuk" value={dirujukData[0]?.value || 0} subtitle={dirujukData[0]?.name || '-'} icon={FileSearch} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-blue-600" /> Ketersediaan Dokter Sp.KKLP</h3>
@@ -177,6 +189,28 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
             </ResponsiveContainer>
           </div>
         </div>
+
+        {statusData && statusData.length > 0 && (
+          <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+            <div className="flex justify-between items-start mb-6">
+              <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Award className="w-5 h-5 mr-2 text-violet-600" /> Kualifikasi Sp.KKLP</h3>
+              {!isPrinting && <ExportButton fileName="Kualifikasi Sp.KKLP" />}
+            </div>
+            <div className="h-72">
+              <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+                <PieChart>
+                  <Pie data={statusData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ name, percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={['#8b5cf6', '#ec4899', '#f97316', '#14b8a6'][index % 4]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip formatter={(value) => [`${value} FKTP`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                  <Legend verticalAlign="bottom" height={36} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
