@@ -148,12 +148,20 @@ const generateComprehensiveAIReport = (rawData, topWords) => {
 };
 
 export default function DashboardKualitatif({ filteredData, isPrinting }) {
+  const [isInitializing, setIsInitializing] = useState(true);
   const [selectedQuestion, setSelectedQuestion] = useState('Semua');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedKeyword, setSelectedKeyword] = useState(null);
 
+  React.useEffect(() => {
+    // Beri jeda sejenak agar animasi loading tampil duluan sebelum thread diblokir komputasi berat
+    const timer = setTimeout(() => setIsInitializing(false), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Parse all raw interview data
   const rawData = useMemo(() => {
+    if (isInitializing) return []; // Skip di render pertama
     const results = [];
     filteredData.forEach(row => {
       const w = row.wawancara || {};
@@ -215,6 +223,16 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
       setSearchTerm(''); // Clear text search if clicking a keyword
     }
   };
+
+  if (isInitializing) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[500px] bg-white rounded-2xl border border-slate-100 shadow-sm">
+        <div className="w-12 h-12 border-4 border-slate-100 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
+        <p className="text-slate-600 font-bold animate-pulse">Menyiapkan Mesin Analisis Kualitatif...</p>
+        <p className="text-slate-400 text-sm mt-2">Menyortir dan memproses ribuan data verbatim responden...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
