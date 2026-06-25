@@ -138,12 +138,22 @@ const getRegion = (rawText) => {
 
   let foundKab = null;
   if (foundProv && kabMap[foundProv]) {
-    let textWithoutProv = cleanText.replace(new RegExp(foundProv, 'g'), '');
     for (const k of kabMap[foundProv]) {
-      if (textWithoutProv.includes(" " + k.searchName + " ") || textWithoutProv.includes(k.searchName + " " + foundProv) || textWithoutProv.includes(k.searchName)) {
+      if (cleanText.includes(" " + k.searchName + " ") || cleanText.includes(k.searchName + " " + foundProv) || cleanText.includes(k.searchName)) {
+        if (foundProv.includes(k.searchName)) {
+           const matches = cleanText.match(new RegExp(k.searchName, 'g'));
+           const provMatches = cleanText.match(new RegExp(foundProv, 'g'));
+           if (matches && provMatches && matches.length === provMatches.length) {
+              continue; // Skip false positive where searchName is just part of the province
+           }
+        }
         foundKab = k.name;
         break;
       }
+    }
+    if (!foundKab) {
+        const fallbackKab = kabMap[foundProv].find(k => foundProv.includes(k.searchName));
+        if (fallbackKab) foundKab = fallbackKab.name;
     }
   }
   return { prov: foundProv, kab: foundKab || "Lainnya" };
