@@ -104,7 +104,7 @@ export default function DashboardPasienBulanan({ filteredData, uniqueFktpData, C
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard title="Total Pasien Dilayani (1 Bln)" value={generalStats.totalPasien} icon={Users} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
         <StatCard title="Rata-rata Pasien per Faskes" value={Math.round(generalStats.rataRataTotal)} subtitle="Beban kerja per responden" icon={Activity} colorClass="bg-teal-500 text-teal-600 bg-teal-100" />
-        <StatCard title="Jumlah Responden Terfilter" value={uniqueFktpData.length} icon={FileText} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
+        <StatCard title="Jumlah FKTP" value={uniqueFktpData.length} icon={FileText} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
