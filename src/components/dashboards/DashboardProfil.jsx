@@ -139,6 +139,36 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
       if (officialRegion) {
          prov = officialRegion.prov;
          kab = officialRegion.kab;
+      } else {
+         const cleanProv = (p) => {
+            if (!p) return '';
+            const lower = p.toLowerCase();
+            if (lower.includes('kepri') || lower.includes('kepulauan riau')) return 'kepulauanriau';
+            if (lower.includes('diy') || lower.includes('yogyakarta')) return 'diyogyakarta';
+            if (lower.includes('dki') || lower.includes('jakarta')) return 'dkijakarta';
+            return lower.replace(/provinsi|prov\.|prov /g, '').replace(/[^a-z0-9]/g, '');
+         };
+         const cleanKab = (k) => {
+            if (!k) return '';
+            return k.toLowerCase().replace(/kabupaten|kab\.|kab |kota administrasi|kota /g, '').replace(/[^a-z0-9]/g, '');
+         };
+         
+         const cProv = cleanProv(prov);
+         const cKab = cleanKab(kab);
+         
+         let matchedProv = Object.keys(wilayahMapping.fktp || {}).find(p => {
+            const pC = cleanProv(p);
+            return pC === cProv || pC.includes(cProv) || cProv.includes(pC);
+         });
+         
+         if (matchedProv) {
+            prov = matchedProv;
+            let matchedKab = Object.keys(wilayahMapping.fktp[matchedProv] || {}).find(k => {
+               const kC = cleanKab(k);
+               return kC === cKab || kC.includes(cKab) || cKab.includes(kC);
+            });
+            if (matchedKab) kab = matchedKab;
+         }
       }
       
       if (!groupedFktpData[prov]) groupedFktpData[prov] = {};
