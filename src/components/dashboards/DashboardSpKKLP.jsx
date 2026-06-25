@@ -26,18 +26,16 @@ const layananDirujukItems = [
   "Gangguan jiwa ringan-sedang", "Penanganan fraktur tertutup sederhana"
 ];
 
-export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
+export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const { docStats, statusData, obatKhususData, relevansiData, dirujukData, topRelevansi, diagData, tindData, analysisText } = useMemo(() => {
     let spkklpYa = 0;
     let spkklpTidak = 0;
     let totalDocUmum = 0;
     let totalDocGigi = 0;
 
-    const relScores = relevansiItems.map(r => ({ name: r, totalScore: 0, count: 0 }));
-    const dirujukCounts = {};
+    const statusCounts = {};
     const diagnosisCounts = {};
     const tindakanCounts = {};
-    const statusCounts = {};
     const obatKhususCounts = {};
 
     const extractTags = (text) => {
@@ -45,7 +43,7 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
       return text.split(/[,;\n]+/).map(s => s.trim()).filter(s => s.length > 2);
     };
 
-    filteredData.forEach(row => {
+    uniqueFktpData.forEach(row => {
       if (row.doc_kklp === 'Ya') spkklpYa++; else spkklpTidak++;
       
       if (row.spkklp_status) {
@@ -55,6 +53,20 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
       totalDocUmum += Number(row.doc_umum) || 0;
       totalDocGigi += Number(row.doc_gigi) || 0;
 
+      const p = row.spkklp_poli || {};
+      if (p.hasPoli === 'Ya') {
+        if (p.diagnosis) extractTags(p.diagnosis).forEach(t => diagnosisCounts[t] = (diagnosisCounts[t] || 0) + 1);
+        if (p.tindakan) extractTags(p.tindakan).forEach(t => tindakanCounts[t] = (tindakanCounts[t] || 0) + 1);
+      }
+      if (row.spkklp_obat_khusus) {
+        extractTags(row.spkklp_obat_khusus).forEach(t => obatKhususCounts[t] = (obatKhususCounts[t] || 0) + 1);
+      }
+    });
+
+    const relScores = relevansiItems.map(r => ({ name: r, totalScore: 0, count: 0 }));
+    const dirujukCounts = {};
+
+    filteredData.forEach(row => {
       const rel = row.relevansi_spkklp || {};
       relevansiItems.forEach((_, idx) => {
         if (rel[idx]) {
@@ -71,37 +83,6 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
           dirujukCounts[name] = (dirujukCounts[name] || 0) + 1;
         }
       });
-
-      if (row.spkklp_poli?.diagnosis) {
-        extractTags(row.spkklp_poli.diagnosis).forEach(tag => {
-          let normalized = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
-          const lower = normalized.toLowerCase();
-          
-          if (lower.includes('i10') || lower.includes('hipertensi esensial')) normalized = 'Hipertensi Esensial (I10)';
-          else if (lower.includes('e11') || lower.includes('diabetes')) normalized = 'Diabetes Mellitus Tipe 2 (E11)';
-          else if (lower.includes('a15') || lower.includes('a16') || lower.includes('tuberkulosis')) normalized = 'Tuberkulosis (A15-A16)';
-          else if (lower.includes('h10') || lower.includes('konjungtivitis')) normalized = 'Konjungtivitis (H10)';
-          else if (lower.includes('h65') || lower.includes('h66') || lower.includes('otitis')) normalized = 'Otitis Media Akut (H65-H66)';
-          else if (lower.includes('ispa') || lower.includes('j06')) normalized = 'ISPA (J06.9)';
-          else if (lower.includes('k30') || lower.includes('dispepsia')) normalized = 'Dispepsia (K30)';
-
-          diagnosisCounts[normalized] = (diagnosisCounts[normalized] || 0) + 1;
-        });
-      }
-
-      if (row.spkklp_poli?.tindakan) {
-        extractTags(row.spkklp_poli.tindakan).forEach(tag => {
-          const normalized = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
-          tindakanCounts[normalized] = (tindakanCounts[normalized] || 0) + 1;
-        });
-      }
-      
-      if (row.spkklp_obat_khusus) {
-        extractTags(row.spkklp_obat_khusus).forEach(tag => {
-          const normalized = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
-          obatKhususCounts[normalized] = (obatKhususCounts[normalized] || 0) + 1;
-        });
-      }
     });
 
     const relData = relScores.map(s => ({
@@ -110,7 +91,7 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
     })).sort((a,b) => b.avgScore - a.avgScore);
 
     const rjkData = Object.keys(dirujukCounts).map(k => ({
-      name: layananDirujukItems[k] || k, // Use array item if key is index
+      name: layananDirujukItems[k] || k,
       value: dirujukCounts[k]
     })).filter(d => isNaN(d.name) && d.name !== 'undefined').sort((a,b) => b.value - a.value).slice(0, 5);
 

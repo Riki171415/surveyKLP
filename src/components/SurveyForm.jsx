@@ -312,24 +312,28 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     });
   };
 
-  const combinedProvinsi = new Set([
-    ...Object.keys(wilayahMapping.fktp || {}),
-    ...Object.keys(wilayahMapping.dpm || {})
-  ]);
-  const provinsiList = Array.from(combinedProvinsi).sort();
+  const provinsiList = useMemo(() => {
+    const combined = new Set([
+      ...Object.keys(wilayahMapping.fktp || {}),
+      ...Object.keys(wilayahMapping.dpm || {})
+    ]);
+    return Array.from(combined).sort();
+  }, []);
 
-  const kabKotaList = formData.provinsi ? Array.from(new Set([
-    ...Object.keys(wilayahMapping.fktp?.[formData.provinsi] || {}),
-    ...Object.keys(wilayahMapping.dpm?.[formData.provinsi] || {})
-  ])).sort() : [];
+  const kabKotaList = useMemo(() => {
+    if (!formData.provinsi) return [];
+    return Array.from(new Set([
+      ...Object.keys(wilayahMapping.fktp?.[formData.provinsi] || {}),
+      ...Object.keys(wilayahMapping.dpm?.[formData.provinsi] || {})
+    ])).sort();
+  }, [formData.provinsi]);
 
-  const sourceMap = formData.jenisFaskes === 'Dokter Praktik Mandiri' ? wilayahMapping.dpm : wilayahMapping.fktp;
-
-  const faskesListRaw = formData.provinsi && formData.kabKota && sourceMap[formData.provinsi]?.[formData.kabKota]
-    ? sourceMap[formData.provinsi][formData.kabKota]
-    : [];
-    
-  const faskesList = (() => {
+  const faskesList = useMemo(() => {
+    const sourceMap = formData.jenisFaskes === 'Dokter Praktik Mandiri' ? wilayahMapping.dpm : wilayahMapping.fktp;
+    const faskesListRaw = formData.provinsi && formData.kabKota && sourceMap[formData.provinsi]?.[formData.kabKota]
+      ? sourceMap[formData.provinsi][formData.kabKota]
+      : [];
+      
     let list = [...faskesListRaw];
     if (formData.jenisFaskes === 'Klinik') {
       list = list.filter(name => {
@@ -356,7 +360,7 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
       if (!isAPusk && isBPusk) return 1;
       return a.localeCompare(b);
     });
-  })();
+  }, [formData.provinsi, formData.kabKota, formData.jenisFaskes]);
 
   useEffect(() => {
     if (isInterview && location.state?.surveyData) {

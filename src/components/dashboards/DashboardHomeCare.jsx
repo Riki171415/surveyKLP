@@ -6,13 +6,23 @@ import {
 } from 'recharts';
 import { Home, Users, CheckCircle, Heart, Stethoscope, Clock, CheckCircle2 } from 'lucide-react';
 
-export default function DashboardHomeCare({ filteredData, COLORS, isPrinting }) {
+export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const { hcStats, kondisiData, jenisData, kepatuhanData } = useMemo(() => {
-    let totalFktp = filteredData.length;
+    let totalFktp = uniqueFktpData.length;
     let fktpWithHomeCare = 0;
     let sumKunjungan = 0;
     let adaKolaborasi = 0;
     let adaPerbaikan = 0;
+
+    uniqueFktpData.forEach(row => {
+      const hc = row.home_care || {};
+      if (hc.screening === 'Ya') {
+        fktpWithHomeCare++;
+        sumKunjungan += Number(hc.jumlahKunjungan) || 0;
+        if (hc.kolaborasi === 'Ya') adaKolaborasi++;
+        if (hc.perbaikan === 'Ya') adaPerbaikan++;
+      }
+    });
 
     const kondisiCounts = {};
     const jenisCounts = {};
@@ -21,12 +31,6 @@ export default function DashboardHomeCare({ filteredData, COLORS, isPrinting }) 
     filteredData.forEach(row => {
       const hc = row.home_care || {};
       if (hc.screening === 'Ya') {
-        fktpWithHomeCare++;
-        sumKunjungan += Number(hc.jumlahKunjungan) || 0;
-        
-        if (hc.kolaborasi === 'Ya') adaKolaborasi++;
-        if (hc.perbaikan === 'Ya') adaPerbaikan++;
-        
         if (hc.kepatuhan) {
           kepatuhanCounts[hc.kepatuhan] = (kepatuhanCounts[hc.kepatuhan] || 0) + 1;
         }
@@ -36,7 +40,6 @@ export default function DashboardHomeCare({ filteredData, COLORS, isPrinting }) 
           if (kondisiObj[k]) kondisiCounts[k] = (kondisiCounts[k] || 0) + 1;
         });
         
-        // Also old structure mapping if exists (checkboxes were saved directly inside homeCare sometimes)
         ['Mandiri (independen)', 'Memerlukan bantuan sebagian', 'Memerlukan bantuan penuh', 'Tirah baring', 'Lainnya'].forEach(k => {
            if (hc[`kondisi_${k}`]) kondisiCounts[k] = (kondisiCounts[k] || 0) + 1;
         });
@@ -63,7 +66,7 @@ export default function DashboardHomeCare({ filteredData, COLORS, isPrinting }) 
       jenisData: Object.keys(jenisCounts).map(k => ({ name: k, value: jenisCounts[k] })).sort((a,b) => b.value - a.value).filter(d => d.value > 0),
       kepatuhanData: Object.keys(kepatuhanCounts).map(k => ({ name: k, value: kepatuhanCounts[k] })).filter(d => d.value > 0)
     };
-  }, [filteredData]);
+  }, [filteredData, uniqueFktpData]);
 
   const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
     <div className={`bg-white rounded-2xl p-6 border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>

@@ -6,12 +6,21 @@ import {
 } from 'recharts';
 import { HeartPulse, Users, CheckCircle, Heart, Stethoscope, CheckCircle2 } from 'lucide-react';
 
-export default function DashboardPaliatif({ filteredData, COLORS, isPrinting }) {
+export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const { palStats, kondisiData, tujuanData, kepatuhanData } = useMemo(() => {
-    let totalFktp = filteredData.length;
+    let totalFktp = uniqueFktpData.length;
     let fktpWithPaliatif = 0;
     let adaKolaborasi = 0;
     let adaPerbaikan = 0;
+
+    uniqueFktpData.forEach(row => {
+      const pal = row.paliatif || {};
+      if (pal.screening === 'Ya') {
+        fktpWithPaliatif++;
+        if (pal.kolaborasi === 'Ya') adaKolaborasi++;
+        if (pal.perbaikan === 'Ya') adaPerbaikan++;
+      }
+    });
 
     const kondisiCounts = {};
     const tujuanCounts = {};
@@ -20,11 +29,6 @@ export default function DashboardPaliatif({ filteredData, COLORS, isPrinting }) 
     filteredData.forEach(row => {
       const pal = row.paliatif || {};
       if (pal.screening === 'Ya') {
-        fktpWithPaliatif++;
-        
-        if (pal.kolaborasi === 'Ya') adaKolaborasi++;
-        if (pal.perbaikan === 'Ya') adaPerbaikan++;
-        
         if (pal.kepatuhan) {
           kepatuhanCounts[pal.kepatuhan] = (kepatuhanCounts[pal.kepatuhan] || 0) + 1;
         }
@@ -49,16 +53,16 @@ export default function DashboardPaliatif({ filteredData, COLORS, isPrinting }) 
 
     return {
       palStats: {
-        proporsiPal: totalFktp > 0 ? (fktpWithPaliatif / totalFktp) * 100 : 0,
+        proporsiPaliatif: totalFktp > 0 ? (fktpWithPaliatif / totalFktp) * 100 : 0,
         fktpWithPaliatif,
         proporsiKolaborasi: fktpWithPaliatif > 0 ? (adaKolaborasi / fktpWithPaliatif) * 100 : 0,
-        proporsiPerbaikan: fktpWithPaliatif > 0 ? (adaPerbaikan / fktpWithPaliatif) * 100 : 0,
+        proporsiPerbaikan: fktpWithPaliatif > 0 ? (adaPerbaikan / fktpWithPaliatif) * 100 : 0
       },
       kondisiData: Object.keys(kondisiCounts).map(k => ({ name: k, value: kondisiCounts[k] })).sort((a,b) => b.value - a.value).filter(d => d.value > 0),
       tujuanData: Object.keys(tujuanCounts).map(k => ({ name: k, value: tujuanCounts[k] })).sort((a,b) => b.value - a.value).filter(d => d.value > 0),
       kepatuhanData: Object.keys(kepatuhanCounts).map(k => ({ name: k, value: kepatuhanCounts[k] })).filter(d => d.value > 0)
     };
-  }, [filteredData]);
+  }, [filteredData, uniqueFktpData]);
 
   const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
     <div className={`bg-white rounded-2xl p-6 border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>

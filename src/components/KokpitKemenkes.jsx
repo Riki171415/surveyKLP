@@ -125,10 +125,26 @@ export default function KokpitKemenkes() {
     // Kualitatif Text
     let allText = "";
 
+    // FKTP Unik untuk count dasar
+    const uniqueFktpMap = new Map();
+    filteredData.forEach(row => {
+      const id = row.kode_faskes || row.fktp_name?.toLowerCase()?.trim() || row.id;
+      if (!uniqueFktpMap.has(id)) {
+        uniqueFktpMap.set(id, row);
+      } else if (row.doc_kklp === 'Ya') {
+        const existing = uniqueFktpMap.get(id);
+        if (existing.doc_kklp !== 'Ya') {
+          uniqueFktpMap.set(id, { ...existing, doc_kklp: 'Ya' });
+        }
+      }
+    });
+    const uniqueFktpList = Array.from(uniqueFktpMap.values());
+    const totalFktp = uniqueFktpList.length;
+
     // Provinsi Map untuk Heatmap
     const provMap = {};
 
-    filteredData.forEach(row => {
+    uniqueFktpList.forEach(row => {
       const prov = row.provinsi || row.city || 'Unknown';
       if (!provMap[prov]) provMap[prov] = { count: 0, spkklp: 0, relSum: 0, relCount: 0 };
       provMap[prov].count++;
@@ -137,6 +153,11 @@ export default function KokpitKemenkes() {
         acc.spkklpCount++;
         provMap[prov].spkklp++;
       }
+    });
+
+    filteredData.forEach(row => {
+      const prov = row.provinsi || row.city || 'Unknown';
+      if (!provMap[prov]) provMap[prov] = { count: 0, spkklp: 0, relSum: 0, relCount: 0 };
 
       // Relevansi
       const rel = row.relevansi_spkklp || {};
@@ -213,7 +234,7 @@ export default function KokpitKemenkes() {
     });
 
     // Kalkulasi Skor Akhir
-    const spkklpRatio = Math.round((acc.spkklpCount / filteredData.length) * 100) || 0;
+    const spkklpRatio = Math.round((acc.spkklpCount / totalFktp) * 100) || 0;
     const avgRelevansi = acc.relevansiCount > 0 ? (acc.totalRelevansiScore / acc.relevansiCount) : 0;
     const relRatio = Math.max(0, (avgRelevansi - 1) / 3); 
     const rujukanRatio = Math.max(0, 1 - (acc.totalRujukan / (filteredData.length * 3))); // Asumsi max 3 rujukan rata2
@@ -275,7 +296,7 @@ export default function KokpitKemenkes() {
       manfaatData,
       kwCounts,
       provArray,
-      totalCount: filteredData.length
+      totalCount: totalFktp
     };
   }, [filteredData]);
 

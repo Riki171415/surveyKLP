@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useTransition } from 'react';
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,6 +34,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('profil');
+  const [isPending, startTransition] = useTransition();
   const [filterProvinsi, setFilterProvinsi] = useState('Semua');
   const [filterRole, setFilterRole] = useState('Semua');
   const [filterKklp, setFilterKklp] = useState('Semua');
@@ -41,6 +42,12 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isPrinting, setIsPrinting] = useState(false);
+
+  const handleTabChange = (tabId) => {
+    startTransition(() => {
+      setActiveTab(tabId);
+    });
+  };
 
   useEffect(() => { fetchData(); }, []);
 
@@ -81,6 +88,23 @@ export default function Dashboard() {
 
   const uniqueProvinsi = useMemo(() => [...new Set(data.map(item => item.provinsi).filter(Boolean))].sort(), [data]);
   const uniqueRoles = useMemo(() => [...new Set(data.map(item => item.role).filter(Boolean))].sort(), [data]);
+  
+  const uniqueFktpData = useMemo(() => {
+    const map = new Map();
+    filteredData.forEach(row => {
+      const id = row.kode_faskes || row.fktp_name?.toLowerCase()?.trim() || row.id;
+      if (!map.has(id)) {
+        map.set(id, row);
+      } else if (row.doc_kklp === 'Ya') {
+        const existing = map.get(id);
+        if (existing.doc_kklp !== 'Ya') {
+          map.set(id, { ...existing, doc_kklp: 'Ya' });
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [filteredData]);
+
   const totalResponden = filteredData.length;
 
   const exportToExcel = () => {
@@ -281,7 +305,7 @@ export default function Dashboard() {
       {!isPrinting && (
         <motion.div variants={itemVariants} className="no-print flex flex-wrap bg-white/70 backdrop-blur-xl p-2 rounded-2xl shadow-sm border border-slate-100 mb-6 gap-2 relative">
           {TABS.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`relative flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all z-10 ${activeTab === tab.id ? 'text-primary-700' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'}`}>
+            <button key={tab.id} onClick={() => handleTabChange(tab.id)} disabled={isPending} className={`relative flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all z-10 ${activeTab === tab.id ? 'text-primary-700' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'} ${isPending ? 'opacity-70 cursor-wait' : ''}`}>
               {activeTab === tab.id && <motion.div layoutId="activeTabIndicator" className="absolute inset-0 bg-white shadow-sm border border-slate-200/60 rounded-xl -z-10" transition={{ type: "spring", stiffness: 300, damping: 30 }} />}
               <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-primary-500' : 'text-slate-400'}`} />
               <span>{tab.label}</span>
@@ -298,32 +322,32 @@ export default function Dashboard() {
           <>
             {isPrinting ? (
               <div className="print-layout flex flex-col gap-12">
-                <DashboardProfil filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
-                <DashboardPRB filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
-                <DashboardMonitoringPRB filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
-                <DashboardHomeCare filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
-                <DashboardPaliatif filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
-                <DashboardNonOptimal filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
-                <DashboardSpKKLP filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
-                <DashboardKendala filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
-                <DashboardDPM filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
-                <DashboardKualitatif filteredData={filteredData} isPrinting={true} />
-                <DashboardPasienBulanan filteredData={filteredData} COLORS={COLORS} isPrinting={true} />
+                <DashboardProfil filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
+                <DashboardPRB filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
+                <DashboardMonitoringPRB filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
+                <DashboardHomeCare filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
+                <DashboardPaliatif filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
+                <DashboardNonOptimal filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
+                <DashboardSpKKLP filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
+                <DashboardKendala filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
+                <DashboardDPM filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
+                <DashboardKualitatif filteredData={filteredData} uniqueFktpData={uniqueFktpData} isPrinting={true} />
+                <DashboardPasienBulanan filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
               </div>
             ) : (
               <AnimatePresence mode="wait">
-                <motion.div key={activeTab} variants={tabVariants} initial="hidden" animate="show" exit="exit" className="h-full">
-                  {activeTab === 'profil' && <DashboardProfil filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
-                  {activeTab === 'prb' && <DashboardPRB filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
-                  {activeTab === 'mon_prb' && <DashboardMonitoringPRB filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
-                  {activeTab === 'homecare' && <DashboardHomeCare filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
-                  {activeTab === 'paliatif' && <DashboardPaliatif filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
-                  {activeTab === 'nonopt' && <DashboardNonOptimal filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
-                  {activeTab === 'spkklp' && <DashboardSpKKLP filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
-                  {activeTab === 'kendala' && <DashboardKendala filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
-                  {activeTab === 'kualitatif' && <DashboardKualitatif filteredData={filteredData} isPrinting={false} />}
-                  {activeTab === 'dpm' && <DashboardDPM filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
-                  {activeTab === 'pasien_bulanan' && <DashboardPasienBulanan filteredData={filteredData} COLORS={COLORS} isPrinting={false} />}
+                <motion.div key={activeTab} variants={tabVariants} initial="hidden" animate="show" exit="exit" className={`h-full transition-opacity duration-300 ${isPending ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                  {activeTab === 'profil' && <DashboardProfil filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
+                  {activeTab === 'prb' && <DashboardPRB filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
+                  {activeTab === 'mon_prb' && <DashboardMonitoringPRB filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
+                  {activeTab === 'homecare' && <DashboardHomeCare filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
+                  {activeTab === 'paliatif' && <DashboardPaliatif filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
+                  {activeTab === 'nonopt' && <DashboardNonOptimal filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
+                  {activeTab === 'spkklp' && <DashboardSpKKLP filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
+                  {activeTab === 'kendala' && <DashboardKendala filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
+                  {activeTab === 'kualitatif' && <DashboardKualitatif filteredData={filteredData} uniqueFktpData={uniqueFktpData} isPrinting={false} />}
+                  {activeTab === 'dpm' && <DashboardDPM filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
+                  {activeTab === 'pasien_bulanan' && <DashboardPasienBulanan filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
                   {activeTab === 'data' && renderDataGrid()}
                 </motion.div>
               </AnimatePresence>

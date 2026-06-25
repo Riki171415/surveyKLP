@@ -2,12 +2,14 @@ import React from 'react';
 import { Printer } from 'lucide-react';
 import logoKemenkes from '../assets/logo-kemenkes.png';
 import {
+  jknBenefits,
   relevansiItems,
   peranSpkklpItems,
   layananDirujukItems,
   layananBelumBerjalanItems,
   kompetensiLayanan,
   penyakitPasienBulanan,
+  nonOptimalServices,
   interviewQuestionsWithSpkklp,
   interviewQuestionsWithoutSpkklp,
 } from './SurveyForm';
@@ -167,15 +169,36 @@ function FormContent({ withSpkklp }) {
         </div>
 
         {withSpkklp && (
-          <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-            <p className="text-xs font-semibold text-emerald-800 mb-2">Tambahan khusus Sp.KKLP:</p>
-            <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-              <BlankLine label="Jumlah hari praktik sebagai Sp.KKLP per minggu" />
-              <BlankLine label="Jumlah jam praktik sebagai Sp.KKLP per hari" />
+          <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+            <p className="text-sm font-bold text-emerald-800 mb-3">Bagian Khusus Dokter Sp.KKLP:</p>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-4">
               <div className="col-span-2">
-                <label className="block text-xs font-semibold text-slate-600 mb-2">Apakah Poli Khusus KKLP tersedia?</label>
-                <RadioGroup options={['Ya, tersedia', 'Tidak tersedia', 'Dalam proses pembentukan']} />
+                <label className="block text-xs font-semibold text-slate-600 mb-2">Status Kualifikasi Dokter Sp.KKLP</label>
+                <RadioGroup options={['PPDS', 'Rekognisi Kompetensi Lulusan (RKL) Kolegium', 'Rekognisi Pembelajaran Lampau (RPL) yang dikelola universitas']} />
               </div>
+              <BlankLine className="col-span-2" label="Obat yang hanya bisa diberikan hanya oleh Sp.KKLP" />
+              <div className="col-span-2">
+                <label className="block text-xs font-semibold text-slate-600 mb-2">Apakah Anda berpraktik sebagai dokter Sp.KKLP?</label>
+                <RadioGroup options={['Ya', 'Tidak']} />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-semibold text-slate-600 mb-2">Apakah Sp.KKLP memiliki Poli Sp.KKLP?</label>
+                <RadioGroup options={['Ya', 'Tidak']} />
+              </div>
+              <BlankLine label="Sejak kapan poli KKLP beroperasi?" />
+              <BlankLine label="Rata-rata jumlah kunjungan per bulan" />
+              <div className="col-span-2">
+                <label className="block text-xs font-semibold text-slate-600 mb-2">Mekanisme pasien masuk ke Poli KKLP</label>
+                <RadioGroup options={['Dari poli umum', 'Rujukan internal', 'Langsung datang', 'Lainnya']} />
+              </div>
+              <BlankLine className="col-span-2" label="Mekanisme pembiayaan layanan Poli KKLP" />
+              <BlankLine className="col-span-2" label="Nama diagnosis apa saja yg ditangani SpKKLP dalam praktek sehari2" />
+              <BlankLine className="col-span-2" label="Tindakan apa saja yg dilakukan Sp.KKLP" />
+              <div className="col-span-2">
+                <label className="block text-xs font-semibold text-slate-600 mb-2">Luaran pelayanan</label>
+                <RadioGroup options={['Selesai di Puskesmas / Klinik', 'Kontrol berkala di Puskesmas / Klinik', 'Home care', 'Paliatif', 'PRB', 'Rujukan ke FKRTL', 'Lainnya']} />
+              </div>
+              <BlankLine className="col-span-2" label="Apabila pasien di rujuk, Apa indikasi atau alasan rujukan tersebut?" />
             </div>
           </div>
         )}
@@ -294,9 +317,9 @@ function FormContent({ withSpkklp }) {
         </div>
       </section>
 
-      {/* BAGIAN D: PAKET MANFAAT JKN */}
+      {/* BAGIAN E: PAKET MANFAAT JKN */}
       <section>
-        <SectionHeader color="bg-amber-600" title="D. Paket Manfaat JKN (Skala 1–4)" />
+        <SectionHeader color="bg-amber-600" title="E. Paket Manfaat JKN (Skala 1–4)" />
         <p className="text-xs text-slate-500 mb-3 italic">Skala 1–4: 1=Sangat Tidak Bermanfaat, 2=Tidak Bermanfaat, 3=Bermanfaat, 4=Sangat Bermanfaat</p>
         <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden mb-4">
           <thead className="bg-slate-50">
@@ -306,12 +329,7 @@ function FormContent({ withSpkklp }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {[
-              'Pemantauan kepatuhan terapi pasien AIDS, TB, dan Malaria.',
-              'Pelaksanaan Program Rujuk Balik (PRB).',
-              'Pengelolaan Hipertensi tanpa komplikasi.',
-              'Deprescribing/pengurangan obat pada pasien polifarmasi.',
-            ].map((item, idx) => (
+            {jknBenefits.map((item, idx) => (
               <tr key={idx}>
                 <td className="px-3 py-2 text-slate-700">{item}</td>
                 <td className="px-3 py-2"><ScaleBoxes /></td>
@@ -329,9 +347,9 @@ function FormContent({ withSpkklp }) {
         </div>
       </section>
 
-      {/* BAGIAN E: LAYANAN NON-OPTIMAL */}
+      {/* BAGIAN F: LAYANAN NON-OPTIMAL */}
       <section>
-        <SectionHeader color="bg-primary-600" title="E. Layanan yang Belum Optimal / Tidak Terakomodasi JKN" />
+        <SectionHeader color="bg-primary-600" title="F. Layanan yang Belum Optimal / Tidak Terakomodasi JKN" />
         <p className="text-xs text-slate-500 mb-3 italic">Pilih Ya/Tidak/Tidak Tahu dan berikan Skala 1–4 (1=Sangat Tidak Setuju s/d 4=Sangat Setuju)</p>
         <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden">
           <thead className="bg-slate-50">
@@ -343,14 +361,7 @@ function FormContent({ withSpkklp }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {[
-              'Pelayanan lifestyle medicine',
-              'Pelayanan wellness dan healthy aging',
-              'Konsultasi travel medicine',
-              'Manajemen pasien geriatri frailty',
-              'Precision medicine / konseling genetik dasar',
-              'Layanan promotif berbasis keluarga',
-            ].map((item, idx) => (
+            {nonOptimalServices.map((item, idx) => (
               <tr key={idx}>
                 <td className="px-3 py-2 text-slate-700">{item}</td>
                 <td className="px-3 py-2"><ScaleBoxes /></td>
@@ -373,9 +384,9 @@ function FormContent({ withSpkklp }) {
         </table>
       </section>
 
-      {/* BAGIAN F: PENDALAMAN KUALITATIF */}
+      {/* BAGIAN G: PENDALAMAN KUALITATIF */}
       <section>
-        <SectionHeader color="bg-emerald-600" title="F. Pendalaman Kualitatif (Jawab semua pertanyaan)" />
+        <SectionHeader color="bg-emerald-600" title="G. Pendalaman Kualitatif (Jawab semua pertanyaan)" />
         <div className="space-y-5">
           {interviewQuestions.map((question, idx) => (
             <div key={idx} className="bg-slate-50 border border-slate-200 rounded-lg p-3">
