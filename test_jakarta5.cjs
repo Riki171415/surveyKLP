@@ -166,6 +166,7 @@ let mappedDpmCount = 0;
 const addFaskesStrict = (pProv, pKab, pNama, type) => {
   let normProv = normalizeStr(pProv);
   if (normProv === 'daerahistimewayogyakarta') normProv = 'diyogyakarta';
+  if (normProv === 'dkijakarta') normProv = 'dki jakarta';
 
   let matchedProv = Object.keys(mapping.fktp).find(provKey => normalizeStr(provKey) === normProv);
   if (!matchedProv) return false;
@@ -197,101 +198,20 @@ const addFaskesStrict = (pProv, pKab, pNama, type) => {
 };
 
 // Add Puskesmas from CSV
-const puskesmasFile = './Data_Puskesmas_2026.csv';
-if (fs.existsSync(puskesmasFile)) {
-  const puskesmasLines = fs.readFileSync(puskesmasFile, 'utf8').split('\n');
-  for (let i = 1; i < puskesmasLines.length; i++) {
-    const line = puskesmasLines[i].trim();
-    if (!line) continue;
-    
-    const parts = [];
-    let current = '';
-    let inQuotes = false;
-    for(let char of line) {
-        if(char === '"') inQuotes = !inQuotes;
-        else if(char === ',' && !inQuotes) {
-            parts.push(current);
-            current = '';
-        } else {
-            current += char;
-        }
-    }
-    parts.push(current);
 
-    if (parts.length >= 4) {
-      let namaPuskesmas = parts[2].replace(/"/g, '').trim();
-      const rawText = parts.slice(3).join(',').replace(/"/g, '');
-      const { prov, kab } = getRegion(rawText);
+const debugAddFaskesStrict = (pProv, pKab, pNama, type) => {
+  let normProv = normalizeStr(pProv);
+  if (normProv === 'daerahistimewayogyakarta') normProv = 'diyogyakarta';
+  if (normProv === 'dkijakarta') normProv = 'dki jakarta'; // Wait! normalizeStr removes spaces! dkijakarta === 'dki jakarta'? NO!
+  console.log('normProv:', normProv);
 
-      if (prov && kab !== "Lainnya") {
-        addFaskesStrict(prov, kab, namaPuskesmas, 'puskesmas');
-      }
-    }
-  }
-}
+  let matchedProv = Object.keys(mapping.fktp).find(provKey => normalizeStr(provKey) === normProv);
+  console.log('matchedProv:', matchedProv);
+  if (!matchedProv) return false;
 
-// Add Klinik and DPM from CSV
-const fasyankesPath = path.join(__dirname, 'v_fasyankes.csv');
-if (fs.existsSync(fasyankesPath)) {
-  const fasyankesContent = fs.readFileSync(fasyankesPath, 'utf8');
-  const fasLines = fasyankesContent.split(/\r?\n/);
-  const headers = fasLines[0].split(',').map(h => h.replace(/"/g, '').trim());
-
-  const pProvIdx = headers.indexOf('provinsi');
-  const pKabIdx = headers.indexOf('kabupaten');
-  const pJenisIdx = headers.indexOf('jenis_fasyankes');
-  const pNamaIdx = headers.indexOf('nama');
-
-  for (let i = 1; i < fasLines.length; i++) {
-    const line = fasLines[i].trim();
-    if (!line) continue;
-    
-    const parts = [];
-    let current = '';
-    let inQuotes = false;
-    for(let char of line) {
-        if(char === '"') inQuotes = !inQuotes;
-        else if(char === ',' && !inQuotes) {
-            parts.push(current);
-            current = '';
-        } else {
-            current += char;
-        }
-    }
-    parts.push(current);
-    
-    if (parts.length < Math.max(pProvIdx, pKabIdx, pJenisIdx, pNamaIdx) + 1) continue;
-
-    const jenis = parts[pJenisIdx];
-    const prov = parts[pProvIdx];
-    const kab = parts[pKabIdx];
-    const nama = parts[pNamaIdx];
-
-    if (jenis === 'Klinik') {
-      addFaskesStrict(prov, kab, nama, 'klinik');
-    } else if (jenis === 'Dokter Praktik Mandiri') {
-      addFaskesStrict(prov, kab, nama, 'dpm');
-    }
-  }
-}
-
-const sortedMapping = { fktp: {}, dpm: {} };
-for (const type of ['fktp', 'dpm']) {
-  Object.keys(mapping[type]).sort().forEach(prov => {
-    const sortedKab = {};
-    Object.keys(mapping[type][prov]).sort().forEach(kab => {
-      sortedKab[kab] = mapping[type][prov][kab].sort();
-    });
-    if (Object.keys(sortedKab).length > 0) {
-      sortedMapping[type][prov] = sortedKab;
-    }
-  });
-}
-
-const outPath = path.join(__dirname, 'src', 'data', 'wilayahMapping.json');
-fs.writeFileSync(outPath, JSON.stringify(sortedMapping, null, 2), 'utf8');
-
-console.log(`✅ Success! Generated structured wilayahMapping.json with fktp and dpm`);
-console.log(`   Puskesmas: ${mappedPuskCount}`);
-console.log(`   Klinik   : ${mappedKlinikCount}`);
-console.log(`   DPM      : ${mappedDpmCount}`);
+  let matchedKab = Object.keys(mapping.fktp[matchedProv]).find(kabKey => normalizeForCompare(kabKey) === normalizeForCompare(pKab));
+  console.log('matchedKab:', matchedKab);
+  if (!matchedKab) return false;
+  return true;
+};
+debugAddFaskesStrict('DKI Jakarta', 'Kota Administrasi Jakarta Selatan', 'TEBET', 'puskesmas');
