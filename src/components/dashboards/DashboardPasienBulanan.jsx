@@ -7,7 +7,7 @@ import {
 import { penyakitPasienBulanan } from '../SurveyForm';
 import { Activity, Users, FileText, BarChart3 } from 'lucide-react';
 
-export default function DashboardPasienBulanan({ filteredData, COLORS, isPrinting }) {
+export default function DashboardPasienBulanan({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const { totalPatientsByDisease, averagePatientsByFaskes, generalStats } = useMemo(() => {
     const diseaseTotals = {};
     const faskesData = {
@@ -31,7 +31,7 @@ export default function DashboardPasienBulanan({ filteredData, COLORS, isPrintin
 
     let overallTotal = 0;
 
-    filteredData.forEach(row => {
+    uniqueFktpData.forEach(row => {
       const isDpm = row.role === 'Dokter Praktik Mandiri';
       const fType = isDpm ? 'DPM' : (row.jenis_faskes === 'Klinik' ? 'Klinik' : 'Puskesmas');
       
@@ -75,12 +75,13 @@ export default function DashboardPasienBulanan({ filteredData, COLORS, isPrintin
       totalPatientsByDisease: diseaseData,
       averagePatientsByFaskes: faskesComparisonData,
       generalStats: {
-        overallTotal,
-        totalResponden: filteredData.length,
-        avgPerFaskes: filteredData.length > 0 ? Math.round(overallTotal / filteredData.length) : 0
+        totalPasien: overallTotal,
+        rataRataTotal: uniqueFktpData.length > 0 ? (overallTotal / uniqueFktpData.length) : 0,
+        totalFaskesIsi: uniqueFktpData.filter(r => (r.role === 'Dokter Praktik Mandiri' ? r.dpm?.dataPasienBulanan : r.data_pasien_bulanan)).length,
+        proporsiIsi: uniqueFktpData.length > 0 ? (uniqueFktpData.filter(r => (r.role === 'Dokter Praktik Mandiri' ? r.dpm?.dataPasienBulanan : r.data_pasien_bulanan)).length / uniqueFktpData.length) * 100 : 0
       }
     };
-  }, [filteredData]);
+  }, [uniqueFktpData]);
 
   const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
     <div className={`bg-white rounded-2xl p-6 border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>

@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { Activity, AlertCircle, FileSearch, ShieldAlert } from 'lucide-react';
 
-export default function DashboardMonitoringPRB({ filteredData, COLORS, isPrinting }) {
+export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const { monStats, mekanismeData, kendalaData } = useMemo(() => {
     let fktpWithMekanisme = 0;
     const mekCounts = {
@@ -16,7 +16,7 @@ export default function DashboardMonitoringPRB({ filteredData, COLORS, isPrintin
 
     const kendalaMap = {};
 
-    filteredData.forEach(row => {
+    uniqueFktpData.forEach(row => {
       const prb = row.prb || {};
       
       let hasMekanisme = false;
@@ -39,16 +39,17 @@ export default function DashboardMonitoringPRB({ filteredData, COLORS, isPrintin
     });
 
     const topKendala = Object.keys(kendalaMap).map(k => ({ name: k, value: kendalaMap[k] })).sort((a,b) => b.value - a.value).slice(0, 10);
+    const proporsiMekanisme = uniqueFktpData.length > 0 ? (fktpWithMekanisme / uniqueFktpData.length) * 100 : 0;
 
     return {
       monStats: {
         fktpWithMekanisme,
-        proporsiMekanisme: filteredData.length > 0 ? (fktpWithMekanisme / filteredData.length) * 100 : 0
+        proporsiMekanisme
       },
       mekanismeData: Object.keys(mekCounts).map(k => ({ name: k, value: mekCounts[k] })).filter(d => d.value > 0),
       kendalaData: topKendala
     };
-  }, [filteredData]);
+  }, [uniqueFktpData]);
 
   const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
     <div className={`bg-white rounded-2xl p-6 border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>

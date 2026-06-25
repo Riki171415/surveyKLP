@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { AlertTriangle, Users, FileText, Database } from 'lucide-react';
 
-export default function DashboardKendala({ filteredData, COLORS, isPrinting }) {
+export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const { kendalaStats, kendalaData, dukunganData } = useMemo(() => {
     let fktpWithKendala = 0;
     const kendalaCounts = {
@@ -14,7 +14,7 @@ export default function DashboardKendala({ filteredData, COLORS, isPrinting }) {
       'Obat': 0, 'Pembiayaan': 0, 'Regulasi': 0, 'Lainnya': 0
     };
 
-    filteredData.forEach(row => {
+    uniqueFktpData.forEach(row => {
       const k = row.spkklp_kendala || {};
       if (k.hasKendala === 'Ya') {
         fktpWithKendala++;
@@ -36,13 +36,13 @@ export default function DashboardKendala({ filteredData, COLORS, isPrinting }) {
     return {
       kendalaStats: {
         totalFktpKendala: fktpWithKendala,
-        proporsiKendala: filteredData.length > 0 ? (fktpWithKendala / filteredData.length) * 100 : 0,
+        proporsiKendala: uniqueFktpData.length > 0 ? (fktpWithKendala / uniqueFktpData.length) * 100 : 0,
         top3: kData.slice(0, 3)
       },
       kendalaData: kData.filter(d => d.value > 0),
       dukunganData: dukData
     };
-  }, [filteredData]);
+  }, [uniqueFktpData]);
 
   const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
     <div className={`bg-white rounded-2xl p-6 border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
