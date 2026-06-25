@@ -50,14 +50,14 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
     });
 
 
-    const regionalTarget = {};
-    const combinedProvinces = new Set();
-    
+    const normalizeProv = (p) => p ? p.toLowerCase().replace(/[^a-z0-9]/g, '') : 'lainnya';
+    const regionalTargetNormalized = {};
+    const originalProvNames = {};
+
     if (wilayahMapping.fktp) {
       Object.keys(wilayahMapping.fktp).forEach(prov => {
         let count = 0;
         Object.values(wilayahMapping.fktp[prov]).forEach(arr => count += arr.length);
-        regionalTarget[prov] = (regionalTarget[prov] || 0) + count;
         const norm = normalizeProv(prov);
         regionalTargetNormalized[norm] = (regionalTargetNormalized[norm] || 0) + count;
         originalProvNames[norm] = prov;
