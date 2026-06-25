@@ -18,7 +18,9 @@ const allowedRegions = {
   'Sumatera Selatan': 'ALL',
   'Kepulauan Bangka Belitung': 'ALL',
   'Sulawesi Utara': 'ALL',
-  'Aceh': 'ALL'
+  'Aceh': 'ALL',
+  'Kalimantan Barat': 'ALL',
+  'Sulawesi Selatan': 'ALL'
 };
 
 const normalizeStr = (s) => s ? s.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
