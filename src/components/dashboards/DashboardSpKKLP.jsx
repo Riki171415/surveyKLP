@@ -27,7 +27,7 @@ const layananDirujukItems = [
 ];
 
 export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
-  const { docStats, statusData, relevansiData, dirujukData, topRelevansi, diagData, tindData, analysisText } = useMemo(() => {
+  const { docStats, statusData, obatKhususData, relevansiData, dirujukData, topRelevansi, diagData, tindData, analysisText } = useMemo(() => {
     let spkklpYa = 0;
     let spkklpTidak = 0;
     let totalDocUmum = 0;
@@ -38,6 +38,7 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
     const diagnosisCounts = {};
     const tindakanCounts = {};
     const statusCounts = {};
+    const obatKhususCounts = {};
 
     const extractTags = (text) => {
       if (!text) return [];
@@ -94,6 +95,13 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
           tindakanCounts[normalized] = (tindakanCounts[normalized] || 0) + 1;
         });
       }
+      
+      if (row.spkklp_obat_khusus) {
+        extractTags(row.spkklp_obat_khusus).forEach(tag => {
+          const normalized = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
+          obatKhususCounts[normalized] = (obatKhususCounts[normalized] || 0) + 1;
+        });
+      }
     });
 
     const relData = relScores.map(s => ({
@@ -126,11 +134,17 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
       value: statusCounts[k]
     })).sort((a,b) => b.value - a.value);
 
+    const obatKhususData = Object.keys(obatKhususCounts).map(k => ({
+      name: k,
+      value: obatKhususCounts[k]
+    })).sort((a,b) => b.value - a.value).slice(0, 5);
+
     return {
       docStats: {
         spkklpYa, spkklpTidak, totalDocUmum, totalDocGigi
       },
       statusData,
+      obatKhususData,
       relevansiData: relData,
       dirujukData: rjkData,
       diagData,
@@ -231,6 +245,29 @@ export default function DashboardSpKKLP({ filteredData, COLORS, isPrinting }) {
             </ResponsiveContainer>
           </div>
         </div>
+
+        {obatKhususData && obatKhususData.length > 0 && (
+          <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+            <div className="flex justify-between items-start mb-6">
+              <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-rose-600" /> Top 5 Obat Khusus Sp.KKLP</h3>
+              {!isPrinting && <ExportButton fileName="Top 5 Obat Khusus Sp.KKLP" />}
+            </div>
+            <div className="h-72">
+              <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+                <BarChart data={obatKhususData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={120} />
+                  <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} FKTP`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                  <Bar dataKey="value" name="Jumlah FKTP" fill="#e11d48" radius={[0, 6, 6, 0]} barSize={32}>
+                    <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
