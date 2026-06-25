@@ -7,6 +7,12 @@ export default defineConfig({
   base: process.env.VITE_BASE_URL || '/',
   build: {
     chunkSizeWarningLimit: 2000,
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    }
+  },
+  optimizeDeps: {
+    include: ['recharts']
   },
   server: {
     allowedHosts: ['jamkesfktp.web.id'],
