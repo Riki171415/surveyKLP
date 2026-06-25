@@ -510,6 +510,8 @@ export default function DataManagement() {
                 <div>
                   <SectionHeader label="B. Detail Khusus Sp.KKLP & Perspektif" />
                   <div className="space-y-4">
+                    <Field label="Status Kualifikasi" value={selected.spkklp_status} />
+                    <Field label="Obat Khusus Sp.KKLP" value={selected.spkklp_obat_khusus} />
                     <Field label="Berpraktik sbg Sp.KKLP?" value={selected.spkklp_berpraktik} />
                     
                     <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2">
