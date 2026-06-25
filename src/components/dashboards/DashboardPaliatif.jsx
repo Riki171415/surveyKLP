@@ -83,7 +83,7 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="FKTP Memberikan Paliatif" value={`${palStats.fktpWithPaliatif} FKTP`} subtitle={`${palStats.proporsiPal.toFixed(1)}% dari total FKTP`} icon={HeartPulse} colorClass="bg-purple-500 text-purple-600 bg-purple-100" />
+        <StatCard title="FKTP Memberikan Paliatif" value={`${palStats.fktpWithPaliatif} FKTP`} subtitle={`${palStats.proporsiPaliatif.toFixed(1)}% dari total FKTP`} icon={HeartPulse} colorClass="bg-purple-500 text-purple-600 bg-purple-100" />
         <StatCard title="Tingkat Kolaborasi" value={`${palStats.proporsiKolaborasi.toFixed(1)}%`} subtitle="FKTP yang berkolaborasi dengan nakes lain" icon={Users} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
         <StatCard title="Outcome (Perbaikan)" value={`${palStats.proporsiPerbaikan.toFixed(1)}%`} subtitle="FKTP melaporkan perbaikan kualitas hidup" icon={CheckCircle2} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
       </div>
