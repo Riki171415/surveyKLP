@@ -92,7 +92,10 @@ export default function Dashboard() {
   const uniqueFktpData = useMemo(() => {
     const map = new Map();
     filteredData.forEach(row => {
-      const id = row.kode_faskes || row.fktp_name?.toLowerCase()?.trim() || row.id;
+      const prov = row.provinsi || row.city || '';
+      const city = row.kab_kota || row.city || '';
+      const name = row.fktp_name?.toLowerCase()?.trim() || '';
+      const id = row.kode_faskes || (name ? `${prov}-${city}-${name}` : row.id);
       if (!map.has(id)) {
         map.set(id, row);
       } else if (row.doc_kklp === 'Ya') {

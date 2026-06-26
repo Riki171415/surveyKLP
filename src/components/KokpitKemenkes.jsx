@@ -128,7 +128,10 @@ export default function KokpitKemenkes() {
     // FKTP Unik untuk count dasar
     const uniqueFktpMap = new Map();
     filteredData.forEach(row => {
-      const id = row.kode_faskes || row.fktp_name?.toLowerCase()?.trim() || row.id;
+      const prov = row.provinsi || row.city || '';
+      const city = row.kab_kota || row.city || '';
+      const name = row.fktp_name?.toLowerCase()?.trim() || '';
+      const id = row.kode_faskes || (name ? `${prov}-${city}-${name}` : row.id);
       const isSpkklp = (r) => r.doc_kklp === 'Ya' || r.role === 'Dokter Sp.KKLP' || r.role === 'Dokter Spesialis KKLP Praktik Mandiri';
       if (!uniqueFktpMap.has(id)) {
         uniqueFktpMap.set(id, row);
