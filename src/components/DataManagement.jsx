@@ -460,7 +460,7 @@ export default function DataManagement() {
                         <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md" title={`Waktu Submit: ${new Date(row.created_at).toLocaleString('id-ID')}`}>
                           {new Date(row.updated_at || row.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>
-                        {(row.edit_history && row.edit_history.length > 0) && (
+                        {(row.edit_history && row.edit_history.length > 1) && (
                           <span className="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200">
                             Pernah Diedit
                           </span>
