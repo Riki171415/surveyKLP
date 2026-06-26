@@ -296,7 +296,8 @@ export default function KokpitKemenkes() {
       manfaatData,
       kwCounts,
       provArray,
-      totalCount: totalFktp
+      totalCount: totalFktp,
+      spkklpCount: acc.spkklpCount
     };
   }, [filteredData]);
 
@@ -375,8 +376,8 @@ export default function KokpitKemenkes() {
             <div className="bg-white shadow-sm border border-slate-200 p-6 rounded-3xl flex flex-col justify-between">
               <div>
                 <p className="text-slate-500 text-sm font-bold tracking-wider uppercase mb-2">Kekurangan Sp.KKLP</p>
-                <h3 className="text-4xl font-black text-slate-800">{100 - metrics.spkklpRatio}%</h3>
-                <p className="text-slate-500 mt-1">Dari {metrics.totalCount} FKTP disurvei belum memiliki Sp.KKLP</p>
+                <h3 className="text-4xl font-black text-slate-800">{metrics.totalCount - metrics.spkklpCount} <span className="text-xl text-slate-500 font-medium">FKTP</span></h3>
+                <p className="text-slate-500 mt-1">Atau {100 - metrics.spkklpRatio}% dari total {metrics.totalCount} FKTP belum memiliki Sp.KKLP</p>
               </div>
               <div className="flex items-center gap-2 mt-4 text-amber-600 text-sm font-bold bg-amber-400/10 px-3 py-2 rounded-lg w-fit">
                 <AlertTriangle className="w-4 h-4" /> Butuh Pemerataan
@@ -402,7 +403,7 @@ export default function KokpitKemenkes() {
             <div>
               <h4 className="text-slate-800 font-bold text-lg mb-1">Rekomendasi Kebijakan Hari Ini</h4>
               <p className="text-slate-600/80 leading-relaxed text-sm">
-                Terdapat <strong className="text-slate-800">{100 - metrics.spkklpRatio}% FKTP</strong> tanpa Sp.KKLP, namun survei menunjukkan skor relevansi rata-rata tinggi. Di sisi lain, <strong className="text-rose-600">{metrics.topRujukan[0]?.name}</strong> masih terus dirujuk oleh {metrics.topRujukan[0]?.value}% FKTP. 
+                Terdapat <strong className="text-slate-800">{metrics.totalCount - metrics.spkklpCount} FKTP ({100 - metrics.spkklpRatio}%)</strong> tanpa Sp.KKLP, namun survei menunjukkan skor relevansi rata-rata tinggi. Di sisi lain, <strong className="text-rose-600">{metrics.topRujukan[0]?.name}</strong> masih terus dirujuk oleh {metrics.topRujukan[0]?.value}% FKTP. 
                 <br/><span className="text-emerald-600 mt-2 block font-medium">→ Tindakan: Prioritaskan pengangkatan Sp.KKLP di Provinsi merah dan masukan layanan prioritas ke pembiayaan JKN (Non-Kapitasi).</span>
               </p>
             </div>
