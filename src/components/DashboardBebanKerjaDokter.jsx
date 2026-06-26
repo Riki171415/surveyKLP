@@ -1,12 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  ScatterChart, Scatter, ZAxis, Cell,
-  PieChart, Pie
+  ScatterChart, Scatter, ZAxis, Cell
 } from 'recharts';
-import { Clock, AlertTriangle, CheckCircle2, TrendingDown, Target, Info } from 'lucide-react';
+import { Clock, AlertTriangle, CheckCircle2, TrendingDown, Target, Info, Loader2, ListChecks } from 'lucide-react';
+import { supabase } from '../supabaseClient';
 
 const DashboardBebanKerjaDokter = () => {
+  const [surveys, setSurveys] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
+        let data = [];
+        if (useSupabase) {
+          const { data: sbData, error } = await supabase.from('surveys').select('fktp_name, kompetensi');
+          if (error) throw error;
+          data = sbData || [];
+        } else {
+          const res = await fetch('/api/surveys');
+          const json = await res.json();
+          data = json.data || [];
+        }
+        setSurveys(data);
+      } catch (err) {
+        console.error("Gagal mengambil data survei:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   // Data Waktu Layanan
   const workloadData = [
     { name: 'Dalam Gedung', Pasien: 80, Waktu: 47, fill: '#0ea5e9' },
@@ -20,6 +47,48 @@ const DashboardBebanKerjaDokter = () => {
     { nama: 'USG Dasar', effort: 8, impact: 8, kuadran: 'Major Projects', color: '#f59e0b' },
     { nama: 'Pemeriksaan X-ray', effort: 9, impact: 7, kuadran: 'Long Term', color: '#ef4444' }
   ];
+
+  const kompetensiLayananList = [
+    "Pemeriksaan USG Dasar untuk penegakan diagnosis",
+    "Deprescribing (pengurangan/rasionalisasi obat pasien kronis)",
+    "Family Conference (Konsultasi keluarga untuk penyelesaian masalah klinis/psikososial)",
+    "Pemeriksaan Xray untuk penegakan diagnosis"
+  ];
+
+  const tableData = kompetensiLayananList.map((namaLayanan, idx) => {
+    let sudah = 0;
+    let belum = 0;
+    const kendalaMap = new Map();
+
+    surveys.forEach(survey => {
+      if (survey.kompetensi && survey.kompetensi[idx]) {
+        if (survey.kompetensi[idx].status === 'sudah') sudah++;
+        if (survey.kompetensi[idx].status === 'belum') {
+          belum++;
+          const kendalaText = survey.kompetensi[idx].kendala;
+          if (kendalaText && kendalaText.trim() !== '') {
+             const key = kendalaText.trim().toLowerCase();
+             kendalaMap.set(key, (kendalaMap.get(key) || 0) + 1);
+          }
+        }
+      }
+    });
+
+    // Mengambil maksimal 3 kendala paling sering muncul
+    const topKendala = Array.from(kendalaMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(entry => entry[0])
+      .slice(0, 3)
+      .join(', ');
+
+    return {
+      namaLayanan,
+      sudah,
+      belum,
+      total: sudah + belum,
+      kendala: topKendala ? topKendala : '-'
+    };
+  });
 
   return (
     <div className="space-y-6 animate-fade-in-up">
@@ -125,6 +194,64 @@ const DashboardBebanKerjaDokter = () => {
           <div className="mt-4 p-3 bg-slate-50 rounded border border-slate-200 text-sm text-slate-600">
             <strong>Analisis:</strong> Terlihat jelas ketimpangan pada layanan Luar Gedung (Home Visit). Meski jumlah pasiennya hanya 20%, namun menghabiskan 53% total waktu karena memakan 45 menit per sesinya.
           </div>
+        </div>
+      </div>
+
+      {/* ROW 1.5: TABEL HASIL ISIAN RESPONDEN */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <ListChecks className="w-5 h-5 text-primary-600" />
+              Tabel Kompetensi Layanan (Hasil Isian Responden)
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">Akumulasi status kompetensi layanan yang sudah/belum berjalan dari {surveys.length} faskes.</p>
+          </div>
+          {loading && (
+            <div className="flex items-center gap-2 text-sm text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+              <Loader2 className="w-4 h-4 animate-spin" /> Memuat data...
+            </div>
+          )}
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-6 py-4 text-xs font-bold text-slate-600 uppercase w-[35%]">Jenis Layanan</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-600 uppercase text-center">Sudah Berjalan</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-600 uppercase text-center">Belum Berjalan</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-600 uppercase">Ringkasan Kendala Utama</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {loading && surveys.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="px-6 py-10 text-center text-slate-400">
+                    Memuat tabel data...
+                  </td>
+                </tr>
+              ) : tableData.map((row, index) => (
+                <tr key={index} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-slate-800 text-sm">
+                    {row.namaLayanan}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span className="inline-flex items-center justify-center min-w-[3rem] px-2 py-1 bg-emerald-50 text-emerald-700 rounded-md font-bold text-sm border border-emerald-100">
+                      {row.sudah}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span className="inline-flex items-center justify-center min-w-[3rem] px-2 py-1 bg-rose-50 text-rose-700 rounded-md font-bold text-sm border border-rose-100">
+                      {row.belum}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-slate-600 italic">
+                    {row.belum === 0 ? <span className="text-slate-400 not-italic">-</span> : <span className="capitalize">{row.kendala}</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
