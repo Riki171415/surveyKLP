@@ -510,8 +510,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     const hasRataRujukan = formData.prb?.rataRujukan !== undefined && formData.prb?.rataRujukan !== null && formData.prb?.rataRujukan !== '';
 
     if (!hasJumlah || !hasDM || !hasHT || !hasMekanisme || !hasRataRujukan) return false;
-    if (!isRoleSpKklp && !relevansiItems.every((_, idx) => formData.relevansiSpkklp[idx])) return false;
-    if (!isRoleSpKklp && formData.docKklp === 'Ya' && !peranSpkklpItems.every((_, idx) => formData.peranSpkklp[idx])) return false;
+    if (!relevansiItems.every((_, idx) => formData.relevansiSpkklp[idx])) return false;
+    if (formData.docKklp === 'Ya' && !peranSpkklpItems.every((_, idx) => formData.peranSpkklp[idx])) return false;
     if (!formData.layananDirujuk?.pengaruhPenurunanRujukan) return false;
     
     const jumlahPRB = Number(formData.prb.jumlah) || 0;
@@ -1148,11 +1148,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
               </div>
             )}
 
-            {/* ===== STEP 3: PERSPEKTIF SPKKLP (SEMUA RESPONDEN) ===== */}
             {(isPrintMode || step === 3) && !isRoleDpm && (
               <div className="space-y-8">
-                {(!isRoleSpKklp || isPrintMode) && (
-                  <>
                     <div className="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-6">
                       <div className="w-1 h-6 bg-indigo-600 rounded-full"></div>
                       <h2 className="text-xl font-bold text-slate-800">C. Perspektif terhadap Sp.KKLP di Puskesmas / Klinik</h2>
@@ -1213,11 +1210,9 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                     </table>
                   </div>
                 </div>
-                  </>
-                )}
 
-                {/* Peran SpKKLP dalam Optimalisasi Layanan (Khusus Non-SpKKLP) */}
-                {((!isRoleSpKklp && formData.docKklp === 'Ya') || isPrintMode) && (
+                {/* Peran SpKKLP dalam Optimalisasi Layanan */}
+                {((formData.docKklp === 'Ya') || isPrintMode) && (
                   <div>
                     <h3 className="text-lg font-bold text-slate-800 mb-3 mt-6">A.2 Peran Sp.KKLP dalam Optimalisasi Layanan</h3>
                     <p className="text-sm text-slate-600 mb-4">Mohon berikan penilaian Anda terhadap peran Sp.KKLP di Fasilitas Kesehatan Anda:</p>
@@ -1716,8 +1711,8 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
                       {(() => { const b = kompetensiLayanan.filter((_, i) => !formData.kompetensi[i]?.status).length; return b > 0 ? <li>{b} layanan kompetensi belum dipilih status-nya</li> : null; })()}
                     </>)}
                     {step === 3 && (<>
-                      {!isRoleSpKklp && (() => { const b = relevansiItems.filter((_, i) => !formData.relevansiSpkklp[i]).length; return b > 0 ? <li>{b} item relevansi Sp.KKLP belum diberi nilai</li> : null; })()}
-                      {!isRoleSpKklp && formData.docKklp === 'Ya' && (() => { const b = peranSpkklpItems.filter((_, i) => !formData.peranSpkklp[i]).length; return b > 0 ? <li>{b} item peran Sp.KKLP belum diberi nilai</li> : null; })()}
+                      {(() => { const b = relevansiItems.filter((_, i) => !formData.relevansiSpkklp[i]).length; return b > 0 ? <li>{b} item relevansi Sp.KKLP belum diberi nilai</li> : null; })()}
+                      {formData.docKklp === 'Ya' && (() => { const b = peranSpkklpItems.filter((_, i) => !formData.peranSpkklp[i]).length; return b > 0 ? <li>{b} item peran Sp.KKLP belum diberi nilai</li> : null; })()}
                       {!formData.layananDirujuk?.pengaruhPenurunanRujukan && <li>Pertanyaan pengaruh keberadaan Sp.KKLP terhadap penurunan rujukan belum diisi</li>}
                       {!(formData.prb?.jumlah !== undefined && formData.prb?.jumlah !== null && formData.prb?.jumlah !== '') && <li>Jumlah peserta PRB wajib diisi</li>}
                       {!(formData.prb?.peserta_dm !== undefined && formData.prb?.peserta_dm !== null && formData.prb?.peserta_dm !== '') && <li>Jumlah peserta PRB DM wajib diisi</li>}
