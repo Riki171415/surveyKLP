@@ -61,9 +61,9 @@ export default function DeepDiveAIReport({ rawData }) {
          })
          .map(c => c.count > 1 ? c.original + ' (Muncul ' + c.count + ' kali)' : c.original);
       
-      // Batas aman API Gemini Free Tier (3000 verbatim unik)
-      if (smartAnswers.length > 3000) {
-         smartAnswers = smartAnswers.slice(0, 3000);
+      // Batas aman API Gemini Free Tier (2000 verbatim unik)
+      if (smartAnswers.length > 2000) {
+         smartAnswers = smartAnswers.slice(0, 2000);
       }
       
       const prompt = `Kamu adalah Senior Qualitative Data Analyst. Berdasarkan ${smartAnswers.length} verbatim responden unik (telah dikelompokkan dari total ${rawData.length} data asli), berikan analisis terstruktur dalam format JSON MURNI. 
