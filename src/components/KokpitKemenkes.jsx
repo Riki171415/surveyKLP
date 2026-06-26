@@ -129,12 +129,13 @@ export default function KokpitKemenkes() {
     const uniqueFktpMap = new Map();
     filteredData.forEach(row => {
       const id = row.kode_faskes || row.fktp_name?.toLowerCase()?.trim() || row.id;
+      const isSpkklp = (r) => r.doc_kklp === 'Ya' || r.role === 'Dokter Sp.KKLP' || r.role === 'Dokter Spesialis KKLP Praktik Mandiri';
       if (!uniqueFktpMap.has(id)) {
         uniqueFktpMap.set(id, row);
-      } else if (row.doc_kklp === 'Ya') {
+      } else if (isSpkklp(row)) {
         const existing = uniqueFktpMap.get(id);
-        if (existing.doc_kklp !== 'Ya') {
-          uniqueFktpMap.set(id, { ...existing, doc_kklp: 'Ya' });
+        if (!isSpkklp(existing)) {
+          uniqueFktpMap.set(id, { ...existing, doc_kklp: 'Ya', role: row.role });
         }
       }
     });
@@ -149,7 +150,8 @@ export default function KokpitKemenkes() {
       if (!provMap[prov]) provMap[prov] = { count: 0, spkklp: 0, relSum: 0, relCount: 0 };
       provMap[prov].count++;
 
-      if (row.doc_kklp === 'Ya') {
+      const isSpkklp = (r) => r.doc_kklp === 'Ya' || r.role === 'Dokter Sp.KKLP' || r.role === 'Dokter Spesialis KKLP Praktik Mandiri';
+      if (isSpkklp(row)) {
         acc.spkklpCount++;
         provMap[prov].spkklp++;
       }
