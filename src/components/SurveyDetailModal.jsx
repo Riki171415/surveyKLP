@@ -626,7 +626,7 @@ export default function SurveyDetailModal({ selected, onClose }) {
             </SectionBlock>
 
             {/* ═══ RIWAYAT EDIT ═══ */}
-            {selected.edit_history && selected.edit_history.length > 0 && (
+            {selected.edit_history && selected.edit_history.length > 1 && (
               <SectionBlock title="Riwayat Edit" color="bg-amber-600">
                 <div className="space-y-3">
                   {selected.edit_history.map((history, idx) => (

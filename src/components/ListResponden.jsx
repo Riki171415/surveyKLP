@@ -144,7 +144,7 @@ export default function ListResponden() {
                               : '-'}
                         </span>
                       </div>
-                      {(row.edit_history && row.edit_history.length > 0) && (
+                      {(row.edit_history && row.edit_history.length > 1) && (
                         <span className="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200">
                           Diedit
                         </span>
