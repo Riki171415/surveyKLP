@@ -414,6 +414,7 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
               )
             )}
           </div>
+          </div>
           
           {errorData && <p className="text-xs text-rose-500 font-medium mb-4 mt-2">{errorData}</p>}
 
