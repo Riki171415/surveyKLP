@@ -110,7 +110,16 @@ Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif. F
         })
       });
 
-      if (!response.ok) throw new Error("Gagal mengambil data dari API Gemini. Cek API Key Anda.");
+      if (!response.ok) {
+        if (response.status === 503) {
+          throw new Error("Server Gemini Google sedang sibuk/overload (Error 503). Silakan coba beberapa saat lagi.");
+        } else if (response.status === 400 || response.status === 403) {
+          throw new Error("API Key tidak valid atau terblokir (Error " + response.status + "). Silakan periksa kembali API Key Anda.");
+        } else if (response.status === 404) {
+          throw new Error("Model Gemini yang diminta tidak ditemukan (Error 404). Cek pengaturan model Anda.");
+        }
+        throw new Error("Gagal terhubung ke API Gemini (Status: " + response.status + ").");
+      }
       
       const resData = await response.json();
       const text = resData.candidates[0].content.parts[0].text;
