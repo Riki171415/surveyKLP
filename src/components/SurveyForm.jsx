@@ -690,6 +690,22 @@ export default function SurveyForm({ isEdit = false, isInterview = false, isPrin
     </label>
   );
 
+  if (!isInterview && !isEdit && !isPrintMode) {
+    return (
+      <div className="max-w-2xl mx-auto p-12 bg-white rounded-xl shadow-sm border border-slate-200 text-center animate-fade-in mt-10">
+        <Info className="w-16 h-16 text-primary-500 mx-auto mb-6" />
+        <h2 className="text-3xl font-bold text-slate-800 mb-3 tracking-tight">Survey Telah Berakhir</h2>
+        <p className="text-slate-500 mb-8 text-lg">Terima kasih atas partisipasi Anda selama proses Survey ini.</p>
+        <button
+          onClick={() => navigate('/login')}
+          className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors shadow-sm"
+        >
+          Login Petugas
+        </button>
+      </div>
+    );
+  }
+
   if (showTransition) {
     return (
       <div className="max-w-3xl mx-auto p-12 bg-white/90 backdrop-blur-md rounded-3xl shadow-soft-lg border border-emerald-100 text-center animate-fade-in mt-10">
