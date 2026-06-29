@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X, Lightbulb } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X, Lightbulb, Target } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
 
 export default function DashboardKeluhanSentences({ filteredData, isPrinting }) {
@@ -9,15 +9,15 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
   const [isGeneratingGemini, setIsGeneratingGemini] = useState(false);
   const [geminiError, setGeminiError] = useState('');
   
-  const [expandedThematic, setExpandedThematic] = useState(null);
-  const [thematicSummary, setThematicSummary] = useState(null);
-  const [isGeneratingThematic, setIsGeneratingThematic] = useState(false);
-  const [thematicError, setThematicError] = useState('');
+  const [expandedAuto, setExpandedAuto] = useState(null);
+  const [autoSummary, setAutoSummary] = useState(null);
+  const [isGeneratingAuto, setIsGeneratingAuto] = useState(false);
+  const [autoError, setAutoError] = useState('');
 
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
   const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
-  const [activeModalContext, setActiveModalContext] = useState(''); // 'keluhan' or 'thematic'
+  const [activeModalContext, setActiveModalContext] = useState(''); 
 
   const handleSaveKey = () => {
     localStorage.setItem('GEMINI_API_KEY', tempKey);
@@ -25,8 +25,8 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
     setShowKeyModal(false);
     if (activeModalContext === 'keluhan') {
       handleGenerateGeminiSummary(chartData, totalRespondents, tempKey, tempModel);
-    } else if (activeModalContext === 'thematic') {
-      handleGenerateThematicSummary(thematicChartData, totalRespondents, tempKey, tempModel);
+    } else if (activeModalContext === 'auto') {
+      handleGenerateAutoSummary(autoClusters, totalRespondents, tempKey, tempModel);
     }
   };
 
@@ -40,19 +40,10 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
     'SOP & Regulasi': ['sop', 'aturan', 'prosedur', 'kebijakan', 'regulasi', 'kaku', 'syarat', 'standar', 'birokrasi', 'administrasi']
   };
 
-  const thematicCategories = {
-    'Cakupan Manfaat & Standar Pelayanan': ['cakupan', 'manfaat', 'standar', 'pelayanan', 'mutu', 'kualitas', 'layanan'],
-    'Penguatan Kompetensi SDM': ['kompetensi', 'sdm', 'pelatihan', 'pendidikan', 'keahlian', 'skill', 'bimbingan', 'pengembangan', 'sosialisasi'],
-    'Ketersediaan Sumber Daya': ['sumber daya', 'fasilitas', 'sarana', 'prasarana', 'alat', 'alkes', 'obat', 'ketersediaan', 'stok', 'infrastruktur'],
-    'Mekanisme Pembiayaan': ['pembiayaan', 'mekanisme', 'dana', 'anggaran', 'kapitasi', 'klaim', 'tarif', 'bayar', 'insentif', 'honor']
-  };
-
-  // Helper untuk regex pencocokan kata (word boundaries) agar aman (contoh: "rs" tidak terdeteksi di "tersebut")
   const buildRegexes = (categories) => {
     const regexes = {};
     Object.keys(categories).forEach(cat => {
       regexes[cat] = categories[cat].map(kw => {
-        // Jika keyword mengandung spasi atau tanda baca khusus, butuh penanganan ekstra
         const escapedKw = kw.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
         return new RegExp(`\\b${escapedKw}\\b`, 'i');
       });
@@ -61,20 +52,34 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
   };
 
   const keluhanRegexes = useMemo(() => buildRegexes(keluhanCategories), []);
-  const thematicRegexes = useMemo(() => buildRegexes(thematicCategories), []);
 
-  const { chartData, thematicChartData, totalRespondents } = useMemo(() => {
+  // Helpers for Unsupervised Clustering
+  const stopwords = new Set(['dan', 'atau', 'yang', 'di', 'ke', 'dari', 'pada', 'untuk', 'dengan', 'ini', 'itu', 'adalah', 'tidak', 'ada', 'bisa', 'karena', 'jika', 'agar', 'juga', 'dalam', 'sangat', 'sudah', 'belum', 'akan', 'harus', 'lebih', 'kurang', 'saat', 'saya', 'kami', 'kita', 'buat', 'seperti']);
+
+  const getTokens = (str) => {
+    return Array.from(new Set(
+      str.toLowerCase()
+         .replace(/[^a-z0-9\s]/g, '')
+         .split(/\s+/)
+         .filter(w => w.length > 2 && !stopwords.has(w))
+    ));
+  };
+
+  const jaccard = (tokensA, tokensB) => {
+    if (tokensA.length === 0 || tokensB.length === 0) return 0;
+    const intersection = tokensA.filter(x => tokensB.includes(x)).length;
+    const union = new Set([...tokensA, ...tokensB]).size;
+    return intersection / union;
+  };
+
+  const { chartData, autoClusters, totalRespondents } = useMemo(() => {
     const results = {};
-    const thematicResults = {};
-    
     Object.keys(keluhanCategories).forEach(cat => {
       results[cat] = { sentences: [], respondents: new Set() };
     });
-    Object.keys(thematicCategories).forEach(cat => {
-      thematicResults[cat] = { sentences: [], respondents: new Set() };
-    });
 
     const processedRespondents = new Set();
+    let allSentences = [];
 
     filteredData.forEach(row => {
       const w = row.wawancara || {};
@@ -82,13 +87,12 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
       for (let i = 0; i < 8; i++) {
         if (w[i] && w[i].trim().length > 0) {
           hasAnswer = true;
-          // Split into sentences using punctuation or newline
-          const sentences = w[i].split(/[.!?\n]+/).map(s => s.trim()).filter(s => s.length > 10);
+          const sents = w[i].split(/[.!?\n]+/).map(s => s.trim()).filter(s => s.length > 10);
           
-          sentences.forEach(sentence => {
+          sents.forEach(sentence => {
             const lowerS = sentence.toLowerCase();
             
-            // Evaluasi Keluhan
+            // 1. Kategorisasi Berbasis Keyword
             Object.keys(keluhanCategories).forEach(cat => {
               if (keluhanRegexes[cat].some(regex => regex.test(lowerS))) {
                 results[cat].sentences.push({ 
@@ -101,17 +105,14 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
               }
             });
 
-            // Evaluasi Tematik Kebijakan
-            Object.keys(thematicCategories).forEach(cat => {
-              if (thematicRegexes[cat].some(regex => regex.test(lowerS))) {
-                thematicResults[cat].sentences.push({ 
-                  text: sentence, 
-                  fktp: row.fktp_name || 'Tidak diketahui', 
-                  role: row.role || 'Lainnya', 
-                  q: `W${i+1}` 
-                });
-                thematicResults[cat].respondents.add(row.id);
-              }
+            // Siapkan untuk clustering otomatis
+            allSentences.push({
+               text: sentence,
+               tokens: getTokens(sentence),
+               fktp: row.fktp_name || 'Tidak diketahui',
+               role: row.role || 'Lainnya',
+               q: `W${i+1}`,
+               id: row.id
             });
           });
         }
@@ -121,6 +122,7 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
 
     const total = processedRespondents.size;
 
+    // Build Chart Data for Categories
     const data = Object.keys(results).map(cat => ({
       name: cat,
       value: results[cat].respondents.size,
@@ -128,15 +130,51 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
       sentences: results[cat].sentences
     })).filter(d => d.value > 0).sort((a,b) => b.value - a.value);
 
-    const thematicData = Object.keys(thematicResults).map(cat => ({
-      name: cat,
-      value: thematicResults[cat].respondents.size,
-      percent: total > 0 ? ((thematicResults[cat].respondents.size / total) * 100).toFixed(1) : 0,
-      sentences: thematicResults[cat].sentences
-    })).filter(d => d.value > 0).sort((a,b) => b.value - a.value);
+    // 2. Unsupervised Clustering Logic
+    // Hanya proses kalimat yang memiliki makna kata yang cukup (>= 3 token bersih)
+    allSentences = allSentences.filter(s => s.tokens.length >= 3);
+    const clusters = [];
 
-    return { chartData: data, thematicChartData: thematicData, totalRespondents: total };
-  }, [filteredData, keluhanRegexes, thematicRegexes]);
+    allSentences.forEach(sentence => {
+       let bestCluster = null;
+       let bestScore = 0.40; // Threshold kemiripan Jaccard 40%
+       
+       for (const cluster of clusters) {
+          const score = jaccard(sentence.tokens, cluster.centroidTokens);
+          if (score > bestScore) {
+             bestScore = score;
+             bestCluster = cluster;
+          }
+       }
+
+       if (bestCluster) {
+          bestCluster.sentences.push(sentence);
+          bestCluster.respondents.add(sentence.id);
+       } else {
+          clusters.push({
+             centroidTokens: sentence.tokens,
+             representativeText: sentence.text,
+             sentences: [sentence],
+             respondents: new Set([sentence.id])
+          });
+       }
+    });
+
+    // Urutkan klaster berdasarkan jumlah responden terbanyak dan ambil Top 20
+    const topClusters = clusters
+       .map((c, idx) => ({
+          id: `cluster_${idx}`,
+          name: c.representativeText, // Menggunakan kalimat asli pertama sebagai judul klaster
+          value: c.respondents.size,
+          percent: total > 0 ? ((c.respondents.size / total) * 100).toFixed(1) : 0,
+          sentences: c.sentences
+       }))
+       .filter(c => c.value > 1) // Minimal 2 orang ngomong hal yang mirip
+       .sort((a,b) => b.value - a.value)
+       .slice(0, 20);
+
+    return { chartData: data, autoClusters: topClusters, totalRespondents: total };
+  }, [filteredData, keluhanRegexes]);
 
   const callGeminiApi = async (prompt, overrideKey, overrideModel) => {
     const apiKey = overrideKey || localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
@@ -199,54 +237,57 @@ Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif re
     }
   };
 
-  const handleGenerateThematicSummary = async (data, total, overrideKey, overrideModel) => {
+  const handleGenerateAutoSummary = async (clusters, total, overrideKey, overrideModel) => {
     try {
-      setIsGeneratingThematic(true);
-      setThematicError('');
+      setIsGeneratingAuto(true);
+      setAutoError('');
       
-      const allCategories = data.map(d => `${d.name} (${d.percent}%)`).join(', ');
+      // Kirim Top 20 kalimat asli ke Gemini
+      const topSentences = clusters.map((c, i) => `${i+1}. "${c.name}" (Dikemukakan oleh ${c.percent}% responden)`).join('\n');
       
-      const prompt = `Kamu adalah Ahli Evaluasi Kebijakan Kesehatan. Kami telah menyeleksi hasil wawancara dari ${total} responden nakes di FKTP ke dalam 4 Pilar Kebijakan Utama JKN. Berikut adalah persentase responden yang secara spesifik menyinggung atau mengeluhkan pilar-pilar kebijakan tersebut dalam kalimat mereka:
-${allCategories}.
+      const prompt = `Kamu adalah Ahli Evaluasi Kebijakan JKN. Kami telah menggunakan algoritma klastering lokal untuk menyaring ribuan kalimat wawancara dari ${total} nakes di FKTP menjadi Top 20 Pola Kalimat Paling Sering Muncul (Unsupervised Benchmark Sentences).
+Berikut adalah 20 kalimat representatif terbanyak dari lapangan:
+${topSentences}
       
-Tolong buatkan Analisis Tematik Kebijakan (sekitar 2-3 paragraf) yang membahas keterkaitan antara keempat pilar tersebut di lapangan. Bagaimana gap antara "Cakupan Manfaat" dan "Ketersediaan Sumber Daya" memengaruhi jalannya pelayanan? Apakah "Mekanisme Pembiayaan" sudah sejalan dengan tuntutan "Penguatan Kompetensi SDM"? 
-Gunakan gaya bahasa akademik, tajam, komprehensif, dan bernada evaluasi strategis. Format output langsung paragraf teks saja (gunakan tag <strong> HTML untuk penekanan pada kata kunci utama).`;
+Tugas Anda:
+Buatkan Analisis Eksekutif Kualitatif (3 paragraf) yang "mengekstrak Tema Besar/Pilar Kebijakan" apa saja yang sebenarnya sedang terbentuk dari 20 kalimat lapangan di atas. Apakah ada benang merah terkait (1) Cakupan Manfaat & Standar Pelayanan, (2) Kompetensi SDM, (3) Ketersediaan Sumber Daya, atau (4) Mekanisme Pembiayaan? 
+Bahas temuan secara tajam, akademis, dan bernada evaluasi strategis berdasarkan data empiris (persentase) di atas. Format output langsung paragraf teks saja (gunakan tag <strong> HTML untuk penekanan pada kata kunci utama, jangan pakai markdown **).`;
 
       const text = await callGeminiApi(prompt, overrideKey, overrideModel);
-      setThematicSummary(text);
+      setAutoSummary(text);
     } catch (err) {
       if (err.message === "API_KEY_MISSING") {
-        setActiveModalContext('thematic');
+        setActiveModalContext('auto');
         setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
         setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
         setShowKeyModal(true);
       } else {
-        setThematicError(err.message || 'Terjadi kesalahan saat memanggil Gemini API.');
+        setAutoError(err.message || 'Terjadi kesalahan saat memanggil Gemini API.');
       }
     } finally {
-      setIsGeneratingThematic(false);
+      setIsGeneratingAuto(false);
     }
   };
 
-  const renderSummarySection = (data, total, isThematic = false) => {
+  const renderSummarySection = (data, total, isAuto = false) => {
     if (data.length === 0) return null;
     
-    const title = isThematic ? "Analisis Eksekutif Pilar Tematik" : "Ringkasan Eksekutif Analisis Kualitatif";
-    const Icon = isThematic ? Lightbulb : FileText;
-    const summaryData = isThematic ? thematicSummary : geminiSummary;
-    const errorData = isThematic ? thematicError : geminiError;
-    const isGenerating = isThematic ? isGeneratingThematic : isGeneratingGemini;
-    const generateFn = isThematic ? handleGenerateThematicSummary : handleGenerateGeminiSummary;
-    const defaultParagraphs = isThematic ? (
-      <p>Berdasarkan pengelompokan semantik terhadap 4 Pilar Kebijakan JKN, teridentifikasi bahwa aspek operasional utama masih terpusat pada isu <strong>{data[0]?.name}</strong> ({data[0]?.percent}%). Hasil ini menunjukkan diperlukannya penyelarasan mendalam antara regulasi strategis dengan ketersediaan di tingkat Fasilitas Kesehatan Tingkat Pertama.</p>
+    const title = isAuto ? "Analisis AI atas Top 20 Kalimat Terbanyak" : "Ringkasan Eksekutif Analisis Kualitatif";
+    const Icon = isAuto ? Target : FileText;
+    const summaryData = isAuto ? autoSummary : geminiSummary;
+    const errorData = isAuto ? autoError : geminiError;
+    const isGenerating = isAuto ? isGeneratingAuto : isGeneratingGemini;
+    const generateFn = isAuto ? handleGenerateAutoSummary : handleGenerateGeminiSummary;
+    const defaultParagraphs = isAuto ? (
+      <p>Algoritma telah menyaring ribuan kutipan wawancara menjadi 20 pola kalimat (klaster) paling dominan secara objektif. Pola teratas saat ini, yaitu: <em>"{data[0]?.name}"</em> muncul pada <strong>{data[0]?.percent}%</strong> responden. Silakan *Generate AI Report* untuk meminta AI menarik kesimpulan Tema/Pilar Kebijakan dari ke-20 kalimat patokan ini.</p>
     ) : (
       <p>
-        Berdasarkan ekstraksi data kualitatif dari <strong>{total}</strong> responden tenaga medis di berbagai Fasilitas Kesehatan Tingkat Pertama (FKTP), analisis menunjukkan bahwa hambatan operasional utama dalam implementasi program JKN secara signifikan didominasi oleh isu <strong>{data[0]?.name}</strong>, yang dikeluhkan secara eksplisit oleh <strong>{data[0]?.percent}%</strong> responden. Tingginya prevalensi keluhan pada sektor ini mengindikasikan adanya urgensi intervensi struktural guna memperbaiki tata kelola dan efisiensi pelayanan langsung di lapangan. 
+        Berdasarkan ekstraksi data kualitatif dari <strong>{total}</strong> responden tenaga medis di berbagai Fasilitas Kesehatan Tingkat Pertama (FKTP), analisis menunjukkan bahwa hambatan operasional utama dalam implementasi program JKN secara signifikan didominasi oleh isu <strong>{data[0]?.name}</strong>, yang dikeluhkan secara eksplisit oleh <strong>{data[0]?.percent}%</strong> responden.
       </p>
     );
 
     return (
-      <div className={`border p-8 rounded-2xl shadow-sm relative overflow-hidden ${isThematic ? 'bg-amber-50 border-amber-100' : 'bg-indigo-50 border-indigo-100'}`}>
+      <div className={`border p-8 rounded-2xl shadow-sm relative overflow-hidden ${isAuto ? 'bg-emerald-50 border-emerald-100' : 'bg-indigo-50 border-indigo-100'}`}>
         {showKeyModal && typeof document !== 'undefined' && createPortal(
           <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
@@ -265,12 +306,12 @@ Gunakan gaya bahasa akademik, tajam, komprehensif, dan bernada evaluasi strategi
           document.body
         )}
         <div className="absolute top-0 right-0 p-6 opacity-5">
-          <Icon className={`w-32 h-32 ${isThematic ? 'text-amber-600' : 'text-indigo-600'}`} />
+          <Icon className={`w-32 h-32 ${isAuto ? 'text-emerald-600' : 'text-indigo-600'}`} />
         </div>
         <div className="relative z-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-            <h3 className={`text-lg font-bold flex items-center ${isThematic ? 'text-amber-900' : 'text-indigo-900'}`}>
-              <Icon className={`w-6 h-6 mr-2 ${isThematic ? 'text-amber-600' : 'text-indigo-600'}`} /> {title}
+            <h3 className={`text-lg font-bold flex items-center ${isAuto ? 'text-emerald-900' : 'text-indigo-900'}`}>
+              <Icon className={`w-6 h-6 mr-2 ${isAuto ? 'text-emerald-600' : 'text-indigo-600'}`} /> {title}
             </h3>
             
             {!isPrinting && (
@@ -280,7 +321,7 @@ Gunakan gaya bahasa akademik, tajam, komprehensif, dan bernada evaluasi strategi
                 <button 
                   onClick={() => generateFn(data, total)} 
                   disabled={isGenerating}
-                  className={`flex items-center gap-2 text-white px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm disabled:opacity-50 ${isThematic ? 'bg-amber-600 hover:bg-amber-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                  className={`flex items-center gap-2 text-white px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm disabled:opacity-50 ${isAuto ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}
                 >
                   {isGenerating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Cpu className="w-4 h-4" />}
                   {isGenerating ? 'Menganalisis...' : 'Generate AI Report'}
@@ -301,22 +342,22 @@ Gunakan gaya bahasa akademik, tajam, komprehensif, dan bernada evaluasi strategi
     );
   };
 
-  const renderAccordionList = (data, expandedState, setExpandedFn, categoriesDict, colorTheme = "rose") => {
+  const renderAccordionList = (data, expandedState, setExpandedFn, isAuto = false) => {
     return (
       <div className="divide-y divide-slate-100">
-        {data.map((category) => (
-          <div key={category.name} className="group">
+        {data.map((category, index) => (
+          <div key={category.name + index} className="group">
             <button 
               onClick={() => setExpandedFn(expandedState === category.name ? null : category.name)}
               className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors focus:outline-none"
             >
               <div className="flex items-center gap-4">
-                <span className={`w-12 h-10 rounded-xl flex items-center justify-center font-extrabold text-sm border ${colorTheme === 'rose' ? 'bg-rose-100 text-rose-600 border-rose-200' : 'bg-amber-100 text-amber-600 border-amber-200'}`}>
+                <span className={`w-12 h-10 rounded-xl flex items-center justify-center font-extrabold text-sm border ${isAuto ? 'bg-emerald-100 text-emerald-600 border-emerald-200' : 'bg-rose-100 text-rose-600 border-rose-200'}`}>
                   {category.percent}%
                 </span>
-                <div className="text-left">
-                  <h4 className="font-bold text-slate-800 text-base">{category.name}</h4>
-                  <p className="text-xs text-slate-500 font-medium">{category.sentences.length} kutipan kalimat terdeteksi dari {category.value} responden</p>
+                <div className="text-left max-w-2xl">
+                  <h4 className="font-bold text-slate-800 text-base line-clamp-1">{isAuto ? `Pola ${index+1}: "${category.name}"` : category.name}</h4>
+                  <p className="text-xs text-slate-500 font-medium">{category.sentences.length} variasi kalimat dari {category.value} responden</p>
                 </div>
               </div>
               {expandedState === category.name ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
@@ -326,24 +367,15 @@ Gunakan gaya bahasa akademik, tajam, komprehensif, dan bernada evaluasi strategi
               <div className="px-6 pb-6 pt-2 bg-slate-50">
                 <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                   {category.sentences.map((s, idx) => {
-                    let highlightedText = s.text;
-                    const keywords = categoriesDict[category.name];
-                    
-                    keywords.forEach(kw => {
-                      const escapedKw = kw.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-                      const regex = new RegExp(`(\\b${escapedKw}\\b)`, 'gi');
-                      highlightedText = highlightedText.replace(regex, '<strong>$1</strong>');
-                    });
-
                     return (
                       <div key={idx} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">
-                        <p className="text-sm text-slate-700 leading-relaxed italic" dangerouslySetInnerHTML={{ __html: `"${highlightedText}."` }}></p>
+                        <p className="text-sm text-slate-700 leading-relaxed italic">"{s.text}."</p>
                         <div className="mt-3 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
                           <div className="flex items-center gap-1.5 font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-md">
                             <User className="w-3.5 h-3.5" />
                             {s.role} ({s.fktp})
                           </div>
-                          <span className={`font-semibold px-2 py-1 rounded-md ${colorTheme === 'rose' ? 'text-rose-600 bg-rose-50' : 'text-amber-600 bg-amber-50'}`}>
+                          <span className={`font-semibold px-2 py-1 rounded-md ${isAuto ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'}`}>
                             Diambil dari {s.q}
                           </span>
                         </div>
@@ -419,24 +451,24 @@ Gunakan gaya bahasa akademik, tajam, komprehensif, dan bernada evaluasi strategi
           <Filter className="w-5 h-5 text-slate-500" />
           <h3 className="text-lg font-bold text-slate-800">Daftar Kutipan Aktual (Kategori Masalah)</h3>
         </div>
-        {renderAccordionList(chartData, expandedCategory, setExpandedCategory, keluhanCategories, "rose")}
+        {renderAccordionList(chartData, expandedCategory, setExpandedCategory, false)}
       </div>
 
-      {/* --- SEKSI ANALISIS TEMATIK PILAR KEBIJAKAN --- */}
+      {/* --- SEKSI AUTO CLUSTERING TOP 20 --- */}
       <div className="mt-12 pt-8 border-t-2 border-dashed border-slate-200">
         <div className="mb-6">
-          <h2 className="text-2xl font-black text-slate-800">Analisis Tematik Pilar Kebijakan</h2>
-          <p className="text-slate-500">Pemetaan kalimat jawaban yang secara spesifik membahas 4 pilar penting kebijakan JKN.</p>
+          <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2"><Target className="text-emerald-500" /> Top 20 Klaster Kalimat (Auto-Benchmark)</h2>
+          <p className="text-slate-500">Sistem otomatis mengelompokkan ribuan kalimat dengan makna serupa untuk mencari patokan masalah teratas dari lapangan tanpa campur tangan manusia.</p>
         </div>
 
-        {renderSummarySection(thematicChartData, totalRespondents, true)}
+        {renderSummarySection(autoClusters, totalRespondents, true)}
 
-        <div className="bg-white rounded-2xl border border-amber-100 shadow-sm overflow-hidden mt-6">
-          <div className="p-6 border-b border-slate-100 bg-amber-50/30 flex items-center gap-2">
-            <Lightbulb className="w-5 h-5 text-amber-500" />
-            <h3 className="text-lg font-bold text-slate-800">Pengelompokan Kutipan per Pilar Kebijakan</h3>
+        <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden mt-6">
+          <div className="p-6 border-b border-slate-100 bg-emerald-50/30 flex items-center gap-2">
+            <Lightbulb className="w-5 h-5 text-emerald-500" />
+            <h3 className="text-lg font-bold text-slate-800">Top 20 Pola Kalimat Paling Sering Diulang</h3>
           </div>
-          {renderAccordionList(thematicChartData, expandedThematic, setExpandedThematic, thematicCategories, "amber")}
+          {renderAccordionList(autoClusters, expandedAuto, setExpandedAuto, true)}
         </div>
       </div>
     </div>
