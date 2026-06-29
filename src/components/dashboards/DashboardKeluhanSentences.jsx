@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X, Lightbulb, Target } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X, Lightbulb, Target, Copy } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
 
 export default function DashboardKeluhanSentences({ filteredData, isPrinting }) {
@@ -378,6 +378,27 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
               <Icon className={`w-6 h-6 mr-2 ${isAuto ? 'text-emerald-600' : 'text-indigo-600'}`} /> {title}
             </h3>
             
+          <div className="flex items-center gap-3">
+            {errorData && (
+              <button 
+                onClick={() => {
+                  let prompt = '';
+                  if (isAuto) {
+                    const topSentences = data.map((c, i) => `${i+1}. "${c.name}" (Dikemukakan oleh ${c.percent}% responden)`).join('\\n');
+                    prompt = `Kamu adalah Ahli Evaluasi Kebijakan JKN. Berdasarkan algoritma klastering dari ${total} nakes di FKTP, berikut adalah 20 kalimat keluhan paling sering muncul:\\n\\n${topSentences}\\n\\nBuatkan Analisis Eksekutif Kualitatif (3 paragraf) yang mengekstrak Tema Besar/Pilar Kebijakan apa saja yang sedang terbentuk dari 20 kalimat lapangan di atas. Apakah ada benang merah terkait (1) Cakupan Manfaat, (2) Kompetensi SDM, (3) Ketersediaan Sumber Daya, atau (4) Mekanisme Pembiayaan? Bahas temuan secara tajam, akademis, dan bernada evaluasi strategis.`;
+                  } else {
+                    const allCategories = data.map(d => `${d.name} (${d.percent}%)`).join(', ');
+                    prompt = `Kamu adalah pakar kebijakan publik dan analis kesehatan. Berdasarkan ekstraksi wawancara kualitatif dari ${total} nakes di FKTP, berikut adalah persentase responden yang mengeluhkan tiap kategori masalah:\\n\\n${allCategories}\\n\\nTolong buatkan Ringkasan Eksekutif Ilmiah (2-3 paragraf) berdasarkan keseluruhan profil masalah tersebut. Bahas urgensi intervensi struktural (fokus masalah dominan), dampaknya terhadap mutu pelayanan, serta berikan rekomendasi strategis. Gunakan bahasa akademik dan formal.`;
+                  }
+                  navigator.clipboard.writeText(prompt);
+                  alert('Prompt berhasil disalin! Silakan paste ke ChatGPT atau Gemini (Web) Anda.');
+                }}
+                className="flex items-center gap-2 text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-2 rounded-xl text-xs font-bold transition border border-rose-200"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                Copy Prompt Manual
+              </button>
+            )}
             {!isPrinting && !isAnalyzingAutoClusters && (
               summaryData ? (
                 <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-200"><Check className="w-4 h-4" /> Digenerate oleh Gemini AI</div>
@@ -394,7 +415,7 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
             )}
           </div>
           
-          {errorData && <p className="text-xs text-rose-500 font-medium mb-4">{errorData}</p>}
+          {errorData && <p className="text-xs text-rose-500 font-medium mb-4 mt-2">{errorData}</p>}
 
           <div className="text-sm text-slate-700 leading-relaxed text-justify space-y-4">
             {isAnalyzingAutoClusters && isAuto ? (
