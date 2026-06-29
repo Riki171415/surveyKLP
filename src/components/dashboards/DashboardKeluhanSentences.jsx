@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
 
 export default function DashboardKeluhanSentences({ filteredData, isPrinting }) {
@@ -64,6 +64,31 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
     return { chartData: data, totalRespondents: total };
   }, [filteredData]);
 
+  const generateScientificSummary = (data, total) => {
+    if (data.length < 3) return null;
+    const top1 = data[0];
+    const top2 = data[1];
+    const top3 = data[2];
+
+    return (
+      <div className="bg-indigo-50 border border-indigo-100 p-8 rounded-2xl shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-6 opacity-5">
+          <FileText className="w-32 h-32 text-indigo-600" />
+        </div>
+        <div className="relative z-10">
+          <h3 className="text-lg font-bold text-indigo-900 mb-4 flex items-center">
+            <FileText className="w-6 h-6 mr-2 text-indigo-600" /> Ringkasan Eksekutif Analisis Kualitatif
+          </h3>
+          <p className="text-sm text-slate-700 leading-relaxed text-justify">
+            Berdasarkan ekstraksi data kualitatif dari <strong>{total}</strong> responden tenaga medis di berbagai Fasilitas Kesehatan Tingkat Pertama (FKTP), analisis tematik menunjukkan bahwa hambatan operasional utama dalam implementasi program JKN secara signifikan didominasi oleh isu <strong>{top1.name}</strong>, yang dikeluhkan secara eksplisit oleh <strong>{top1.percent}%</strong> responden. Tingginya prevalensi keluhan pada sektor ini mengindikasikan adanya urgensi intervensi struktural guna memperbaiki tata kelola dan efisiensi pelayanan langsung di lapangan. 
+            <br /><br />
+            Lebih lanjut, temuan sekunder menyoroti kendala pada aspek <strong>{top2.name}</strong> ({top2.percent}%) dan <strong>{top3.name}</strong> ({top3.percent}%), yang saling berkaitan dalam memengaruhi mutu pelayanan komprehensif, khususnya dalam tata laksana Program Rujuk Balik (PRB) dan optimalisasi peran Spesialis Kedokteran Keluarga Layanan Primer (Sp.KKLP). Oleh karena itu, direkomendasikan adanya re-evaluasi kebijakan secara holistik—mulai dari penyediaan regulasi yang lebih adaptif, penyesuaian beban kerja tenaga medis, hingga debirokratisasi sistem informasi operasional—guna mencapai standar pelayanan kesehatan primer yang bermutu dan berkesinambungan.
+          </p>
+        </div>
+      </div>
+    );
+  };
+
   if (totalRespondents === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-2xl border border-slate-100 shadow-sm">
@@ -75,6 +100,7 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {generateScientificSummary(chartData, totalRespondents)}
       <div className="bg-white p-8 rounded-2xl border border-rose-100 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 p-6 opacity-5">
           <AlertTriangle className="w-48 h-48 text-rose-600" />
