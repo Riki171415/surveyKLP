@@ -94,12 +94,13 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
     setGeminiError('');
 
     try {
-      const topCategories = data.slice(0, 3).map(d => `${d.name} (${d.percent}%)`).join(', ');
+      const allCategories = data.map(d => `${d.name} (${d.percent}%)`).join(', ');
       
-      const prompt = `Kamu adalah pakar kebijakan publik dan analis kesehatan (Senior Qualitative Data Analyst). Berdasarkan data keluhan lapangan terkait program JKN dari ${total} responden tenaga medis (FKTP), isu yang paling banyak dikeluhkan berturut-turut adalah: ${topCategories}.
+      const prompt = `Kamu adalah pakar kebijakan publik dan analis kesehatan (Senior Qualitative Data Analyst). Berdasarkan hasil ekstraksi data dari seluruh pertanyaan wawancara kualitatif (W1 hingga W8), kami telah mengelompokkan keluhan dari ${total} responden tenaga medis di FKTP ke dalam masalah-masalah utama. Berikut adalah persentase responden yang mengeluhkan tiap kategori masalah (diurutkan dari yang paling banyak):
+${allCategories}.
       
-Tolong buatkan Ringkasan Eksekutif Ilmiah (sekitar 2 paragraf) yang membahas urgensi intervensi struktural, dampaknya terhadap mutu pelayanan Program Rujuk Balik (PRB) atau peran Sp.KKLP, serta rekomendasi strategis (misal: debirokratisasi, evaluasi kebijakan). 
-Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif. Format output langsung paragraf teks saja (gunakan tag <strong> untuk penekanan pada kata kunci jika perlu, jangan gunakan markdown tebal/miring biasa).`;
+Tolong buatkan Ringkasan Eksekutif Ilmiah (sekitar 2-3 paragraf) berdasarkan keseluruhan profil masalah tersebut. Bahas urgensi intervensi struktural (fokus pada masalah-masalah dominan), dampaknya terhadap mutu pelayanan komprehensif seperti Program Rujuk Balik (PRB) atau peran Sp.KKLP, serta berikan rekomendasi strategis (misal: debirokratisasi, evaluasi kebijakan, dll). 
+Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif resmi. Format output langsung paragraf teks saja (gunakan tag <strong> HTML untuk penekanan pada kata kunci jika perlu, jangan gunakan format markdown markdown seperti **).`;
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
         method: 'POST',
