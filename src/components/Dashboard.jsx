@@ -8,7 +8,7 @@ import { format, parseISO } from 'date-fns';
 import { 
   Users, Activity, HeartPulse, Stethoscope, AlertTriangle, 
   MessageSquare, Database, Printer, Download, Filter, Home, ShieldAlert,
-  Search, ChevronLeft, ChevronRight, FileSearch
+  Search, ChevronLeft, ChevronRight, FileSearch, Copy
 } from 'lucide-react';
 
 import DashboardProfil from './dashboards/DashboardProfil';
@@ -164,6 +164,21 @@ export default function Dashboard() {
     XLSX.writeFile(workbook, `Data_DPM_KKLP_${new Date().getTime()}.xlsx`);
   };
 
+  const copyPromptAllData = () => {
+    try {
+      const conciseData = filteredData.map(d => {
+        const { id, created_at, updated_at, edit_history, ip_address, browser_info, ...importantData } = d;
+        return importantData;
+      });
+      const prompt = `Anda adalah Ahli Analisis Data Kesehatan dan Kebijakan JKN. Berikut adalah data mentah (JSON) dari survei Kesiapan Fasilitas Kesehatan Tingkat Pertama (FKTP) terkait implementasi Spesialis Kedokteran Keluarga Layanan Primer (Sp.KKLP) di Indonesia.\nTotal data responden saat ini: ${totalResponden}.\n\nData JSON:\n${JSON.stringify(conciseData)}\n\nTugas Anda:\n1. Analisis demografi dan profil faskes.\n2. Evaluasi kesiapan dan implementasi Program Rujuk Balik (PRB).\n3. Evaluasi layanan Home Care dan Paliatif.\n4. Analisis masalah/kendala yang dihadapi faskes.\n5. Berikan kesimpulan strategis dan rekomendasi kebijakan untuk Kementerian Kesehatan.`;
+      
+      navigator.clipboard.writeText(prompt);
+      alert('Prompt beserta seluruh data survei (format JSON) berhasil disalin!\\nSilakan Paste di ChatGPT (GPT-4o) atau Claude (Claude 3.5) untuk dianalisis.');
+    } catch (err) {
+      alert('Gagal menyalin data. Mungkin ukuran data terlalu besar untuk clipboard.');
+    }
+  };
+
   const handlePrint = () => {
     setIsPrinting(true);
     setTimeout(() => { window.print(); setIsPrinting(false); }, 500);
@@ -284,10 +299,11 @@ export default function Dashboard() {
             <h1 className="text-4xl font-black text-slate-800 tracking-tight leading-tight">Analisis Data <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-teal-500">Kesiapan Puskesmas / Klinik</span></h1>
             <p className="text-slate-500 mt-2 text-lg font-medium">Monitoring capaian dan evaluasi implementasi Sp.KKLP</p>
           </div>
-          <div className="flex gap-3">
-            <button onClick={handlePrint} className="flex items-center px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 hover:text-primary-600 transition shadow-sm hover:shadow-md hover:border-primary-200 active:scale-95"><Printer className="w-5 h-5 mr-2" /> Cetak</button>
-            <button onClick={exportToExcel} className="flex items-center px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95"><Download className="w-5 h-5 mr-2" /> Data Puskesmas / Klinik</button>
-            <button onClick={exportDpmToExcel} className="flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-bold hover:from-blue-400 hover:to-indigo-500 transition shadow-md hover:shadow-lg hover:shadow-blue-500/30 active:scale-95"><Download className="w-5 h-5 mr-2" /> Data DPM</button>
+          <div className="flex flex-wrap justify-end gap-3">
+            <button onClick={copyPromptAllData} className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-md active:scale-95 text-sm sm:text-base"><Copy className="w-5 h-5 mr-2" /> Copy Prompt AI (Semua Data)</button>
+            <button onClick={handlePrint} className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 hover:text-primary-600 transition shadow-sm hover:shadow-md hover:border-primary-200 active:scale-95 text-sm sm:text-base"><Printer className="w-5 h-5 mr-2" /> Cetak PDF (Semua Dashboard)</button>
+            <button onClick={exportToExcel} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 text-sm sm:text-base"><Download className="w-5 h-5 mr-2" /> Data Faskes</button>
+            <button onClick={exportDpmToExcel} className="flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-bold hover:from-blue-400 hover:to-indigo-500 transition shadow-md hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 text-sm sm:text-base"><Download className="w-5 h-5 mr-2" /> Data DPM</button>
           </div>
         </div>
       </div>
