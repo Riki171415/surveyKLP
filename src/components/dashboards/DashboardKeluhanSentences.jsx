@@ -259,13 +259,17 @@ Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif re
 
 KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
 {
-  "summary": "Teks ringkasan paragraf 1.\\n\\nTeks ringkasan paragraf 2.\\n\\nTeks ringkasan paragraf 3."
+  "paragraphs": [
+    "Teks ringkasan paragraf 1...",
+    "Teks ringkasan paragraf 2...",
+    "Teks ringkasan paragraf 3..."
+  ]
 }`;
 
       const text = await callGeminiApi(prompt, overrideKey, overrideModel);
       try {
         const parsed = JSON.parse(text);
-        setGeminiSummary(parsed.summary);
+        setGeminiSummary(parsed.paragraphs ? parsed.paragraphs.join('\\n\\n') : text);
       } catch (e) {
         setGeminiSummary(text);
       }
@@ -300,13 +304,17 @@ Bahas temuan secara tajam, akademis, dan bernada evaluasi strategis berdasarkan 
 
 KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
 {
-  "summary": "Teks ringkasan paragraf 1.\\n\\nTeks ringkasan paragraf 2.\\n\\nTeks ringkasan paragraf 3."
+  "paragraphs": [
+    "Teks ringkasan paragraf 1...",
+    "Teks ringkasan paragraf 2...",
+    "Teks ringkasan paragraf 3..."
+  ]
 }`;
 
       const text = await callGeminiApi(prompt, overrideKey, overrideModel);
       try {
         const parsed = JSON.parse(text);
-        setAutoSummary(parsed.summary);
+        setAutoSummary(parsed.paragraphs ? parsed.paragraphs.join('\\n\\n') : text);
       } catch (e) {
         setAutoSummary(text);
       }
