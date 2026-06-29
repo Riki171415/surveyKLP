@@ -194,7 +194,7 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
     return () => clearTimeout(timer);
   }, [allSentences, totalRespondents]);
 
-  const callGeminiApi = async (prompt, overrideKey, overrideModel) => {
+  const callGeminiApi = async (prompt, overrideKey, overrideModel, retryCount = 0) => {
     const apiKey = overrideKey || localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
     const model = overrideModel || localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
     
@@ -221,7 +221,11 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
       const errMsg = rawError ? `[API Error]: ${rawError}` : `(Status: ${response.status})`;
       
       if (response.status === 503) {
-        throw new Error(`Server Gemini Error 503. ${errMsg}`);
+        if (retryCount < 3) {
+           await new Promise(resolve => setTimeout(resolve, 3000 * (retryCount + 1))); // Exponential backoff: 3s, 6s, 9s
+           return callGeminiApi(prompt, overrideKey, overrideModel, retryCount + 1);
+        }
+        throw new Error(`Server Gemini Error 503 setelah 3x percobaan. ${errMsg}`);
       } else if (response.status === 400 || response.status === 403) {
         throw new Error(`Error ${response.status}. ${errMsg}`);
       } else if (response.status === 404) {
