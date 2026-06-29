@@ -1,9 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
 
 export default function DashboardKeluhanSentences({ filteredData, isPrinting }) {
   const [expandedCategory, setExpandedCategory] = useState(null);
+  const [geminiSummary, setGeminiSummary] = useState(null);
+  const [isGeneratingGemini, setIsGeneratingGemini] = useState(false);
+  const [geminiError, setGeminiError] = useState('');
 
   const keluhanCategories = {
     'Sistem P-Care / IT': ['pcare', 'p-care', 'sistem', 'internet', 'jaringan', 'error', 'server', 'simpus', 'lemot', 'aplikasi', 'bridging', 'koneksi'],
@@ -64,7 +67,50 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
     return { chartData: data, totalRespondents: total };
   }, [filteredData]);
 
-  const generateScientificSummary = (data, total) => {
+  const handleGenerateGeminiSummary = async (data, total) => {
+    const apiKey = localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
+    const model = localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
+    
+    if (!apiKey) {
+      setGeminiError('API Key belum di-set. Silakan atur API Key di menu Kualitatif (NVIVO) terlebih dahulu.');
+      return;
+    }
+
+    setIsGeneratingGemini(true);
+    setGeminiError('');
+
+    try {
+      const topCategories = data.slice(0, 3).map(d => `${d.name} (${d.percent}%)`).join(', ');
+      
+      const prompt = `Kamu adalah pakar kebijakan publik dan analis kesehatan (Senior Qualitative Data Analyst). Berdasarkan data keluhan lapangan terkait program JKN dari ${total} responden tenaga medis (FKTP), isu yang paling banyak dikeluhkan berturut-turut adalah: ${topCategories}.
+      
+Tolong buatkan Ringkasan Eksekutif Ilmiah (sekitar 2 paragraf) yang membahas urgensi intervensi struktural, dampaknya terhadap mutu pelayanan Program Rujuk Balik (PRB) atau peran Sp.KKLP, serta rekomendasi strategis (misal: debirokratisasi, evaluasi kebijakan). 
+Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif. Format output langsung paragraf teks saja (gunakan tag <strong> untuk penekanan pada kata kunci jika perlu, jangan gunakan markdown tebal/miring biasa).`;
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.3 }
+        })
+      });
+
+      if (!response.ok) throw new Error("Gagal mengambil data dari API Gemini. Cek API Key Anda.");
+      
+      const resData = await response.json();
+      const text = resData.candidates[0].content.parts[0].text;
+      setGeminiSummary(text);
+
+    } catch (err) {
+      console.error(err);
+      setGeminiError(err.message || 'Terjadi kesalahan saat memanggil Gemini API.');
+    } finally {
+      setIsGeneratingGemini(false);
+    }
+  };
+
+  const renderScientificSummary = (data, total) => {
     if (data.length < 3) return null;
     const top1 = data[0];
     const top2 = data[1];
@@ -76,14 +122,40 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
           <FileText className="w-32 h-32 text-indigo-600" />
         </div>
         <div className="relative z-10">
-          <h3 className="text-lg font-bold text-indigo-900 mb-4 flex items-center">
-            <FileText className="w-6 h-6 mr-2 text-indigo-600" /> Ringkasan Eksekutif Analisis Kualitatif
-          </h3>
-          <p className="text-sm text-slate-700 leading-relaxed text-justify">
-            Berdasarkan ekstraksi data kualitatif dari <strong>{total}</strong> responden tenaga medis di berbagai Fasilitas Kesehatan Tingkat Pertama (FKTP), analisis tematik menunjukkan bahwa hambatan operasional utama dalam implementasi program JKN secara signifikan didominasi oleh isu <strong>{top1.name}</strong>, yang dikeluhkan secara eksplisit oleh <strong>{top1.percent}%</strong> responden. Tingginya prevalensi keluhan pada sektor ini mengindikasikan adanya urgensi intervensi struktural guna memperbaiki tata kelola dan efisiensi pelayanan langsung di lapangan. 
-            <br /><br />
-            Lebih lanjut, temuan sekunder menyoroti kendala pada aspek <strong>{top2.name}</strong> ({top2.percent}%) dan <strong>{top3.name}</strong> ({top3.percent}%), yang saling berkaitan dalam memengaruhi mutu pelayanan komprehensif, khususnya dalam tata laksana Program Rujuk Balik (PRB) dan optimalisasi peran Spesialis Kedokteran Keluarga Layanan Primer (Sp.KKLP). Oleh karena itu, direkomendasikan adanya re-evaluasi kebijakan secara holistik—mulai dari penyediaan regulasi yang lebih adaptif, penyesuaian beban kerja tenaga medis, hingga debirokratisasi sistem informasi operasional—guna mencapai standar pelayanan kesehatan primer yang bermutu dan berkesinambungan.
-          </p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+            <h3 className="text-lg font-bold text-indigo-900 flex items-center">
+              <FileText className="w-6 h-6 mr-2 text-indigo-600" /> Ringkasan Eksekutif Analisis Kualitatif
+            </h3>
+            
+            {!isPrinting && (
+              geminiSummary ? (
+                <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-200"><Check className="w-4 h-4" /> Digenerate oleh Gemini AI</div>
+              ) : (
+                <button 
+                  onClick={() => handleGenerateGeminiSummary(data, total)} 
+                  disabled={isGeneratingGemini}
+                  className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 transition shadow-sm disabled:opacity-50"
+                >
+                  {isGeneratingGemini ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Cpu className="w-4 h-4" />}
+                  {isGeneratingGemini ? 'Menganalisis...' : 'Generate AI Report'}
+                </button>
+              )
+            )}
+          </div>
+          
+          {geminiError && <p className="text-xs text-rose-500 font-medium mb-4">{geminiError}</p>}
+
+          <div className="text-sm text-slate-700 leading-relaxed text-justify space-y-4">
+            {geminiSummary ? (
+              <div dangerouslySetInnerHTML={{ __html: geminiSummary.replace(/\n\n/g, '<br/><br/>') }} />
+            ) : (
+              <p>
+                Berdasarkan ekstraksi data kualitatif dari <strong>{total}</strong> responden tenaga medis di berbagai Fasilitas Kesehatan Tingkat Pertama (FKTP), analisis tematik menunjukkan bahwa hambatan operasional utama dalam implementasi program JKN secara signifikan didominasi oleh isu <strong>{top1.name}</strong>, yang dikeluhkan secara eksplisit oleh <strong>{top1.percent}%</strong> responden. Tingginya prevalensi keluhan pada sektor ini mengindikasikan adanya urgensi intervensi struktural guna memperbaiki tata kelola dan efisiensi pelayanan langsung di lapangan. 
+                <br /><br />
+                Lebih lanjut, temuan sekunder menyoroti kendala pada aspek <strong>{top2.name}</strong> ({top2.percent}%) dan <strong>{top3.name}</strong> ({top3.percent}%), yang saling berkaitan dalam memengaruhi mutu pelayanan komprehensif, khususnya dalam tata laksana Program Rujuk Balik (PRB) dan optimalisasi peran Spesialis Kedokteran Keluarga Layanan Primer (Sp.KKLP). Oleh karena itu, direkomendasikan adanya re-evaluasi kebijakan secara holistik—mulai dari penyediaan regulasi yang lebih adaptif, penyesuaian beban kerja tenaga medis, hingga debirokratisasi sistem informasi operasional—guna mencapai standar pelayanan kesehatan primer yang bermutu dan berkesinambungan.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -100,7 +172,7 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {generateScientificSummary(chartData, totalRespondents)}
+      {renderScientificSummary(chartData, totalRespondents)}
       <div className="bg-white p-8 rounded-2xl border border-rose-100 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 p-6 opacity-5">
           <AlertTriangle className="w-48 h-48 text-rose-600" />
