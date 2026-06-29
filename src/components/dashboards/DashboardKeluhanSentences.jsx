@@ -11,7 +11,9 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
     'Sistem Rujukan / RS': ['rujukan', 'bpjs', 'rs', 'fktp', 'lanjutan', 'rumah sakit', 'menolak', 'kuota', 'spesialis', 'sistem rujukan', 'zonasi', 'dirujuk'],
     'Obat / Farmasi (PRB)': ['obat', 'farmasi', 'stok', 'apotek', 'resep', 'kosong', 'formularium', 'prb', 'ketersediaan'],
     'Pembiayaan / Kapitasi': ['kapitasi', 'biaya', 'dana', 'uang', 'klaim', 'bayar', 'insentif', 'pembiayaan', 'anggaran', 'jasa', 'remunerasi'],
-    'Sarana & Prasarana': ['sarana', 'prasarana', 'alat', 'alkes', 'usg', 'reagen', 'gedung', 'fasilitas', 'ruangan', 'tempat']
+    'Sarana & Prasarana': ['sarana', 'prasarana', 'alat', 'alkes', 'usg', 'reagen', 'gedung', 'fasilitas', 'ruangan', 'tempat'],
+    'Karakteristik & Edukasi Pasien': ['pasien', 'pemahaman', 'edukasi', 'masyarakat', 'karakter', 'komplain', 'nolak', 'bandel', 'tidak paham', 'kesadaran'],
+    'SOP & Regulasi': ['sop', 'aturan', 'prosedur', 'kebijakan', 'regulasi', 'kaku', 'syarat', 'standar', 'birokrasi', 'administrasi']
   };
 
   const { chartData, totalRespondents } = useMemo(() => {
@@ -130,12 +132,12 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
                 className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors focus:outline-none"
               >
                 <div className="flex items-center gap-4">
-                  <span className="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-sm">
-                    {Math.round(category.percent)}
+                  <span className="w-12 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center font-extrabold text-sm border border-rose-200">
+                    {category.percent}%
                   </span>
                   <div className="text-left">
-                    <h4 className="font-bold text-slate-800">{category.name}</h4>
-                    <p className="text-xs text-slate-500">{category.sentences.length} kutipan kalimat terdeteksi</p>
+                    <h4 className="font-bold text-slate-800 text-base">{category.name}</h4>
+                    <p className="text-xs text-slate-500 font-medium">{category.sentences.length} kutipan kalimat terdeteksi dari {category.value} responden</p>
                   </div>
                 </div>
                 {expandedCategory === category.name ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
