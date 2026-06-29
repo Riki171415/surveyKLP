@@ -212,14 +212,22 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
     });
 
     if (!response.ok) {
+      let rawError = '';
+      try {
+        const errJson = await response.json();
+        rawError = errJson.error ? errJson.error.message : JSON.stringify(errJson);
+      } catch(e) {}
+      
+      const errMsg = rawError ? `[API Error]: ${rawError}` : `(Status: ${response.status})`;
+      
       if (response.status === 503) {
-        throw new Error("Server Gemini Google sedang sibuk/overload (Error 503). Silakan coba beberapa saat lagi.");
+        throw new Error(`Server Gemini Error 503. ${errMsg}`);
       } else if (response.status === 400 || response.status === 403) {
-        throw new Error("API Key tidak valid atau terblokir (Error " + response.status + "). Silakan periksa kembali API Key Anda.");
+        throw new Error(`Error ${response.status}. ${errMsg}`);
       } else if (response.status === 404) {
-        throw new Error("Model Gemini yang diminta tidak ditemukan (Error 404). Cek pengaturan model Anda.");
+        throw new Error(`Model tidak ditemukan (Error 404). ${errMsg}`);
       }
-      throw new Error("Gagal terhubung ke API Gemini (Status: " + response.status + ").");
+      throw new Error(`Gagal terhubung ke API Gemini. ${errMsg}`);
     }
     
     const resData = await response.json();
@@ -237,7 +245,7 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
 ${allCategories}.
       
 Tolong buatkan Ringkasan Eksekutif Ilmiah (sekitar 2-3 paragraf) berdasarkan keseluruhan profil masalah tersebut. Bahas urgensi intervensi struktural (fokus pada masalah-masalah dominan), dampaknya terhadap mutu pelayanan komprehensif seperti Program Rujuk Balik (PRB) atau peran Sp.KKLP, serta berikan rekomendasi strategis (misal: debirokratisasi, evaluasi kebijakan, dll). 
-Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif resmi. Format output langsung paragraf teks saja (gunakan tag <strong> HTML untuk penekanan pada kata kunci jika perlu, jangan gunakan format markdown seperti **).`;
+Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif resmi. Format output ke dalam paragraf teks biasa.`;
 
       const text = await callGeminiApi(prompt, overrideKey, overrideModel);
       setGeminiSummary(text);
@@ -268,7 +276,7 @@ ${topSentences}
       
 Tugas Anda:
 Buatkan Analisis Eksekutif Kualitatif (3 paragraf) yang "mengekstrak Tema Besar/Pilar Kebijakan" apa saja yang sebenarnya sedang terbentuk dari 20 kalimat lapangan di atas. Apakah ada benang merah terkait (1) Cakupan Manfaat & Standar Pelayanan, (2) Kompetensi SDM, (3) Ketersediaan Sumber Daya, atau (4) Mekanisme Pembiayaan? 
-Bahas temuan secara tajam, akademis, dan bernada evaluasi strategis berdasarkan data empiris (persentase) di atas. Format output langsung paragraf teks saja (gunakan tag <strong> HTML untuk penekanan pada kata kunci utama, jangan pakai markdown **).`;
+Bahas temuan secara tajam, akademis, dan bernada evaluasi strategis berdasarkan data empiris (persentase) di atas. Format output ke dalam paragraf teks biasa.`;
 
       const text = await callGeminiApi(prompt, overrideKey, overrideModel);
       setAutoSummary(text);
