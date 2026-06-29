@@ -207,7 +207,7 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.3 }
+        generationConfig: { temperature: 0.3, responseMimeType: "application/json" }
       })
     });
 
@@ -249,10 +249,20 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
 ${allCategories}.
       
 Tolong buatkan Ringkasan Eksekutif Ilmiah (sekitar 2-3 paragraf) berdasarkan keseluruhan profil masalah tersebut. Bahas urgensi intervensi struktural (fokus pada masalah-masalah dominan), dampaknya terhadap mutu pelayanan komprehensif seperti Program Rujuk Balik (PRB) atau peran Sp.KKLP, serta berikan rekomendasi strategis (misal: debirokratisasi, evaluasi kebijakan, dll). 
-Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif resmi. Format output ke dalam paragraf teks biasa.`;
+Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif resmi.
+
+KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
+{
+  "summary": "Teks ringkasan paragraf 1.\\n\\nTeks ringkasan paragraf 2.\\n\\nTeks ringkasan paragraf 3."
+}`;
 
       const text = await callGeminiApi(prompt, overrideKey, overrideModel);
-      setGeminiSummary(text);
+      try {
+        const parsed = JSON.parse(text);
+        setGeminiSummary(parsed.summary);
+      } catch (e) {
+        setGeminiSummary(text);
+      }
     } catch (err) {
       if (err.message === "API_KEY_MISSING") {
         setActiveModalContext('keluhan');
@@ -280,10 +290,20 @@ ${topSentences}
       
 Tugas Anda:
 Buatkan Analisis Eksekutif Kualitatif (3 paragraf) yang "mengekstrak Tema Besar/Pilar Kebijakan" apa saja yang sebenarnya sedang terbentuk dari 20 kalimat lapangan di atas. Apakah ada benang merah terkait (1) Cakupan Manfaat & Standar Pelayanan, (2) Kompetensi SDM, (3) Ketersediaan Sumber Daya, atau (4) Mekanisme Pembiayaan? 
-Bahas temuan secara tajam, akademis, dan bernada evaluasi strategis berdasarkan data empiris (persentase) di atas. Format output ke dalam paragraf teks biasa.`;
+Bahas temuan secara tajam, akademis, dan bernada evaluasi strategis berdasarkan data empiris (persentase) di atas.
+
+KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
+{
+  "summary": "Teks ringkasan paragraf 1.\\n\\nTeks ringkasan paragraf 2.\\n\\nTeks ringkasan paragraf 3."
+}`;
 
       const text = await callGeminiApi(prompt, overrideKey, overrideModel);
-      setAutoSummary(text);
+      try {
+        const parsed = JSON.parse(text);
+        setAutoSummary(parsed.summary);
+      } catch (e) {
+        setAutoSummary(text);
+      }
     } catch (err) {
       if (err.message === "API_KEY_MISSING") {
         setActiveModalContext('auto');
