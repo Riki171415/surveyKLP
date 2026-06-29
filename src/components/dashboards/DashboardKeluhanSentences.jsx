@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X, Lightbulb } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
 
 export default function DashboardKeluhanSentences({ filteredData, isPrinting }) {
@@ -8,22 +8,31 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
   const [geminiSummary, setGeminiSummary] = useState(null);
   const [isGeneratingGemini, setIsGeneratingGemini] = useState(false);
   const [geminiError, setGeminiError] = useState('');
+  
+  const [expandedThematic, setExpandedThematic] = useState(null);
+  const [thematicSummary, setThematicSummary] = useState(null);
+  const [isGeneratingThematic, setIsGeneratingThematic] = useState(false);
+  const [thematicError, setThematicError] = useState('');
+
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
   const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+  const [activeModalContext, setActiveModalContext] = useState(''); // 'keluhan' or 'thematic'
 
   const handleSaveKey = () => {
     localStorage.setItem('GEMINI_API_KEY', tempKey);
     localStorage.setItem('GEMINI_MODEL', tempModel);
     setShowKeyModal(false);
-    // Langsung coba generate lagi setelah save
-    handleGenerateGeminiSummary(chartData, totalRespondents, tempKey, tempModel);
+    if (activeModalContext === 'keluhan') {
+      handleGenerateGeminiSummary(chartData, totalRespondents, tempKey, tempModel);
+    } else if (activeModalContext === 'thematic') {
+      handleGenerateThematicSummary(thematicChartData, totalRespondents, tempKey, tempModel);
+    }
   };
 
   const keluhanCategories = {
-    'Sistem P-Care / IT': ['pcare', 'p-care', 'sistem', 'internet', 'jaringan', 'error', 'server', 'simpus', 'lemot', 'aplikasi', 'bridging', 'koneksi'],
+    'Sistem Rujukan / P-Care / IT': ['pcare', 'p-care', 'sistem', 'internet', 'jaringan', 'error', 'server', 'simpus', 'lemot', 'aplikasi', 'bridging', 'koneksi', 'rujukan', 'bpjs', 'rs', 'fktp', 'lanjutan', 'rumah sakit', 'menolak', 'kuota', 'spesialis', 'zonasi', 'dirujuk'],
     'Beban Kerja & SDM': ['beban', 'sdm', 'tenaga', 'kurang', 'sibuk', 'waktu', 'lelah', 'dokter', 'petugas', 'perawat', 'kapasitas', 'pasien banyak', 'kekurangan', 'merangkap'],
-    'Sistem Rujukan / RS': ['rujukan', 'bpjs', 'rs', 'fktp', 'lanjutan', 'rumah sakit', 'menolak', 'kuota', 'spesialis', 'sistem rujukan', 'zonasi', 'dirujuk'],
     'Obat / Farmasi (PRB)': ['obat', 'farmasi', 'stok', 'apotek', 'resep', 'kosong', 'formularium', 'prb', 'ketersediaan'],
     'Pembiayaan / Kapitasi': ['kapitasi', 'biaya', 'dana', 'uang', 'klaim', 'bayar', 'insentif', 'pembiayaan', 'anggaran', 'jasa', 'remunerasi'],
     'Sarana & Prasarana': ['sarana', 'prasarana', 'alat', 'alkes', 'usg', 'reagen', 'gedung', 'fasilitas', 'ruangan', 'tempat'],
@@ -31,10 +40,38 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
     'SOP & Regulasi': ['sop', 'aturan', 'prosedur', 'kebijakan', 'regulasi', 'kaku', 'syarat', 'standar', 'birokrasi', 'administrasi']
   };
 
-  const { chartData, totalRespondents } = useMemo(() => {
+  const thematicCategories = {
+    'Cakupan Manfaat & Standar Pelayanan': ['cakupan', 'manfaat', 'standar', 'pelayanan', 'mutu', 'kualitas', 'layanan'],
+    'Penguatan Kompetensi SDM': ['kompetensi', 'sdm', 'pelatihan', 'pendidikan', 'keahlian', 'skill', 'bimbingan', 'pengembangan', 'sosialisasi'],
+    'Ketersediaan Sumber Daya': ['sumber daya', 'fasilitas', 'sarana', 'prasarana', 'alat', 'alkes', 'obat', 'ketersediaan', 'stok', 'infrastruktur'],
+    'Mekanisme Pembiayaan': ['pembiayaan', 'mekanisme', 'dana', 'anggaran', 'kapitasi', 'klaim', 'tarif', 'bayar', 'insentif', 'honor']
+  };
+
+  // Helper untuk regex pencocokan kata (word boundaries) agar aman (contoh: "rs" tidak terdeteksi di "tersebut")
+  const buildRegexes = (categories) => {
+    const regexes = {};
+    Object.keys(categories).forEach(cat => {
+      regexes[cat] = categories[cat].map(kw => {
+        // Jika keyword mengandung spasi atau tanda baca khusus, butuh penanganan ekstra
+        const escapedKw = kw.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+        return new RegExp(`\\b${escapedKw}\\b`, 'i');
+      });
+    });
+    return regexes;
+  };
+
+  const keluhanRegexes = useMemo(() => buildRegexes(keluhanCategories), []);
+  const thematicRegexes = useMemo(() => buildRegexes(thematicCategories), []);
+
+  const { chartData, thematicChartData, totalRespondents } = useMemo(() => {
     const results = {};
+    const thematicResults = {};
+    
     Object.keys(keluhanCategories).forEach(cat => {
       results[cat] = { sentences: [], respondents: new Set() };
+    });
+    Object.keys(thematicCategories).forEach(cat => {
+      thematicResults[cat] = { sentences: [], respondents: new Set() };
     });
 
     const processedRespondents = new Set();
@@ -50,8 +87,10 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
           
           sentences.forEach(sentence => {
             const lowerS = sentence.toLowerCase();
+            
+            // Evaluasi Keluhan
             Object.keys(keluhanCategories).forEach(cat => {
-              if (keluhanCategories[cat].some(kw => lowerS.includes(kw))) {
+              if (keluhanRegexes[cat].some(regex => regex.test(lowerS))) {
                 results[cat].sentences.push({ 
                   text: sentence, 
                   fktp: row.fktp_name || 'Tidak diketahui', 
@@ -59,6 +98,19 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
                   q: `W${i+1}` 
                 });
                 results[cat].respondents.add(row.id);
+              }
+            });
+
+            // Evaluasi Tematik Kebijakan
+            Object.keys(thematicCategories).forEach(cat => {
+              if (thematicRegexes[cat].some(regex => regex.test(lowerS))) {
+                thematicResults[cat].sentences.push({ 
+                  text: sentence, 
+                  fktp: row.fktp_name || 'Tidak diketahui', 
+                  role: row.role || 'Lainnya', 
+                  q: `W${i+1}` 
+                });
+                thematicResults[cat].respondents.add(row.id);
               }
             });
           });
@@ -76,72 +128,125 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
       sentences: results[cat].sentences
     })).filter(d => d.value > 0).sort((a,b) => b.value - a.value);
 
-    return { chartData: data, totalRespondents: total };
-  }, [filteredData]);
+    const thematicData = Object.keys(thematicResults).map(cat => ({
+      name: cat,
+      value: thematicResults[cat].respondents.size,
+      percent: total > 0 ? ((thematicResults[cat].respondents.size / total) * 100).toFixed(1) : 0,
+      sentences: thematicResults[cat].sentences
+    })).filter(d => d.value > 0).sort((a,b) => b.value - a.value);
 
-  const handleGenerateGeminiSummary = async (data, total, overrideKey, overrideModel) => {
+    return { chartData: data, thematicChartData: thematicData, totalRespondents: total };
+  }, [filteredData, keluhanRegexes, thematicRegexes]);
+
+  const callGeminiApi = async (prompt, overrideKey, overrideModel) => {
     const apiKey = overrideKey || localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
     const model = overrideModel || localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
     
     if (!apiKey) {
-      setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
-      setTempModel(model);
-      setShowKeyModal(true);
-      return;
+      throw new Error("API_KEY_MISSING");
     }
 
-    setIsGeneratingGemini(true);
-    setGeminiError('');
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.3 }
+      })
+    });
 
+    if (!response.ok) {
+      if (response.status === 503) {
+        throw new Error("Server Gemini Google sedang sibuk/overload (Error 503). Silakan coba beberapa saat lagi.");
+      } else if (response.status === 400 || response.status === 403) {
+        throw new Error("API Key tidak valid atau terblokir (Error " + response.status + "). Silakan periksa kembali API Key Anda.");
+      } else if (response.status === 404) {
+        throw new Error("Model Gemini yang diminta tidak ditemukan (Error 404). Cek pengaturan model Anda.");
+      }
+      throw new Error("Gagal terhubung ke API Gemini (Status: " + response.status + ").");
+    }
+    
+    const resData = await response.json();
+    return resData.candidates[0].content.parts[0].text;
+  };
+
+  const handleGenerateGeminiSummary = async (data, total, overrideKey, overrideModel) => {
     try {
+      setIsGeneratingGemini(true);
+      setGeminiError('');
+      
       const allCategories = data.map(d => `${d.name} (${d.percent}%)`).join(', ');
       
       const prompt = `Kamu adalah pakar kebijakan publik dan analis kesehatan (Senior Qualitative Data Analyst). Berdasarkan hasil ekstraksi data dari seluruh pertanyaan wawancara kualitatif (W1 hingga W8), kami telah mengelompokkan keluhan dari ${total} responden tenaga medis di FKTP ke dalam masalah-masalah utama. Berikut adalah persentase responden yang mengeluhkan tiap kategori masalah (diurutkan dari yang paling banyak):
 ${allCategories}.
       
 Tolong buatkan Ringkasan Eksekutif Ilmiah (sekitar 2-3 paragraf) berdasarkan keseluruhan profil masalah tersebut. Bahas urgensi intervensi struktural (fokus pada masalah-masalah dominan), dampaknya terhadap mutu pelayanan komprehensif seperti Program Rujuk Balik (PRB) atau peran Sp.KKLP, serta berikan rekomendasi strategis (misal: debirokratisasi, evaluasi kebijakan, dll). 
-Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif resmi. Format output langsung paragraf teks saja (gunakan tag <strong> HTML untuk penekanan pada kata kunci jika perlu, jangan gunakan format markdown markdown seperti **).`;
+Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif resmi. Format output langsung paragraf teks saja (gunakan tag <strong> HTML untuk penekanan pada kata kunci jika perlu, jangan gunakan format markdown seperti **).`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.3 }
-        })
-      });
-
-      if (!response.ok) {
-        if (response.status === 503) {
-          throw new Error("Server Gemini Google sedang sibuk/overload (Error 503). Silakan coba beberapa saat lagi.");
-        } else if (response.status === 400 || response.status === 403) {
-          throw new Error("API Key tidak valid atau terblokir (Error " + response.status + "). Silakan periksa kembali API Key Anda.");
-        } else if (response.status === 404) {
-          throw new Error("Model Gemini yang diminta tidak ditemukan (Error 404). Cek pengaturan model Anda.");
-        }
-        throw new Error("Gagal terhubung ke API Gemini (Status: " + response.status + ").");
-      }
-      
-      const resData = await response.json();
-      const text = resData.candidates[0].content.parts[0].text;
+      const text = await callGeminiApi(prompt, overrideKey, overrideModel);
       setGeminiSummary(text);
-
     } catch (err) {
-      console.error(err);
-      setGeminiError(err.message || 'Terjadi kesalahan saat memanggil Gemini API.');
+      if (err.message === "API_KEY_MISSING") {
+        setActiveModalContext('keluhan');
+        setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
+        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+        setShowKeyModal(true);
+      } else {
+        setGeminiError(err.message || 'Terjadi kesalahan saat memanggil Gemini API.');
+      }
     } finally {
       setIsGeneratingGemini(false);
     }
   };
 
-  const renderScientificSummary = (data, total) => {
-    if (data.length < 3) return null;
-    const top1 = data[0];
-    const top2 = data[1];
-    const top3 = data[2];
+  const handleGenerateThematicSummary = async (data, total, overrideKey, overrideModel) => {
+    try {
+      setIsGeneratingThematic(true);
+      setThematicError('');
+      
+      const allCategories = data.map(d => `${d.name} (${d.percent}%)`).join(', ');
+      
+      const prompt = `Kamu adalah Ahli Evaluasi Kebijakan Kesehatan. Kami telah menyeleksi hasil wawancara dari ${total} responden nakes di FKTP ke dalam 4 Pilar Kebijakan Utama JKN. Berikut adalah persentase responden yang secara spesifik menyinggung atau mengeluhkan pilar-pilar kebijakan tersebut dalam kalimat mereka:
+${allCategories}.
+      
+Tolong buatkan Analisis Tematik Kebijakan (sekitar 2-3 paragraf) yang membahas keterkaitan antara keempat pilar tersebut di lapangan. Bagaimana gap antara "Cakupan Manfaat" dan "Ketersediaan Sumber Daya" memengaruhi jalannya pelayanan? Apakah "Mekanisme Pembiayaan" sudah sejalan dengan tuntutan "Penguatan Kompetensi SDM"? 
+Gunakan gaya bahasa akademik, tajam, komprehensif, dan bernada evaluasi strategis. Format output langsung paragraf teks saja (gunakan tag <strong> HTML untuk penekanan pada kata kunci utama).`;
+
+      const text = await callGeminiApi(prompt, overrideKey, overrideModel);
+      setThematicSummary(text);
+    } catch (err) {
+      if (err.message === "API_KEY_MISSING") {
+        setActiveModalContext('thematic');
+        setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
+        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+        setShowKeyModal(true);
+      } else {
+        setThematicError(err.message || 'Terjadi kesalahan saat memanggil Gemini API.');
+      }
+    } finally {
+      setIsGeneratingThematic(false);
+    }
+  };
+
+  const renderSummarySection = (data, total, isThematic = false) => {
+    if (data.length === 0) return null;
+    
+    const title = isThematic ? "Analisis Eksekutif Pilar Tematik" : "Ringkasan Eksekutif Analisis Kualitatif";
+    const Icon = isThematic ? Lightbulb : FileText;
+    const summaryData = isThematic ? thematicSummary : geminiSummary;
+    const errorData = isThematic ? thematicError : geminiError;
+    const isGenerating = isThematic ? isGeneratingThematic : isGeneratingGemini;
+    const generateFn = isThematic ? handleGenerateThematicSummary : handleGenerateGeminiSummary;
+    const defaultParagraphs = isThematic ? (
+      <p>Berdasarkan pengelompokan semantik terhadap 4 Pilar Kebijakan JKN, teridentifikasi bahwa aspek operasional utama masih terpusat pada isu <strong>{data[0]?.name}</strong> ({data[0]?.percent}%). Hasil ini menunjukkan diperlukannya penyelarasan mendalam antara regulasi strategis dengan ketersediaan di tingkat Fasilitas Kesehatan Tingkat Pertama.</p>
+    ) : (
+      <p>
+        Berdasarkan ekstraksi data kualitatif dari <strong>{total}</strong> responden tenaga medis di berbagai Fasilitas Kesehatan Tingkat Pertama (FKTP), analisis menunjukkan bahwa hambatan operasional utama dalam implementasi program JKN secara signifikan didominasi oleh isu <strong>{data[0]?.name}</strong>, yang dikeluhkan secara eksplisit oleh <strong>{data[0]?.percent}%</strong> responden. Tingginya prevalensi keluhan pada sektor ini mengindikasikan adanya urgensi intervensi struktural guna memperbaiki tata kelola dan efisiensi pelayanan langsung di lapangan. 
+      </p>
+    );
 
     return (
-      <div className="bg-indigo-50 border border-indigo-100 p-8 rounded-2xl shadow-sm relative overflow-hidden">
+      <div className={`border p-8 rounded-2xl shadow-sm relative overflow-hidden ${isThematic ? 'bg-amber-50 border-amber-100' : 'bg-indigo-50 border-indigo-100'}`}>
         {showKeyModal && typeof document !== 'undefined' && createPortal(
           <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
@@ -160,44 +265,96 @@ Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif re
           document.body
         )}
         <div className="absolute top-0 right-0 p-6 opacity-5">
-          <FileText className="w-32 h-32 text-indigo-600" />
+          <Icon className={`w-32 h-32 ${isThematic ? 'text-amber-600' : 'text-indigo-600'}`} />
         </div>
         <div className="relative z-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-            <h3 className="text-lg font-bold text-indigo-900 flex items-center">
-              <FileText className="w-6 h-6 mr-2 text-indigo-600" /> Ringkasan Eksekutif Analisis Kualitatif
+            <h3 className={`text-lg font-bold flex items-center ${isThematic ? 'text-amber-900' : 'text-indigo-900'}`}>
+              <Icon className={`w-6 h-6 mr-2 ${isThematic ? 'text-amber-600' : 'text-indigo-600'}`} /> {title}
             </h3>
             
             {!isPrinting && (
-              geminiSummary ? (
+              summaryData ? (
                 <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-200"><Check className="w-4 h-4" /> Digenerate oleh Gemini AI</div>
               ) : (
                 <button 
-                  onClick={() => handleGenerateGeminiSummary(data, total)} 
-                  disabled={isGeneratingGemini}
-                  className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 transition shadow-sm disabled:opacity-50"
+                  onClick={() => generateFn(data, total)} 
+                  disabled={isGenerating}
+                  className={`flex items-center gap-2 text-white px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm disabled:opacity-50 ${isThematic ? 'bg-amber-600 hover:bg-amber-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}
                 >
-                  {isGeneratingGemini ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Cpu className="w-4 h-4" />}
-                  {isGeneratingGemini ? 'Menganalisis...' : 'Generate AI Report'}
+                  {isGenerating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Cpu className="w-4 h-4" />}
+                  {isGenerating ? 'Menganalisis...' : 'Generate AI Report'}
                 </button>
               )
             )}
           </div>
           
-          {geminiError && <p className="text-xs text-rose-500 font-medium mb-4">{geminiError}</p>}
+          {errorData && <p className="text-xs text-rose-500 font-medium mb-4">{errorData}</p>}
 
           <div className="text-sm text-slate-700 leading-relaxed text-justify space-y-4">
-            {geminiSummary ? (
-              <div dangerouslySetInnerHTML={{ __html: geminiSummary.replace(/\n\n/g, '<br/><br/>') }} />
-            ) : (
-              <p>
-                Berdasarkan ekstraksi data kualitatif dari <strong>{total}</strong> responden tenaga medis di berbagai Fasilitas Kesehatan Tingkat Pertama (FKTP), analisis tematik menunjukkan bahwa hambatan operasional utama dalam implementasi program JKN secara signifikan didominasi oleh isu <strong>{top1.name}</strong>, yang dikeluhkan secara eksplisit oleh <strong>{top1.percent}%</strong> responden. Tingginya prevalensi keluhan pada sektor ini mengindikasikan adanya urgensi intervensi struktural guna memperbaiki tata kelola dan efisiensi pelayanan langsung di lapangan. 
-                <br /><br />
-                Lebih lanjut, temuan sekunder menyoroti kendala pada aspek <strong>{top2.name}</strong> ({top2.percent}%) dan <strong>{top3.name}</strong> ({top3.percent}%), yang saling berkaitan dalam memengaruhi mutu pelayanan komprehensif, khususnya dalam tata laksana Program Rujuk Balik (PRB) dan optimalisasi peran Spesialis Kedokteran Keluarga Layanan Primer (Sp.KKLP). Oleh karena itu, direkomendasikan adanya re-evaluasi kebijakan secara holistik—mulai dari penyediaan regulasi yang lebih adaptif, penyesuaian beban kerja tenaga medis, hingga debirokratisasi sistem informasi operasional—guna mencapai standar pelayanan kesehatan primer yang bermutu dan berkesinambungan.
-              </p>
-            )}
+            {summaryData ? (
+              <div dangerouslySetInnerHTML={{ __html: summaryData.replace(/\n\n/g, '<br/><br/>') }} />
+            ) : defaultParagraphs}
           </div>
         </div>
+      </div>
+    );
+  };
+
+  const renderAccordionList = (data, expandedState, setExpandedFn, categoriesDict, colorTheme = "rose") => {
+    return (
+      <div className="divide-y divide-slate-100">
+        {data.map((category) => (
+          <div key={category.name} className="group">
+            <button 
+              onClick={() => setExpandedFn(expandedState === category.name ? null : category.name)}
+              className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors focus:outline-none"
+            >
+              <div className="flex items-center gap-4">
+                <span className={`w-12 h-10 rounded-xl flex items-center justify-center font-extrabold text-sm border ${colorTheme === 'rose' ? 'bg-rose-100 text-rose-600 border-rose-200' : 'bg-amber-100 text-amber-600 border-amber-200'}`}>
+                  {category.percent}%
+                </span>
+                <div className="text-left">
+                  <h4 className="font-bold text-slate-800 text-base">{category.name}</h4>
+                  <p className="text-xs text-slate-500 font-medium">{category.sentences.length} kutipan kalimat terdeteksi dari {category.value} responden</p>
+                </div>
+              </div>
+              {expandedState === category.name ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
+            </button>
+            
+            {expandedState === category.name && (
+              <div className="px-6 pb-6 pt-2 bg-slate-50">
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                  {category.sentences.map((s, idx) => {
+                    let highlightedText = s.text;
+                    const keywords = categoriesDict[category.name];
+                    
+                    keywords.forEach(kw => {
+                      const escapedKw = kw.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+                      const regex = new RegExp(`(\\b${escapedKw}\\b)`, 'gi');
+                      highlightedText = highlightedText.replace(regex, '<strong>$1</strong>');
+                    });
+
+                    return (
+                      <div key={idx} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">
+                        <p className="text-sm text-slate-700 leading-relaxed italic" dangerouslySetInnerHTML={{ __html: `"${highlightedText}."` }}></p>
+                        <div className="mt-3 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
+                          <div className="flex items-center gap-1.5 font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-md">
+                            <User className="w-3.5 h-3.5" />
+                            {s.role} ({s.fktp})
+                          </div>
+                          <span className={`font-semibold px-2 py-1 rounded-md ${colorTheme === 'rose' ? 'text-rose-600 bg-rose-50' : 'text-amber-600 bg-amber-50'}`}>
+                            Diambil dari {s.q}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     );
   };
@@ -213,7 +370,8 @@ Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif re
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {renderScientificSummary(chartData, totalRespondents)}
+      {renderSummarySection(chartData, totalRespondents, false)}
+      
       <div className="bg-white p-8 rounded-2xl border border-rose-100 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 p-6 opacity-5">
           <AlertTriangle className="w-48 h-48 text-rose-600" />
@@ -224,7 +382,7 @@ Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif re
               <AlertTriangle className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-800">Analisis Keluhan (Pemindaian W1 - W8)</h2>
+              <h2 className="text-xl font-bold text-slate-800">Analisis Keluhan Berdasarkan Kategori (W1 - W8)</h2>
               <p className="text-sm text-slate-500">Mengekstrak keluhan per-kalimat dari total {totalRespondents} responden yang diwawancara.</p>
             </div>
           </div>
@@ -253,69 +411,32 @@ Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif re
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-xs text-slate-400 mt-6 text-center italic">*Persentase di atas adalah proporsi responden yang mengeluhkan topik tersebut. Satu responden bisa memiliki lebih dari satu keluhan.</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-12">
         <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
           <Filter className="w-5 h-5 text-slate-500" />
-          <h3 className="text-lg font-bold text-slate-800">Daftar Kutipan Aktual per Kategori</h3>
+          <h3 className="text-lg font-bold text-slate-800">Daftar Kutipan Aktual (Kategori Masalah)</h3>
         </div>
-        
-        <div className="divide-y divide-slate-100">
-          {chartData.map((category) => (
-            <div key={category.name} className="group">
-              <button 
-                onClick={() => setExpandedCategory(expandedCategory === category.name ? null : category.name)}
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors focus:outline-none"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="w-12 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center font-extrabold text-sm border border-rose-200">
-                    {category.percent}%
-                  </span>
-                  <div className="text-left">
-                    <h4 className="font-bold text-slate-800 text-base">{category.name}</h4>
-                    <p className="text-xs text-slate-500 font-medium">{category.sentences.length} kutipan kalimat terdeteksi dari {category.value} responden</p>
-                  </div>
-                </div>
-                {expandedCategory === category.name ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
-              </button>
-              
-              {expandedCategory === category.name && (
-                <div className="px-6 pb-6 pt-2 bg-slate-50">
-                  <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                    {category.sentences.map((s, idx) => {
-                      // Highlight keywords mapping
-                      let highlightedText = s.text;
-                      const keywords = keluhanCategories[category.name];
-                      
-                      // Highlight manually with safe replacement
-                      keywords.forEach(kw => {
-                        const regex = new RegExp(`(${kw})`, 'gi');
-                        highlightedText = highlightedText.replace(regex, '<strong>$1</strong>');
-                      });
+        {renderAccordionList(chartData, expandedCategory, setExpandedCategory, keluhanCategories, "rose")}
+      </div>
 
-                      return (
-                        <div key={idx} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200/60">
-                          <p className="text-sm text-slate-700 leading-relaxed italic" dangerouslySetInnerHTML={{ __html: `"${highlightedText}."` }}></p>
-                          <div className="mt-3 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
-                            <div className="flex items-center gap-1.5 font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-md">
-                              <User className="w-3.5 h-3.5" />
-                              {s.role} ({s.fktp})
-                            </div>
-                            <span className="font-semibold text-rose-600 bg-rose-50 px-2 py-1 rounded-md">
-                              Diambil dari {s.q}
-                            </span>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+      {/* --- SEKSI ANALISIS TEMATIK PILAR KEBIJAKAN --- */}
+      <div className="mt-12 pt-8 border-t-2 border-dashed border-slate-200">
+        <div className="mb-6">
+          <h2 className="text-2xl font-black text-slate-800">Analisis Tematik Pilar Kebijakan</h2>
+          <p className="text-slate-500">Pemetaan kalimat jawaban yang secara spesifik membahas 4 pilar penting kebijakan JKN.</p>
+        </div>
+
+        {renderSummarySection(thematicChartData, totalRespondents, true)}
+
+        <div className="bg-white rounded-2xl border border-amber-100 shadow-sm overflow-hidden mt-6">
+          <div className="p-6 border-b border-slate-100 bg-amber-50/30 flex items-center gap-2">
+            <Lightbulb className="w-5 h-5 text-amber-500" />
+            <h3 className="text-lg font-bold text-slate-800">Pengelompokan Kutipan per Pilar Kebijakan</h3>
+          </div>
+          {renderAccordionList(thematicChartData, expandedThematic, setExpandedThematic, thematicCategories, "amber")}
         </div>
       </div>
     </div>
