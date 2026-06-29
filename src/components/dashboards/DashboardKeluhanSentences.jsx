@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
 
 export default function DashboardKeluhanSentences({ filteredData, isPrinting }) {
@@ -7,6 +8,17 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
   const [geminiSummary, setGeminiSummary] = useState(null);
   const [isGeneratingGemini, setIsGeneratingGemini] = useState(false);
   const [geminiError, setGeminiError] = useState('');
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [tempKey, setTempKey] = useState('');
+  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+
+  const handleSaveKey = () => {
+    localStorage.setItem('GEMINI_API_KEY', tempKey);
+    localStorage.setItem('GEMINI_MODEL', tempModel);
+    setShowKeyModal(false);
+    // Langsung coba generate lagi setelah save
+    handleGenerateGeminiSummary(chartData, totalRespondents, tempKey, tempModel);
+  };
 
   const keluhanCategories = {
     'Sistem P-Care / IT': ['pcare', 'p-care', 'sistem', 'internet', 'jaringan', 'error', 'server', 'simpus', 'lemot', 'aplikasi', 'bridging', 'koneksi'],
@@ -67,12 +79,14 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
     return { chartData: data, totalRespondents: total };
   }, [filteredData]);
 
-  const handleGenerateGeminiSummary = async (data, total) => {
-    const apiKey = localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
-    const model = localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
+  const handleGenerateGeminiSummary = async (data, total, overrideKey, overrideModel) => {
+    const apiKey = overrideKey || localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
+    const model = overrideModel || localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
     
     if (!apiKey) {
-      setGeminiError('API Key belum di-set. Silakan atur API Key di menu Kualitatif (NVIVO) terlebih dahulu.');
+      setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
+      setTempModel(model);
+      setShowKeyModal(true);
       return;
     }
 
@@ -118,6 +132,23 @@ Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif. F
 
     return (
       <div className="bg-indigo-50 border border-indigo-100 p-8 rounded-2xl shadow-sm relative overflow-hidden">
+        {showKeyModal && typeof document !== 'undefined' && createPortal(
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+              <button onClick={() => setShowKeyModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><X className="w-5 h-5"/></button>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><Key className="w-5 h-5"/></div>
+                <h3 className="text-lg font-bold text-slate-800">Set Gemini API Key</h3>
+              </div>
+              <p className="text-sm text-slate-600 mb-4">Masukkan API Key Anda untuk menghubungkan data wawancara ini dengan mesin LLM Gemini secara langsung.</p>
+              <input type="password" value={tempKey} onChange={e => setTempKey(e.target.value)} placeholder="AIzaSy..." className="w-full border border-slate-200 rounded-xl px-4 py-2 mb-4 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
+              <p className="text-sm text-slate-600 mb-2">Versi Model Gemini:</p>
+              <input type="text" value={tempModel} onChange={e => setTempModel(e.target.value)} placeholder="gemini-1.5-pro" className="w-full border border-slate-200 rounded-xl px-4 py-2 mb-6 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
+              <button onClick={handleSaveKey} className="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl hover:bg-indigo-700 transition">Simpan & Mulai Analisis</button>
+            </div>
+          </div>,
+          document.body
+        )}
         <div className="absolute top-0 right-0 p-6 opacity-5">
           <FileText className="w-32 h-32 text-indigo-600" />
         </div>
