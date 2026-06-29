@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X, Lightbulb, Target } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
@@ -13,6 +13,10 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
   const [autoSummary, setAutoSummary] = useState(null);
   const [isGeneratingAuto, setIsGeneratingAuto] = useState(false);
   const [autoError, setAutoError] = useState('');
+  
+  // State untuk unblocking proses berat (clustering)
+  const [isAnalyzingAutoClusters, setIsAnalyzingAutoClusters] = useState(true);
+  const [autoClusters, setAutoClusters] = useState([]);
 
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
@@ -53,7 +57,6 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
 
   const keluhanRegexes = useMemo(() => buildRegexes(keluhanCategories), []);
 
-  // Helpers for Unsupervised Clustering
   const stopwords = new Set(['dan', 'atau', 'yang', 'di', 'ke', 'dari', 'pada', 'untuk', 'dengan', 'ini', 'itu', 'adalah', 'tidak', 'ada', 'bisa', 'karena', 'jika', 'agar', 'juga', 'dalam', 'sangat', 'sudah', 'belum', 'akan', 'harus', 'lebih', 'kurang', 'saat', 'saya', 'kami', 'kita', 'buat', 'seperti']);
 
   const getTokens = (str) => {
@@ -65,21 +68,22 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
     ));
   };
 
+  // Optimize Jaccard
   const jaccard = (tokensA, tokensB) => {
     if (tokensA.length === 0 || tokensB.length === 0) return 0;
     const intersection = tokensA.filter(x => tokensB.includes(x)).length;
-    const union = new Set([...tokensA, ...tokensB]).size;
+    const union = tokensA.length + tokensB.length - intersection;
     return intersection / union;
   };
 
-  const { chartData, autoClusters, totalRespondents } = useMemo(() => {
+  const { chartData, allSentences, totalRespondents } = useMemo(() => {
     const results = {};
     Object.keys(keluhanCategories).forEach(cat => {
       results[cat] = { sentences: [], respondents: new Set() };
     });
 
     const processedRespondents = new Set();
-    let allSentences = [];
+    let sentencesList = [];
 
     filteredData.forEach(row => {
       const w = row.wawancara || {};
@@ -92,7 +96,6 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
           sents.forEach(sentence => {
             const lowerS = sentence.toLowerCase();
             
-            // 1. Kategorisasi Berbasis Keyword
             Object.keys(keluhanCategories).forEach(cat => {
               if (keluhanRegexes[cat].some(regex => regex.test(lowerS))) {
                 results[cat].sentences.push({ 
@@ -105,8 +108,7 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
               }
             });
 
-            // Siapkan untuk clustering otomatis
-            allSentences.push({
+            sentencesList.push({
                text: sentence,
                tokens: getTokens(sentence),
                fktp: row.fktp_name || 'Tidak diketahui',
@@ -122,7 +124,6 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
 
     const total = processedRespondents.size;
 
-    // Build Chart Data for Categories
     const data = Object.keys(results).map(cat => ({
       name: cat,
       value: results[cat].respondents.size,
@@ -130,51 +131,68 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
       sentences: results[cat].sentences
     })).filter(d => d.value > 0).sort((a,b) => b.value - a.value);
 
-    // 2. Unsupervised Clustering Logic
-    // Hanya proses kalimat yang memiliki makna kata yang cukup (>= 3 token bersih)
-    allSentences = allSentences.filter(s => s.tokens.length >= 3);
-    const clusters = [];
+    // Hanya ambil kalimat dengan minimal 3 kata bersih
+    sentencesList = sentencesList.filter(s => s.tokens.length >= 3);
 
-    allSentences.forEach(sentence => {
-       let bestCluster = null;
-       let bestScore = 0.40; // Threshold kemiripan Jaccard 40%
-       
-       for (const cluster of clusters) {
-          const score = jaccard(sentence.tokens, cluster.centroidTokens);
-          if (score > bestScore) {
-             bestScore = score;
-             bestCluster = cluster;
-          }
-       }
-
-       if (bestCluster) {
-          bestCluster.sentences.push(sentence);
-          bestCluster.respondents.add(sentence.id);
-       } else {
-          clusters.push({
-             centroidTokens: sentence.tokens,
-             representativeText: sentence.text,
-             sentences: [sentence],
-             respondents: new Set([sentence.id])
-          });
-       }
-    });
-
-    // Urutkan klaster berdasarkan jumlah responden terbanyak dan ambil Top 20
-    const topClusters = clusters
-       .map((c, idx) => ({
-          id: `cluster_${idx}`,
-          name: c.representativeText, // Menggunakan kalimat asli pertama sebagai judul klaster
-          value: c.respondents.size,
-          percent: total > 0 ? ((c.respondents.size / total) * 100).toFixed(1) : 0,
-          sentences: c.sentences
-       }))
-       .filter(c => c.value > 1) // Minimal 2 orang ngomong hal yang mirip
-       .sort((a,b) => b.value - a.value)
-       .slice(0, 20);
-
-    return { chartData: data, autoClusters: topClusters, totalRespondents: total };
+    return { chartData: data, allSentences: sentencesList, totalRespondents: total };
   }, [filteredData, keluhanRegexes]);
+
+  // Efek untuk menjalankan proses auto-clustering di latar belakang agar UI tidak freeze (ngeblank)
+  useEffect(() => {
+    setIsAnalyzingAutoClusters(true);
+    setAutoClusters([]);
+
+    if (!allSentences || allSentences.length === 0) {
+      setIsAnalyzingAutoClusters(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      const clusters = [];
+      
+      allSentences.forEach(sentence => {
+         let bestCluster = null;
+         let bestScore = 0.40; 
+         
+         for (const cluster of clusters) {
+            const score = jaccard(sentence.tokens, cluster.centroidTokens);
+            if (score > bestScore) {
+               bestScore = score;
+               bestCluster = cluster;
+            }
+         }
+
+         if (bestCluster) {
+            bestCluster.sentences.push(sentence);
+            bestCluster.respondents.add(sentence.id);
+         } else {
+            clusters.push({
+               centroidTokens: sentence.tokens,
+               representativeText: sentence.text,
+               sentences: [sentence],
+               respondents: new Set([sentence.id])
+            });
+         }
+      });
+
+      const topClusters = clusters
+         .map((c, idx) => ({
+            id: `cluster_${idx}`,
+            name: c.representativeText, 
+            value: c.respondents.size,
+            percent: totalRespondents > 0 ? ((c.respondents.size / totalRespondents) * 100).toFixed(1) : 0,
+            sentences: c.sentences
+         }))
+         .filter(c => c.value > 1)
+         .sort((a,b) => b.value - a.value)
+         .slice(0, 20);
+
+      setAutoClusters(topClusters);
+      setIsAnalyzingAutoClusters(false);
+    }, 50); // Beri jeda 50ms agar React sempat menggambar komponen (menghindari blank screen)
+
+    return () => clearTimeout(timer);
+  }, [allSentences, totalRespondents]);
 
   const callGeminiApi = async (prompt, overrideKey, overrideModel) => {
     const apiKey = overrideKey || localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
@@ -242,7 +260,6 @@ Gunakan gaya bahasa akademik, formal, analitis, dan bernada laporan eksekutif re
       setIsGeneratingAuto(true);
       setAutoError('');
       
-      // Kirim Top 20 kalimat asli ke Gemini
       const topSentences = clusters.map((c, i) => `${i+1}. "${c.name}" (Dikemukakan oleh ${c.percent}% responden)`).join('\n');
       
       const prompt = `Kamu adalah Ahli Evaluasi Kebijakan JKN. Kami telah menggunakan algoritma klastering lokal untuk menyaring ribuan kalimat wawancara dari ${total} nakes di FKTP menjadi Top 20 Pola Kalimat Paling Sering Muncul (Unsupervised Benchmark Sentences).
@@ -270,7 +287,7 @@ Bahas temuan secara tajam, akademis, dan bernada evaluasi strategis berdasarkan 
   };
 
   const renderSummarySection = (data, total, isAuto = false) => {
-    if (data.length === 0) return null;
+    if (data.length === 0 && !isAnalyzingAutoClusters) return null;
     
     const title = isAuto ? "Analisis AI atas Top 20 Kalimat Terbanyak" : "Ringkasan Eksekutif Analisis Kualitatif";
     const Icon = isAuto ? Target : FileText;
@@ -278,6 +295,7 @@ Bahas temuan secara tajam, akademis, dan bernada evaluasi strategis berdasarkan 
     const errorData = isAuto ? autoError : geminiError;
     const isGenerating = isAuto ? isGeneratingAuto : isGeneratingGemini;
     const generateFn = isAuto ? handleGenerateAutoSummary : handleGenerateGeminiSummary;
+    
     const defaultParagraphs = isAuto ? (
       <p>Algoritma telah menyaring ribuan kutipan wawancara menjadi 20 pola kalimat (klaster) paling dominan secara objektif. Pola teratas saat ini, yaitu: <em>"{data[0]?.name}"</em> muncul pada <strong>{data[0]?.percent}%</strong> responden. Silakan *Generate AI Report* untuk meminta AI menarik kesimpulan Tema/Pilar Kebijakan dari ke-20 kalimat patokan ini.</p>
     ) : (
@@ -314,7 +332,7 @@ Bahas temuan secara tajam, akademis, dan bernada evaluasi strategis berdasarkan 
               <Icon className={`w-6 h-6 mr-2 ${isAuto ? 'text-emerald-600' : 'text-indigo-600'}`} /> {title}
             </h3>
             
-            {!isPrinting && (
+            {!isPrinting && !isAnalyzingAutoClusters && (
               summaryData ? (
                 <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-200"><Check className="w-4 h-4" /> Digenerate oleh Gemini AI</div>
               ) : (
@@ -333,7 +351,13 @@ Bahas temuan secara tajam, akademis, dan bernada evaluasi strategis berdasarkan 
           {errorData && <p className="text-xs text-rose-500 font-medium mb-4">{errorData}</p>}
 
           <div className="text-sm text-slate-700 leading-relaxed text-justify space-y-4">
-            {summaryData ? (
+            {isAnalyzingAutoClusters && isAuto ? (
+              <div className="flex flex-col items-center justify-center py-6">
+                <RefreshCw className="w-8 h-8 text-emerald-500 animate-spin mb-4" />
+                <p className="font-semibold text-emerald-700">Menganalisis dan mengelompokkan ribuan kalimat (Local Clustering)...</p>
+                <p className="text-xs text-emerald-600/70 mt-1">Harap tunggu sebentar, algoritma sedang berjalan tanpa internet.</p>
+              </div>
+            ) : summaryData ? (
               <div dangerouslySetInnerHTML={{ __html: summaryData.replace(/\n\n/g, '<br/><br/>') }} />
             ) : defaultParagraphs}
           </div>
@@ -468,7 +492,16 @@ Bahas temuan secara tajam, akademis, dan bernada evaluasi strategis berdasarkan 
             <Lightbulb className="w-5 h-5 text-emerald-500" />
             <h3 className="text-lg font-bold text-slate-800">Top 20 Pola Kalimat Paling Sering Diulang</h3>
           </div>
-          {renderAccordionList(autoClusters, expandedAuto, setExpandedAuto, true)}
+          
+          {isAnalyzingAutoClusters ? (
+            <div className="p-16 flex flex-col items-center justify-center bg-white">
+               <RefreshCw className="w-10 h-10 text-emerald-500 animate-spin mb-4" />
+               <h4 className="text-lg font-bold text-slate-700">Sedang memproses algoritma AI lokal...</h4>
+               <p className="text-sm text-slate-500 text-center max-w-md mt-2">Membaca ribuan kalimat, menyaring token, dan menghitung Jaccard Similarity untuk membentuk klaster-klaster tanpa *delay* internet.</p>
+            </div>
+          ) : (
+            renderAccordionList(autoClusters, expandedAuto, setExpandedAuto, true)
+          )}
         </div>
       </div>
     </div>
