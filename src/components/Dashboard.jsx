@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useTransition } from 'react';
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
+import XlsxPopulate from 'xlsx-populate';
 import { motion, AnimatePresence } from 'framer-motion';
 import { penyakitPasienBulanan } from './SurveyForm';
 import { id as localeID } from 'date-fns/locale';
@@ -43,6 +44,7 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isExportingAll, setIsExportingAll] = useState(false);
 
   const handleTabChange = (tabId) => {
     startTransition(() => {
@@ -162,6 +164,173 @@ export default function Dashboard() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data DPM");
     XLSX.writeFile(workbook, `Data_DPM_KKLP_${new Date().getTime()}.xlsx`);
+  };
+
+  const exportAllNativeExcel = async () => {
+    try {
+      setIsExportingAll(true);
+      
+      const response = await fetch('/templates/dashboard_template_all.xlsx');
+      if (!response.ok) throw new Error('File template gagal dimuat (HTTP ' + response.status + ')');
+      
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
+
+      // --- CALCULATIONS FOR ALL SHEETS ---
+      // 1. Profil
+      let spkklpCount = 0;
+      const roleCount = {}; 
+      const fktpTypeCount = { 'Puskesmas': 0, 'Klinik': 0, 'Dokter Praktik Mandiri': 0 };
+      const regionalCount = {};
+
+      filteredData.forEach(row => {
+        const role = row.role || 'Lainnya'; 
+        roleCount[role] = (roleCount[role] || 0) + 1;
+        const fName = (row.fktp_name || '').toLowerCase();
+        let type = row.jenis_faskes;
+        if (type !== 'Puskesmas' && type !== 'Klinik' && type !== 'Dokter Praktik Mandiri') {
+          if (role === 'Dokter Praktik Mandiri') type = 'Dokter Praktik Mandiri';
+          else if (fName.includes('puskesmas') || fName.includes('pkm') || fName.includes('puseksmas') || fName.includes('puskes')) type = 'Puskesmas';
+          else type = 'Klinik';
+        }
+        fktpTypeCount[type]++;
+        const prov = row.provinsi || 'Lainnya';
+        regionalCount[prov] = (regionalCount[prov] || 0) + 1;
+      });
+
+      const uniqueFktpTypeCount = { 'Puskesmas': 0, 'Klinik': 0, 'Dokter Praktik Mandiri': 0 };
+      uniqueFktpData.forEach(row => {
+        if ((row.doc_kklp || 'Tidak') === 'Ya') spkklpCount++;
+        const fName = (row.fktp_name || '').toLowerCase();
+        let type = row.jenis_faskes;
+        if (type !== 'Puskesmas' && type !== 'Klinik' && type !== 'Dokter Praktik Mandiri') {
+          if (row.role === 'Dokter Praktik Mandiri') type = 'Dokter Praktik Mandiri';
+          else if (fName.includes('puskesmas') || fName.includes('pkm') || fName.includes('puseksmas') || fName.includes('puskes')) type = 'Puskesmas';
+          else type = 'Klinik';
+        }
+        uniqueFktpTypeCount[type]++;
+      });
+
+      const roleChartData = Object.keys(roleCount).map(k => ({ name: k, value: roleCount[k] })).sort((a,b) => b.value - a.value);
+      const regionalData = Object.keys(regionalCount).map(k => ({ name: k, value: regionalCount[k] })).sort((a,b) => b.value - a.value).slice(0, 10);
+
+      const sProf = workbook.sheet('Dashboard Profil');
+      if (sProf) {
+         sProf.cell('B4').value(filteredData.length);
+         sProf.cell('B5').value(uniqueFktpData.length);
+         sProf.cell('B6').value(Object.keys(regionalCount).length);
+         sProf.cell('B7').value(spkklpCount);
+
+         sProf.cell('B11').value(fktpTypeCount['Puskesmas']||0);
+         sProf.cell('B12').value(fktpTypeCount['Klinik']||0);
+         sProf.cell('B13').value(fktpTypeCount['Dokter Praktik Mandiri']||0);
+
+         sProf.cell('B27').value(uniqueFktpTypeCount['Puskesmas']||0);
+         sProf.cell('B28').value(uniqueFktpTypeCount['Klinik']||0);
+         sProf.cell('B29').value(uniqueFktpTypeCount['Dokter Praktik Mandiri']||0);
+
+         for(let i=0; i<15; i++) { sProf.cell(`A${43+i}`).value(''); sProf.cell(`B${43+i}`).value(''); }
+         roleChartData.slice(0,15).forEach((item, i) => { sProf.cell(`A${43+i}`).value(item.name); sProf.cell(`B${43+i}`).value(item.value); });
+
+         for(let i=0; i<10; i++) { sProf.cell(`A${61+i}`).value(''); sProf.cell(`B${61+i}`).value(''); }
+         regionalData.forEach((item, i) => { sProf.cell(`A${61+i}`).value(item.name); sProf.cell(`B${61+i}`).value(item.value); });
+      }
+
+      // 2. PRB
+      let totalJumlah = 0, totalRutin = 0, totalTidakBerkunjung = 0;
+      const diagCounts = {'DM': 0, 'Hipertensi': 0, 'Jantung': 0, 'PPOK': 0, 'Asma': 0, 'Stroke': 0, 'Epilepsi': 0, 'Skizofrenia': 0, 'SLE': 0};
+      filteredData.forEach(row => {
+         const prb = row.prb || {};
+         totalJumlah += Number(prb.jumlah) || 0;
+         totalRutin += Number(prb.rutinKunjungan) || 0;
+         totalTidakBerkunjung += Number(prb.tidakBerkunjung) || 0;
+         diagCounts['DM'] += Number(prb.peserta_dm) || 0;
+         diagCounts['Hipertensi'] += Number(prb.peserta_ht) || 0;
+         diagCounts['Jantung'] += Number(prb.peserta_jantung) || 0;
+         diagCounts['PPOK'] += Number(prb.peserta_ppok) || 0;
+         diagCounts['Asma'] += Number(prb.peserta_asma) || 0;
+         diagCounts['Stroke'] += Number(prb.peserta_stroke) || 0;
+         diagCounts['Epilepsi'] += Number(prb.peserta_epilepsi) || 0;
+         diagCounts['Skizofrenia'] += Number(prb.peserta_skizofrenia) || 0;
+         diagCounts['SLE'] += Number(prb.peserta_sle) || 0;
+      });
+      const diagData = Object.keys(diagCounts).map(k => ({ name: k, value: diagCounts[k] })).sort((a,b) => b.value - a.value).filter(d => d.value > 0);
+
+      const sPrb = workbook.sheet('Dashboard PRB');
+      if (sPrb) {
+         sPrb.cell('B4').value(totalJumlah);
+         sPrb.cell('B5').value(totalRutin);
+         sPrb.cell('B6').value(totalTidakBerkunjung);
+         
+         const kepatuhan = totalJumlah > 0 ? (totalRutin / totalJumlah) * 100 : 0;
+         sPrb.cell('B11').value(kepatuhan);
+         sPrb.cell('B12').value(totalJumlah > 0 ? (totalTidakBerkunjung / totalJumlah) * 100 : 0);
+
+         for(let i=0; i<10; i++) { sPrb.cell(`A${27+i}`).value(''); sPrb.cell(`B${27+i}`).value(''); }
+         diagData.slice(0,10).forEach((item, i) => { sPrb.cell(`A${27+i}`).value(item.name); sPrb.cell(`B${27+i}`).value(item.value); });
+      }
+
+      // 3. Home Care
+      let fktpWithHomeCare = 0;
+      uniqueFktpData.forEach(row => { if ((row.home_care || {}).screening === 'Ya') fktpWithHomeCare++; });
+      const kondisiCounts = {};
+      filteredData.forEach(row => {
+         const hc = row.home_care || {};
+         if (hc.screening === 'Ya') {
+            const kondisiObj = hc.kondisi || {};
+            Object.keys(kondisiObj).forEach(k => { if(kondisiObj[k]) kondisiCounts[k] = (kondisiCounts[k]||0)+1; });
+            ['Mandiri (independen)', 'Memerlukan bantuan sebagian', 'Memerlukan bantuan penuh', 'Tirah baring', 'Lainnya'].forEach(k => {
+               if (hc[`kondisi_${k}`]) kondisiCounts[k] = (kondisiCounts[k]||0)+1;
+            });
+         }
+      });
+      const hcKondisiData = Object.keys(kondisiCounts).map(k => ({name:k, value:kondisiCounts[k]})).sort((a,b)=>b.value-a.value);
+      
+      const sHc = workbook.sheet('Dashboard Home Care');
+      if (sHc) {
+         sHc.cell('B4').value(uniqueFktpData.length > 0 ? (fktpWithHomeCare/uniqueFktpData.length)*100 : 0);
+         for(let i=0; i<6; i++) { sHc.cell(`A${10+i}`).value(''); sHc.cell(`B${10+i}`).value(''); }
+         hcKondisiData.slice(0,6).forEach((item, i) => { sHc.cell(`A${10+i}`).value(item.name); sHc.cell(`B${10+i}`).value(item.value); });
+      }
+
+      // 4. Paliatif
+      let fktpWithPaliatif = 0;
+      uniqueFktpData.forEach(row => { if ((row.paliatif || {}).screening === 'Ya') fktpWithPaliatif++; });
+      const tujuanCounts = {};
+      filteredData.forEach(row => {
+         const pal = row.paliatif || {};
+         if (pal.screening === 'Ya') {
+            const tujuanObj = pal.tujuan || {};
+            Object.keys(tujuanObj).forEach(k => { if(tujuanObj[k]) tujuanCounts[k] = (tujuanCounts[k]||0)+1; });
+            ['Pengendalian nyeri', 'Pengendalian gejala', 'Dukungan psikososial', 'Edukasi keluarga/caregiver', 'Perawatan akhir kehidupan', 'Lainnya'].forEach(t => {
+               if (pal[`tujuan_${t}`]) tujuanCounts[t] = (tujuanCounts[t]||0)+1;
+            });
+         }
+      });
+      const palTujuanData = Object.keys(tujuanCounts).map(k => ({name:k, value:tujuanCounts[k]})).sort((a,b)=>b.value-a.value);
+      
+      const sPal = workbook.sheet('Dashboard Paliatif');
+      if (sPal) {
+         sPal.cell('B4').value(uniqueFktpData.length > 0 ? (fktpWithPaliatif/uniqueFktpData.length)*100 : 0);
+         for(let i=0; i<6; i++) { sPal.cell(`A${9+i}`).value(''); sPal.cell(`B${9+i}`).value(''); }
+         palTujuanData.slice(0,6).forEach((item, i) => { sPal.cell(`A${9+i}`).value(item.name); sPal.cell(`B${9+i}`).value(item.value); });
+      }
+
+      const outBuffer = await workbook.outputAsync();
+      const blob = new Blob([outBuffer], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Semua_Dashboard_Native_${new Date().getTime()}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to export all native excel:', err);
+      alert('Gagal mengekspor Excel Native: ' + err.message);
+    } finally {
+      setIsExportingAll(false);
+    }
   };
 
   const copyPromptAllData = () => {
@@ -302,6 +471,17 @@ export default function Dashboard() {
           <div className="flex flex-wrap justify-end gap-3">
             <button onClick={copyPromptAllData} className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-md active:scale-95 text-sm sm:text-base"><Copy className="w-5 h-5 mr-2" /> Copy Prompt AI (Semua Data)</button>
             <button onClick={handlePrint} className="flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 hover:text-primary-600 transition shadow-sm hover:shadow-md hover:border-primary-200 active:scale-95 text-sm sm:text-base"><Printer className="w-5 h-5 mr-2" /> Cetak PDF (Semua Dashboard)</button>
+            <button 
+              onClick={exportAllNativeExcel} 
+              disabled={isExportingAll}
+              className="flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-fuchsia-600 text-white rounded-xl font-bold hover:from-purple-400 hover:to-fuchsia-500 transition shadow-md hover:shadow-lg hover:shadow-purple-500/30 active:scale-95 disabled:opacity-50 text-sm sm:text-base"
+            >
+              {isExportingAll ? (
+                <span className="flex items-center"><svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyiapkan...</span>
+              ) : (
+                <span className="flex items-center"><Download className="w-5 h-5 mr-2" /> Unduh Semua Dashboard (Native Excel)</span>
+              )}
+            </button>
             <button onClick={exportToExcel} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 text-sm sm:text-base"><Download className="w-5 h-5 mr-2" /> Data Faskes</button>
             <button onClick={exportDpmToExcel} className="flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-bold hover:from-blue-400 hover:to-indigo-500 transition shadow-md hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 text-sm sm:text-base"><Download className="w-5 h-5 mr-2" /> Data DPM</button>
           </div>
