@@ -170,7 +170,7 @@ export default function Dashboard() {
     try {
       setIsExportingAll(true);
       
-      const response = await fetch('/templates/dashboard_template_all.xlsx');
+      const response = await fetch('/templates/dashboard_template_all.xlsx?v=' + new Date().getTime());
       if (!response.ok) throw new Error('File template gagal dimuat (HTTP ' + response.status + ')');
       
       const arrayBuffer = await response.arrayBuffer();
