@@ -243,6 +243,16 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
         data: pembiayaanData.map(d => [d.name, d.value])
       },
       {
+        title: 'TOP 10 DIAGNOSIS SP.KKLP',
+        headers: ['Diagnosis', 'Frekuensi Kasus'],
+        data: diagData.map(d => [d.name, d.value])
+      },
+      {
+        title: 'TOP 10 TINDAKAN / PROSEDUR',
+        headers: ['Tindakan', 'Frekuensi'],
+        data: tindData.map(d => [d.name, d.value])
+      },
+      {
         title: 'TOP 5 LAYANAN SERING DIRUJUK KE FKRTL',
         headers: ['Layanan', 'Jumlah Rujukan'],
         data: dirujukData.map(d => [d.name, d.value])
