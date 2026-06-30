@@ -67,6 +67,12 @@ export default function DashboardNonOptimal({ filteredData, COLORS, isPrinting }
         top3
       },
       jknData: jknDataAgg,
+      usulanDetailData: serviceStats.filter(s => s.jknYa > 0 || s.jknTidak > 0).map(s => ({
+        name: s.name.replace('Pelayanan ', '').replace('Konsultasi ', ''),
+        'Diusulkan JKN': s.jknYa,
+        'Tidak Diusulkan': s.jknTidak,
+        total: s.jknYa + s.jknTidak
+      })).sort((a,b) => b['Diusulkan JKN'] - a['Diusulkan JKN']),
       hambatanData: serviceStats.filter(s => s.identifiedCount > 0).map(s => ({
         name: s.name.replace('Pelayanan ', '').replace('Konsultasi ', ''),
         'Skala 1 (Sangat Kurang)': s.skala1,
@@ -108,6 +114,11 @@ export default function DashboardNonOptimal({ filteredData, COLORS, isPrinting }
         title: 'Proporsi Usulan Masuk JKN',
         headers: ['Kategori', 'Jumlah Usulan'],
         data: jknData
+      },
+      {
+        title: 'Detail Usulan Layanan Masuk JKN',
+        headers: ['Layanan', 'Diusulkan JKN', 'Tidak Diusulkan', 'Total Respon'],
+        data: usulanDetailData.map(d => [d.name, d['Diusulkan JKN'], d['Tidak Diusulkan'], d.total])
       },
       {
         title: 'Distribusi Skala Hambatan Pelaksanaan (1-4)',
@@ -171,6 +182,27 @@ export default function DashboardNonOptimal({ filteredData, COLORS, isPrinting }
                 <Bar dataKey="Skala 2 (Kurang)" stackId="a" fill="#f97316" radius={[0, 0, 0, 0]} />
                 <Bar dataKey="Skala 3 (Cukup)" stackId="a" fill="#eab308" radius={[0, 0, 0, 0]} />
                 <Bar dataKey="Skala 4 (Sangat Baik)" stackId="a" fill="#22c55e" radius={[0, 6, 6, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><CheckCircle className="w-5 h-5 mr-2 text-rose-600" /> Detail Usulan Layanan Masuk JKN</h3>
+          </div>
+          <div className="h-80">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <BarChart data={usulanDetailData} layout="vertical" margin={{ top: 10, right: 30, left: 100, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={120} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '12px' }} />
+                <Bar dataKey="Diusulkan JKN" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="Tidak Diusulkan" stackId="a" fill="#f43f5e" radius={[0, 6, 6, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
