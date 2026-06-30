@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import wilayahMapping from '../../data/wilayahMapping.json';
 import ExportButton from '../ExportButton';
+import XlsxPopulate from 'xlsx-populate';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList
 } from 'recharts';
-import { Users, Stethoscope, Building, Map, ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
+import { Users, Stethoscope, Building, Map, ChevronDown, ChevronUp, CheckCircle, XCircle, Download } from 'lucide-react';
 
 export const normalizeStr = (s) => s ? s.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
 export const normalizeProv = (p) => p ? p.toLowerCase().replace(/[^a-z0-9]/g, '') : 'lainnya';
@@ -34,6 +35,7 @@ if (wilayahMapping.dpm) {
 export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const [expandedProv, setExpandedProv] = useState(null);
   const [expandedKab, setExpandedKab] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
   
   const totalResponden = filteredData.length;
   const totalFktp = uniqueFktpData.length;
@@ -253,6 +255,81 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
     };
   }, [filteredData, uniqueFktpData]);
 
+  const exportNativeExcel = async () => {
+    try {
+      setIsExporting(true);
+      
+      const response = await fetch('/templates/dashboard_template.xlsx');
+      if (!response.ok) throw new Error('File template gagal dimuat (HTTP ' + response.status + ')');
+      
+      const arrayBuffer = await response.arrayBuffer();
+
+      const workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
+      const sheetData = workbook.sheet('Data_Profil');
+
+      if (!sheetData) throw new Error('Sheet "Data_Profil" tidak ditemukan di template.');
+
+      // 1. Proporsi Responden per FKTP
+      sheetData.cell('B2').value(0);
+      sheetData.cell('B3').value(0);
+      sheetData.cell('B4').value(0);
+      fktpTypeData.forEach((item) => {
+         if (item.name === 'Puskesmas') sheetData.cell('B2').value(item.value);
+         if (item.name === 'Klinik') sheetData.cell('B3').value(item.value);
+         if (item.name === 'Dokter Praktik Mandiri') sheetData.cell('B4').value(item.value);
+      });
+
+      // 2. Proporsi FKTP Unik
+      sheetData.cell('E2').value(0);
+      sheetData.cell('E3').value(0);
+      sheetData.cell('E4').value(0);
+      uniqueFktpTypeData.forEach((item) => {
+         if (item.name === 'Puskesmas') sheetData.cell('E2').value(item.value);
+         if (item.name === 'Klinik') sheetData.cell('E3').value(item.value);
+         if (item.name === 'Dokter Praktik Mandiri') sheetData.cell('E4').value(item.value);
+      });
+
+      // 3. Proporsi Jabatan Responden
+      for (let i = 2; i <= 15; i++) {
+          sheetData.cell(`G${i}`).value('');
+          sheetData.cell(`H${i}`).value('');
+      }
+      roleChartData.forEach((item, index) => {
+          if (index < 14) {
+             sheetData.cell(`G${index+2}`).value(item.name);
+             sheetData.cell(`H${index+2}`).value(item.value);
+          }
+      });
+
+      // 4. 10 Provinsi Terbanyak
+      for (let i = 2; i <= 11; i++) {
+          sheetData.cell(`J${i}`).value('');
+          sheetData.cell(`K${i}`).value('');
+      }
+      regionalData.forEach((item, index) => {
+          if (index < 10) {
+             sheetData.cell(`J${index+2}`).value(item.name);
+             sheetData.cell(`K${index+2}`).value(item.value);
+          }
+      });
+
+      const outBuffer = await workbook.outputAsync();
+      const blob = new Blob([outBuffer], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Dashboard_Profil_Native_${new Date().getTime()}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to export native excel:', err);
+      alert('Gagal mengekspor Excel Native: ' + err.message);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
     <div className={`bg-white rounded-2xl p-6 border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
       <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full ${colorClass} opacity-10`}></div>
@@ -271,6 +348,21 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
 
   return (
     <div className="space-y-6">
+      {!isPrinting && (
+        <div className="flex justify-end mb-4 no-print">
+          <button 
+            onClick={exportNativeExcel} 
+            disabled={isExporting}
+            className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 disabled:opacity-50 text-sm"
+          >
+            {isExporting ? (
+              <span className="flex items-center"><svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyiapkan Excel...</span>
+            ) : (
+              <span className="flex items-center"><Download className="w-4 h-4 mr-2" /> Download Excel Dashboard (Native Charts)</span>
+            )}
+          </button>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard title="Total Responden" value={filteredData.length} subtitle="Partisipan Medis" icon={Users} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
         <StatCard title="Total Institusi FKTP" value={uniqueFktpData.length} subtitle="Unik Berdasarkan Nama FKTP" icon={Building} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
