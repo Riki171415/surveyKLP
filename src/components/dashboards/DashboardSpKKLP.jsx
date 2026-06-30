@@ -36,6 +36,21 @@ const layananDirujukItems = [
   "Gangguan jiwa ringan-sedang", "Penanganan fraktur tertutup sederhana"
 ];
 
+const layananBelumBerjalanItems = [
+  "Manajemen pasien dengan multimorbiditas kompleks",
+  "Home care dengan intervensi medis komprehensif",
+  "Pelayanan paliatif primer/komunitas",
+  "Family conference atau konsultasi keluarga",
+  "Monitoring pasien kronis secara terintegrasi",
+  "Deprescribing atau evaluasi penggunaan obat pada pasien polifarmasi",
+  "Konseling dan tata laksana pasien geriatri frailty",
+  "Edukasi kelompok pasien penyakit kronis (DM, hipertensi, dll.)",
+  "Monitoring komunitas risiko tinggi penyakit kronis",
+  "Koordinasi lintas profesi dan kader kesehatan",
+  "Discharge planning dan tindak lanjut pasien pasca rawat inap",
+  "Koordinasi rujuk balik FKRTL–Puskesmas / Klinik"
+];
+
 export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const [isExporting, setIsExporting] = useState(false);
 
@@ -136,7 +151,7 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
       const belum = row.layanan_belum_berjalan || {};
       Object.keys(belum).forEach(k => {
         if (belum[k]) {
-          const name = k === 'lainnya' ? belum.lainnya : k;
+          const name = k === 'lainnya' ? belum.lainnya : (isNaN(k) ? k : layananBelumBerjalanItems[k]);
           layananBelumCounts[name] = (layananBelumCounts[name] || 0) + 1;
         }
       });
