@@ -1,7 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import ExcelJS from 'exceljs';
-import { saveAs } from 'file-saver';
-import html2canvas from 'html2canvas';
+import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
@@ -217,119 +215,60 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
     { name: 'Tidak Ada Sp.KKLP', value: docStats.spkklpTidak }
   ].filter(d => d.value > 0);
 
-  const exportExcelSpKKLP = async () => {
-    try {
-      setIsExporting(true);
-      const workbook = new ExcelJS.Workbook();
-      workbook.creator = 'Dashboard Survey KKLP';
-      const sheet = workbook.addWorksheet('Peran SpKKLP');
-
-      sheet.columns = [
-        { header: '', key: 'col1', width: 5 },
-        { header: '', key: 'col2', width: 40 },
-        { header: '', key: 'col3', width: 25 },
-        { header: '', key: 'col4', width: 25 },
-      ];
-
-      // Header
-      sheet.mergeCells('B1:D1');
-      sheet.getCell('B1').value = 'DASHBOARD DETAIL PRAKTIK & PERSPEKTIF SP.KKLP';
-      sheet.getCell('B1').font = { size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
-      sheet.getCell('B1').alignment = { vertical: 'middle', horizontal: 'center' };
-      sheet.getCell('B1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
-
-      // Insight Text
-      sheet.mergeCells('B3:D3');
-      sheet.getCell('B3').value = 'INSIGHT & GAP ANALYSIS';
-      sheet.getCell('B3').font = { bold: true };
-      
-      sheet.mergeCells('B4:D7');
-      const cleanText = analysisText.replace(/<[^>]+>/g, '');
-      sheet.getCell('B4').value = cleanText;
-      sheet.getCell('B4').alignment = { wrapText: true, vertical: 'top' };
-
-      // Tabel Ketersediaan Dokter Sp.KKLP
-      sheet.addRow([]);
-      sheet.addRow(['', 'KETERSEDIAAN DOKTER SP.KKLP']);
-      sheet.lastRow.getCell(2).font = { bold: true };
-      sheet.addRow(['', 'Status', 'Jumlah FKTP']);
-      sheet.lastRow.font = { bold: true };
-      docStats.forEach(item => sheet.addRow(['', item.name, item.value]));
-
-      // Tabel Kualifikasi Sp.KKLP
-      sheet.addRow([]);
-      sheet.addRow(['', 'KUALIFIKASI SP.KKLP']);
-      sheet.lastRow.getCell(2).font = { bold: true };
-      sheet.addRow(['', 'Kualifikasi', 'Jumlah']);
-      sheet.lastRow.font = { bold: true };
-      statusData.forEach(item => sheet.addRow(['', item.name, item.value]));
-
-      // Tabel Detail Praktik: Poli Tersendiri
-      sheet.addRow([]);
-      sheet.addRow(['', 'DETAIL PRAKTIK: POLI TERSENDIRI']);
-      sheet.lastRow.getCell(2).font = { bold: true };
-      sheet.addRow(['', 'Memiliki Poli?', 'Jumlah']);
-      sheet.lastRow.font = { bold: true };
-      poliData.forEach(item => sheet.addRow(['', item.name, item.value]));
-
-      // Tabel Detail Praktik: Pembiayaan
-      sheet.addRow([]);
-      sheet.addRow(['', 'DETAIL PRAKTIK: PEMBIAYAAN']);
-      sheet.lastRow.getCell(2).font = { bold: true };
-      sheet.addRow(['', 'Kategori Pembiayaan', 'Jumlah']);
-      sheet.lastRow.font = { bold: true };
-      pembiayaanData.forEach(item => sheet.addRow(['', item.name, item.value]));
-
-      // Tabel Top 5 Layanan Dirujuk
-      sheet.addRow([]);
-      sheet.addRow(['', 'TOP 5 LAYANAN SERING DIRUJUK KE FKRTL']);
-      sheet.lastRow.getCell(2).font = { bold: true };
-      sheet.addRow(['', 'Layanan', 'Jumlah Rujukan']);
-      sheet.lastRow.font = { bold: true };
-      dirujukData.forEach(item => sheet.addRow(['', item.name, item.value]));
-
-      // Tabel Layanan Belum Berjalan
-      sheet.addRow([]);
-      sheet.addRow(['', 'PERSPEKTIF: LAYANAN BELUM BERJALAN']);
-      sheet.lastRow.getCell(2).font = { bold: true };
-      sheet.addRow(['', 'Layanan', 'Jumlah Responden']);
-      sheet.lastRow.font = { bold: true };
-      layananBelumData.forEach(item => sheet.addRow(['', item.name, item.value]));
-
-      // Tabel Pengaruh Penurunan Rujukan
-      sheet.addRow([]);
-      sheet.addRow(['', 'PERSPEKTIF: PENGARUH PENURUNAN RUJUKAN']);
-      sheet.lastRow.getCell(2).font = { bold: true };
-      sheet.addRow(['', 'Skala Pengaruh', 'Jumlah Responden']);
-      sheet.lastRow.font = { bold: true };
-      rujukanData.forEach(item => sheet.addRow(['', item.name, item.value]));
-
-      // Tabel Rata-Rata Skala Relevansi
-      sheet.addRow([]);
-      sheet.addRow(['', 'RATA-RATA SKALA RELEVANSI PERAN SP.KKLP (1-5)']);
-      sheet.lastRow.getCell(2).font = { bold: true };
-      sheet.addRow(['', 'Aspek Relevansi', 'Rata-Rata Nilai']);
-      sheet.lastRow.font = { bold: true };
-      relevansiData.forEach(item => sheet.addRow(['', item.name, item.value]));
-
-      // Tabel Peran Sp.KKLP
-      sheet.addRow([]);
-      sheet.addRow(['', 'PERAN SP.KKLP DALAM OPTIMALISASI']);
-      sheet.lastRow.getCell(2).font = { bold: true };
-      sheet.addRow(['', 'Aspek Peran', 'Rata-Rata Nilai']);
-      sheet.lastRow.font = { bold: true };
-      peranData.forEach(item => sheet.addRow(['', item.name, item.value]));
-
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      saveAs(blob, `Dashboard_SpKKLP_${new Date().getTime()}.xlsx`);
-
-    } catch (err) {
-      console.error(err);
-      alert('Gagal mengekspor Excel: ' + err.message);
-    } finally {
-      setIsExporting(false);
-    }
+  const exportExcelSpKKLP = () => {
+    const tables = [
+      {
+        title: 'KETERSEDIAAN DOKTER SP.KKLP',
+        headers: ['Status', 'Jumlah FKTP'],
+        data: [
+          ['FKTP Ada Sp.KKLP', docStats.spkklpYa],
+          ['Tidak Ada Sp.KKLP', docStats.spkklpTidak],
+          ['Total Dokter Umum', docStats.totalDocUmum],
+          ['Total Dokter Gigi', docStats.totalDocGigi]
+        ]
+      },
+      {
+        title: 'KUALIFIKASI SP.KKLP',
+        headers: ['Kualifikasi', 'Jumlah'],
+        data: statusData.map(d => [d.name, d.value])
+      },
+      {
+        title: 'DETAIL PRAKTIK: POLI TERSENDIRI',
+        headers: ['Memiliki Poli?', 'Jumlah'],
+        data: poliData.map(d => [d.name, d.value])
+      },
+      {
+        title: 'DETAIL PRAKTIK: PEMBIAYAAN',
+        headers: ['Kategori Pembiayaan', 'Jumlah'],
+        data: pembiayaanData.map(d => [d.name, d.value])
+      },
+      {
+        title: 'TOP 5 LAYANAN SERING DIRUJUK KE FKRTL',
+        headers: ['Layanan', 'Jumlah Rujukan'],
+        data: dirujukData.map(d => [d.name, d.value])
+      },
+      {
+        title: 'PERSPEKTIF: LAYANAN BELUM BERJALAN',
+        headers: ['Layanan', 'Jumlah Responden'],
+        data: layananBelumData.map(d => [d.name, d.value])
+      },
+      {
+        title: 'PERSPEKTIF: PENGARUH PENURUNAN RUJUKAN',
+        headers: ['Skala Pengaruh', 'Jumlah Responden'],
+        data: rujukanData.map(d => [d.name, d.value])
+      },
+      {
+        title: 'RATA-RATA SKALA RELEVANSI PERAN SP.KKLP (1-5)',
+        headers: ['Aspek Relevansi', 'Rata-Rata Nilai'],
+        data: relevansiData.map(d => [d.name, d.avgScore])
+      },
+      {
+        title: 'PERAN SP.KKLP DALAM OPTIMALISASI',
+        headers: ['Aspek Peran', 'Rata-Rata Nilai'],
+        data: peranData.map(d => [d.name, d.avgScore])
+      }
+    ];
+    exportTablesToExcel('DETAIL PRAKTIK & PERSPEKTIF SP.KKLP', tables, 'Dashboard_SpKKLP');
   };
 
   const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
