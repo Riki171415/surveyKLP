@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
-import ExportButton from '../ExportButton';
+import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import DeepDiveAIReport from './DeepDiveAIReport';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList, ScatterChart, Scatter, ZAxis 
 } from 'recharts';
-import { Stethoscope, Users, Clock, FileText, CheckCircle, Map, Target, AlertTriangle, TrendingUp, Zap } from 'lucide-react';
+import { Stethoscope, Users, Clock, FileText, CheckCircle, Map, Target, AlertTriangle, TrendingUp, Zap, Download } from 'lucide-react';
 import { normalizeStr, faskesToKabMap } from './DashboardProfil';
 
 export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
@@ -201,8 +201,54 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
     );
   }
 
+  const handleExport = () => {
+    const tables = [
+      {
+        title: 'Statistik DPM',
+        headers: ['Metrik', 'Nilai'],
+        data: [
+          ['Total Responden DPM', dpmStats.totalDpm],
+          ...dpmStats.top3Layanan.map((d, i) => [`Kegiatan Terbanyak ${i+1}`, `${d.name} (${d.value})`])
+        ]
+      },
+      {
+        title: 'Menangani Keluarga yang Sama',
+        headers: ['Kategori', 'Jumlah DPM'],
+        data: keluargaSamaData.filter(d => d.name !== 'Belum Ada Data')
+      },
+      {
+        title: 'Penerapan RM / Family Folder',
+        headers: ['Status', 'Jumlah DPM'],
+        data: rekamMedisData.filter(d => d.name !== 'Belum Ada Data')
+      },
+      {
+        title: 'Lama Praktik DPM',
+        headers: ['Lama Praktik', 'Jumlah DPM'],
+        data: lamaPraktikData
+      },
+      {
+        title: 'Beban Pasien',
+        headers: ['Jumlah Pasien', 'Jumlah DPM'],
+        data: bebanPasienData
+      },
+      {
+        title: 'Luaran Pelayanan yang Diukur',
+        headers: ['Luaran', 'Jumlah DPM'],
+        data: luaranPelayananData
+      }
+    ];
+    exportTablesToExcel('DOKTER PRAKTIK MANDIRI', tables, 'Dashboard_DPM');
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
+      {!isPrinting && (
+        <div className="flex justify-end mb-4 no-print">
+          <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
+            <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
+          </button>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Total Responden DPM" value={dpmStats.totalDpm} icon={Stethoscope} colorClass="bg-blue-500 text-blue-600 bg-blue-100" />
         <StatCard title="Kegiatan Terbanyak 1" value={dpmStats.top3Layanan[0]?.value || 0} subtitle={dpmStats.top3Layanan[0]?.name || '-'} icon={CheckCircle} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
@@ -214,7 +260,6 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Users className="w-5 h-5 mr-2 text-blue-600" /> Menangani Keluarga yang Sama</h3>
-            {!isPrinting && <ExportButton fileName="Menangani Keluarga yang Sama" />}
           </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
@@ -234,7 +279,6 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileText className="w-5 h-5 mr-2 text-indigo-600" /> Penerapan RM / Family Folder</h3>
-            {!isPrinting && <ExportButton fileName="Penerapan RM / Family Folder" />}
           </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>

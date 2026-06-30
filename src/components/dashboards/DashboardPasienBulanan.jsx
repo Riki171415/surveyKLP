@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
-import ExportButton from '../ExportButton';
+import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   Legend, LabelList
 } from 'recharts';
+import { Activity, Users, FileText, BarChart3, Download } from 'lucide-react';
 import { penyakitPasienBulanan } from '../SurveyForm';
-import { Activity, Users, FileText, BarChart3 } from 'lucide-react';
 
 export default function DashboardPasienBulanan({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const { totalPatientsByDisease, averagePatientsByFaskes, generalStats } = useMemo(() => {
@@ -99,8 +99,40 @@ export default function DashboardPasienBulanan({ filteredData, uniqueFktpData, C
     </div>
   );
 
+  const handleExport = () => {
+    const tables = [
+      {
+        title: 'Statistik Data Pasien Bulanan',
+        headers: ['Metrik', 'Nilai'],
+        data: [
+          ['Total Pasien Dilayani (1 Bln)', generalStats.totalPasien],
+          ['Rata-rata Pasien per Faskes', Math.round(generalStats.rataRataTotal)],
+          ['Jumlah FKTP', uniqueFktpData.length]
+        ]
+      },
+      {
+        title: 'Total Akumulasi Kasus per Penyakit',
+        headers: ['Penyakit', 'Total Pasien'],
+        data: totalPatientsByDisease.map(d => [d.name, d.value])
+      },
+      {
+        title: 'Rata-rata Kunjungan per Jenis Faskes',
+        headers: ['Penyakit', 'Rata-rata Puskesmas', 'Rata-rata Klinik', 'Rata-rata DPM'],
+        data: averagePatientsByFaskes.map(d => [d.name, d.Puskesmas, d.Klinik, d['Praktik Mandiri (DPM)']])
+      }
+    ];
+    exportTablesToExcel('DATA PASIEN BULANAN', tables, 'Dashboard_PasienBulanan');
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
+      {!isPrinting && (
+        <div className="flex justify-end mb-4 no-print">
+          <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
+            <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
+          </button>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard title="Total Pasien Dilayani (1 Bln)" value={generalStats.totalPasien} icon={Users} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
         <StatCard title="Rata-rata Pasien per Faskes" value={Math.round(generalStats.rataRataTotal)} subtitle="Beban kerja per FKTP" icon={Activity} colorClass="bg-teal-500 text-teal-600 bg-teal-100" />
@@ -111,7 +143,6 @@ export default function DashboardPasienBulanan({ filteredData, uniqueFktpData, C
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><BarChart3 className="w-5 h-5 mr-2 text-primary-600" /> Total Akumulasi Kasus per Penyakit</h3>
-            {!isPrinting && <ExportButton fileName="Total Akumulasi Kasus per Penyakit" />}
           </div>
           <div className="h-96">
             <ResponsiveContainer width="99%" height="100%">
@@ -131,7 +162,6 @@ export default function DashboardPasienBulanan({ filteredData, uniqueFktpData, C
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-primary-600" /> Rata-rata Kunjungan per Jenis Faskes</h3>
-            {!isPrinting && <ExportButton fileName="Rata-rata Kunjungan per Jenis Faskes" />}
           </div>
           <p className="text-xs text-slate-400 mb-4">Perbandingan rata-rata pasien yang dilayani di Puskesmas, Klinik, dan DPM dalam 1 bulan terakhir.</p>
           <div className="h-96">

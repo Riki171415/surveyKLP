@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import ExportButton from '../ExportButton';
+import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
 } from 'recharts';
-import { Activity, Users, Clock, AlertTriangle, FileText } from 'lucide-react';
+import { Activity, Users, Clock, AlertTriangle, FileText, Download } from 'lucide-react';
 
 export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
   const { prbStats, diagnosisData, mekanismeData, kepatuhanRate } = useMemo(() => {
@@ -112,8 +112,49 @@ export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
     );
   };
 
+  const handleExport = () => {
+    const tables = [
+      {
+        title: 'Statistik Program Rujuk Balik (PRB)',
+        headers: ['Metrik', 'Nilai'],
+        data: [
+          ['Total Peserta PRB Aktif', prbStats.totalJumlah],
+          ['Peserta Rutin Berkunjung', prbStats.totalRutin],
+          ['Peserta Tidak Berkunjung', prbStats.totalTidakBerkunjung],
+          ['Rata-rata Rujukan FKRTL', prbStats.avgRujukan]
+        ]
+      },
+      {
+        title: 'Kepatuhan PRB',
+        headers: ['Kategori', 'Persentase'],
+        data: [
+          ['Peserta Rutin Berkunjung', `${kepatuhanRate.toFixed(2)}%`],
+          ['Peserta Tidak Berkunjung', `${(prbStats.totalJumlah > 0 ? (prbStats.totalTidakBerkunjung / prbStats.totalJumlah) * 100 : 0).toFixed(2)}%`]
+        ]
+      },
+      {
+        title: 'Distribusi Diagnosis PRB',
+        headers: ['Diagnosis', 'Jumlah FKTP'],
+        data: diagnosisData
+      },
+      {
+        title: 'Mekanisme Pemantauan PRB',
+        headers: ['Mekanisme', 'Jumlah FKTP'],
+        data: mekanismeData
+      }
+    ];
+    exportTablesToExcel('PROGRAM RUJUK BALIK (PRB)', tables, 'Dashboard_PRB');
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
+      {!isPrinting && (
+        <div className="flex justify-end mb-4 no-print">
+          <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
+            <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
+          </button>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Total Peserta PRB Aktif" value={prbStats.totalJumlah} subtitle={`Rata-rata: ${prbStats.avgJumlah} per FKTP`} icon={Users} colorClass="bg-blue-500 text-blue-600 bg-blue-100" />
         <StatCard title="Peserta Rutin Berkunjung" value={prbStats.totalRutin} subtitle={`Rata-rata: ${prbStats.avgRutin} per FKTP (dalam 3 bln)`} icon={Activity} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
@@ -125,7 +166,6 @@ export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-primary-600" /> Kepatuhan PRB</h3>
-            {!isPrinting && <ExportButton fileName="Kepatuhan PRB" />}
           </div>
           <div className="grid grid-cols-2 gap-4 mt-8">
             <GaugeChart value={kepatuhanRate} label="Proporsi Peserta Rutin (Kepatuhan)" color="#10b981" />
@@ -136,7 +176,6 @@ export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileText className="w-5 h-5 mr-2 text-primary-600" /> Distribusi Diagnosis PRB</h3>
-            {!isPrinting && <ExportButton fileName="Distribusi Diagnosis PRB" />}
           </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
@@ -154,7 +193,6 @@ export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Clock className="w-5 h-5 mr-2 text-primary-600" /> Mekanisme Pemantauan PRB di FKTP</h3>
-            {!isPrinting && <ExportButton fileName="Mekanisme Pemantauan PRB di FKTP" />}
           </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>

@@ -69,68 +69,47 @@ export default function KokpitKemenkes() {
         return;
       }
       setIsExportingKokpit(true);
-
-      const templatePath = import.meta.env.VITE_USE_LOCAL_API === 'true'
-        ? '/templates/kokpit_template.xlsx'
-        : '/templates/kokpit_template.xlsx';
       
-      const response = await fetch(templatePath);
-      if (!response.ok) throw new Error(`Gagal mengambil template (${response.status})`);
-      const arrayBuffer = await response.arrayBuffer();
+      const { exportTablesToExcel } = await import('../utils/exportExcelUtils');
 
-      const workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
-
-      // 1. Ringkasan Kesiapan
-      const s1 = workbook.sheet('Ringkasan Kesiapan');
-      if (s1) {
-        s1.cell('B4').value(metrics.indeksKesiapan);
-        s1.cell('B5').value(Number(metrics.radarData.reduce((acc, curr) => acc + curr.Kapus, 0) / (metrics.radarData.length||1)).toFixed(2));
-        
-        const provData = metrics.provArray;
-        for (let i = 0; i < 35; i++) {
-          if (provData[i]) {
-            s1.cell(`A${10 + i}`).value(provData[i].nama);
-            s1.cell(`B${10 + i}`).value(provData[i].indeks);
-          } else {
-            s1.cell(`A${10 + i}`).value('');
-            s1.cell(`B${10 + i}`).value('');
-          }
+      const tables = [
+        {
+          title: 'Ringkasan Kesiapan',
+          headers: ['Metrik', 'Nilai'],
+          data: [
+            ['Indeks Kesiapan Sp.KKLP Nasional', metrics.indeksKesiapan],
+            ['Rata-Rata Harapan Kepala Puskesmas', Number(metrics.radarData.reduce((a,c) => a + c.Kapus, 0) / (metrics.radarData.length || 1)).toFixed(2)],
+            ['Ketersediaan Sp.KKLP Nasional', `${Math.round(metrics.spkklpRatio)}%`],
+            ['Rekomendasi Utama', 'Akselerasi di provinsi merah & Integrasi layanan baru ke JKN']
+          ]
+        },
+        {
+          title: 'Peta Kesiapan per Provinsi',
+          headers: ['Provinsi', 'Indeks Kesiapan (0-5)'],
+          data: metrics.provArray.map(p => [p.nama, p.indeks])
+        },
+        {
+          title: 'Persepsi Peran Sp.KKLP (Radar Analysis)',
+          headers: ['Aspek Peran', 'Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP'],
+          data: metrics.radarData.map(r => [r.subject, r.Kapus, r.Umum, r.Spkklp])
+        },
+        {
+          title: 'Evaluasi Manfaat JKN Saat Ini',
+          headers: ['Aspek Pelayanan JKN', 'Skor Rata-Rata'],
+          data: metrics.jknData.map(j => [j.name, j.value])
+        },
+        {
+          title: 'Urgensi Layanan Prioritas Baru (Non-Kapitasi)',
+          headers: ['Layanan', 'Skor Rata-Rata'],
+          data: metrics.usulanData.map(u => [u.name, u.value])
         }
-      }
+      ];
 
-      // 2. Relevansi SpKKLP
-      const s2 = workbook.sheet('Relevansi Lintas Profesi');
-      if (s2) {
-        metrics.radarData.forEach((item, i) => {
-          s2.cell(`A${5 + i}`).value(relevansiItems[i]);
-          s2.cell(`B${5 + i}`).value(item.Kapus);
-          s2.cell(`C${5 + i}`).value(item.DUmum);
-          s2.cell(`D${5 + i}`).value(item.SpKKLP);
-        });
-      }
+      await exportTablesToExcel('KOKPIT EKSEKUTIF KEMENKES', tables, 'Kokpit_Kemenkes');
 
-      // 3. Peta Jalan JKN vs Prioritas Baru
-      const s3 = workbook.sheet('Usulan JKN');
-      if (s3) {
-        metrics.manfaatData.forEach((item, i) => {
-          s3.cell(`A${5 + i}`).value(item.name);
-          s3.cell(`B${5 + i}`).value(item.JKN);
-          s3.cell(`C${5 + i}`).value(item.Usulan);
-        });
-      }
-
-      const outBuffer = await workbook.outputAsync();
-      const blob = new Blob([outBuffer], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-      
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Kokpit_Kemenkes_Native_${new Date().getTime()}.xlsx`;
-      a.click();
-      window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Failed to export kokpit excel:', err);
-      alert('Gagal mengekspor Excel Native Kokpit: ' + err.message);
+      console.error(err);
+      alert('Gagal mengekspor Excel: ' + err.message);
     } finally {
       setIsExportingKokpit(false);
     }

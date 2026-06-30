@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import ExportButton from '../ExportButton';
+import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
 } from 'recharts';
-import { Activity, ShieldAlert, CheckCircle, TrendingDown } from 'lucide-react';
+import { Activity, ShieldAlert, CheckCircle, TrendingDown, Download } from 'lucide-react';
 
 const nonOptimalServices = [
   "Pelayanan lifestyle medicine", "Pelayanan wellness dan healthy aging",
@@ -94,8 +94,41 @@ export default function DashboardNonOptimal({ filteredData, COLORS, isPrinting }
     </div>
   );
 
+  const handleExport = () => {
+    const tables = [
+      {
+        title: 'Statistik Layanan Non-Optimal',
+        headers: ['Metrik', 'Nilai'],
+        data: [
+          ['Total Layanan Teridentifikasi', nonOptStats.totalIdentified],
+          ['Diusulkan Masuk JKN', jknData.find(d => d.name === 'Diusulkan Masuk JKN')?.value || 0]
+        ]
+      },
+      {
+        title: 'Proporsi Usulan Masuk JKN',
+        headers: ['Kategori', 'Jumlah Usulan'],
+        data: jknData
+      },
+      {
+        title: 'Distribusi Skala Hambatan Pelaksanaan (1-4)',
+        headers: ['Layanan', 'Skala 1 (Sangat Kurang)', 'Skala 2 (Kurang)', 'Skala 3 (Cukup)', 'Skala 4 (Sangat Baik)', 'Total'],
+        data: hambatanData.map(h => [
+          h.name, h['Skala 1 (Sangat Kurang)'], h['Skala 2 (Kurang)'], h['Skala 3 (Cukup)'], h['Skala 4 (Sangat Baik)'], h.total
+        ])
+      }
+    ];
+    exportTablesToExcel('LAYANAN NON-OPTIMAL', tables, 'Dashboard_NonOptimal');
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
+      {!isPrinting && (
+        <div className="flex justify-end mb-4 no-print">
+          <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
+            <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
+          </button>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Total Layanan Teridentifikasi" value={nonOptStats.totalIdentified} subtitle="Respon layanan non-optimal" icon={Activity} colorClass="bg-rose-500 text-rose-600 bg-rose-100" />
         <StatCard title="Top 1 Layanan Non-Optimal" value={nonOptStats.top3[0]?.identifiedCount || 0} subtitle={nonOptStats.top3[0]?.name || '-'} icon={TrendingDown} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
@@ -107,7 +140,6 @@ export default function DashboardNonOptimal({ filteredData, COLORS, isPrinting }
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><CheckCircle className="w-5 h-5 mr-2 text-rose-600" /> Proporsi Usulan Masuk JKN</h3>
-            {!isPrinting && <ExportButton fileName="Proporsi Usulan Masuk JKN" />}
           </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
@@ -126,7 +158,6 @@ export default function DashboardNonOptimal({ filteredData, COLORS, isPrinting }
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><TrendingDown className="w-5 h-5 mr-2 text-rose-600" /> Distribusi Skala Hambatan Pelaksanaan (1-4)</h3>
-            {!isPrinting && <ExportButton fileName="Distribusi Skala Hambatan Pelaksanaan (1-4)" />}
           </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>

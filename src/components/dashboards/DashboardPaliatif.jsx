@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import ExportButton from '../ExportButton';
+import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LabelList, Legend
 } from 'recharts';
-import { HeartPulse, Users, CheckCircle, Heart, Stethoscope, CheckCircle2 } from 'lucide-react';
+import { HeartPulse, Users, CheckCircle, Heart, Stethoscope, CheckCircle2, Download } from 'lucide-react';
 
 export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const { palStats, kondisiData, tujuanData, kepatuhanData } = useMemo(() => {
@@ -80,8 +80,45 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
     </div>
   );
 
+  const handleExport = () => {
+    const tables = [
+      {
+        title: 'Statistik Utama Pelayanan Paliatif',
+        headers: ['Metrik', 'Nilai'],
+        data: [
+          ['FKTP Memberikan Paliatif', `${palStats.fktpWithPaliatif} (${palStats.proporsiPaliatif.toFixed(2)}%)`],
+          ['Tingkat Kolaborasi Nakes Lain', `${palStats.proporsiKolaborasi.toFixed(2)}%`],
+          ['Proporsi Pelaporan Perbaikan Kualitas Hidup', `${palStats.proporsiPerbaikan.toFixed(2)}%`]
+        ]
+      },
+      {
+        title: 'Tujuan Utama Pelayanan Paliatif',
+        headers: ['Tujuan Pelayanan', 'Jumlah FKTP'],
+        data: tujuanData
+      },
+      {
+        title: 'Kondisi Pasien Paliatif',
+        headers: ['Kondisi Pasien', 'Jumlah FKTP'],
+        data: kondisiData
+      },
+      {
+        title: 'Tingkat Kepatuhan Pasien/Keluarga',
+        headers: ['Tingkat Kepatuhan', 'Jumlah FKTP'],
+        data: kepatuhanData
+      }
+    ];
+    exportTablesToExcel('PELAYANAN PALIATIF', tables, 'Dashboard_Paliatif');
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
+      {!isPrinting && (
+        <div className="flex justify-end mb-4 no-print">
+          <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
+            <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
+          </button>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="FKTP Memberikan Paliatif" value={`${palStats.fktpWithPaliatif} FKTP`} subtitle={`${palStats.proporsiPaliatif.toFixed(1)}% dari total FKTP`} icon={HeartPulse} colorClass="bg-purple-500 text-purple-600 bg-purple-100" />
         <StatCard title="Tingkat Kolaborasi" value={`${palStats.proporsiKolaborasi.toFixed(1)}%`} subtitle="FKTP yang berkolaborasi dengan nakes lain" icon={Users} colorClass="bg-indigo-500 text-indigo-600 bg-indigo-100" />
@@ -92,7 +129,6 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-purple-600" /> Tujuan Utama Pelayanan Paliatif</h3>
-            {!isPrinting && <ExportButton fileName="Tujuan Utama Pelayanan Paliatif" />}
           </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
@@ -112,7 +148,6 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Heart className="w-5 h-5 mr-2 text-purple-600" /> Kondisi Pasien Paliatif</h3>
-            {!isPrinting && <ExportButton fileName="Kondisi Pasien Paliatif" />}
           </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
@@ -130,7 +165,6 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><CheckCircle className="w-5 h-5 mr-2 text-purple-600" /> Tingkat Kepatuhan Pasien/Keluarga</h3>
-            {!isPrinting && <ExportButton fileName="Tingkat Kepatuhan Pasien/Keluarga" />}
           </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>

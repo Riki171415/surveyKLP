@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X, Lightbulb, Target, Copy } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X, Lightbulb, Target, Copy, Download } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
+import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 
 export default function DashboardKeluhanSentences({ filteredData, isPrinting }) {
   const [expandedCategory, setExpandedCategory] = useState(null);
@@ -492,8 +493,31 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
     );
   }
 
+  const handleExport = () => {
+    const tables = [
+      {
+        title: 'Analisis Keluhan Berdasarkan Kategori',
+        headers: ['Kategori Keluhan', 'Jumlah Responden (FKTP)', 'Persentase'],
+        data: chartData.map(d => [d.name, d.value, `${d.percent}%`])
+      },
+      {
+        title: 'Analisis Sentimen Otomatis AI (Top Clusters)',
+        headers: ['Topik Keluhan / Isu', 'Jumlah Responden', 'Persentase'],
+        data: autoClusters.map(c => [c.name, c.value, `${c.percent}%`])
+      }
+    ];
+    exportTablesToExcel('ANALISIS KELUHAN & SENTIMEN', tables, 'Dashboard_Keluhan');
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
+      {!isPrinting && (
+        <div className="flex justify-end mb-4 no-print">
+          <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
+            <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
+          </button>
+        </div>
+      )}
       {renderSummarySection(chartData, totalRespondents, false)}
       
       <div className="bg-white p-8 rounded-2xl border border-rose-100 shadow-sm relative overflow-hidden">
