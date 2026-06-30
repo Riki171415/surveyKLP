@@ -389,6 +389,41 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
           </div>
         )}
 
+        {/* Diagnosis & Tindakan */}
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-rose-500" /> Top 10 Diagnosis Sp.KKLP</h3>
+          <div className="h-72">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <BarChart data={diagData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={120} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} Kasus`, 'Frekuensi']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="value" name="Frekuensi" fill="#f43f5e" radius={[0, 6, 6, 0]} barSize={24}>
+                  <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><HeartPulse className="w-5 h-5 mr-2 text-indigo-500" /> Top 10 Tindakan/Prosedur</h3>
+          <div className="h-72">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <BarChart data={tindData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={120} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} Tindakan`, 'Frekuensi']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="value" name="Frekuensi" fill="#6366f1" radius={[0, 6, 6, 0]} barSize={24}>
+                  <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
         {/* Dirujuk */}
         <div id="chart-dirujuk" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileSearch className="w-5 h-5 mr-2 text-amber-600" /> Top 5 Layanan Sering Dirujuk ke FKRTL</h3>
