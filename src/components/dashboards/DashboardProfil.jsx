@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import wilayahMapping from '../../data/wilayahMapping.json';
 import ExportButton from '../ExportButton';
-import XlsxPopulate from 'xlsx-populate';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import html2canvas from 'html2canvas';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList
@@ -259,69 +261,126 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
     try {
       setIsExporting(true);
       
-      const response = await fetch('/templates/dashboard_template.xlsx');
-      if (!response.ok) throw new Error('File template gagal dimuat (HTTP ' + response.status + ')');
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Dashboard Survey KKLP';
+      workbook.created = new Date();
       
-      const arrayBuffer = await response.arrayBuffer();
-
-      const workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
-      const sheetData = workbook.sheet('Data_Profil');
-
-      if (!sheetData) throw new Error('Sheet "Data_Profil" tidak ditemukan di template.');
-
-      // 1. Proporsi Responden per FKTP
-      sheetData.cell('B2').value(0);
-      sheetData.cell('B3').value(0);
-      sheetData.cell('B4').value(0);
-      fktpTypeData.forEach((item) => {
-         if (item.name === 'Puskesmas') sheetData.cell('B2').value(item.value);
-         if (item.name === 'Klinik') sheetData.cell('B3').value(item.value);
-         if (item.name === 'Dokter Praktik Mandiri') sheetData.cell('B4').value(item.value);
-      });
-
-      // 2. Proporsi FKTP Unik
-      sheetData.cell('E2').value(0);
-      sheetData.cell('E3').value(0);
-      sheetData.cell('E4').value(0);
-      uniqueFktpTypeData.forEach((item) => {
-         if (item.name === 'Puskesmas') sheetData.cell('E2').value(item.value);
-         if (item.name === 'Klinik') sheetData.cell('E3').value(item.value);
-         if (item.name === 'Dokter Praktik Mandiri') sheetData.cell('E4').value(item.value);
-      });
-
-      // 3. Proporsi Jabatan Responden
-      for (let i = 2; i <= 15; i++) {
-          sheetData.cell(`G${i}`).value('');
-          sheetData.cell(`H${i}`).value('');
-      }
-      roleChartData.forEach((item, index) => {
-          if (index < 14) {
-             sheetData.cell(`G${index+2}`).value(item.name);
-             sheetData.cell(`H${index+2}`).value(item.value);
-          }
-      });
-
-      // 4. 10 Provinsi Terbanyak
-      for (let i = 2; i <= 11; i++) {
-          sheetData.cell(`J${i}`).value('');
-          sheetData.cell(`K${i}`).value('');
-      }
-      regionalData.forEach((item, index) => {
-          if (index < 10) {
-             sheetData.cell(`J${index+2}`).value(item.name);
-             sheetData.cell(`K${index+2}`).value(item.value);
-          }
-      });
-
-      const outBuffer = await workbook.outputAsync();
-      const blob = new Blob([outBuffer], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      const sheet = workbook.addWorksheet('Dashboard Profil');
       
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Dashboard_Profil_Native_${new Date().getTime()}.xlsx`;
-      a.click();
-      window.URL.revokeObjectURL(url);
+      // Setup Columns
+      sheet.columns = [
+        { header: '', key: 'no', width: 5 },
+        { header: '', key: 'col1', width: 35 },
+        { header: '', key: 'col2', width: 15 },
+        { header: '', key: 'col3', width: 15 },
+        { header: '', key: 'col4', width: 20 },
+      ];
+
+      // Title
+      sheet.mergeCells('A1:E1');
+      const titleCell = sheet.getCell('A1');
+      titleCell.value = 'DASHBOARD PROFIL & TARGET CAPAIAN';
+      titleCell.font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+      titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+      titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0ea5e9' } };
+
+      sheet.addRow([]);
+      
+      // Ringkasan Data
+      sheet.mergeCells('A3:E3');
+      const sumTitle = sheet.getCell('A3');
+      sumTitle.value = 'RINGKASAN DATA';
+      sumTitle.font = { bold: true, size: 12 };
+      
+      sheet.addRow(['', 'Total Responden', filteredData.length]);
+      sheet.addRow(['', 'Total Institusi FKTP', uniqueFktpData.length]);
+      sheet.addRow(['', 'Provinsi Terjangkau', new Set(uniqueFktpData.map(d => d.provinsi).filter(Boolean)).size]);
+      sheet.addRow(['', 'FKTP dengan Sp.KKLP', spkklpCount || 0]);
+      
+      sheet.addRow([]);
+
+      // Data Distribusi Faskes
+      sheet.mergeCells('A9:E9');
+      sheet.getCell('A9').value = 'DISTRIBUSI JENIS FASKES (Unik)';
+      sheet.getCell('A9').font = { bold: true, size: 12 };
+      uniqueFktpTypeData.forEach(item => {
+        sheet.addRow(['', item.name, item.value]);
+      });
+
+      sheet.addRow([]);
+
+      let currentRow = sheet.rowCount + 2;
+
+      // Charts (Capture images)
+      const chartIds = [
+        { id: 'chart-fktp-type', title: 'Proporsi Responden per FKTP' },
+        { id: 'chart-unique-fktp', title: 'Proporsi FKTP Unik' },
+        { id: 'chart-role', title: 'Proporsi Jabatan Responden' },
+        { id: 'chart-regional', title: '10 Provinsi Terbanyak' }
+      ];
+
+      for (const chart of chartIds) {
+        const element = document.getElementById(chart.id);
+        if (element) {
+          const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
+          const imgData = canvas.toDataURL('image/png');
+          const imageId = workbook.addImage({ base64: imgData, extension: 'png' });
+          
+          sheet.getCell(`B${currentRow}`).value = chart.title;
+          sheet.getCell(`B${currentRow}`).font = { bold: true };
+          
+          sheet.addImage(imageId, {
+            tl: { col: 1, row: currentRow },
+            ext: { width: 500, height: 350 }
+          });
+          currentRow += 20; // reserve rows for image
+        }
+      }
+
+      sheet.addRow([]);
+      currentRow = sheet.rowCount + 2;
+
+      // Target vs Capaian Table
+      sheet.mergeCells(`A${currentRow}:E${currentRow}`);
+      const tableTitle = sheet.getCell(`A${currentRow}`);
+      tableTitle.value = 'TARGET VS CAPAIAN PARTISIPASI PER PROVINSI';
+      tableTitle.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      tableTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0ea5e9' } };
+      tableTitle.alignment = { vertical: 'middle', horizontal: 'center' };
+      
+      currentRow++;
+      // Write Header Row for Table
+      const headerRow = sheet.getRow(currentRow);
+      headerRow.values = ['No', 'Provinsi', 'Target', 'Capaian', 'Persentase (%)'];
+      headerRow.font = { bold: true, color: { argb: 'FF334155' } };
+      headerRow.eachCell(cell => {
+         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
+         cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+         cell.alignment = { horizontal: 'center' };
+      });
+
+      currentRow++;
+      
+      partisipasiData.forEach((row, idx) => {
+        const dataRow = sheet.getRow(currentRow);
+        dataRow.values = [idx + 1, row.provinsi, row.target, row.capaian, row.persentase / 100];
+        
+        dataRow.getCell(5).numFmt = '0.00%';
+        dataRow.getCell(1).alignment = { horizontal: 'center' };
+        dataRow.getCell(3).alignment = { horizontal: 'center' };
+        dataRow.getCell(4).alignment = { horizontal: 'center' };
+        dataRow.getCell(5).alignment = { horizontal: 'center' };
+        
+        dataRow.eachCell(cell => {
+           cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+        });
+        currentRow++;
+      });
+      
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, `Dashboard_Profil_${new Date().getTime()}.xlsx`);
+      
     } catch (err) {
       console.error('Failed to export native excel:', err);
       alert('Gagal mengekspor Excel Native: ' + err.message);
@@ -387,7 +446,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Building className="w-5 h-5 mr-2 text-primary-600" /> Proporsi Responden per FKTP</h3>
             {!isPrinting && <ExportButton fileName="Proporsi Responden per FKTP" />}
           </div>
-          <div className="flex-1 min-h-[300px]">
+          <div id="chart-fktp-type" className="flex-1 min-h-[300px]">
             <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <PieChart>
                 <Pie data={fktpTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
@@ -405,7 +464,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Building className="w-5 h-5 mr-2 text-indigo-600" /> Proporsi FKTP Unik</h3>
             {!isPrinting && <ExportButton fileName="Proporsi FKTP Unik" />}
           </div>
-          <div className="flex-1 min-h-[300px]">
+          <div id="chart-unique-fktp" className="flex-1 min-h-[300px]">
             <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <PieChart>
                 <Pie data={uniqueFktpTypeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
@@ -423,7 +482,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Users className="w-5 h-5 mr-2 text-primary-600" /> Proporsi Jabatan Responden</h3>
             {!isPrinting && <ExportButton fileName="Proporsi Jabatan Responden" />}
           </div>
-          <div className="flex-1 min-h-[300px]">
+          <div id="chart-role" className="flex-1 min-h-[300px]">
             <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <PieChart>
                 <Pie data={roleChartData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
@@ -441,7 +500,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Map className="w-5 h-5 mr-2 text-primary-600" /> 10 Provinsi Terbanyak</h3>
             {!isPrinting && <ExportButton fileName="10 Provinsi Terbanyak" />}
           </div>
-          <div className="flex-1 min-h-[350px]">
+          <div id="chart-regional" className="flex-1 min-h-[350px]">
             <ResponsiveContainer width="100%" height="100%" minHeight={350}>
               <BarChart data={regionalData} margin={{ top: 20, right: 30, left: 0, bottom: 50 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />

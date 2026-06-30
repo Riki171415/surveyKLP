@@ -1,10 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import ExportButton from '../ExportButton';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import html2canvas from 'html2canvas';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
 } from 'recharts';
-import { Stethoscope, Award, FileSearch, CheckCircle, Activity, HeartPulse } from 'lucide-react';
+import { Stethoscope, Award, FileSearch, CheckCircle, Activity, HeartPulse, Building, ArrowDownCircle, AlertCircle } from 'lucide-react';
 
 const relevansiItems = [
   "Pengelolaan Multimorbiditas",
@@ -20,6 +23,13 @@ const relevansiItems = [
   "Pengelolaan Geriatri"
 ];
 
+const peranSpkklpItems = [
+  "Skrining komprehensif penyakit kronis",
+  "Kolaborasi dengan dokter spesialis lain",
+  "Optimalisasi rujukan",
+  "Pemantauan pengobatan jangka panjang"
+];
+
 const layananDirujukItems = [
   "Kasus PTM tanpa komplikasi (DM, Hipertensi)", "Penanganan luka diabetes berat", 
   "Tindakan bedah minor", "Pelayanan paliatif akhir hayat", 
@@ -27,7 +37,13 @@ const layananDirujukItems = [
 ];
 
 export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
-  const { docStats, statusData, obatKhususData, relevansiData, dirujukData, topRelevansi, diagData, tindData, analysisText } = useMemo(() => {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const { 
+    docStats, statusData, obatKhususData, relevansiData, dirujukData, 
+    topRelevansi, diagData, tindData, analysisText,
+    poliData, pembiayaanData, peranData, layananBelumData, rujukanData
+  } = useMemo(() => {
     let spkklpYa = 0;
     let spkklpTidak = 0;
     let totalDocUmum = 0;
@@ -37,6 +53,8 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
     const diagnosisCounts = {};
     const tindakanCounts = {};
     const obatKhususCounts = {};
+    const hasPoliCounts = { 'Ya': 0, 'Tidak': 0 };
+    const pembiayaanCounts = {};
 
     const extractTags = (text) => {
       if (!text) return [];
@@ -54,9 +72,11 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
       totalDocGigi += Number(row.doc_gigi) || 0;
 
       const p = row.spkklp_poli || {};
+      if (p.hasPoli) hasPoliCounts[p.hasPoli] = (hasPoliCounts[p.hasPoli] || 0) + 1;
       if (p.hasPoli === 'Ya') {
         if (p.diagnosis) extractTags(p.diagnosis).forEach(t => diagnosisCounts[t] = (diagnosisCounts[t] || 0) + 1);
         if (p.tindakan) extractTags(p.tindakan).forEach(t => tindakanCounts[t] = (tindakanCounts[t] || 0) + 1);
+        if (p.pembiayaan) pembiayaanCounts[p.pembiayaan] = (pembiayaanCounts[p.pembiayaan] || 0) + 1;
       }
       if (row.spkklp_obat_khusus) {
         extractTags(row.spkklp_obat_khusus).forEach(t => obatKhususCounts[t] = (obatKhususCounts[t] || 0) + 1);
@@ -64,7 +84,10 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
     });
 
     const relScores = relevansiItems.map(r => ({ name: r, totalScore: 0, count: 0 }));
+    const peranScores = peranSpkklpItems.map(r => ({ name: r, totalScore: 0, count: 0 }));
     const dirujukCounts = {};
+    const layananBelumCounts = {};
+    const rujukanCounts = {};
 
     filteredData.forEach(row => {
       const rel = row.relevansi_spkklp || {};
@@ -72,6 +95,14 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
         if (rel[idx]) {
           relScores[idx].totalScore += Number(rel[idx]);
           relScores[idx].count++;
+        }
+      });
+
+      const prn = row.peran_spkklp || {};
+      peranSpkklpItems.forEach((_, idx) => {
+        if (prn[idx]) {
+          peranScores[idx].totalScore += Number(prn[idx]);
+          peranScores[idx].count++;
         }
       });
 
@@ -83,9 +114,26 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
           dirujukCounts[name] = (dirujukCounts[name] || 0) + 1;
         }
       });
+
+      if (rjk.pengaruhPenurunanRujukan) {
+        rujukanCounts[rjk.pengaruhPenurunanRujukan] = (rujukanCounts[rjk.pengaruhPenurunanRujukan] || 0) + 1;
+      }
+
+      const belum = row.layanan_belum_berjalan || {};
+      Object.keys(belum).forEach(k => {
+        if (belum[k]) {
+          const name = k === 'lainnya' ? belum.lainnya : k;
+          layananBelumCounts[name] = (layananBelumCounts[name] || 0) + 1;
+        }
+      });
     });
 
     const relData = relScores.map(s => ({
+      name: s.name,
+      avgScore: s.count > 0 ? Number((s.totalScore / s.count).toFixed(2)) : 0
+    })).sort((a,b) => b.avgScore - a.avgScore);
+
+    const peranData = peranScores.map(s => ({
       name: s.name,
       avgScore: s.count > 0 ? Number((s.totalScore / s.count).toFixed(2)) : 0
     })).sort((a,b) => b.avgScore - a.avgScore);
@@ -95,19 +143,28 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
       value: dirujukCounts[k]
     })).filter(d => isNaN(d.name) && d.name !== 'undefined').sort((a,b) => b.value - a.value).slice(0, 5);
 
+    const belumData = Object.keys(layananBelumCounts).map(k => ({ name: k, value: layananBelumCounts[k] })).sort((a,b) => b.value - a.value).slice(0, 5);
+
     const diagData = Object.keys(diagnosisCounts).map(k => ({ name: k, value: diagnosisCounts[k] }))
       .sort((a,b) => b.value - a.value).slice(0, 10);
 
     const tindData = Object.keys(tindakanCounts).map(k => ({ name: k, value: tindakanCounts[k] }))
       .sort((a,b) => b.value - a.value).slice(0, 10);
 
+    const poliData = Object.keys(hasPoliCounts).map(k => ({ name: k, value: hasPoliCounts[k] })).filter(d => d.value > 0);
+    const pembiayaanData = Object.keys(pembiayaanCounts).map(k => ({ name: k, value: pembiayaanCounts[k] })).sort((a,b) => b.value - a.value);
+    
+    const rujukanMap = { '1': 'Sangat Tidak Setuju', '2': 'Tidak Setuju', '3': 'Setuju', '4': 'Sangat Setuju' };
+    const rujukanDataMapped = Object.keys(rujukanCounts).map(k => ({ name: rujukanMap[k] || k, value: rujukanCounts[k] })).sort((a,b) => b.value - a.value);
+
     let analysisText = "Belum ada data diagnosis atau tindakan yang diinput oleh responden.";
-    if (diagData.length > 0 && tindData.length > 0) {
-      analysisText = `Berdasarkan data input terbaru, diagnosis utama yang paling banyak dilaporkan oleh responden adalah **${diagData[0].name}** (ditemukan di ${diagData[0].value} FKTP)${diagData[1] ? ` dan **${diagData[1].name}** (${diagData[1].value} FKTP)` : ''}. ` + 
-      `Sementara itu, prosedur atau tindakan medis yang paling sering dilakukan adalah **${tindData[0].name}** (${tindData[0].value} pelaporan). ` +
-      `Data ini memberikan gambaran langsung mengenai pola morbiditas dan tindakan klinis aktual yang paling sering ditangani di tingkat primer.`;
-    } else if (diagData.length > 0) {
-      analysisText = `Diagnosis utama yang paling banyak dilaporkan adalah **${diagData[0].name}** (ditemukan di ${diagData[0].value} FKTP).`;
+    if (diagData.length > 0 && rjkData.length > 0) {
+      analysisText = `<span class="text-indigo-700 font-bold">🎯 Analisis Kesenjangan (Gap Analysis) & Rekomendasi:</span><br/><br/>
+      Berdasarkan data input terbaru, layanan yang paling sering dirujuk ke FKRTL adalah <span class="font-bold">${rjkData[0].name}</span> (${rjkData[0].value} FKTP). 
+      Namun di sisi lain, relevansi peran Sp.KKLP tertinggi tercatat pada <span class="font-bold">${relData[0].name}</span>. <br/><br/>
+      <span class="text-indigo-700 font-bold">💡 Insight Strategis:</span><br/>
+      Hal ini menunjukkan adanya <span class="font-bold text-rose-600">peluang besar</span> bagi Sp.KKLP untuk memotong mata rantai rujukan pada kasus ${rjkData[0].name}. 
+      Penguatan fasilitas dan penempatan Sp.KKLP di ${spkklpTidak} FKTP yang saat ini belum memilikinya dapat secara signifikan menurunkan beban rujukan FKRTL dan mengoptimalkan penanganan di tingkat primer.`;
     }
 
     const statusData = Object.keys(statusCounts).map(k => ({
@@ -121,24 +178,92 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
     })).sort((a,b) => b.value - a.value).slice(0, 5);
 
     return {
-      docStats: {
-        spkklpYa, spkklpTidak, totalDocUmum, totalDocGigi
-      },
-      statusData,
-      obatKhususData,
-      relevansiData: relData,
-      dirujukData: rjkData,
-      diagData,
-      tindData,
-      analysisText,
-      topRelevansi: relData.slice(0, 3)
+      docStats: { spkklpYa, spkklpTidak, totalDocUmum, totalDocGigi },
+      statusData, obatKhususData, relevansiData, dirujukData, diagData, tindData, analysisText,
+      topRelevansi: relData.slice(0, 3), poliData, pembiayaanData, peranData, layananBelumData: belumData, rujukanData: rujukanDataMapped
     };
-  }, [filteredData]);
+  }, [filteredData, uniqueFktpData]);
 
   const docPieData = [
     { name: 'FKTP Ada Sp.KKLP', value: docStats.spkklpYa },
     { name: 'Tidak Ada Sp.KKLP', value: docStats.spkklpTidak }
   ].filter(d => d.value > 0);
+
+  const exportExcelSpKKLP = async () => {
+    try {
+      setIsExporting(true);
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Dashboard Survey KKLP';
+      const sheet = workbook.addWorksheet('Peran SpKKLP');
+
+      sheet.columns = [
+        { header: '', key: 'col1', width: 5 },
+        { header: '', key: 'col2', width: 40 },
+        { header: '', key: 'col3', width: 25 },
+        { header: '', key: 'col4', width: 25 },
+      ];
+
+      // Header
+      sheet.mergeCells('B1:D1');
+      sheet.getCell('B1').value = 'DASHBOARD DETAIL PRAKTIK & PERSPEKTIF SP.KKLP';
+      sheet.getCell('B1').font = { size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+      sheet.getCell('B1').alignment = { vertical: 'middle', horizontal: 'center' };
+      sheet.getCell('B1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
+
+      // Insight Text
+      sheet.mergeCells('B3:D3');
+      sheet.getCell('B3').value = 'INSIGHT & GAP ANALYSIS';
+      sheet.getCell('B3').font = { bold: true };
+      
+      sheet.mergeCells('B4:D7');
+      const cleanText = analysisText.replace(/<[^>]+>/g, '');
+      sheet.getCell('B4').value = cleanText;
+      sheet.getCell('B4').alignment = { wrapText: true, vertical: 'top' };
+
+      let currentRow = 9;
+
+      // Charts
+      const chartIds = [
+        { id: 'chart-ketersediaan', title: 'Ketersediaan Dokter Sp.KKLP' },
+        { id: 'chart-kualifikasi', title: 'Kualifikasi Sp.KKLP' },
+        { id: 'chart-poli', title: 'Detail Praktik: Poli Tersendiri' },
+        { id: 'chart-pembiayaan', title: 'Detail Praktik: Pembiayaan' },
+        { id: 'chart-dirujuk', title: 'Top 5 Layanan Sering Dirujuk' },
+        { id: 'chart-belum-jalan', title: 'Top Layanan Belum Berjalan' },
+        { id: 'chart-pengaruh', title: 'Perspektif: Pengaruh Penurunan Rujukan' },
+        { id: 'chart-relevansi', title: 'Rata-Rata Skala Relevansi' },
+        { id: 'chart-peran', title: 'Peran Sp.KKLP dalam Optimalisasi' },
+      ];
+
+      for (const chart of chartIds) {
+        const element = document.getElementById(chart.id);
+        if (element) {
+          const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
+          const imgData = canvas.toDataURL('image/png');
+          const imageId = workbook.addImage({ base64: imgData, extension: 'png' });
+          
+          sheet.getCell(`B${currentRow}`).value = chart.title;
+          sheet.getCell(`B${currentRow}`).font = { bold: true };
+          
+          sheet.addImage(imageId, {
+            tl: { col: 1, row: currentRow },
+            ext: { width: 500, height: 320 }
+          });
+          currentRow += 18;
+        }
+      }
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, `Dashboard_SpKKLP_${new Date().getTime()}.xlsx`);
+
+    } catch (err) {
+      console.error(err);
+      alert('Gagal mengekspor Excel: ' + err.message);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
     <div className={`bg-white rounded-2xl p-6 border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
@@ -158,6 +283,26 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
 
   return (
     <div className="space-y-8 animate-fade-in">
+      {!isPrinting && (
+        <div className="flex justify-end mb-4 no-print">
+          <button 
+            onClick={exportExcelSpKKLP} 
+            disabled={isExporting}
+            className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-blue-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-blue-500 transition shadow-md active:scale-95 disabled:opacity-50 text-sm"
+          >
+            {isExporting ? 'Menyiapkan Excel...' : 'Download Excel (Detail & Perspektif)'}
+          </button>
+        </div>
+      )}
+
+      {/* Insight Panel */}
+      <div className={`bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-2xl border border-indigo-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+        <h3 className="text-xl font-bold text-indigo-900 mb-3 flex items-center">
+          <Award className="w-6 h-6 mr-2 text-indigo-600" /> Executive Insight & Gap Analysis
+        </h3>
+        <p className="text-slate-700 leading-relaxed text-sm md:text-base" dangerouslySetInnerHTML={{ __html: analysisText }}></p>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="FKTP Memiliki Sp.KKLP" value={docStats.spkklpYa} subtitle={`${filteredData.length > 0 ? Math.round((docStats.spkklpYa/filteredData.length)*100) : 0}% dari total`} icon={Stethoscope} colorClass="bg-blue-500 text-blue-600 bg-blue-100" />
         <StatCard title="Top 1 Peran Sp.KKLP" value={topRelevansi[0]?.avgScore || 0} subtitle={topRelevansi[0]?.name || '-'} icon={Award} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
@@ -166,40 +311,33 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-blue-600" /> Ketersediaan Dokter Sp.KKLP</h3>
-            {!isPrinting && <ExportButton fileName="Ketersediaan Dokter Sp.KKLP" />}
-          </div>
+        {/* Ketersediaan SpKKLP */}
+        <div id="chart-ketersediaan" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-blue-600" /> Ketersediaan Sp.KKLP</h3>
           <div className="h-72">
-            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+            <ResponsiveContainer width="99%" height="100%">
               <PieChart>
-                <Pie data={docPieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ name, percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
-                  <Cell fill="#3b82f6" /> {/* Ya */}
-                  <Cell fill="#94a3b8" /> {/* Tidak */}
+                <Pie data={docPieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
+                  <Cell fill="#3b82f6" /><Cell fill="#94a3b8" />
                 </Pie>
-                <RechartsTooltip formatter={(value) => [`${value} FKTP`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <RechartsTooltip formatter={(value) => [`${value} FKTP`, 'Jumlah']} />
                 <Legend verticalAlign="bottom" height={36} />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
+        {/* Kualifikasi SpKKLP */}
         {statusData && statusData.length > 0 && (
-          <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-            <div className="flex justify-between items-start mb-6">
-              <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Award className="w-5 h-5 mr-2 text-violet-600" /> Kualifikasi Sp.KKLP</h3>
-              {!isPrinting && <ExportButton fileName="Kualifikasi Sp.KKLP" />}
-            </div>
+          <div id="chart-kualifikasi" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Award className="w-5 h-5 mr-2 text-violet-600" /> Kualifikasi Sp.KKLP</h3>
             <div className="h-72">
-              <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <ResponsiveContainer width="99%" height="100%">
                 <PieChart>
-                  <Pie data={statusData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ name, percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
-                    {statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={['#8b5cf6', '#ec4899', '#f97316', '#14b8a6'][index % 4]} />
-                    ))}
+                  <Pie data={statusData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
+                    {statusData.map((_, i) => <Cell key={i} fill={['#8b5cf6', '#ec4899', '#f97316', '#14b8a6'][i % 4]} />)}
                   </Pie>
-                  <RechartsTooltip formatter={(value) => [`${value} FKTP`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                  <RechartsTooltip formatter={(value) => [`${value} FKTP`, 'Jumlah']} />
                   <Legend verticalAlign="bottom" height={36} />
                 </PieChart>
               </ResponsiveContainer>
@@ -207,41 +345,37 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
           </div>
         )}
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileSearch className="w-5 h-5 mr-2 text-amber-600" /> Top 5 Layanan Sering Dirujuk ke FKRTL</h3>
-            {!isPrinting && <ExportButton fileName="Top 5 Layanan Sering Dirujuk ke FKRTL" />}
-          </div>
-          <div className="h-72">
-            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
-              <BarChart data={dirujukData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
-                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={120} />
-                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} FKTP`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Bar dataKey="value" name="Jumlah FKTP" fill="#f59e0b" radius={[0, 6, 6, 0]} barSize={32}>
-                  <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {obatKhususData && obatKhususData.length > 0 && (
-          <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-            <div className="flex justify-between items-start mb-6">
-              <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-rose-600" /> Top 5 Obat Khusus Sp.KKLP</h3>
-              {!isPrinting && <ExportButton fileName="Top 5 Obat Khusus Sp.KKLP" />}
-            </div>
+        {/* Poli Tersendiri */}
+        {poliData && poliData.length > 0 && (
+          <div id="chart-poli" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Building className="w-5 h-5 mr-2 text-emerald-600" /> Detail Praktik: Poli Tersendiri</h3>
             <div className="h-72">
-              <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
-                <BarChart data={obatKhususData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
-                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={120} />
-                  <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} FKTP`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Bar dataKey="value" name="Jumlah FKTP" fill="#e11d48" radius={[0, 6, 6, 0]} barSize={32}>
-                    <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+              <ResponsiveContainer width="99%" height="100%">
+                <PieChart>
+                  <Pie data={poliData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" label={({ percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
+                    {poliData.map((_, i) => <Cell key={i} fill={['#10b981', '#64748b'][i % 2]} />)}
+                  </Pie>
+                  <RechartsTooltip formatter={(value) => [`${value} FKTP`, 'Jumlah']} />
+                  <Legend verticalAlign="bottom" height={36} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* Pembiayaan */}
+        {pembiayaanData && pembiayaanData.length > 0 && (
+          <div id="chart-pembiayaan" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-teal-600" /> Detail Praktik: Pembiayaan</h3>
+            <div className="h-72">
+              <ResponsiveContainer width="99%" height="100%">
+                <BarChart data={pembiayaanData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                  <RechartsTooltip cursor={{ fill: '#F1F5F9' }} />
+                  <Bar dataKey="value" fill="#14b8a6" radius={[6, 6, 0, 0]} maxBarSize={50}>
+                    <LabelList dataKey="value" position="top" fill="#475569" fontSize={12} fontWeight={600} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -249,20 +383,71 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
           </div>
         )}
 
-
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Award className="w-5 h-5 mr-2 text-emerald-600" /> Rata-Rata Skala Relevansi Peran Sp.KKLP (1-4)</h3>
-            {!isPrinting && <ExportButton fileName="Rata-Rata Skala Relevansi Peran Sp.KKLP (1-4)" />}
+        {/* Dirujuk */}
+        <div id="chart-dirujuk" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileSearch className="w-5 h-5 mr-2 text-amber-600" /> Top 5 Layanan Sering Dirujuk ke FKRTL</h3>
+          <div className="h-72">
+            <ResponsiveContainer width="99%" height="100%">
+              <BarChart data={dirujukData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                <XAxis type="number" axisLine={false} tickLine={false} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} width={150} tick={{ fontSize: 11 }} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} />
+                <Bar dataKey="value" fill="#f59e0b" radius={[0, 6, 6, 0]} barSize={32}>
+                  <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
+        </div>
+
+        {/* Belum Berjalan */}
+        <div id="chart-belum-jalan" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><AlertCircle className="w-5 h-5 mr-2 text-rose-600" /> Perspektif: Layanan Belum Berjalan</h3>
+          <div className="h-72">
+            <ResponsiveContainer width="99%" height="100%">
+              <BarChart data={layananBelumData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                <XAxis type="number" axisLine={false} tickLine={false} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} width={150} tick={{ fontSize: 11 }} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} />
+                <Bar dataKey="value" fill="#e11d48" radius={[0, 6, 6, 0]} barSize={32}>
+                  <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Pengaruh Penurunan Rujukan */}
+        <div id="chart-pengaruh" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><ArrowDownCircle className="w-5 h-5 mr-2 text-indigo-600" /> Perspektif: Pengaruh Penurunan Rujukan</h3>
+          <div className="h-72">
+            <ResponsiveContainer width="99%" height="100%">
+              <BarChart data={rujukanData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis axisLine={false} tickLine={false} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} />
+                <Bar dataKey="value" fill="#6366f1" radius={[6, 6, 0, 0]} maxBarSize={50}>
+                  <LabelList dataKey="value" position="top" fill="#475569" fontSize={12} fontWeight={600} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Relevansi */}
+        <div id="chart-relevansi" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Award className="w-5 h-5 mr-2 text-emerald-600" /> Rata-Rata Skala Relevansi (1-4)</h3>
           <div className="h-80">
-            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+            <ResponsiveContainer width="99%" height="100%">
               <BarChart data={relevansiData} margin={{ top: 20, right: 30, left: 0, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11 }} angle={-25} textAnchor="end" />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} domain={[0, 4]} />
-                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`Skala ${value}`, 'Rata-rata']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Bar dataKey="avgScore" name="Skala Relevansi" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={60}>
+                <XAxis dataKey="name" axisLine={false} tickLine={false} angle={-25} textAnchor="end" tick={{ fontSize: 11 }} />
+                <YAxis domain={[0, 4]} axisLine={false} tickLine={false} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} />
+                <Bar dataKey="avgScore" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={60}>
                   <LabelList dataKey="avgScore" position="top" fill="#475569" fontSize={12} fontWeight={600} />
                 </Bar>
               </BarChart>
@@ -270,52 +455,22 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
           </div>
         </div>
 
-        {/* Diagnosis & Tindakan */}
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-rose-500" /> Top 10 Diagnosis Sp.KKLP</h3>
-            {!isPrinting && <ExportButton fileName="Top 10 Diagnosis Sp.KKLP" />}
-          </div>
+        {/* Peran SpKKLP */}
+        <div id="chart-peran" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-blue-600" /> Peran Sp.KKLP dalam Optimalisasi (Skala 1-4)</h3>
           <div className="h-72">
-            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
-              <BarChart data={diagData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
-                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={120} />
-                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} Kasus`, 'Frekuensi']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Bar dataKey="value" name="Frekuensi" fill="#f43f5e" radius={[0, 6, 6, 0]} barSize={24}>
-                  <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+            <ResponsiveContainer width="99%" height="100%">
+              <BarChart data={peranData} margin={{ top: 20, right: 30, left: 0, bottom: 40 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} angle={-15} textAnchor="end" tick={{ fontSize: 11 }} />
+                <YAxis domain={[0, 4]} axisLine={false} tickLine={false} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} />
+                <Bar dataKey="avgScore" fill="#3b82f6" radius={[6, 6, 0, 0]} maxBarSize={60}>
+                  <LabelList dataKey="avgScore" position="top" fill="#475569" fontSize={12} fontWeight={600} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
-
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><HeartPulse className="w-5 h-5 mr-2 text-indigo-500" /> Top 10 Tindakan/Prosedur</h3>
-            {!isPrinting && <ExportButton fileName="Top 10 Tindakan/Prosedur" />}
-          </div>
-          <div className="h-72">
-            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
-              <BarChart data={tindData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
-                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={120} />
-                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} Tindakan`, 'Frekuensi']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Bar dataKey="value" name="Frekuensi" fill="#6366f1" radius={[0, 6, 6, 0]} barSize={24}>
-                  <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className={`bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-2xl border border-indigo-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <h3 className="text-lg font-bold text-indigo-900 mb-3 flex items-center">
-            <Stethoscope className="w-5 h-5 mr-2 text-indigo-600" /> Analisis Eksekutif: Diagnosis & Tindakan
-          </h3>
-          <p className="text-indigo-800 leading-relaxed text-sm md:text-base" dangerouslySetInnerHTML={{ __html: analysisText.replace(/\*\*(.*?)\*\*/g, '<span class="font-bold text-indigo-900">$1</span>').replace(/\*(.*?)\*/g, '<em class="italic">$1</em>') }}></p>
         </div>
       </div>
     </div>
