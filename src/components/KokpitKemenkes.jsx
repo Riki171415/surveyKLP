@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import { 
   Target, AlertTriangle, Activity, Map as MapIcon, Users, Stethoscope, Briefcase, ChevronRight, 
-  Database, RefreshCw, Layers, MessageSquare, Zap, FileText
+  Database, RefreshCw, Layers, MessageSquare, Zap, FileText, Download
 } from 'lucide-react';
+import XlsxPopulate from 'xlsx-populate';
 import DashboardEksekutif from './dashboards/DashboardEksekutif';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend,
@@ -59,6 +60,81 @@ export default function KokpitKemenkes() {
   const [loading, setLoading] = useState(true);
   const [filterProv, setFilterProv] = useState('Semua');
   const [activeTab, setActiveTab] = useState('utama'); // 'utama', 'eksekutif'
+  const [isExportingKokpit, setIsExportingKokpit] = useState(false);
+
+  const exportKokpitNativeExcel = async () => {
+    try {
+      if (filteredData.length === 0 || !metrics) {
+        alert('Tidak ada data untuk diekspor.');
+        return;
+      }
+      setIsExportingKokpit(true);
+
+      const templatePath = import.meta.env.VITE_USE_LOCAL_API === 'true'
+        ? '/templates/kokpit_template.xlsx'
+        : '/templates/kokpit_template.xlsx';
+      
+      const response = await fetch(templatePath);
+      if (!response.ok) throw new Error(`Gagal mengambil template (${response.status})`);
+      const arrayBuffer = await response.arrayBuffer();
+
+      const workbook = await XlsxPopulate.fromDataAsync(arrayBuffer);
+
+      // 1. Ringkasan Kesiapan
+      const s1 = workbook.sheet('Ringkasan Kesiapan');
+      if (s1) {
+        s1.cell('B4').value(metrics.indeksKesiapan);
+        s1.cell('B5').value(Number(metrics.radarData.reduce((acc, curr) => acc + curr.Kapus, 0) / (metrics.radarData.length||1)).toFixed(2));
+        
+        const provData = metrics.provArray;
+        for (let i = 0; i < 35; i++) {
+          if (provData[i]) {
+            s1.cell(`A${10 + i}`).value(provData[i].nama);
+            s1.cell(`B${10 + i}`).value(provData[i].indeks);
+          } else {
+            s1.cell(`A${10 + i}`).value('');
+            s1.cell(`B${10 + i}`).value('');
+          }
+        }
+      }
+
+      // 2. Relevansi SpKKLP
+      const s2 = workbook.sheet('Relevansi Lintas Profesi');
+      if (s2) {
+        metrics.radarData.forEach((item, i) => {
+          s2.cell(`A${5 + i}`).value(relevansiItems[i]);
+          s2.cell(`B${5 + i}`).value(item.Kapus);
+          s2.cell(`C${5 + i}`).value(item.DUmum);
+          s2.cell(`D${5 + i}`).value(item.SpKKLP);
+        });
+      }
+
+      // 3. Peta Jalan JKN vs Prioritas Baru
+      const s3 = workbook.sheet('Usulan JKN');
+      if (s3) {
+        metrics.manfaatData.forEach((item, i) => {
+          s3.cell(`A${5 + i}`).value(item.name);
+          s3.cell(`B${5 + i}`).value(item.JKN);
+          s3.cell(`C${5 + i}`).value(item.Usulan);
+        });
+      }
+
+      const outBuffer = await workbook.outputAsync();
+      const blob = new Blob([outBuffer], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Kokpit_Kemenkes_Native_${new Date().getTime()}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to export kokpit excel:', err);
+      alert('Gagal mengekspor Excel Native Kokpit: ' + err.message);
+    } finally {
+      setIsExportingKokpit(false);
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -350,6 +426,14 @@ export default function KokpitKemenkes() {
         </div>
 
         <div className="flex gap-3">
+          <button
+            onClick={exportKokpitNativeExcel}
+            disabled={isExportingKokpit}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold transition-all duration-300 ${isExportingKokpit ? 'bg-slate-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 shadow-md hover:shadow-lg'}`}
+          >
+            {isExportingKokpit ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
+            {isExportingKokpit ? 'Memproses...' : 'Unduh Kokpit Excel'}
+          </button>
           <select 
             className="bg-white border border-slate-200 text-slate-800 px-4 py-2.5 rounded-xl outline-none focus:border-primary-500"
             value={filterProv}
