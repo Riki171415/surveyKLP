@@ -13,7 +13,7 @@ const nonOptimalServices = [
 ];
 
 export default function DashboardNonOptimal({ filteredData, COLORS, isPrinting }) {
-  const { nonOptStats, jknData, hambatanData } = useMemo(() => {
+  const { nonOptStats, jknData, hambatanData, usulanDetailData } = useMemo(() => {
     let totalIdentified = 0;
     
     // Per service stats
