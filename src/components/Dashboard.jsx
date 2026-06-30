@@ -411,6 +411,83 @@ export default function Dashboard() {
          kdData.slice(0,7).forEach((item, i) => { sKd.cell(`A${9+i}`).value(item.name); sKd.cell(`B${9+i}`).value(item.value); });
       }
 
+      // 9. Kualitatif
+      const sKual = workbook.sheet('Kualitatif');
+      if (sKual) {
+         filteredData.forEach((row, i) => {
+            const w = row.wawancara || {};
+            sKual.cell(`A${i+2}`).value(row.nama_responden || 'Anonim');
+            sKual.cell(`B${i+2}`).value(row.fktp_name || 'Tidak diketahui');
+            for(let j=0; j<8; j++) sKual.cell(i+2, j+3).value(w[j] || '');
+         });
+      }
+
+      // 10. Keluhan
+      const sKel = workbook.sheet('Keluhan');
+      if (sKel) {
+         filteredData.forEach((row, i) => {
+            sKel.cell(`A${i+2}`).value(row.nama_responden || 'Anonim');
+            sKel.cell(`B${i+2}`).value(row.fktp_name || 'Tidak diketahui');
+            sKel.cell(`C${i+2}`).value(row.keluhan || '');
+            sKel.cell(`D${i+2}`).value(row.solusi_keluhan || '');
+         });
+      }
+
+      // 11. DPM
+      const dpmRows = filteredData.filter(r => r.role === 'Dokter Praktik Mandiri' || (r.fktp_name||'').toLowerCase().includes('dpm'));
+      const lamaCount = {}; const bebanCount = {};
+      dpmRows.forEach(row => {
+         const kar = (row.dpm || {}).karakteristik || {};
+         if (kar.lamaPraktik) lamaCount[kar.lamaPraktik] = (lamaCount[kar.lamaPraktik] || 0) + 1;
+         if (kar.jumlahKunjungan) bebanCount[kar.jumlahKunjungan] = (bebanCount[kar.jumlahKunjungan] || 0) + 1;
+      });
+      const sDpm = workbook.sheet('Dashboard DPM');
+      if (sDpm) {
+         const lamaKeys = Object.keys(lamaCount);
+         for(let i=0; i<5; i++) {
+             if (lamaKeys[i]) { sDpm.cell(`A${5+i}`).value(lamaKeys[i]); sDpm.cell(`B${5+i}`).value(lamaCount[lamaKeys[i]]); }
+             else { sDpm.cell(`A${5+i}`).value(''); sDpm.cell(`B${5+i}`).value(0); }
+         }
+         const bebanKeys = Object.keys(bebanCount);
+         for(let i=0; i<5; i++) {
+             if (bebanKeys[i]) { sDpm.cell(`A${27+i}`).value(bebanKeys[i]); sDpm.cell(`B${27+i}`).value(bebanCount[bebanKeys[i]]); }
+             else { sDpm.cell(`A${27+i}`).value(''); sDpm.cell(`B${27+i}`).value(0); }
+         }
+      }
+
+      // 12. Pasien Bulanan
+      const diseaseTotals = {};
+      penyakitPasienBulanan.forEach(p => diseaseTotals[p.id] = 0);
+      uniqueFktpData.forEach(row => {
+         const isDpm = row.role === 'Dokter Praktik Mandiri';
+         const sourceObj = isDpm ? row.dpm?.dataPasienBulanan : row.data_pasien_bulanan;
+         if (sourceObj) {
+            penyakitPasienBulanan.forEach(p => { diseaseTotals[p.id] += (Number(sourceObj[p.id]) || 0); });
+         }
+      });
+      const sPb = workbook.sheet('Pasien Bulanan');
+      if (sPb) {
+         penyakitPasienBulanan.forEach((p, i) => {
+             sPb.cell(`A${5+i}`).value(p.label);
+             sPb.cell(`B${5+i}`).value(diseaseTotals[p.id] || 0);
+         });
+      }
+
+      // 13. Raw Data
+      const sRaw = workbook.sheet('Raw Data');
+      if (sRaw) {
+         const headers = ['Waktu Submit', 'Nama Responden', 'Faskes', 'Provinsi', 'Kab/Kota', 'Jabatan'];
+         headers.forEach((h, i) => sRaw.cell(1, i+1).value(h));
+         filteredData.forEach((row, i) => {
+            sRaw.cell(i+2, 1).value(row.created_at || '');
+            sRaw.cell(i+2, 2).value(row.nama_responden || '');
+            sRaw.cell(i+2, 3).value(row.fktp_name || '');
+            sRaw.cell(i+2, 4).value(row.provinsi || '');
+            sRaw.cell(i+2, 5).value(row.kab_kota || '');
+            sRaw.cell(i+2, 6).value(row.role || '');
+         });
+      }
+
       const outBuffer = await workbook.outputAsync();
       const blob = new Blob([outBuffer], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
       
