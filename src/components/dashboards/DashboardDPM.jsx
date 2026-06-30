@@ -298,7 +298,7 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Clock className="w-5 h-5 mr-2 text-amber-600" /> Distribusi Lama Praktik</h3>
-            {!isPrinting && <ExportButton fileName="Distribusi Lama Praktik" />}
+            
           </div>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
@@ -318,7 +318,7 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-emerald-600" /> Top Kegiatan Holistik & Aspek yang Digali</h3>
-            {!isPrinting && <ExportButton fileName="Top Kegiatan Holistik & Aspek yang Digali" />}
+            
           </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
@@ -339,7 +339,7 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
           <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
             <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><FileText className="w-5 h-5 mr-2 text-indigo-600" /> Luaran Pelayanan Sp.KKLP</h3>
-            {!isPrinting && <ExportButton fileName="Luaran Pelayanan Sp.KKLP" />}
+            
           </div>
             <div className="h-80">
               <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
@@ -361,7 +361,7 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Map className="w-5 h-5 mr-2 text-primary-600" /> Distribusi Provinsi</h3>
-            {!isPrinting && <ExportButton fileName="Distribusi Provinsi DPM" />}
+            
           </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
@@ -381,7 +381,7 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><TrendingUp className="w-5 h-5 mr-2 text-indigo-600" /> Cross-Tab: Lama Praktik vs % Kasus Kronis</h3>
-            {!isPrinting && <ExportButton fileName="CrossTab Kronis" />}
+            
           </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
@@ -403,7 +403,7 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Target className="w-5 h-5 mr-2 text-emerald-600" /> Skor Indeks Pelayanan KKLP</h3>
-            {!isPrinting && <ExportButton fileName="Skor Indeks KKLP" />}
+            
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
@@ -441,7 +441,7 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Zap className="w-5 h-5 mr-2 text-amber-500" /> Gap Analysis (Penyakit vs Tindakan)</h3>
-            {!isPrinting && <ExportButton fileName="Gap Analysis" />}
+            
           </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>

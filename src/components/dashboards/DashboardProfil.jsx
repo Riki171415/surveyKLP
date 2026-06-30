@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import wilayahMapping from '../../data/wilayahMapping.json';
-import ExportButton from '../ExportButton';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
@@ -446,7 +445,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Building className="w-5 h-5 mr-2 text-primary-600" /> Proporsi Responden per FKTP</h3>
-            {!isPrinting && <ExportButton fileName="Proporsi Responden per FKTP" />}
+            
           </div>
           <div id="chart-fktp-type" className="flex-1 min-h-[300px]">
             <ResponsiveContainer width="100%" height="100%" minHeight={300}>
@@ -464,7 +463,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Building className="w-5 h-5 mr-2 text-indigo-600" /> Proporsi FKTP Unik</h3>
-            {!isPrinting && <ExportButton fileName="Proporsi FKTP Unik" />}
+            
           </div>
           <div id="chart-unique-fktp" className="flex-1 min-h-[300px]">
             <ResponsiveContainer width="100%" height="100%" minHeight={300}>
@@ -482,7 +481,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Users className="w-5 h-5 mr-2 text-primary-600" /> Proporsi Jabatan Responden</h3>
-            {!isPrinting && <ExportButton fileName="Proporsi Jabatan Responden" />}
+            
           </div>
           <div id="chart-role" className="flex-1 min-h-[300px]">
             <ResponsiveContainer width="100%" height="100%" minHeight={300}>
@@ -500,7 +499,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-3 flex flex-col ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Map className="w-5 h-5 mr-2 text-primary-600" /> 10 Provinsi Terbanyak</h3>
-            {!isPrinting && <ExportButton fileName="10 Provinsi Terbanyak" />}
+            
           </div>
           <div id="chart-regional" className="flex-1 min-h-[350px]">
             <ResponsiveContainer width="100%" height="100%" minHeight={350}>
@@ -522,7 +521,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
       <div className={`mt-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
         <div className="flex justify-between items-start mb-6">
           <h3 className="text-base font-bold text-slate-800 flex items-center"><Map className="w-5 h-5 mr-2 text-primary-600" /> Target vs Capaian Partisipasi per Provinsi</h3>
-          {!isPrinting && <ExportButton fileName="Target vs Capaian Provinsi" />}
+          
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
