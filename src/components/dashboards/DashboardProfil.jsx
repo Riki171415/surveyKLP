@@ -309,36 +309,38 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
 
       sheet.addRow([]);
 
-      let currentRow = sheet.rowCount + 2;
+      // Tabel Proporsi Responden per FKTP
+      sheet.addRow([]);
+      sheet.addRow(['', 'PROPORSI RESPONDEN PER JENIS FKTP']);
+      sheet.lastRow.getCell(2).font = { bold: true };
+      sheet.addRow(['', 'Jenis FKTP', 'Jumlah Responden']);
+      sheet.lastRow.font = { bold: true };
+      fktpTypeData.forEach(item => {
+        sheet.addRow(['', item.name, item.value]);
+      });
 
-      // Charts (Capture images)
-      const chartIds = [
-        { id: 'chart-fktp-type', title: 'Proporsi Responden per FKTP' },
-        { id: 'chart-unique-fktp', title: 'Proporsi FKTP Unik' },
-        { id: 'chart-role', title: 'Proporsi Jabatan Responden' },
-        { id: 'chart-regional', title: '10 Provinsi Terbanyak' }
-      ];
+      // Tabel Proporsi Jabatan Responden
+      sheet.addRow([]);
+      sheet.addRow(['', 'PROPORSI JABATAN RESPONDEN']);
+      sheet.lastRow.getCell(2).font = { bold: true };
+      sheet.addRow(['', 'Jabatan', 'Jumlah']);
+      sheet.lastRow.font = { bold: true };
+      roleChartData.forEach(item => {
+        sheet.addRow(['', item.name, item.value]);
+      });
 
-      for (const chart of chartIds) {
-        const element = document.getElementById(chart.id);
-        if (element) {
-          const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
-          const imgData = canvas.toDataURL('image/png');
-          const imageId = workbook.addImage({ base64: imgData, extension: 'png' });
-          
-          sheet.getCell(`B${currentRow}`).value = chart.title;
-          sheet.getCell(`B${currentRow}`).font = { bold: true };
-          
-          sheet.addImage(imageId, {
-            tl: { col: 1, row: currentRow },
-            ext: { width: 500, height: 350 }
-          });
-          currentRow += 20; // reserve rows for image
-        }
-      }
+      // Tabel 10 Provinsi Terbanyak
+      sheet.addRow([]);
+      sheet.addRow(['', '10 PROVINSI RESPONDEN TERBANYAK']);
+      sheet.lastRow.getCell(2).font = { bold: true };
+      sheet.addRow(['', 'Provinsi', 'Jumlah Responden']);
+      sheet.lastRow.font = { bold: true };
+      regionalData.forEach(item => {
+        sheet.addRow(['', item.name, item.value]);
+      });
 
       sheet.addRow([]);
-      currentRow = sheet.rowCount + 2;
+      let currentRow = sheet.rowCount + 2;
 
       // Target vs Capaian Table
       sheet.mergeCells(`A${currentRow}:E${currentRow}`);
