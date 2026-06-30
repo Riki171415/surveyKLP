@@ -76,7 +76,21 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
       if (p.hasPoli === 'Ya') {
         if (p.diagnosis) extractTags(p.diagnosis).forEach(t => diagnosisCounts[t] = (diagnosisCounts[t] || 0) + 1);
         if (p.tindakan) extractTags(p.tindakan).forEach(t => tindakanCounts[t] = (tindakanCounts[t] || 0) + 1);
-        if (p.pembiayaan) pembiayaanCounts[p.pembiayaan] = (pembiayaanCounts[p.pembiayaan] || 0) + 1;
+        
+        if (p.pembiayaan) {
+          const txt = p.pembiayaan.toLowerCase();
+          let cat = "Lainnya";
+          if (txt.includes('bpjs') || txt.includes('jkn') || txt.includes('kapitasi') || txt.includes('asuransi')) {
+            cat = (txt.includes('umum') || txt.includes('mandiri')) ? 'BPJS & Umum' : 'BPJS / JKN';
+          } else if (txt.includes('umum') || txt.includes('mandiri') || txt.includes('pribadi')) {
+            cat = 'Umum / Mandiri';
+          } else if (txt.includes('gratis') || txt.includes('bantuan')) {
+            cat = 'Gratis';
+          } else {
+            cat = p.pembiayaan.length <= 3 ? 'Lainnya' : p.pembiayaan;
+          }
+          pembiayaanCounts[cat] = (pembiayaanCounts[cat] || 0) + 1;
+        }
       }
       if (row.spkklp_obat_khusus) {
         extractTags(row.spkklp_obat_khusus).forEach(t => obatKhususCounts[t] = (obatKhususCounts[t] || 0) + 1);
