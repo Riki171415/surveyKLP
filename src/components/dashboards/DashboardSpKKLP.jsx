@@ -160,10 +160,10 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
     let analysisText = "Belum ada data diagnosis atau tindakan yang diinput oleh responden.";
     if (diagData.length > 0 && rjkData.length > 0) {
       analysisText = `<span class="text-indigo-700 font-bold">🎯 Analisis Kesenjangan (Gap Analysis) & Rekomendasi:</span><br/><br/>
-      Berdasarkan data input terbaru, layanan yang paling sering dirujuk ke FKRTL adalah <span class="font-bold">${rjkData[0].name}</span> (${rjkData[0].value} FKTP). 
-      Namun di sisi lain, relevansi peran Sp.KKLP tertinggi tercatat pada <span class="font-bold">${relData[0].name}</span>. <br/><br/>
+      Berdasarkan data input terbaru, layanan yang paling sering dirujuk ke FKRTL adalah <span class="font-bold">${rjkData[0]?.name || ''}</span> (${rjkData[0]?.value || 0} FKTP). 
+      Namun di sisi lain, relevansi peran Sp.KKLP tertinggi tercatat pada <span class="font-bold">${relData[0]?.name || ''}</span>. <br/><br/>
       <span class="text-indigo-700 font-bold">💡 Insight Strategis:</span><br/>
-      Hal ini menunjukkan adanya <span class="font-bold text-rose-600">peluang besar</span> bagi Sp.KKLP untuk memotong mata rantai rujukan pada kasus ${rjkData[0].name}. 
+      Hal ini menunjukkan adanya <span class="font-bold text-rose-600">peluang besar</span> bagi Sp.KKLP untuk memotong mata rantai rujukan pada kasus ${rjkData[0]?.name || ''}. 
       Penguatan fasilitas dan penempatan Sp.KKLP di ${spkklpTidak} FKTP yang saat ini belum memilikinya dapat secara signifikan menurunkan beban rujukan FKRTL dan mengoptimalkan penanganan di tingkat primer.`;
     }
 
@@ -179,7 +179,7 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
 
     return {
       docStats: { spkklpYa, spkklpTidak, totalDocUmum, totalDocGigi },
-      statusData, obatKhususData, relevansiData, dirujukData, diagData, tindData, analysisText,
+      statusData, obatKhususData, relevansiData: relData, dirujukData: rjkData, diagData, tindData, analysisText,
       topRelevansi: relData.slice(0, 3), poliData, pembiayaanData, peranData, layananBelumData: belumData, rujukanData: rujukanDataMapped
     };
   }, [filteredData, uniqueFktpData]);
