@@ -70,7 +70,7 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
 
     const extractTags = (text) => {
       if (!text) return [];
-      return text.split(/[,;\n]+/).map(s => s.trim()).filter(s => s.length > 2);
+      return text.split(/[,;\n](?![^()]*\))/g).map(s => s ? s.trim() : '').filter(s => s.length > 2);
     };
 
     uniqueFktpData.forEach(row => {
