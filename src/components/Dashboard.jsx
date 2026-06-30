@@ -316,6 +316,101 @@ export default function Dashboard() {
          palTujuanData.slice(0,6).forEach((item, i) => { sPal.cell(`A${9+i}`).value(item.name); sPal.cell(`B${9+i}`).value(item.value); });
       }
 
+      // 5. Monitoring PRB
+      let fktpWithMekanisme = 0;
+      const mekCounts = { 'Pengingat kunjungan': 0, 'Telepon/WA': 0, 'Kunjungan rumah': 0, 'Tidak ada mekanisme khusus': 0, 'Lainnya': 0 };
+      uniqueFktpData.forEach(row => {
+        const prb = row.prb || {};
+        let hasMekanisme = false;
+        Object.keys(mekCounts).forEach(mek => {
+          if (prb[`mek_${mek}`]) { mekCounts[mek]++; if (mek !== 'Tidak ada mekanisme khusus') hasMekanisme = true; }
+        });
+        if (hasMekanisme) fktpWithMekanisme++;
+      });
+      const mekData = Object.keys(mekCounts).map(k => ({ name: k, value: mekCounts[k] })).sort((a,b) => b.value - a.value);
+      
+      const sMon = workbook.sheet('Dashboard Monitoring PRB');
+      if (sMon) {
+         sMon.cell('B4').value(uniqueFktpData.length > 0 ? (fktpWithMekanisme / uniqueFktpData.length) * 100 : 0);
+         for(let i=0; i<5; i++) { sMon.cell(`A${9+i}`).value(''); sMon.cell(`B${9+i}`).value(''); }
+         mekData.slice(0,5).forEach((item, i) => { sMon.cell(`A${9+i}`).value(item.name); sMon.cell(`B${9+i}`).value(item.value); });
+      }
+
+      // 6. Non-Optimal
+      const nonOptimalServices = [ "Pelayanan lifestyle medicine", "Pelayanan wellness dan healthy aging", "Konsultasi perjalanan/travel medicine", "Manajemen pasien geriatri frailty", "Precision medicine/konseling genetik dasar", "Layanan promotif berbasis keluarga" ];
+      let totalIdentified = 0;
+      let totalJknYa = 0; let totalJknTidak = 0;
+      filteredData.forEach(row => {
+         const nonOpt = row.non_optimal || [];
+         nonOptimalServices.forEach((service, idx) => {
+            const item = nonOpt[idx] || {};
+            if (item.masukJkn || item.skala) {
+               totalIdentified++;
+               if (item.masukJkn === 'Ya') totalJknYa++; else if (item.masukJkn === 'Tidak') totalJknTidak++;
+            }
+         });
+      });
+      const sNo = workbook.sheet('Dashboard Non-Optimal');
+      if (sNo) {
+         sNo.cell('B4').value(totalIdentified);
+         sNo.cell('A9').value('Diusulkan Masuk JKN'); sNo.cell('B9').value(totalJknYa);
+         sNo.cell('A10').value('Tidak Diusulkan'); sNo.cell('B10').value(totalJknTidak);
+      }
+
+      // 7. Sp.KKLP
+      let spkklpYaFinal = 0;
+      uniqueFktpData.forEach(row => { if (row.doc_kklp === 'Ya') spkklpYaFinal++; });
+      const layananDirujukItems = [ "Kasus PTM tanpa komplikasi (DM, Hipertensi)", "Penanganan luka diabetes berat", "Tindakan bedah minor", "Pelayanan paliatif akhir hayat", "Gangguan jiwa ringan-sedang", "Penanganan fraktur tertutup sederhana" ];
+      const dirujukCounts = {};
+      const diagSpCounts = {};
+      filteredData.forEach(row => {
+         const rjk = row.layanan_dirujuk || {};
+         Object.keys(rjk).forEach(k => {
+            if (rjk[k] && k !== 'pengaruhPenurunanRujukan') {
+               if (!isNaN(k) && k !== 'lainnya' && !layananDirujukItems[k]) return;
+               const name = k === 'lainnya' ? rjk.lainnya : (isNaN(k) ? k : layananDirujukItems[k]);
+               dirujukCounts[name] = (dirujukCounts[name] || 0) + 1;
+            }
+         });
+      });
+      uniqueFktpData.forEach(row => {
+         const p = row.spkklp_poli || {};
+         if (p.hasPoli === 'Ya' && p.diagnosis) {
+            p.diagnosis.split(/[,;\n]+/).map(s => s.trim()).filter(s => s.length > 2).forEach(t => diagSpCounts[t] = (diagSpCounts[t] || 0) + 1);
+         }
+      });
+      const dirujukData = Object.keys(dirujukCounts).map(k => ({ name: k, value: dirujukCounts[k] })).filter(d => isNaN(d.name) && d.name !== 'undefined').sort((a,b) => b.value - a.value);
+      const diagSpData = Object.keys(diagSpCounts).map(k => ({ name: k, value: diagSpCounts[k] })).sort((a,b) => b.value - a.value);
+
+      const sSp = workbook.sheet('Dashboard Sp.KKLP');
+      if (sSp) {
+         sSp.cell('B4').value(spkklpYaFinal);
+         for(let i=0; i<5; i++) { sSp.cell(`A${9+i}`).value(''); sSp.cell(`B${9+i}`).value(''); }
+         dirujukData.slice(0,5).forEach((item, i) => { sSp.cell(`A${9+i}`).value(item.name); sSp.cell(`B${9+i}`).value(item.value); });
+         
+         for(let i=0; i<10; i++) { sSp.cell(`A${27+i}`).value(''); sSp.cell(`B${27+i}`).value(''); }
+         diagSpData.slice(0,10).forEach((item, i) => { sSp.cell(`A${27+i}`).value(item.name); sSp.cell(`B${27+i}`).value(item.value); });
+      }
+
+      // 8. Kendala
+      let fktpWithKendala = 0;
+      const kdCounts = { 'SDM': 0, 'Sarana prasarana': 0, 'Alat kesehatan': 0, 'Obat': 0, 'Pembiayaan': 0, 'Regulasi': 0, 'Lainnya': 0 };
+      uniqueFktpData.forEach(row => {
+         const k = row.spkklp_kendala || {};
+         if (k.hasKendala === 'Ya') {
+            fktpWithKendala++;
+            Object.keys(kdCounts).forEach(key => { if (k[`kendala_${key}`]) kdCounts[key]++; });
+         }
+      });
+      const kdData = Object.keys(kdCounts).map(k => ({ name: k, value: kdCounts[k] })).sort((a,b) => b.value - a.value);
+      
+      const sKd = workbook.sheet('Dashboard Kendala');
+      if (sKd) {
+         sKd.cell('B4').value(fktpWithKendala);
+         for(let i=0; i<7; i++) { sKd.cell(`A${9+i}`).value(''); sKd.cell(`B${9+i}`).value(''); }
+         kdData.slice(0,7).forEach((item, i) => { sKd.cell(`A${9+i}`).value(item.name); sKd.cell(`B${9+i}`).value(item.value); });
+      }
+
       const outBuffer = await workbook.outputAsync();
       const blob = new Blob([outBuffer], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
       
