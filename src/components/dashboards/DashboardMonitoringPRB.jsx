@@ -89,7 +89,6 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
 
   const handleExport = () => {
     const tables = [
-    const tables = [
       {
         title: 'Statistik Monitoring PRB (Per FKTP)',
         headers: ['Metrik', 'Nilai'],
