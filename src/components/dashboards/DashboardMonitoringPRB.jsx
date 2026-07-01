@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -6,50 +6,70 @@ import {
 } from 'recharts';
 import { Activity, AlertCircle, FileSearch, ShieldAlert, Download } from 'lucide-react';
 
+const ViewToggle = ({ value, onChange }) => (
+  <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-semibold shrink-0">
+    <button onClick={() => onChange('responden')} className={`px-3 py-1 rounded-md transition-all ${value === 'responden' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Per Responden</button>
+    <button onClick={() => onChange('fktp')} className={`px-3 py-1 rounded-md transition-all ${value === 'fktp' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Per FKTP</button>
+  </div>
+);
+
 export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
-  const { monStats, mekanismeData, kendalaData } = useMemo(() => {
+  const [mekanismeView, setMekanismeView] = useState('responden');
+  const [kendalaView, setKendalaView] = useState('responden');
+  const { monStats, mekanismeDataR, mekanismeDataF, kendalaDataR, kendalaDataF } = useMemo(() => {
     let fktpWithMekanisme = 0;
-    const mekCounts = {
-      'Pengingat kunjungan': 0, 'Telepon/WA': 0, 'Kunjungan rumah': 0, 
-      'Tidak ada mekanisme khusus': 0, 'Lainnya': 0
-    };
+    
+    // -- Per Responden --
+    const mekCountsR = { 'Pengingat kunjungan': 0, 'Telepon/WA': 0, 'Kunjungan rumah': 0, 'Tidak ada mekanisme khusus': 0, 'Lainnya': 0 };
+    const kendalaMapR = {};
+    filteredData.forEach(row => {
+      const prb = row.prb || {};
+      Object.keys(mekCountsR).forEach(mek => { if (prb[`mek_${mek}`]) mekCountsR[mek]++; });
+      if (prb.kendala && prb.kendala.trim().length > 3) {
+        const text = (prb.kendala || '').toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"");
+        const words = text.split(/\s+/).filter(w => w.length > 3 && !['yang', 'dari', 'pada', 'untuk', 'dengan', 'dan', 'atau', 'ini', 'itu', 'karena', 'tidak', 'belum', 'kurang'].includes(w));
+        words.forEach(w => { kendalaMapR[w] = (kendalaMapR[w] || 0) + 1; });
+      }
+    });
 
-    const kendalaMap = {};
-
+    // -- Per FKTP --
+    const mekCountsF = { 'Pengingat kunjungan': 0, 'Telepon/WA': 0, 'Kunjungan rumah': 0, 'Tidak ada mekanisme khusus': 0, 'Lainnya': 0 };
+    const kendalaMapF = {};
     uniqueFktpData.forEach(row => {
       const prb = row.prb || {};
-      
       let hasMekanisme = false;
-      Object.keys(mekCounts).forEach(mek => {
+      Object.keys(mekCountsF).forEach(mek => {
         if (prb[`mek_${mek}`]) {
-          mekCounts[mek]++;
+          mekCountsF[mek]++;
           if (mek !== 'Tidak ada mekanisme khusus') hasMekanisme = true;
         }
       });
       if (hasMekanisme) fktpWithMekanisme++;
 
       if (prb.kendala && prb.kendala.trim().length > 3) {
-        // Extract words for a simple "kendala" distribution (pseudo word cloud / bar chart)
         const text = (prb.kendala || '').toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"");
         const words = text.split(/\s+/).filter(w => w.length > 3 && !['yang', 'dari', 'pada', 'untuk', 'dengan', 'dan', 'atau', 'ini', 'itu', 'karena', 'tidak', 'belum', 'kurang'].includes(w));
-        words.forEach(w => {
-          kendalaMap[w] = (kendalaMap[w] || 0) + 1;
-        });
+        words.forEach(w => { kendalaMapF[w] = (kendalaMapF[w] || 0) + 1; });
       }
     });
 
-    const topKendala = Object.keys(kendalaMap).map(k => ({ name: k, value: kendalaMap[k] })).sort((a,b) => b.value - a.value).slice(0, 10);
+    const topKendalaR = Object.keys(kendalaMapR).map(k => ({ name: k, value: kendalaMapR[k] })).sort((a,b) => b.value - a.value).slice(0, 10);
+    const topKendalaF = Object.keys(kendalaMapF).map(k => ({ name: k, value: kendalaMapF[k] })).sort((a,b) => b.value - a.value).slice(0, 10);
     const proporsiMekanisme = uniqueFktpData.length > 0 ? (fktpWithMekanisme / uniqueFktpData.length) * 100 : 0;
 
     return {
-      monStats: {
-        fktpWithMekanisme,
-        proporsiMekanisme
-      },
-      mekanismeData: Object.keys(mekCounts).map(k => ({ name: k, value: mekCounts[k] })).filter(d => d.value > 0),
-      kendalaData: topKendala
+      monStats: { fktpWithMekanisme, proporsiMekanisme },
+      mekanismeDataR: Object.keys(mekCountsR).map(k => ({ name: k, value: mekCountsR[k] })).filter(d => d.value > 0),
+      mekanismeDataF: Object.keys(mekCountsF).map(k => ({ name: k, value: mekCountsF[k] })).filter(d => d.value > 0),
+      kendalaDataR: topKendalaR,
+      kendalaDataF: topKendalaF
     };
-  }, [uniqueFktpData]);
+  }, [filteredData, uniqueFktpData]);
+
+  const mekanismeData = mekanismeView === 'fktp' ? mekanismeDataF : mekanismeDataR;
+  const kendalaData = kendalaView === 'fktp' ? kendalaDataF : kendalaDataR;
+  const mekanismeLabel = mekanismeView === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
+  const kendalaLabel = kendalaView === 'fktp' ? 'FKTP (Frekuensi Kata)' : 'Responden (Frekuensi Kata)';
 
   const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
     <div className={`bg-white rounded-2xl p-6 border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
@@ -69,24 +89,21 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
 
   const handleExport = () => {
     const tables = [
+    const tables = [
       {
-        title: 'Statistik Monitoring PRB',
+        title: 'Statistik Monitoring PRB (Per FKTP)',
         headers: ['Metrik', 'Nilai'],
         data: [
+          ['Total Responden', filteredData.length],
+          ['Total FKTP (Unik)', uniqueFktpData.length],
           ['Total FKTP dengan Mekanisme', monStats.fktpWithMekanisme],
           ['Proporsi FKTP dengan Mekanisme', `${monStats.proporsiMekanisme.toFixed(2)}%`]
         ]
       },
-      {
-        title: 'Proporsi Mekanisme Utama PRB',
-        headers: ['Mekanisme', 'Jumlah FKTP'],
-        data: mekanismeData
-      },
-      {
-        title: 'Top 10 Kata Kunci Kendala Pelaksanaan',
-        headers: ['Kata Kunci', 'Frekuensi Penyebutan'],
-        data: kendalaData
-      }
+      { title: 'Proporsi Mekanisme Utama PRB (Per Responden)', headers: ['Mekanisme', 'Jumlah Responden'], data: mekanismeDataR },
+      { title: 'Proporsi Mekanisme Utama PRB (Per FKTP)', headers: ['Mekanisme', 'Jumlah FKTP'], data: mekanismeDataF },
+      { title: 'Top 10 Kata Kunci Kendala Pelaksanaan (Per Responden)', headers: ['Kata Kunci', 'Frekuensi Penyebutan'], data: kendalaDataR },
+      { title: 'Top 10 Kata Kunci Kendala Pelaksanaan (Per FKTP)', headers: ['Kata Kunci', 'Frekuensi Penyebutan'], data: kendalaDataF }
     ];
 
     const rawData = {
@@ -126,16 +143,18 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><Activity className="w-5 h-5 mr-2 text-blue-600" /> Proporsi Mekanisme Utama PRB</h3>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-base font-bold text-slate-800 flex items-center"><Activity className="w-5 h-5 mr-2 text-blue-600" /> Proporsi Mekanisme Utama PRB</h3>
+            {!isPrinting && <ViewToggle value={mekanismeView} onChange={setMekanismeView} />}
           </div>
+          <p className="text-xs text-slate-400 mb-4 italic">{mekanismeView === 'responden' ? `${filteredData.length} responden` : `${uniqueFktpData.length} FKTP unik`}</p>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <PieChart>
                 <Pie data={mekanismeData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value" label={({ name, percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}>
                   {mekanismeData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
-                <RechartsTooltip formatter={(value) => [`${value} FKTP`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <RechartsTooltip formatter={(value) => [`${value} ${mekanismeLabel}`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                 <Legend verticalAlign="bottom" height={36} />
               </PieChart>
             </ResponsiveContainer>
@@ -143,9 +162,11 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
         </div>
 
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-base font-bold text-slate-800 mb-6 flex items-center"><AlertCircle className="w-5 h-5 mr-2 text-amber-600" /> Top 10 Kata Kunci Kendala Pelaksanaan</h3>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-base font-bold text-slate-800 flex items-center"><AlertCircle className="w-5 h-5 mr-2 text-amber-600" /> Top 10 Kata Kunci Kendala Pelaksanaan</h3>
+            {!isPrinting && <ViewToggle value={kendalaView} onChange={setKendalaView} />}
           </div>
+          <p className="text-xs text-slate-400 mb-4 italic">{kendalaView === 'responden' ? `${filteredData.length} responden` : `${uniqueFktpData.length} FKTP unik`}</p>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
               <BarChart data={kendalaData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
