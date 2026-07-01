@@ -111,7 +111,10 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
     Object.keys(dataAda).forEach(k => dataAda[k] = Number(dataAda[k].toFixed(1)));
     Object.keys(dataTanpa).forEach(k => dataTanpa[k] = Number(dataTanpa[k].toFixed(1)));
 
-    return { spData: barKinerja, radarData: radar, stats: { adaSp, tanpaSp, dataAda, dataTanpa } };
+    const rawAda = { countPrb: countPrbAda, hc: metrikAda.hc, paliatif: metrikAda.paliatif, kolaborasi: metrikAda.kolaborasiHc, perbaikan: metrikAda.perbaikanHc, total: adaSp };
+    const rawTanpa = { countPrb: countPrbTanpa, hc: metrikTanpa.hc, paliatif: metrikTanpa.paliatif, kolaborasi: metrikTanpa.kolaborasiHc, perbaikan: metrikTanpa.perbaikanHc, total: tanpaSp };
+
+    return { spData: barKinerja, radarData: radar, stats: { adaSp, tanpaSp, dataAda, dataTanpa, rawAda, rawTanpa } };
   };
 
   const { metricsR, metricsF } = useMemo(() => {
@@ -149,31 +152,55 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
   };
 
   const handleExport = () => {
+    const formatExportData = (metrics) => {
+      const s = metrics.stats;
+      const getVal = (name, adaN, adaTotal, tanpaN, tanpaTotal, percAda, percTanpa) => [
+        name,
+        `${adaN} dari ${adaTotal}`,
+        `${percAda.toFixed(1)}%`,
+        `${tanpaN} dari ${tanpaTotal}`,
+        `${percTanpa.toFixed(1)}%`
+      ];
+
+      return [
+        [
+          'Kepatuhan PRB', 
+          `(N = ${s.rawAda.countPrb})`, `${s.dataAda.avgKepatuhan.toFixed(1)}%`, 
+          `(N = ${s.rawTanpa.countPrb})`, `${s.dataTanpa.avgKepatuhan.toFixed(1)}%`
+        ],
+        getVal('Home Care', s.rawAda.hc, s.rawAda.total, s.rawTanpa.hc, s.rawTanpa.total, s.dataAda.percHc, s.dataTanpa.percHc),
+        getVal('Paliatif', s.rawAda.paliatif, s.rawAda.total, s.rawTanpa.paliatif, s.rawTanpa.total, s.dataAda.percPaliatif, s.dataTanpa.percPaliatif),
+        getVal('Kolaborasi Interdisiplin', s.rawAda.kolaborasi, s.rawAda.hc, s.rawTanpa.kolaborasi, s.rawTanpa.hc, s.dataAda.percKolaborasi, s.dataTanpa.percKolaborasi),
+        getVal('Outcome (Perbaikan)', s.rawAda.perbaikan, s.rawAda.hc, s.rawTanpa.perbaikan, s.rawTanpa.hc, s.dataAda.percPerbaikan, s.dataTanpa.percPerbaikan),
+        [
+          'Rata-rata Rujukan FKRTL',
+          `(N = ${s.rawAda.countPrb})`, `${s.dataAda.avgRujukan.toFixed(2)}x`,
+          `(N = ${s.rawTanpa.countPrb})`, `${s.dataTanpa.avgRujukan.toFixed(2)}x`
+        ]
+      ];
+    };
+
+    const headersList = ['Indikator Kinerja', 'Ada Sp.KKLP (Nilai/N)', 'Ada Sp.KKLP (Nilai %/x)', 'Tanpa Sp.KKLP (Nilai/N)', 'Tanpa Sp.KKLP (Nilai %/x)'];
+
     const tables = [
       {
         title: 'Ringkasan Kinerja Keseluruhan (Per Responden)',
-        headers: ['Indikator Kinerja', 'Ada Sp.KKLP', 'Tanpa Sp.KKLP'],
-        data: [
-          ...metricsR.spData.map(d => [d.name, `${d['Ada Sp.KKLP'].toFixed(1)}%`, `${d['Tanpa Sp.KKLP'].toFixed(1)}%`]),
-          ['Rata-rata Rujukan FKRTL', `${metricsR.stats.dataAda.avgRujukan.toFixed(2)}x`, `${metricsR.stats.dataTanpa.avgRujukan.toFixed(2)}x`]
-        ]
+        headers: headersList,
+        data: formatExportData(metricsR)
       },
       {
         title: 'Ringkasan Kinerja Keseluruhan (Per FKTP)',
-        headers: ['Indikator Kinerja', 'Ada Sp.KKLP', 'Tanpa Sp.KKLP'],
-        data: [
-          ...metricsF.spData.map(d => [d.name, `${d['Ada Sp.KKLP'].toFixed(1)}%`, `${d['Tanpa Sp.KKLP'].toFixed(1)}%`]),
-          ['Rata-rata Rujukan FKRTL', `${metricsF.stats.dataAda.avgRujukan.toFixed(2)}x`, `${metricsF.stats.dataTanpa.avgRujukan.toFixed(2)}x`]
-        ]
+        headers: headersList,
+        data: formatExportData(metricsF)
       },
       {
         title: 'Analisis Spektrum Kemampuan (Radar - Per Responden)',
-        headers: ['Aspek Pelayanan', 'Ada Sp.KKLP', 'Tanpa Sp.KKLP'],
+        headers: ['Aspek Pelayanan', 'Ada Sp.KKLP (%)', 'Tanpa Sp.KKLP (%)'],
         data: metricsR.radarData.map(d => [d.subject, `${d['Ada'].toFixed(1)}%`, `${d['Tanpa'].toFixed(1)}%`])
       },
       {
         title: 'Analisis Spektrum Kemampuan (Radar - Per FKTP)',
-        headers: ['Aspek Pelayanan', 'Ada Sp.KKLP', 'Tanpa Sp.KKLP'],
+        headers: ['Aspek Pelayanan', 'Ada Sp.KKLP (%)', 'Tanpa Sp.KKLP (%)'],
         data: metricsF.radarData.map(d => [d.subject, `${d['Ada'].toFixed(1)}%`, `${d['Tanpa'].toFixed(1)}%`])
       }
     ];
