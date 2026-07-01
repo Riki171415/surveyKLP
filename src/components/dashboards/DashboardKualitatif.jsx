@@ -270,7 +270,7 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
       {!isPrinting && (
         <div className="w-full">
           {generateComprehensiveAIReport(rawData.filter(item => selectedQuestion === 'Semua' || item.question === selectedQuestion), topWords)}
-          <DeepDiveAIReport rawData={rawData.filter(item => selectedQuestion === 'Semua' || item.question === selectedQuestion)} />
+          <DeepDiveAIReport rawData={rawData.filter(item => selectedQuestion === 'Semua' || item.question === selectedQuestion)} isPrinting={isPrinting} />
         </div>
       )}
 

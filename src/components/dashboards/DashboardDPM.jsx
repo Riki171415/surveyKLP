@@ -533,7 +533,7 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
       {/* Qualitative Deep Dive Khusus DPM */}
       {wawancaraTexts.length > 0 && (
         <div className="mt-12">
-          <DeepDiveAIReport rawData={wawancaraTexts} />
+          <DeepDiveAIReport rawData={wawancaraTexts} isPrinting={isPrinting} />
         </div>
       )}
     </div>

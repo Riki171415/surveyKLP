@@ -4,7 +4,7 @@ import { Sparkles, BarChart2, Filter, FileText, Check, AlertCircle, RefreshCw, L
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 import { supabase } from '../../supabaseClient';
 
-export default function DeepDiveAIReport({ rawData }) {
+export default function DeepDiveAIReport({ rawData, isPrinting }) {
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [isGeneratingGemini, setIsGeneratingGemini] = useState(false);
   const [geminiApiKey, setGeminiApiKey] = useState(localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY || '');
