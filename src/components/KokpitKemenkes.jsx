@@ -107,11 +107,11 @@ export default function KokpitKemenkes() {
 
       const rawData = {
         headers: [
-          'No', 'Nama Faskes', 'Provinsi', 'Kab/Kota', 'Peran', 'Ada Sp.KKLP',
-          ...relevansiItems.map((_, i) => `Relevansi ${i+1}`),
-          ...jknBenefits.map((_, i) => `JKN ${i+1}: Manfaat`),
-          ...nonOptimalServices.map((_, i) => `NonOpt ${i+1}: Masuk JKN`),
-          ...layananDirujukItems.map((_, i) => `Dirujuk ${i+1}`)
+          'No', 'Nama Responden', 'Nama Faskes', 'Provinsi', 'Kab/Kota', 'Peran', 'Ada Sp.KKLP',
+          ...relevansiItems.map((item, i) => `Peran Sp.KKLP Q${i+1}: ${item}`),
+          ...jknBenefits.map((item, i) => `Manfaat JKN Q${i+1}: ${item}`),
+          ...nonOptimalServices.map((item, i) => `Non-Optimal Q${i+1}: ${item}`),
+          ...layananDirujukItems.map((item, i) => `Layanan Dirujuk Q${i+1}: ${item}`)
         ],
         rows: filteredData.map((row, idx) => {
           const rel = row.relevansi_spkklp || {};
@@ -120,6 +120,7 @@ export default function KokpitKemenkes() {
           const rujukan = row.layanan_dirujuk || {};
           return [
             idx + 1,
+            row.nama_responden || '-',
             row.fktp_name || '-',
             row.provinsi || '-',
             row.kab_kota || '-',
