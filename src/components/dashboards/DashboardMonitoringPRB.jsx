@@ -16,7 +16,7 @@ const ViewToggle = ({ value, onChange }) => (
 export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const [mekanismeView, setMekanismeView] = useState('responden');
   const [kendalaView, setKendalaView] = useState('responden');
-  const { monStats, mekanismeDataR, mekanismeDataF, kendalaDataR, kendalaDataF } = useMemo(() => {
+  const { monStats, mekanismeDataR, mekanismeDataF, kendalaDataR, kendalaDataF, crossSpkklpData, crossTypeData } = useMemo(() => {
     let fktpWithMekanisme = 0;
     
     // -- Per Responden --
@@ -213,7 +213,7 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
           <p className="text-xs text-slate-400 mb-4 italic">Berdasarkan {uniqueFktpData.length} FKTP Unik</p>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
-              <BarChart data={monStats.crossSpkklpData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
+              <BarChart data={crossSpkklpData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11 }} />
@@ -233,7 +233,7 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
           <p className="text-xs text-slate-400 mb-4 italic">Berdasarkan {uniqueFktpData.length} FKTP Unik</p>
           <div className="h-72">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
-              <BarChart data={monStats.crossTypeData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
+              <BarChart data={crossTypeData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11 }} />
