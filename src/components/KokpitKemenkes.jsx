@@ -105,7 +105,46 @@ export default function KokpitKemenkes() {
         }
       ];
 
-      await exportTablesToExcel('KOKPIT EKSEKUTIF KEMENKES', tables, 'Kokpit_Kemenkes');
+      const rawData = {
+        headers: [
+          'No', 'Nama Faskes', 'Provinsi', 'Kab/Kota', 'Peran', 'Ada Sp.KKLP',
+          ...relevansiItems.map((_, i) => `Relevansi ${i+1}`),
+          ...jknBenefits.map((_, i) => `JKN ${i+1}: Manfaat`),
+          ...nonOptimalServices.map((_, i) => `NonOpt ${i+1}: Masuk JKN`),
+          ...layananDirujukItems.map((_, i) => `Dirujuk ${i+1}`)
+        ],
+        rows: filteredData.map((row, idx) => {
+          const rel = row.relevansi_spkklp || {};
+          const jkn = row.jkn || {};
+          const nonOpt = row.non_optimal || {};
+          const rujukan = row.layanan_dirujuk || {};
+          return [
+            idx + 1,
+            row.fktp_name || '-',
+            row.provinsi || '-',
+            row.kab_kota || '-',
+            row.role || '-',
+            row.doc_kklp || 'Tidak',
+            ...Array.from({ length: 11 }, (_, i) => {
+              const v = rel[i];
+              return typeof v === 'object' ? Number(v?.skala || 0) : Number(v || 0);
+            }),
+            ...Array.from({ length: 4 }, (_, i) => {
+              const v = jkn[i];
+              return typeof v === 'object' ? Number(v?.skala || 0) : Number(v || 0);
+            }),
+            ...Array.from({ length: 6 }, (_, i) => {
+              const v = nonOpt[i];
+              if (!v) return '-';
+              return typeof v === 'object' ? (v.masukJkn || '-') : String(v);
+            }),
+            ...layananDirujukItems.map((_, i) => rujukan[i] ? 'Ya' : 'Tidak')
+          ];
+        })
+      };
+
+      await exportTablesToExcel('KOKPIT EKSEKUTIF KEMENKES', tables, 'Kokpit_Kemenkes', rawData);
+
 
     } catch (err) {
       console.error(err);

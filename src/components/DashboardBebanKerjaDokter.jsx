@@ -168,8 +168,53 @@ const DashboardBebanKerjaDokter = () => {
     ws3['!cols'] = [{ wch: 45 }, { wch: 25 }, { wch: 25 }, { wch: 25 }];
     XLSX.utils.book_append_sheet(wb, ws3, 'Analitik Beban Kerja');
 
+    // ── Sheet 4: Data Mentah Responden ──
+    const mentahHeaders = [
+      'No', 'Nama Faskes', 'Provinsi',
+      ...kompetensiLayananList.map((_, i) => `[${i+1}] Status`),
+      ...kompetensiLayananList.map((_, i) => `[${i+1}] Kendala`),
+    ];
+    const mentahRows = surveys.map((survey, idx) => [
+      idx + 1,
+      survey.fktp_name || '-',
+      survey.provinsi || '-',
+      ...kompetensiLayananList.map((_, i) => survey.kompetensi?.[i]?.status || '-'),
+      ...kompetensiLayananList.map((_, i) => survey.kompetensi?.[i]?.kendala || '-'),
+    ]);
+
+    // Buat aoa dengan header info dulu
+    const mentahAoa = [
+      [`DATA MENTAH RESPONDEN — BEBAN KERJA & KOMPETENSI DOKTER`],
+      [`Diekspor: ${new Date().toLocaleString('id-ID')}   |   Total Baris: ${surveys.length}`],
+      [],
+      mentahHeaders,
+      ...mentahRows
+    ];
+    const ws4 = XLSX.utils.aoa_to_sheet(mentahAoa);
+
+    // Style header row (baris ke-4, index 3 / row 4 di excel = A4)
+    const headerRange = XLSX.utils.decode_range(ws4['!ref']);
+    for (let C = headerRange.s.c; C <= headerRange.e.c; C++) {
+      const cell = ws4[XLSX.utils.encode_cell({ r: 3, c: C })];
+      if (cell) {
+        cell.s = {
+          fill: { fgColor: { rgb: '0F172A' } },
+          font: { bold: true, color: { rgb: 'FFFFFF' } },
+          alignment: { horizontal: 'center', wrapText: true }
+        };
+      }
+    }
+
+    ws4['!cols'] = [
+      { wch: 5 }, { wch: 35 }, { wch: 20 },
+      ...kompetensiLayananList.map(() => ({ wch: 15 })),
+      ...kompetensiLayananList.map(() => ({ wch: 50 })),
+    ];
+    XLSX.utils.book_append_sheet(wb, ws4, 'Data Mentah Responden');
+
     XLSX.writeFile(wb, `Dashboard_BebanKerja_Dokter_${new Date().getTime()}.xlsx`);
   };
+
 
   return (
     <div className="space-y-6 animate-fade-in-up">
