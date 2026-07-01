@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   Legend, LabelList, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
@@ -6,9 +6,28 @@ import {
 import { Stethoscope, Activity, Home, HeartPulse, CheckCircle2, AlertCircle, FileText, Download } from 'lucide-react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 
+// ── Komponen Toggle Pill ──────────────────────────────────────────────────────
+const ViewToggle = ({ value, onChange }) => (
+  <div className="flex items-center bg-white/20 backdrop-blur-md rounded-lg p-1 text-xs font-semibold shrink-0 mt-4 sm:mt-0 shadow-inner">
+    <button
+      onClick={() => onChange('responden')}
+      className={`px-4 py-1.5 rounded-md transition-all ${value === 'responden' ? 'bg-white text-indigo-600 shadow-sm' : 'text-indigo-100 hover:text-white'}`}
+    >
+      Per Responden
+    </button>
+    <button
+      onClick={() => onChange('fktp')}
+      className={`px-4 py-1.5 rounded-md transition-all ${value === 'fktp' ? 'bg-white text-indigo-600 shadow-sm' : 'text-indigo-100 hover:text-white'}`}
+    >
+      Per FKTP
+    </button>
+  </div>
+);
+
 export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
+  const [view, setView] = useState('responden');
   
-  const { spData, radarData, tableData, stats } = useMemo(() => {
+  const calculateMetrics = (dataset) => {
     let adaSp = 0, tanpaSp = 0;
     
     const metrikAda = { prbAktif: 0, kepatuhanPrb: 0, rujukanFkrtl: 0, hc: 0, paliatif: 0, kolaborasiHc: 0, perbaikanHc: 0 };
@@ -16,7 +35,7 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
 
     let countPrbAda = 0, countPrbTanpa = 0;
 
-    uniqueFktpData.forEach(row => {
+    dataset.forEach(row => {
       const isAdaSp = row.doc_kklp === 'Ya';
       if (isAdaSp) adaSp++; else tanpaSp++;
 
@@ -93,7 +112,17 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
     Object.keys(dataTanpa).forEach(k => dataTanpa[k] = Number(dataTanpa[k].toFixed(1)));
 
     return { spData: barKinerja, radarData: radar, stats: { adaSp, tanpaSp, dataAda, dataTanpa } };
+  };
+
+  const { metricsR, metricsF } = useMemo(() => {
+    return {
+      metricsR: calculateMetrics(filteredData),
+      metricsF: calculateMetrics(uniqueFktpData)
+    };
   }, [filteredData, uniqueFktpData]);
+
+  const activeMetrics = view === 'responden' ? metricsR : metricsF;
+  const { spData, radarData, stats } = activeMetrics;
 
   const StatCard = ({ title, valueAda, valueTanpa, subtitle, icon: Icon, colorClass }) => {
     const diff = valueAda - valueTanpa;
@@ -122,14 +151,30 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
   const handleExport = () => {
     const tables = [
       {
-        title: 'Komparasi Kinerja Lintas Program',
+        title: 'Ringkasan Kinerja Keseluruhan (Per Responden)',
         headers: ['Indikator Kinerja', 'Ada Sp.KKLP', 'Tanpa Sp.KKLP'],
-        data: spData.map(d => [d.name, `${d['Ada Sp.KKLP'].toFixed(1)}%`, `${d['Tanpa Sp.KKLP'].toFixed(1)}%`])
+        data: [
+          ...metricsR.spData.map(d => [d.name, `${d['Ada Sp.KKLP'].toFixed(1)}%`, `${d['Tanpa Sp.KKLP'].toFixed(1)}%`]),
+          ['Rata-rata Rujukan FKRTL', `${metricsR.stats.dataAda.avgRujukan.toFixed(2)}x`, `${metricsR.stats.dataTanpa.avgRujukan.toFixed(2)}x`]
+        ]
       },
       {
-        title: 'Analisis Spektrum Kemampuan (Radar)',
+        title: 'Ringkasan Kinerja Keseluruhan (Per FKTP)',
+        headers: ['Indikator Kinerja', 'Ada Sp.KKLP', 'Tanpa Sp.KKLP'],
+        data: [
+          ...metricsF.spData.map(d => [d.name, `${d['Ada Sp.KKLP'].toFixed(1)}%`, `${d['Tanpa Sp.KKLP'].toFixed(1)}%`]),
+          ['Rata-rata Rujukan FKRTL', `${metricsF.stats.dataAda.avgRujukan.toFixed(2)}x`, `${metricsF.stats.dataTanpa.avgRujukan.toFixed(2)}x`]
+        ]
+      },
+      {
+        title: 'Analisis Spektrum Kemampuan (Radar - Per Responden)',
         headers: ['Aspek Pelayanan', 'Ada Sp.KKLP', 'Tanpa Sp.KKLP'],
-        data: radarData.map(d => [d.subject, `${d['Ada'].toFixed(1)}%`, `${d['Tanpa'].toFixed(1)}%`])
+        data: metricsR.radarData.map(d => [d.subject, `${d['Ada'].toFixed(1)}%`, `${d['Tanpa'].toFixed(1)}%`])
+      },
+      {
+        title: 'Analisis Spektrum Kemampuan (Radar - Per FKTP)',
+        headers: ['Aspek Pelayanan', 'Ada Sp.KKLP', 'Tanpa Sp.KKLP'],
+        data: metricsF.radarData.map(d => [d.subject, `${d['Ada'].toFixed(1)}%`, `${d['Tanpa'].toFixed(1)}%`])
       }
     ];
 
@@ -179,8 +224,9 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
         <div className="relative z-10 flex flex-col sm:flex-row justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold mb-2 flex items-center"><Stethoscope className="w-6 h-6 mr-2" /> Dampak Keberadaan Sp.KKLP</h2>
-            <p className="text-primary-100 font-medium">Komparasi capaian indikator pelayanan antara {stats.adaSp} FKTP dengan Sp.KKLP vs {stats.tanpaSp} FKTP tanpa Sp.KKLP</p>
+            <p className="text-primary-100 font-medium">Komparasi capaian indikator pelayanan antara {stats.adaSp} dengan Sp.KKLP vs {stats.tanpaSp} tanpa Sp.KKLP ({view === 'responden' ? 'Responden' : 'FKTP'})</p>
           </div>
+          {!isPrinting && <ViewToggle value={view} onChange={setView} />}
         </div>
       </div>
 
