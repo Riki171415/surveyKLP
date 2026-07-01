@@ -3,8 +3,9 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   ScatterChart, Scatter, ZAxis, Cell
 } from 'recharts';
-import { Clock, AlertTriangle, CheckCircle2, TrendingDown, Target, Info, Loader2, ListChecks } from 'lucide-react';
+import { Clock, AlertTriangle, CheckCircle2, TrendingDown, Target, Info, Loader2, ListChecks, Download } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import * as XLSX from 'xlsx';
 
 const DashboardBebanKerjaDokter = () => {
   const [surveys, setSurveys] = useState([]);
@@ -59,6 +60,7 @@ const DashboardBebanKerjaDokter = () => {
     let sudah = 0;
     let belum = 0;
     const kendalaMap = new Map();
+    const allKendalaList = [];
 
     surveys.forEach(survey => {
       if (survey.kompetensi && survey.kompetensi[idx]) {
@@ -69,6 +71,7 @@ const DashboardBebanKerjaDokter = () => {
           if (kendalaText && kendalaText.trim() !== '') {
              const key = kendalaText.trim().toLowerCase();
              kendalaMap.set(key, (kendalaMap.get(key) || 0) + 1);
+             allKendalaList.push(kendalaText.trim());
           }
         }
       }
@@ -86,17 +89,103 @@ const DashboardBebanKerjaDokter = () => {
       sudah,
       belum,
       total: sudah + belum,
-      kendala: topKendala ? topKendala : '-'
+      kendala: topKendala ? topKendala : '-',
+      allKendala: allKendalaList
     };
   });
 
+  const exportToExcel = () => {
+    const wb = XLSX.utils.book_new();
+
+    // ── Sheet 1: Semua Isian Responden (Detail per Faskes) ──
+    // Nama pendek layanan untuk kolom header
+    const shortNames = ['USG Dasar', 'Deprescribing', 'Family Conference', 'Pemeriksaan X-ray'];
+    const detailHeadersFinal = [
+      'No', 'Nama Faskes',
+      ...shortNames.map(n => `Status: ${n}`),
+      ...shortNames.map(n => `Kendala: ${n}`),
+    ];
+
+    const detailRows = surveys.map((survey, idx) => [
+      idx + 1,
+      survey.fktp_name || '-',
+      ...kompetensiLayananList.map((_, i) => survey.kompetensi?.[i]?.status || '-'),
+      ...kompetensiLayananList.map((_, i) => survey.kompetensi?.[i]?.kendala || '-'),
+    ]);
+
+    // Tambah baris rata-rata / rekap
+    const rekapRow = [
+      'REKAP', '',
+      ...kompetensiLayananList.map((_, i) => {
+        const sudah = surveys.filter(s => s.kompetensi?.[i]?.status === 'sudah').length;
+        return `Sudah: ${sudah} | Belum: ${surveys.filter(s => s.kompetensi?.[i]?.status === 'belum').length}`;
+      }),
+      ...kompetensiLayananList.map(() => ''),
+    ];
+
+    const ws1 = XLSX.utils.aoa_to_sheet([detailHeadersFinal, ...detailRows, ['---'], rekapRow]);
+    ws1['!cols'] = [{ wch: 5 }, { wch: 35 }, ...shortNames.map(() => ({ wch: 18 })), ...shortNames.map(() => ({ wch: 40 }))];
+    XLSX.utils.book_append_sheet(wb, ws1, 'Detail Per Faskes');
+
+    // ── Sheet 2: Ringkasan Kompetensi ──
+    const summaryHeaders = ['Jenis Layanan', 'Sudah Berjalan', 'Belum Berjalan', 'Total Responden', 'Ringkasan Kendala Utama'];
+    const summaryRows = tableData.map(row => [
+      row.namaLayanan, row.sudah, row.belum, row.total, row.kendala
+    ]);
+    const ws2 = XLSX.utils.aoa_to_sheet([summaryHeaders, ...summaryRows]);
+    ws2['!cols'] = [{ wch: 55 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 60 }];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Ringkasan Kompetensi');
+
+    // ── Sheet 3: Analitik Beban Kerja ──
+    const analyticsData = [
+      ['DASHBOARD BEBAN KERJA & KOMPETENSI DOKTER'],
+      [],
+      ['A. OPERASIONAL & EFISIENSI WAKTU (WACT)'],
+      ['Metrik', 'Nilai', 'Keterangan'],
+      ['Rata-rata Waktu per Pasien (WACT)', '17 menit', 'Gabungan dalam & luar gedung'],
+      ['Kapasitas Maksimal Harian', '26 pasien', 'Total Waktu Produktif 450 menit ÷ WACT 17 menit'],
+      ['Proporsi Pasien Dalam Gedung', '80%', 'Waktu rata-rata 10 menit/pasien'],
+      ['Proporsi Pasien Luar Gedung (Home Visit)', '20%', 'Waktu rata-rata 45 menit/pasien'],
+      [],
+      ['B. PARADOKS VOLUME PASIEN VS WAKTU TERSITA'],
+      ['Segmen', 'Proporsi Jumlah Pasien (%)', 'Proporsi Waktu Tersita (%)'],
+      ['Dalam Gedung', '80%', '47%'],
+      ['Home Visit (Luar Gedung)', '20%', '53%'],
+      [],
+      ['C. MATRIKS PRIORITAS KESENJANGAN KOMPETENSI'],
+      ['Kompetensi', 'Effort (Upaya, 1-10)', 'Impact (Dampak, 1-10)', 'Kuadran Prioritas'],
+      ...competencyData.map(c => [c.nama, c.effort, c.impact, c.kuadran]),
+      [],
+      ['D. POTENSI OPPORTUNITY COST'],
+      ['Item', 'Nilai'],
+      ['Rata-rata rujukan per hari', '5 Pasien'],
+      ['Asumsi nilai hilang per pasien', 'Rp 100.000'],
+      ['Potensi kebocoran harian', 'Rp 500.000'],
+      ['Total 1 Bulan (20 Hari Kerja)', 'Rp 10.000.000'],
+      ['Total 1 Tahun (12 Bulan)', 'Rp 120.000.000'],
+    ];
+    const ws3 = XLSX.utils.aoa_to_sheet(analyticsData);
+    ws3['!cols'] = [{ wch: 45 }, { wch: 25 }, { wch: 25 }, { wch: 25 }];
+    XLSX.utils.book_append_sheet(wb, ws3, 'Analitik Beban Kerja');
+
+    XLSX.writeFile(wb, `Dashboard_BebanKerja_Dokter_${new Date().getTime()}.xlsx`);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Dashboard Analitik: Kompetensi & Beban Kerja Dokter</h1>
           <p className="text-slate-500 mt-1">Sistem Pemantauan Kapasitas, Kesenjangan Kompetensi, dan Analisis Beban Waktu Harian.</p>
         </div>
+        <button
+          onClick={exportToExcel}
+          disabled={loading || surveys.length === 0}
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+        >
+          <Download className="w-4 h-4" />
+          Download Excel
+        </button>
       </div>
 
       {/* EXECUTIVE SUMMARY */}

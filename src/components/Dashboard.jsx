@@ -120,15 +120,56 @@ export default function Dashboard() {
       "Kepatuhan PRB", "Kolaborasi Homecare", "Kolaborasi Paliatif",
       ...penyakitPasienBulanan.map(p => `Pasien_Bulanan_${p.label}`)
     ];
+
+    // Kolom indeks numerik (0-based, setelah header) yang bisa dihitung rata-ratanya
+    // Indeks: 11=dok.umum, 12=dok.gigi, 13=waktuPoli, 14=waktuHV, 15=bebanDlm, 16=bebanLuar, + pasien bulanan (mulai indeks 20)
+    const numericColIndices = [11, 12, 13, 14, 15, 16, ...penyakitPasienBulanan.map((_, i) => 20 + i)];
+
     const rows = filteredData.map((row, index) => {
       return [
         index + 1, new Date(row.created_at).toLocaleString('id-ID'), row.provinsi || '', row.kab_kota || '', row.fktp_name || '', row.kode_faskes || '', row.nama_responden || '', row.role || '', row.doc_kklp || 'Tidak', row.spkklp_status || '', row.spkklp_obat_khusus || '',
-        row.doc_umum || '', row.doc_gigi || '', row.time_in_poli || '', row.time_home_visit || '', row.prop_in_fktp || '', row.prop_out_fktp || '',
+        row.doc_umum !== undefined && row.doc_umum !== '' ? Number(row.doc_umum) : '',
+        row.doc_gigi !== undefined && row.doc_gigi !== '' ? Number(row.doc_gigi) : '',
+        row.time_in_poli !== undefined && row.time_in_poli !== '' ? Number(row.time_in_poli) : '',
+        row.time_home_visit !== undefined && row.time_home_visit !== '' ? Number(row.time_home_visit) : '',
+        row.prop_in_fktp !== undefined && row.prop_in_fktp !== '' ? Number(row.prop_in_fktp) : '',
+        row.prop_out_fktp !== undefined && row.prop_out_fktp !== '' ? Number(row.prop_out_fktp) : '',
         row.prb?.rutinKunjungan || '', row.home_care?.kolaborasi || '', row.paliatif?.kolaborasi || '',
-        ...penyakitPasienBulanan.map(p => row.data_pasien_bulanan?.[p.id] || '')
+        ...penyakitPasienBulanan.map(p => {
+          const val = row.data_pasien_bulanan?.[p.id];
+          return val !== undefined && val !== '' ? Number(val) : '';
+        })
       ];
     });
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+    // Hitung baris rata-rata untuk kolom numerik
+    const avgRow = headers.map((_, colIdx) => {
+      if (colIdx === 0) return 'RATA-RATA';
+      if (!numericColIndices.includes(colIdx)) return '';
+      const vals = rows.map(r => r[colIdx]).filter(v => v !== '' && !isNaN(Number(v))).map(Number);
+      if (vals.length === 0) return '';
+      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+      return Math.round(avg * 100) / 100;
+    });
+
+    // Tambahkan baris pemisah dan rata-rata
+    const separatorRow = headers.map((_, i) => i === 0 ? '---' : '');
+    const allRows = [...rows, separatorRow, avgRow];
+
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...allRows]);
+
+    // Style baris rata-rata (baris terakhir) - highlight kuning
+    const avgRowIndex = allRows.length + 1; // +1 karena header di baris 1
+    headers.forEach((_, colIdx) => {
+      const cellAddress = XLSX.utils.encode_cell({ r: avgRowIndex, c: colIdx });
+      if (!worksheet[cellAddress]) worksheet[cellAddress] = { v: '', t: 's' };
+      worksheet[cellAddress].s = {
+        fill: { fgColor: { rgb: 'FFF9C4' }, patternType: 'solid' },
+        font: { bold: true },
+        border: { top: { style: 'thin' }, bottom: { style: 'thin' } }
+      };
+    });
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data Terfilter");
     XLSX.writeFile(workbook, `Data_Dashboard_KKLP_${new Date().getTime()}.xlsx`);
@@ -148,19 +189,42 @@ export default function Dashboard() {
       "Bentuk Pelayanan Keluarga", "Kegiatan Dilakukan",
       ...penyakitPasienBulanan.map(p => `DPM_Pasien_Bulanan_${p.label}`)
     ];
+
+    // Kolom numerik DPM: pasien bulanan mulai dari indeks 19
+    const dpmNumericColIndices = [...penyakitPasienBulanan.map((_, i) => 19 + i)];
+
     const rows = dpmData.map((row, index) => {
       const d = row.dpm || {};
       return [
         index + 1, new Date(row.created_at).toLocaleString('id-ID'), row.provinsi || '', row.kab_kota || '', row.fktp_name || '', row.nama_responden || '',
         d.karakteristik?.lamaPraktik || '', d.karakteristik?.jumlahKunjungan || '', d.karakteristik?.kelompokUmur || '', d.karakteristik?.statusPeserta || '',
         Array.isArray(d.kasus?.masalahKesehatan) ? d.kasus.masalahKesehatan.join(', ') : (d.kasus?.masalahKesehatan || ''), 
-        d.kasus?.persenKronis || '', d.kasus?.persenKontrol || '', d.kasus?.alasanRujukan || '',
+        d.kasus?.persenKronis !== undefined && d.kasus?.persenKronis !== '' ? Number(d.kasus.persenKronis) : '',
+        d.kasus?.persenKontrol !== undefined && d.kasus?.persenKontrol !== '' ? Number(d.kasus.persenKontrol) : '',
+        d.kasus?.alasanRujukan || '',
         d.kontinuitas?.sistemPencatatan || '', d.kontinuitas?.jadwalkanKunjunganUlang || '', d.kontinuitas?.tindakLanjutTidakDatang || '',
         d.gambaran?.bentukPelayananKeluarga || '', Array.isArray(d.gambaran?.kegiatanDilakukan) ? d.gambaran.kegiatanDilakukan.join(', ') : (d.gambaran?.kegiatanDilakukan || ''),
-        ...penyakitPasienBulanan.map(p => d.dataPasienBulanan?.[p.id] || '')
+        ...penyakitPasienBulanan.map(p => {
+          const val = d.dataPasienBulanan?.[p.id];
+          return val !== undefined && val !== '' ? Number(val) : '';
+        })
       ];
     });
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+    // Hitung baris rata-rata untuk kolom numerik DPM
+    const avgRow = headers.map((_, colIdx) => {
+      if (colIdx === 0) return 'RATA-RATA';
+      if (!dpmNumericColIndices.includes(colIdx)) return '';
+      const vals = rows.map(r => r[colIdx]).filter(v => v !== '' && !isNaN(Number(v))).map(Number);
+      if (vals.length === 0) return '';
+      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+      return Math.round(avg * 100) / 100;
+    });
+
+    const separatorRow = headers.map((_, i) => i === 0 ? '---' : '');
+    const allRows = [...rows, separatorRow, avgRow];
+
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...allRows]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data DPM");
     XLSX.writeFile(workbook, `Data_DPM_KKLP_${new Date().getTime()}.xlsx`);
@@ -473,18 +537,76 @@ export default function Dashboard() {
          });
       }
 
-      // 13. Raw Data
+      // 13. Raw Data — semua isian responden + baris rata-rata
       const sRaw = workbook.sheet('Raw Data');
       if (sRaw) {
-         const headers = ['Waktu Submit', 'Nama Responden', 'Faskes', 'Provinsi', 'Kab/Kota', 'Jabatan'];
-         headers.forEach((h, i) => sRaw.cell(1, i+1).value(h));
+         const rawHeaders = [
+           'Waktu Submit', 'Nama Responden', 'Faskes', 'Provinsi', 'Kab/Kota', 'Jabatan',
+           'Ada Sp.KKLP?', 'Status Sp.KKLP',
+           'Total Dokter Umum', 'Total Dokter Gigi',
+           'Waktu Poli (jam)', 'Waktu Home Visit (jam)',
+           'Beban Dalam Gedung (%)', 'Beban Luar Gedung (%)',
+           'Total Peserta PRB', 'Rutin Berkunjung PRB', 'Tidak Berkunjung PRB',
+           'Kolaborasi Home Care', 'Kolaborasi Paliatif',
+           ...penyakitPasienBulanan.map(p => `Pasien Bulanan - ${p.label}`)
+         ];
+         rawHeaders.forEach((h, i) => sRaw.cell(1, i+1).value(h));
+
+         // Kolom numerik untuk rata-rata (indeks 0-based): 8=dok.umum, 9=dok.gigi, 10=wkt poli, 11=wkt hv, 12=beban dlm, 13=beban luar, 14=jml prb, 15=rutin, 16=tdk berkunjung, + pasien bulanan
+         const rawNumericCols = [8, 9, 10, 11, 12, 13, 14, 15, 16, ...penyakitPasienBulanan.map((_, i) => 19 + i)];
+         const rawDataMatrix = [];
+
          filteredData.forEach((row, i) => {
-            sRaw.cell(i+2, 1).value(row.created_at || '');
-            sRaw.cell(i+2, 2).value(row.nama_responden || '');
-            sRaw.cell(i+2, 3).value(row.fktp_name || '');
-            sRaw.cell(i+2, 4).value(row.provinsi || '');
-            sRaw.cell(i+2, 5).value(row.kab_kota || '');
-            sRaw.cell(i+2, 6).value(row.role || '');
+            const rowArr = [
+              row.created_at ? new Date(row.created_at).toLocaleString('id-ID') : '',
+              row.nama_responden || '',
+              row.fktp_name || '',
+              row.provinsi || '',
+              row.kab_kota || '',
+              row.role || '',
+              row.doc_kklp || 'Tidak',
+              row.spkklp_status || '',
+              row.doc_umum !== undefined && row.doc_umum !== '' ? Number(row.doc_umum) : '',
+              row.doc_gigi !== undefined && row.doc_gigi !== '' ? Number(row.doc_gigi) : '',
+              row.time_in_poli !== undefined && row.time_in_poli !== '' ? Number(row.time_in_poli) : '',
+              row.time_home_visit !== undefined && row.time_home_visit !== '' ? Number(row.time_home_visit) : '',
+              row.prop_in_fktp !== undefined && row.prop_in_fktp !== '' ? Number(row.prop_in_fktp) : '',
+              row.prop_out_fktp !== undefined && row.prop_out_fktp !== '' ? Number(row.prop_out_fktp) : '',
+              row.prb?.jumlah !== undefined && row.prb?.jumlah !== '' ? Number(row.prb.jumlah) : '',
+              row.prb?.rutinKunjungan !== undefined && row.prb?.rutinKunjungan !== '' ? Number(row.prb.rutinKunjungan) : '',
+              row.prb?.tidakBerkunjung !== undefined && row.prb?.tidakBerkunjung !== '' ? Number(row.prb.tidakBerkunjung) : '',
+              row.home_care?.kolaborasi || '',
+              row.paliatif?.kolaborasi || '',
+              ...penyakitPasienBulanan.map(p => {
+                const val = row.data_pasien_bulanan?.[p.id];
+                return val !== undefined && val !== '' ? Number(val) : '';
+              })
+            ];
+            rawDataMatrix.push(rowArr);
+            rawHeaders.forEach((_, j) => sRaw.cell(i+2, j+1).value(rowArr[j] !== undefined ? rowArr[j] : ''));
+         });
+
+         // Baris pemisah
+         const sepRowIdx = filteredData.length + 2;
+         sRaw.cell(sepRowIdx, 1).value('--- RATA-RATA ---');
+         rawHeaders.forEach((_, j) => {
+           if (j === 0) return;
+           sRaw.cell(sepRowIdx, j+1).value('');
+         });
+
+         // Baris rata-rata
+         const avgRowIdx = filteredData.length + 3;
+         sRaw.cell(avgRowIdx, 1).value('RATA-RATA');
+         rawHeaders.forEach((_, colIdx) => {
+           if (colIdx === 0) return;
+           if (!rawNumericCols.includes(colIdx)) {
+             sRaw.cell(avgRowIdx, colIdx+1).value('');
+             return;
+           }
+           const vals = rawDataMatrix.map(r => r[colIdx]).filter(v => v !== '' && !isNaN(Number(v))).map(Number);
+           if (vals.length === 0) { sRaw.cell(avgRowIdx, colIdx+1).value(''); return; }
+           const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+           sRaw.cell(avgRowIdx, colIdx+1).value(Math.round(avg * 100) / 100);
          });
       }
 
