@@ -134,11 +134,32 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
     ];
 
     const rawData = {
-      headers: ['No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi', 'Ada Sp.KKLP'],
-      rows: uniqueFktpData.map((row, idx) => [
-        idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
-        row.doc_kklp || '-'
-      ])
+      headers: [
+        'No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi', 'Ada Sp.KKLP',
+        'Peserta PRB Aktif', 'Peserta PRB Rutin', 'Kepatuhan PRB (%)', 'Rata-rata Rujukan FKRTL',
+        'Pelayanan Home Care', 'HC: Kolaborasi Nakes', 'HC: Ada Perbaikan',
+        'Pelayanan Paliatif'
+      ],
+      rows: filteredData.map((row, idx) => {
+        const prb = row.prb || {};
+        const hc = row.home_care || {};
+        const pal = row.paliatif || {};
+        
+        const prbAktif = Number(prb.jumlah) || 0;
+        const prbRutin = Number(prb.rutinKunjungan) || 0;
+        const prbPatuh = prbAktif > 0 ? ((prbRutin / prbAktif) * 100).toFixed(1) : 0;
+        const rujukan = Number(prb.rataRujukan) || 0;
+
+        return [
+          idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
+          row.doc_kklp || '-',
+          prbAktif, prbRutin, prbPatuh, rujukan,
+          hc.screening || 'Tidak',
+          hc.kolaborasi || 'Tidak',
+          hc.perbaikan || 'Tidak',
+          pal.screening || 'Tidak'
+        ];
+      })
     };
 
     exportTablesToExcel('IMPACT SP.KKLP', tables, 'Dashboard_Impact_SpKKLP', rawData);
