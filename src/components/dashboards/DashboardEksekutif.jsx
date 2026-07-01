@@ -430,7 +430,7 @@ export default function DashboardEksekutif({ data = [] }) {
     // Sheet 5: Hambatan
     const hambatanData = [
       ['J. KENDALA IMPLEMENTASI SP.KKLP'],
-      ['Kategori Kendala', 'Jumlah FKTP'],
+      ['Kategori Kendala', 'Jumlah Responden'],
       ...metrics.barKendala.map(d => [d.name, d.value]),
       [],
       ['K. FEEDBACK SUARA LAPANGAN (Hambatan Klinis & PRB)'],
