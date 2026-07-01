@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Sparkles, BarChart2, Filter, FileText, Check, AlertCircle, RefreshCw, Layers, Users, Zap, Target, Activity, Key, Cpu, X , Image as ImageIcon } from 'lucide-react';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import { supabase } from '../../supabaseClient';
 
 export default function DeepDiveAIReport({ rawData }) {
   const [isAnalyzing, setIsAnalyzing] = useState(true);
@@ -12,13 +13,28 @@ export default function DeepDiveAIReport({ rawData }) {
   const [tempKey, setTempKey] = useState('');
   const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
   const [geminiError, setGeminiError] = useState('');
-  const [geminiReport, setGeminiReport] = useState(() => {
-    const cached = localStorage.getItem('GEMINI_CACHED_REPORT');
-    if (cached) {
-      try { return JSON.parse(cached); } catch(e) { return null; }
-    }
-    return null;
-  });
+  const [geminiReport, setGeminiReport] = useState(null);
+
+  useEffect(() => {
+    const fetchReport = async () => {
+      try {
+        const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
+        if (useSupabase) {
+          const { data, error } = await supabase.from('ai_reports').select('content').eq('id', 'deepdive').single();
+          if (data && data.content) setGeminiReport(JSON.parse(data.content));
+        } else {
+          const res = await fetch('/api/ai-reports/deepdive');
+          if (res.ok) {
+            const json = await res.json();
+            if (json.data && json.data.content) setGeminiReport(JSON.parse(json.data.content));
+          }
+        }
+      } catch (e) {
+        console.error("Error fetching AI report:", e);
+      }
+    };
+    fetchReport();
+  }, []);
 
   useEffect(() => {
     setIsAnalyzing(true);
@@ -113,7 +129,21 @@ ${JSON.stringify(smartAnswers)}
       const text = data.candidates[0].content.parts[0].text;
       const parsed = JSON.parse(text);
       setGeminiReport(parsed);
-      localStorage.setItem('GEMINI_CACHED_REPORT', JSON.stringify(parsed));
+      
+      try {
+        const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
+        if (useSupabase) {
+          await supabase.from('ai_reports').upsert({ id: 'deepdive', content: JSON.stringify(parsed) });
+        } else {
+          await fetch('/api/ai-reports', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: 'deepdive', content: JSON.stringify(parsed) })
+          });
+        }
+      } catch (dbErr) {
+        console.error("Error saving to DB:", dbErr);
+      }
 
     } catch (err) {
       console.error(err);

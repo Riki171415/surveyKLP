@@ -4,6 +4,7 @@ import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, Fil
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import { supabase } from '../../supabaseClient';
 
 export default function DashboardKeluhanSentences({ filteredData, isPrinting }) {
   const [expandedCategory, setExpandedCategory] = useState(null);
@@ -13,6 +14,35 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
   
   const [expandedAuto, setExpandedAuto] = useState(null);
   const [autoSummary, setAutoSummary] = useState(null);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
+        if (useSupabase) {
+          const { data: dataK } = await supabase.from('ai_reports').select('content').eq('id', 'keluhan').single();
+          if (dataK && dataK.content) { try { setGeminiSummary(JSON.parse(dataK.content)); } catch(e) { setGeminiSummary(dataK.content); } }
+          
+          const { data: dataA } = await supabase.from('ai_reports').select('content').eq('id', 'auto_cluster').single();
+          if (dataA && dataA.content) { try { setAutoSummary(JSON.parse(dataA.content)); } catch(e) { setAutoSummary(dataA.content); } }
+        } else {
+          const resK = await fetch('/api/ai-reports/keluhan');
+          if (resK.ok) {
+            const json = await resK.json();
+            if (json.data && json.data.content) { try { setGeminiSummary(JSON.parse(json.data.content)); } catch(e) { setGeminiSummary(json.data.content); } }
+          }
+          const resA = await fetch('/api/ai-reports/auto_cluster');
+          if (resA.ok) {
+            const json = await resA.json();
+            if (json.data && json.data.content) { try { setAutoSummary(JSON.parse(json.data.content)); } catch(e) { setAutoSummary(json.data.content); } }
+          }
+        }
+      } catch (e) {
+        console.error("Error fetching AI reports:", e);
+      }
+    };
+    fetchReports();
+  }, []);
   const [isGeneratingAuto, setIsGeneratingAuto] = useState(false);
   const [autoError, setAutoError] = useState('');
   
@@ -246,6 +276,23 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
     return resData.candidates[0].content.parts[0].text;
   };
 
+  const saveReportToDb = async (id, content) => {
+    try {
+      const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
+      if (useSupabase) {
+        await supabase.from('ai_reports').upsert({ id, content: JSON.stringify(content) });
+      } else {
+        await fetch('/api/ai-reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, content: JSON.stringify(content) })
+        });
+      }
+    } catch (e) {
+      console.error("Error saving report to DB:", e);
+    }
+  };
+
   const handleGenerateGeminiSummary = async (data, total, overrideKey, overrideModel) => {
     try {
       setIsGeneratingGemini(true);
@@ -271,9 +318,12 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
       const text = await callGeminiApi(prompt, overrideKey, overrideModel);
       try {
         const parsed = JSON.parse(text);
-        setGeminiSummary(parsed.paragraphs ? parsed.paragraphs.join('\\n\\n') : text);
+        const textSum = parsed.paragraphs ? parsed.paragraphs.join('\n\n') : text;
+        setGeminiSummary(textSum);
+        saveReportToDb('keluhan', textSum);
       } catch (e) {
         setGeminiSummary(text);
+        saveReportToDb('keluhan', text);
       }
     } catch (err) {
       if (err.message === "API_KEY_MISSING") {
@@ -316,9 +366,12 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
       const text = await callGeminiApi(prompt, overrideKey, overrideModel);
       try {
         const parsed = JSON.parse(text);
-        setAutoSummary(parsed.paragraphs ? parsed.paragraphs.join('\\n\\n') : text);
+        const textSum = parsed.paragraphs ? parsed.paragraphs.join('\n\n') : text;
+        setAutoSummary(textSum);
+        saveReportToDb('auto_cluster', textSum);
       } catch (e) {
         setAutoSummary(text);
+        saveReportToDb('auto_cluster', text);
       }
     } catch (err) {
       if (err.message === "API_KEY_MISSING") {
@@ -403,7 +456,12 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
             )}
             {!isPrinting && !isAnalyzingAutoClusters && (
               summaryData ? (
-                <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-200"><Check className="w-4 h-4" /> Digenerate oleh Gemini AI</div>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-200"><Check className="w-4 h-4" /> Digenerate oleh Gemini AI</div>
+                  <button onClick={() => generateFn(data, total)} className={`text-xs flex items-center gap-1 font-medium transition underline ${isAuto ? 'text-emerald-600 hover:text-emerald-800' : 'text-indigo-600 hover:text-indigo-800'}`}>
+                    <RefreshCw className="w-3 h-3" /> Generate Ulang
+                  </button>
+                </div>
               ) : (
                 <button 
                   onClick={() => generateFn(data, total)} 

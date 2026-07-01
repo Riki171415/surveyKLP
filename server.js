@@ -20,12 +20,61 @@ const initDB = async () => {
     await pool.query('ALTER TABLE surveys ADD COLUMN IF NOT EXISTS is_editable BOOLEAN DEFAULT false');
     await pool.query("ALTER TABLE surveys ADD COLUMN IF NOT EXISTS edit_history JSONB DEFAULT '[]'::jsonb");
     await pool.query('ALTER TABLE surveys ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE');
-    console.log('Database schema verified: edit_history, updated_at, is_editable are ready.');
+    
+    // Create ai_reports table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS ai_reports (
+        id VARCHAR(50) PRIMARY KEY,
+        content TEXT NOT NULL,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    console.log('Database schema verified: edit_history, updated_at, is_editable, ai_reports are ready.');
   } catch (err) {
     console.log('Skipping schema init: ', err.message);
   }
 };
 initDB();
+
+// GET /api/ai-reports/:id
+app.get('/api/ai-reports/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { rows } = await pool.query('SELECT content FROM ai_reports WHERE id = $1', [id]);
+    if (rows.length > 0) {
+      res.json({ data: rows[0], error: null });
+    } else {
+      res.json({ data: null, error: null });
+    }
+  } catch (err) {
+    console.error('Fetch ai-report error:', err);
+    res.status(500).json({ data: null, error: { message: err.message } });
+  }
+});
+
+// POST /api/ai-reports
+app.post('/api/ai-reports', async (req, res) => {
+  const { id, content } = req.body;
+  if (!id || !content) {
+    return res.status(400).json({ data: null, error: { message: 'id and content are required' } });
+  }
+  
+  try {
+    const query = `
+      INSERT INTO ai_reports (id, content, updated_at) 
+      VALUES ($1, $2, CURRENT_TIMESTAMP)
+      ON CONFLICT (id) 
+      DO UPDATE SET content = EXCLUDED.content, updated_at = CURRENT_TIMESTAMP
+      RETURNING *
+    `;
+    const { rows } = await pool.query(query, [id, content]);
+    res.json({ data: rows[0], error: null });
+  } catch (err) {
+    console.error('Upsert ai-report error:', err);
+    res.status(500).json({ data: null, error: { message: err.message } });
+  }
+});
 
 
 // GET /api/surveys
