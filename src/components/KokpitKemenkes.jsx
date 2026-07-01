@@ -96,12 +96,12 @@ export default function KokpitKemenkes() {
         {
           title: 'Evaluasi Manfaat JKN Saat Ini',
           headers: ['Aspek Pelayanan JKN', 'Skor Rata-Rata'],
-          data: metrics.manfaatData.filter(d => d.JKN > 0).map(j => [j.name, j.JKN])
+          data: metrics.manfaatData.filter(d => d.JKN > 0).map(j => [j.fullName, j.JKN])
         },
         {
           title: 'Urgensi Layanan Prioritas Baru (Non-Kapitasi)',
           headers: ['Layanan', 'Skor Rata-Rata'],
-          data: metrics.manfaatData.filter(d => d.Usulan > 0).map(u => [u.name, u.Usulan])
+          data: metrics.manfaatData.filter(d => d.Usulan > 0).map(u => [u.fullName, u.Usulan])
         }
       ];
 
@@ -358,11 +358,11 @@ export default function KokpitKemenkes() {
     const manfaatData = [];
     jknBenefits.forEach((item, i) => {
       const s = jknScores[i];
-      if (s.count > 0) manfaatData.push({ name: item.substring(0,15), JKN: Number((s.sum / s.count).toFixed(1)), Usulan: 0 });
+      if (s.count > 0) manfaatData.push({ name: item.substring(0,15), fullName: item, JKN: Number((s.sum / s.count).toFixed(1)), Usulan: 0 });
     });
     nonOptimalServices.slice(0,4).forEach((item, i) => {
       const s = usulanScores[i];
-      if (s.count > 0) manfaatData.push({ name: item.substring(0,15), JKN: 0, Usulan: Number((s.sum / s.count).toFixed(1)) });
+      if (s.count > 0) manfaatData.push({ name: item.substring(0,15), fullName: item, JKN: 0, Usulan: Number((s.sum / s.count).toFixed(1)) });
     });
 
     // Top Rujukan
