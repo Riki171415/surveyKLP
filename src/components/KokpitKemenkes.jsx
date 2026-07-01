@@ -91,7 +91,7 @@ export default function KokpitKemenkes() {
         {
           title: 'Persepsi Peran Sp.KKLP (Radar Analysis)',
           headers: ['Aspek Peran', 'Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP'],
-          data: metrics.radarData.map(r => [r.subject, r.Kapus, r.Umum, r.Spkklp])
+          data: metrics.radarData.map(r => [r.fullName, r.Kapus, r.Umum, r.Spkklp])
         },
         {
           title: 'Evaluasi Manfaat JKN Saat Ini',
@@ -347,6 +347,7 @@ export default function KokpitKemenkes() {
       const sp = roleScores['Dokter Sp.KKLP'][i];
       return {
         subject: `Q${i+1}`,
+        fullName: `Q${i+1}: ${item}`,
         Kapus: kapus.count > 0 ? Number((kapus.sum / kapus.count).toFixed(1)) : 0,
         DUmum: du.count > 0 ? Number((du.sum / du.count).toFixed(1)) : 0,
         SpKKLP: sp.count > 0 ? Number((sp.sum / sp.count).toFixed(1)) : 0,
