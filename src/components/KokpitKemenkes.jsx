@@ -96,12 +96,12 @@ export default function KokpitKemenkes() {
         {
           title: 'Evaluasi Manfaat JKN Saat Ini',
           headers: ['Aspek Pelayanan JKN', 'Skor Rata-Rata'],
-          data: metrics.jknData.map(j => [j.name, j.value])
+          data: metrics.manfaatData.filter(d => d.JKN > 0).map(j => [j.name, j.JKN])
         },
         {
           title: 'Urgensi Layanan Prioritas Baru (Non-Kapitasi)',
           headers: ['Layanan', 'Skor Rata-Rata'],
-          data: metrics.usulanData.map(u => [u.name, u.value])
+          data: metrics.manfaatData.filter(d => d.Usulan > 0).map(u => [u.name, u.Usulan])
         }
       ];
 
