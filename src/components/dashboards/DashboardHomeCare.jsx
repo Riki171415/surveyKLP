@@ -154,7 +154,7 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
 
     const rawData = {
       headers: [
-        'No', 'Nama Faskes', 'Provinsi',
+        'No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi',
         'Ada Home Care', 'Jml Kunjungan/Bulan', 'Kolaborasi Nakes', 'Perbaikan Kondisi', 'Kepatuhan',
         'Kondisi: Mandiri', 'Kondisi: Bantuan Sebagian', 'Kondisi: Bantuan Penuh', 'Kondisi: Tirah Baring', 'Kondisi: Lainnya',
         'Jenis: Pemeriksaan', 'Jenis: Pmtauan Kronis', 'Jenis: Perawatan Luka', 'Jenis: Rehabilitasi', 'Jenis: Edukasi Keluarga', 'Jenis: Lainnya'
@@ -166,7 +166,7 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
         const getKondisi = k => (kondisiObj[k] || hc[`kondisi_${k}`]) ? 'Ya' : 'Tidak';
         const getJenis  = j => (jenisObj[j]  || hc[`jenis_${j}`])  ? 'Ya' : 'Tidak';
         return [
-          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
           hc.screening || 'Tidak',
           Number(hc.jumlahKunjungan) || 0,
           hc.kolaborasi || '-',

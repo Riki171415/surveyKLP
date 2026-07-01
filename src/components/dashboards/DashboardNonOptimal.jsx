@@ -194,7 +194,7 @@ export default function DashboardNonOptimal({ filteredData, uniqueFktpData, COLO
       rows: filteredData.map((row, idx) => {
         const nonOpt = row.non_optimal || [];
         return [
-          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
           ...nonOptimalServices.flatMap((_, sIdx) => {
             const item = nonOpt[sIdx] || {};
             return [

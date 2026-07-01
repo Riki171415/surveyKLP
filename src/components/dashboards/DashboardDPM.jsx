@@ -288,7 +288,7 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
         const kas = dpm.kasus || {};
         const poli = dpm.poliKklp || {};
         return [
-          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
           kar.lamaPraktik || '-',
           kar.jumlahKunjungan || '-',
           kas.persenKronis || '-',

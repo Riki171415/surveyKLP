@@ -514,13 +514,13 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
       const kategoriMap = { 0: 'W1', 1: 'W2', 2: 'W3', 3: 'W4', 4: 'W5', 5: 'W6', 6: 'W7', 7: 'W8' };
       Object.keys(kategoriMap).forEach(k => {
         if (w[k] && w[k].trim().length > 0) {
-          rawRows.push([idx + 1, row.fktp_name || '-', row.provinsi || '-', row.role || '-', kategoriMap[k], w[k]]);
+          rawRows.push([idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-', row.role || '-', kategoriMap[k], w[k]]);
         }
       });
     });
 
     const rawData = {
-      headers: ['No Responden', 'Nama Faskes', 'Provinsi', 'Peran', 'Pertanyaan', 'Isi Jawaban'],
+      headers: ['No', 'Nama Responden', 'Nama Faskes', 'Provinsi', 'Peran', 'Pertanyaan', 'Isi Jawaban'],
       rows: rawRows
     };
 

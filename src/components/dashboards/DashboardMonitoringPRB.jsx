@@ -106,11 +106,11 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
     ];
 
     const rawData = {
-      headers: ['No', 'Nama Faskes', 'Provinsi', 'Pengingat Kunjungan', 'Telepon/WA', 'Kunjungan Rumah', 'Tidak Ada Mekanisme', 'Lainnya', 'Teks Kendala'],
-      rows: uniqueFktpData.map((row, idx) => {
+      headers: ['No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi', 'Pengingat Kunjungan', 'Telepon/WA', 'Kunjungan Rumah', 'Tidak Ada Mekanisme', 'Lainnya', 'Teks Kendala'],
+      rows: filteredData.map((row, idx) => {
         const prb = row.prb || {};
         return [
-          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
           prb['mek_Pengingat kunjungan'] ? 'Ya' : 'Tidak',
           prb['mek_Telepon/WA'] ? 'Ya' : 'Tidak',
           prb['mek_Kunjungan rumah'] ? 'Ya' : 'Tidak',

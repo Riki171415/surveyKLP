@@ -100,11 +100,11 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
     ];
 
     const rawData = {
-      headers: ['No', 'Nama Faskes', 'Provinsi', 'Ada Kendala', 'Kendala: SDM', 'Kendala: Sarana Prasarana', 'Kendala: Alat Kesehatan', 'Kendala: Obat', 'Kendala: Pembiayaan', 'Kendala: Regulasi', 'Kendala: Lainnya'],
-      rows: uniqueFktpData.map((row, idx) => {
+      headers: ['No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi', 'Ada Kendala', 'Kendala: SDM', 'Kendala: Sarana Prasarana', 'Kendala: Alat Kesehatan', 'Kendala: Obat', 'Kendala: Pembiayaan', 'Kendala: Regulasi', 'Kendala: Lainnya'],
+      rows: filteredData.map((row, idx) => {
         const k = row.spkklp_kendala || {};
         return [
-          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
           k.hasKendala || 'Tidak',
           k['kendala_SDM'] ? 'Ya' : 'Tidak',
           k['kendala_Sarana prasarana'] ? 'Ya' : 'Tidak',

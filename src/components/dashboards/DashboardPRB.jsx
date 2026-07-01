@@ -183,7 +183,7 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
 
     const rawData = {
       headers: [
-        'No', 'Nama Faskes', 'Provinsi',
+        'No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi',
         'Total Peserta PRB', 'Rutin Berkunjung', 'Tidak Berkunjung', '% Kepatuhan', 'Rata² Rujukan FKRTL',
         'Peserta DM', 'Peserta Hipertensi', 'Peserta Jantung', 'Peserta PPOK',
         'Peserta Asma', 'Peserta Stroke', 'Peserta Epilepsi', 'Peserta Skizofrenia', 'Peserta SLE',
@@ -195,7 +195,7 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
         const jumlah = Number(prb.jumlah) || 0;
         const rutin = Number(prb.rutinKunjungan) || 0;
         return [
-          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
           jumlah, rutin,
           Number(prb.tidakBerkunjung) || 0,
           jumlah > 0 ? Number(((rutin / jumlah) * 100).toFixed(1)) : 0,

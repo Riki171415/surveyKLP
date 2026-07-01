@@ -123,7 +123,7 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
 
     const rawData = {
       headers: [
-        'No', 'Nama Faskes', 'Provinsi',
+        'No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi',
         'Ada Paliatif', 'Kolaborasi Nakes', 'Perbaikan Kualitas Hidup', 'Kepatuhan',
         'Tujuan: Kendali Nyeri', 'Tujuan: Kendali Gejala', 'Tujuan: Psikosoial', 'Tujuan: Edukasi Keluarga', 'Tujuan: Akhir Hayat', 'Tujuan: Lainnya',
         'Kondisi: Mandiri', 'Kondisi: Bantuan Sebagian', 'Kondisi: Bantuan Penuh', 'Kondisi: Tirah Baring', 'Kondisi: Lainnya'
@@ -135,7 +135,7 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
         const getTujuan  = t => (tujuanObj[t]  || pal[`tujuan_${t}`])  ? 'Ya' : 'Tidak';
         const getKondisi = k => (kondisiObj[k] || pal[`kondisi_${k}`]) ? 'Ya' : 'Tidak';
         return [
-          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
           pal.screening || 'Tidak',
           pal.kolaborasi || '-',
           pal.perbaikan || '-',

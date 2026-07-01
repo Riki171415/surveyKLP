@@ -244,7 +244,7 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
       },
       {
         title: 'Data Verbatim (Difilter)',
-        headers: ['FKTP', 'Peran', 'Pertanyaan', 'Jawaban Lengkap'],
+        headers: ['Nama Responden', 'FKTP', 'Peran', 'Pertanyaan', 'Jawaban Lengkap'],
         data: kualitatifData.map(d => [d.fktp, d.role, d.question, d.answer])
       }
     ];

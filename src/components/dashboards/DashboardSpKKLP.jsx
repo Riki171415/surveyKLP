@@ -281,7 +281,7 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
 
     const rawData = {
       headers: [
-        'No', 'Nama Faskes', 'Provinsi', 'Ada Sp.KKLP', 'Status Kualifikasi',
+        'No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi', 'Ada Sp.KKLP', 'Status Kualifikasi',
         'Ada Poli Sp.KKLP', 'Pembiayaan Poli',
         ...relevansiItems.map((r, i) => `Relevansi ${i+1}: ${r}`),
         ...peranSpkklpItems.map((p, i) => `Peran ${i+1}: ${p}`)
@@ -291,7 +291,7 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
         const prn = row.peran_spkklp || {};
         const poli = row.spkklp_poli || {};
         return [
-          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
           row.doc_kklp || 'Tidak',
           row.spkklp_status || '-',
           poli.hasPoli || '-',
