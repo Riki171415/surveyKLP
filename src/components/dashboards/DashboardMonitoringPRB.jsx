@@ -88,7 +88,24 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
         data: kendalaData
       }
     ];
-    exportTablesToExcel('MONITORING PROGRAM RUJUK BALIK', tables, 'Dashboard_Monitoring_PRB');
+
+    const rawData = {
+      headers: ['No', 'Nama Faskes', 'Provinsi', 'Pengingat Kunjungan', 'Telepon/WA', 'Kunjungan Rumah', 'Tidak Ada Mekanisme', 'Lainnya', 'Teks Kendala'],
+      rows: uniqueFktpData.map((row, idx) => {
+        const prb = row.prb || {};
+        return [
+          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          prb['mek_Pengingat kunjungan'] ? 'Ya' : 'Tidak',
+          prb['mek_Telepon/WA'] ? 'Ya' : 'Tidak',
+          prb['mek_Kunjungan rumah'] ? 'Ya' : 'Tidak',
+          prb['mek_Tidak ada mekanisme khusus'] ? 'Ya' : 'Tidak',
+          prb['mek_Lainnya'] ? 'Ya' : 'Tidak',
+          prb.kendala || '-'
+        ];
+      })
+    };
+
+    exportTablesToExcel('MONITORING PROGRAM RUJUK BALIK', tables, 'Dashboard_Monitoring_PRB', rawData);
   };
 
   return (

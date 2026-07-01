@@ -272,8 +272,37 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
         data: gapData.map(d => [d.name, d.Penyakit, d.Edukasi, d.HomeVisit])
       }
     ];
-    exportTablesToExcel('DOKTER PRAKTIK MANDIRI', tables, 'Dashboard_DPM');
+
+    const rawData = {
+      headers: [
+        'No', 'Nama Faskes', 'Provinsi',
+        'Lama Praktik', 'Kunjungan/Hari', '% Kasus Kronis',
+        'Menangani Keluarga Sama', 'Sistem Pencatatan',
+        'Ada Poli Sp.KKLP', 'Luaran yang Diukur'
+      ],
+      rows: dpmDataFiltered.map((row, idx) => {
+        const dpm = row.dpm || {};
+        const kar = dpm.karakteristik || {};
+        const pen = dpm.pendekatan || {};
+        const kon = dpm.kontinuitas || {};
+        const kas = dpm.kasus || {};
+        const poli = dpm.poliKklp || {};
+        return [
+          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          kar.lamaPraktik || '-',
+          kar.jumlahKunjungan || '-',
+          kas.persenKronis || '-',
+          pen.menanganiKeluargaSama || '-',
+          kon.sistemPencatatan || '-',
+          poli.hasPoli || '-',
+          Array.isArray(poli.luaranPelayanan) ? poli.luaranPelayanan.join(', ') : '-'
+        ];
+      })
+    };
+
+    exportTablesToExcel('DOKTER PRAKTIK MANDIRI', tables, 'Dashboard_DPM', rawData);
   };
+
 
   return (
     <div className="space-y-8 animate-fade-in">

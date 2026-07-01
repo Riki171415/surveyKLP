@@ -107,8 +107,38 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
         data: kepatuhanData
       }
     ];
-    exportTablesToExcel('PELAYANAN PALIATIF', tables, 'Dashboard_Paliatif');
+
+    const tujuanKeys = ['Pengendalian nyeri', 'Pengendalian gejala', 'Dukungan psikososial', 'Edukasi keluarga/caregiver', 'Perawatan akhir kehidupan', 'Lainnya'];
+    const kondisiKeys = ['Mandiri (independen)', 'Memerlukan bantuan sebagian', 'Memerlukan bantuan penuh', 'Tirah baring', 'Lainnya'];
+
+    const rawData = {
+      headers: [
+        'No', 'Nama Faskes', 'Provinsi',
+        'Ada Paliatif', 'Kolaborasi Nakes', 'Perbaikan Kualitas Hidup', 'Kepatuhan',
+        'Tujuan: Kendali Nyeri', 'Tujuan: Kendali Gejala', 'Tujuan: Psikosoial', 'Tujuan: Edukasi Keluarga', 'Tujuan: Akhir Hayat', 'Tujuan: Lainnya',
+        'Kondisi: Mandiri', 'Kondisi: Bantuan Sebagian', 'Kondisi: Bantuan Penuh', 'Kondisi: Tirah Baring', 'Kondisi: Lainnya'
+      ],
+      rows: filteredData.map((row, idx) => {
+        const pal = row.paliatif || {};
+        const tujuanObj = pal.tujuan || {};
+        const kondisiObj = pal.kondisi || {};
+        const getTujuan  = t => (tujuanObj[t]  || pal[`tujuan_${t}`])  ? 'Ya' : 'Tidak';
+        const getKondisi = k => (kondisiObj[k] || pal[`kondisi_${k}`]) ? 'Ya' : 'Tidak';
+        return [
+          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          pal.screening || 'Tidak',
+          pal.kolaborasi || '-',
+          pal.perbaikan || '-',
+          pal.kepatuhan || '-',
+          ...tujuanKeys.map(getTujuan),
+          ...kondisiKeys.map(getKondisi)
+        ];
+      })
+    };
+
+    exportTablesToExcel('PELAYANAN PALIATIF', tables, 'Dashboard_Paliatif', rawData);
   };
+
 
   return (
     <div className="space-y-8 animate-fade-in">

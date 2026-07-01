@@ -121,8 +121,26 @@ export default function DashboardPasienBulanan({ filteredData, uniqueFktpData, C
         data: averagePatientsByFaskes.map(d => [d.name, d.Puskesmas, d.Klinik, d['Praktik Mandiri (DPM)']])
       }
     ];
-    exportTablesToExcel('DATA PASIEN BULANAN', tables, 'Dashboard_PasienBulanan');
+
+    const rawData = {
+      headers: [
+        'No', 'Nama Faskes', 'Provinsi', 'Jenis Faskes',
+        ...penyakitPasienBulanan.map(p => p.label)
+      ],
+      rows: uniqueFktpData.map((row, idx) => {
+        const isDpm = row.role === 'Dokter Praktik Mandiri';
+        const fType = isDpm ? 'DPM' : (row.jenis_faskes === 'Klinik' ? 'Klinik' : 'Puskesmas');
+        const sourceObj = isDpm ? row.dpm?.dataPasienBulanan : row.data_pasien_bulanan;
+        return [
+          idx + 1, row.fktp_name || '-', row.provinsi || '-', fType,
+          ...penyakitPasienBulanan.map(p => Number((sourceObj || {})[p.id]) || 0)
+        ];
+      })
+    };
+
+    exportTablesToExcel('DATA PASIEN BULANAN', tables, 'Dashboard_PasienBulanan', rawData);
   };
+
 
   return (
     <div className="space-y-8 animate-fade-in">

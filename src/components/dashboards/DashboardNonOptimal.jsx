@@ -128,7 +128,31 @@ export default function DashboardNonOptimal({ filteredData, COLORS, isPrinting }
         ])
       }
     ];
-    exportTablesToExcel('LAYANAN NON-OPTIMAL', tables, 'Dashboard_NonOptimal');
+
+    const rawData = {
+      headers: [
+        'No', 'Nama Faskes', 'Provinsi',
+        ...nonOptimalServices.flatMap(s => [
+          `${s}: Teridentifikasi`, `${s}: Masuk JKN`, `${s}: Skala Hambatan`
+        ])
+      ],
+      rows: filteredData.map((row, idx) => {
+        const nonOpt = row.non_optimal || [];
+        return [
+          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          ...nonOptimalServices.flatMap((_, sIdx) => {
+            const item = nonOpt[sIdx] || {};
+            return [
+              (item.masukJkn || item.skala) ? 'Ya' : 'Tidak',
+              item.masukJkn || '-',
+              item.skala || '-'
+            ];
+          })
+        ];
+      })
+    };
+
+    exportTablesToExcel('LAYANAN NON-OPTIMAL', tables, 'Dashboard_NonOptimal', rawData);
   };
 
   return (

@@ -137,8 +137,39 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
         data: kepatuhanData
       }
     ];
-    exportTablesToExcel('PELAYANAN HOME CARE', tables, 'Dashboard_Home_Care');
+
+    const kondisiKeys = ['Mandiri (independen)', 'Memerlukan bantuan sebagian', 'Memerlukan bantuan penuh', 'Tirah baring', 'Lainnya'];
+    const jenisKeys = ['Pemeriksaan kesehatan', 'Pemantauan penyakit kronis', 'Perawatan luka', 'Rehabilitasi sederhana', 'Edukasi keluarga', 'Lainnya'];
+
+    const rawData = {
+      headers: [
+        'No', 'Nama Faskes', 'Provinsi',
+        'Ada Home Care', 'Jml Kunjungan/Bulan', 'Kolaborasi Nakes', 'Perbaikan Kondisi', 'Kepatuhan',
+        'Kondisi: Mandiri', 'Kondisi: Bantuan Sebagian', 'Kondisi: Bantuan Penuh', 'Kondisi: Tirah Baring', 'Kondisi: Lainnya',
+        'Jenis: Pemeriksaan', 'Jenis: Pmtauan Kronis', 'Jenis: Perawatan Luka', 'Jenis: Rehabilitasi', 'Jenis: Edukasi Keluarga', 'Jenis: Lainnya'
+      ],
+      rows: filteredData.map((row, idx) => {
+        const hc = row.home_care || {};
+        const kondisiObj = hc.kondisi || {};
+        const jenisObj = hc.jenisLayanan || {};
+        const getKondisi = k => (kondisiObj[k] || hc[`kondisi_${k}`]) ? 'Ya' : 'Tidak';
+        const getJenis  = j => (jenisObj[j]  || hc[`jenis_${j}`])  ? 'Ya' : 'Tidak';
+        return [
+          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          hc.screening || 'Tidak',
+          Number(hc.jumlahKunjungan) || 0,
+          hc.kolaborasi || '-',
+          hc.perbaikan || '-',
+          hc.kepatuhan || '-',
+          ...kondisiKeys.map(getKondisi),
+          ...jenisKeys.map(getJenis)
+        ];
+      })
+    };
+
+    exportTablesToExcel('PELAYANAN HOME CARE', tables, 'Dashboard_Home_Care', rawData);
   };
+
 
   return (
     <div className="space-y-8 animate-fade-in">

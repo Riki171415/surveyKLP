@@ -278,8 +278,33 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
         data: peranData.map(d => [d.name, d.avgScore])
       }
     ];
-    exportTablesToExcel('DETAIL PRAKTIK & PERSPEKTIF SP.KKLP', tables, 'Dashboard_SpKKLP');
+
+    const rawData = {
+      headers: [
+        'No', 'Nama Faskes', 'Provinsi', 'Ada Sp.KKLP', 'Status Kualifikasi',
+        'Ada Poli Sp.KKLP', 'Pembiayaan Poli',
+        ...relevansiItems.map((r, i) => `Relevansi ${i+1}: ${r}`),
+        ...peranSpkklpItems.map((p, i) => `Peran ${i+1}: ${p}`)
+      ],
+      rows: filteredData.map((row, idx) => {
+        const rel = row.relevansi_spkklp || {};
+        const prn = row.peran_spkklp || {};
+        const poli = row.spkklp_poli || {};
+        return [
+          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          row.doc_kklp || 'Tidak',
+          row.spkklp_status || '-',
+          poli.hasPoli || '-',
+          poli.pembiayaan || '-',
+          ...relevansiItems.map((_, i) => Number(rel[i]) || 0),
+          ...peranSpkklpItems.map((_, i) => Number(prn[i]) || 0)
+        ];
+      })
+    };
+
+    exportTablesToExcel('DETAIL PRAKTIK & PERSPEKTIF SP.KKLP', tables, 'Dashboard_SpKKLP', rawData);
   };
+
 
   const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
     <div className={`bg-white rounded-2xl p-6 border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>

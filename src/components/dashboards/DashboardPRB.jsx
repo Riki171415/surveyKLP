@@ -143,8 +143,48 @@ export default function DashboardPRB({ filteredData, COLORS, isPrinting }) {
         data: mekanismeData
       }
     ];
-    exportTablesToExcel('PROGRAM RUJUK BALIK (PRB)', tables, 'Dashboard_PRB');
+
+    const rawData = {
+      headers: [
+        'No', 'Nama Faskes', 'Provinsi',
+        'Total Peserta PRB', 'Rutin Berkunjung', 'Tidak Berkunjung', '% Kepatuhan', 'Rata² Rujukan FKRTL',
+        'Peserta DM', 'Peserta Hipertensi', 'Peserta Jantung', 'Peserta PPOK',
+        'Peserta Asma', 'Peserta Stroke', 'Peserta Epilepsi', 'Peserta Skizofrenia', 'Peserta SLE',
+        'Mek: Pengingat Kunjungan', 'Mek: Telepon/WA', 'Mek: Kunjungan Rumah',
+        'Mek: Tidak Ada', 'Mek: Lainnya', 'Kendala (Teks)'
+      ],
+      rows: filteredData.map((row, idx) => {
+        const prb = row.prb || {};
+        const jumlah = Number(prb.jumlah) || 0;
+        const rutin = Number(prb.rutinKunjungan) || 0;
+        return [
+          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          jumlah, rutin,
+          Number(prb.tidakBerkunjung) || 0,
+          jumlah > 0 ? Number(((rutin / jumlah) * 100).toFixed(1)) : 0,
+          Number(prb.rataRujukan) || 0,
+          Number(prb.peserta_dm) || 0,
+          Number(prb.peserta_ht) || 0,
+          Number(prb.peserta_jantung) || 0,
+          Number(prb.peserta_ppok) || 0,
+          Number(prb.peserta_asma) || 0,
+          Number(prb.peserta_stroke) || 0,
+          Number(prb.peserta_epilepsi) || 0,
+          Number(prb.peserta_skizofrenia) || 0,
+          Number(prb.peserta_sle) || 0,
+          prb['mek_Pengingat kunjungan'] ? 'Ya' : 'Tidak',
+          prb['mek_Telepon/WA'] ? 'Ya' : 'Tidak',
+          prb['mek_Kunjungan rumah'] ? 'Ya' : 'Tidak',
+          prb['mek_Tidak ada mekanisme khusus'] ? 'Ya' : 'Tidak',
+          prb['mek_Lainnya'] ? 'Ya' : 'Tidak',
+          prb.kendala || '-'
+        ];
+      })
+    };
+
+    exportTablesToExcel('PROGRAM RUJUK BALIK (PRB)', tables, 'Dashboard_PRB', rawData);
   };
+
 
   return (
     <div className="space-y-8 animate-fade-in">

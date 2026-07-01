@@ -6,14 +6,15 @@ import { saveAs } from 'file-saver';
  * @param {string} dashboardTitle - Title of the dashboard for the header.
  * @param {Array} tables - Array of table objects: { title: string, headers: Array<string>, data: Array<Array|Object> }
  * @param {string} filenamePrefix - Prefix for the output filename.
+ * @param {Object|null} rawData - Optional: { headers: string[], rows: any[][] } for a "Data Mentah Responden" sheet.
  */
-export const exportTablesToExcel = async (dashboardTitle, tables, filenamePrefix) => {
+export const exportTablesToExcel = async (dashboardTitle, tables, filenamePrefix, rawData = null) => {
   try {
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'Dashboard Survey KKLP';
     workbook.created = new Date();
     
-    // Max sheet name is 31 chars
+    // ── Sheet 1: Rangkuman Dashboard ──
     const sheetName = dashboardTitle.substring(0, 31).replace(/[\[\]\*\\\?\/\:]/g, ''); 
     const sheet = workbook.addWorksheet(sheetName);
 
@@ -35,8 +36,6 @@ export const exportTablesToExcel = async (dashboardTitle, tables, filenamePrefix
     titleCell.font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
     titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
     titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0ea5e9' } };
-
-    let currentRow = 3;
 
     tables.forEach(table => {
       if (!table.data || table.data.length === 0) return; // Skip empty tables
@@ -86,6 +85,60 @@ export const exportTablesToExcel = async (dashboardTitle, tables, filenamePrefix
       
       sheet.addRow([]); // Blank row after table
     });
+
+    // ── Sheet 2: Data Mentah Responden (opsional) ──
+    if (rawData && rawData.headers && rawData.rows && rawData.rows.length > 0) {
+      const rawSheet = workbook.addWorksheet('Data Mentah Responden');
+
+      // Title bar
+      rawSheet.mergeCells(`A1:${String.fromCharCode(64 + Math.min(rawData.headers.length, 26))}1`);
+      const rawTitle = rawSheet.getCell('A1');
+      rawTitle.value = `DATA MENTAH RESPONDEN — ${dashboardTitle.toUpperCase()}`;
+      rawTitle.font = { name: 'Arial', size: 13, bold: true, color: { argb: 'FFFFFFFF' } };
+      rawTitle.alignment = { vertical: 'middle', horizontal: 'center' };
+      rawTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF334155' } };
+      rawSheet.getRow(1).height = 28;
+
+      // Keterangan
+      rawSheet.addRow([`Diekspor: ${new Date().toLocaleString('id-ID')}   |   Total Baris: ${rawData.rows.length}`]);
+      rawSheet.getRow(2).font = { italic: true, color: { argb: 'FF64748B' }, size: 10 };
+      rawSheet.addRow([]);
+
+      // Headers row
+      const hRow = rawSheet.addRow(rawData.headers);
+      hRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      hRow.height = 22;
+      hRow.eachCell(cell => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0f172a' } };
+        cell.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
+        cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      });
+
+      // Data rows
+      rawData.rows.forEach((row, idx) => {
+        const dRow = rawSheet.addRow(row);
+        const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8FAFC';
+        dRow.eachCell({ includeEmpty: true }, (cell, colIdx) => {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+          cell.border = { top: {style:'thin', color:{argb:'FFE2E8F0'}}, bottom: {style:'thin', color:{argb:'FFE2E8F0'}}, left: {style:'thin', color:{argb:'FFE2E8F0'}}, right: {style:'thin', color:{argb:'FFE2E8F0'}} };
+          if (typeof cell.value === 'number') {
+            cell.alignment = { horizontal: 'center' };
+          } else {
+            cell.alignment = { wrapText: false };
+          }
+        });
+      });
+
+      // Auto column widths (capped at 50)
+      rawSheet.columns.forEach((col, i) => {
+        const header = rawData.headers[i] || '';
+        const maxDataLen = rawData.rows.reduce((max, row) => {
+          const val = row[i];
+          return Math.max(max, val ? String(val).length : 0);
+        }, 0);
+        col.width = Math.min(50, Math.max(header.length + 2, Math.min(maxDataLen + 2, 30)));
+      });
+    }
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });

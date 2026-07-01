@@ -81,7 +81,26 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
         data: dukunganData
       }
     ];
-    exportTablesToExcel('KENDALA JKN', tables, 'Dashboard_Kendala');
+
+    const rawData = {
+      headers: ['No', 'Nama Faskes', 'Provinsi', 'Ada Kendala', 'Kendala: SDM', 'Kendala: Sarana Prasarana', 'Kendala: Alat Kesehatan', 'Kendala: Obat', 'Kendala: Pembiayaan', 'Kendala: Regulasi', 'Kendala: Lainnya'],
+      rows: uniqueFktpData.map((row, idx) => {
+        const k = row.spkklp_kendala || {};
+        return [
+          idx + 1, row.fktp_name || '-', row.provinsi || '-',
+          k.hasKendala || 'Tidak',
+          k['kendala_SDM'] ? 'Ya' : 'Tidak',
+          k['kendala_Sarana prasarana'] ? 'Ya' : 'Tidak',
+          k['kendala_Alat kesehatan'] ? 'Ya' : 'Tidak',
+          k['kendala_Obat'] ? 'Ya' : 'Tidak',
+          k['kendala_Pembiayaan'] ? 'Ya' : 'Tidak',
+          k['kendala_Regulasi'] ? 'Ya' : 'Tidak',
+          k['kendala_Lainnya'] ? 'Ya' : 'Tidak'
+        ];
+      })
+    };
+
+    exportTablesToExcel('KENDALA JKN', tables, 'Dashboard_Kendala', rawData);
   };
 
   return (
