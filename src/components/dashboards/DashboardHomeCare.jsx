@@ -4,7 +4,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
 } from 'recharts';
-import { Home, Users, CheckCircle, Heart, Stethoscope, Clock, CheckCircle2, Download } from 'lucide-react';
+import { Heart, Home, Clock, Users, CheckCircle2, Stethoscope, CheckCircle, Download } from 'lucide-react';
+import CustomWordCloud from '../ui/CustomWordCloud';
 
 const ViewToggle = ({ value, onChange }) => (
   <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-semibold shrink-0">
@@ -17,6 +18,8 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
   const [jenisView, setJenisView] = useState('responden');
   const [kondisiView, setKondisiView] = useState('responden');
   const [kepatuhanView, setKepatuhanView] = useState('responden');
+  const [tenagaView, setTenagaView] = useState('responden');
+  const [diagnosisView, setDiagnosisView] = useState('responden');
   const { hcStats, kondisiDataR, kondisiDataF, jenisDataR, jenisDataF, kepatuhanDataR, kepatuhanDataF } = useMemo(() => {
     let totalFktp = uniqueFktpData.length;
     let fktpWithHomeCare = 0;
@@ -36,6 +39,7 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
 
     // ── Per Responden ──
     const kondisiCountsR = {}, jenisCountsR = {}, kepatuhanCountsR = { 'Tinggi (>80%)': 0, 'Sedang (50–80%)': 0, 'Rendah (<50%)': 0 };
+    const tenagaCountsR = {}, diagnosisCountsR = {};
     filteredData.forEach(row => {
       const hc = row.home_care || {};
       if (hc.screening === 'Ya') {
@@ -46,10 +50,22 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
         const jenisObj = hc.jenisLayanan || {};
         Object.keys(jenisObj).forEach(j => { if (jenisObj[j]) jenisCountsR[j] = (jenisCountsR[j] || 0) + 1; });
         ['Pemeriksaan kesehatan', 'Pemantauan penyakit kronis', 'Perawatan luka', 'Rehabilitasi sederhana', 'Edukasi keluarga', 'Lainnya'].forEach(j => { if (hc[`jenis_${j}`]) jenisCountsR[j] = (jenisCountsR[j] || 0) + 1; });
+        
+        // Tenaga
+        if (hc.tenaga) {
+          const tenagas = hc.tenaga.split(',').map(t => t.trim()).filter(Boolean);
+          tenagas.forEach(t => tenagaCountsR[t] = (tenagaCountsR[t] || 0) + 1);
+        }
+        // Diagnosis
+        if (hc.diagnosis) {
+          const diagnoses = hc.diagnosis.split(',').map(d => d.trim()).filter(Boolean);
+          diagnoses.forEach(d => diagnosisCountsR[d] = (diagnosisCountsR[d] || 0) + 1);
+        }
       }
     });
     // ── Per FKTP ──
     const kondisiCountsF = {}, jenisCountsF = {}, kepatuhanCountsF = { 'Tinggi (>80%)': 0, 'Sedang (50–80%)': 0, 'Rendah (<50%)': 0 };
+    const tenagaCountsF = {}, diagnosisCountsF = {};
     uniqueFktpData.forEach(row => {
       const hc = row.home_care || {};
       if (hc.screening === 'Ya') {
@@ -60,9 +76,21 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
         const jenisObj = hc.jenisLayanan || {};
         Object.keys(jenisObj).forEach(j => { if (jenisObj[j]) jenisCountsF[j] = (jenisCountsF[j] || 0) + 1; });
         ['Pemeriksaan kesehatan', 'Pemantauan penyakit kronis', 'Perawatan luka', 'Rehabilitasi sederhana', 'Edukasi keluarga', 'Lainnya'].forEach(j => { if (hc[`jenis_${j}`]) jenisCountsF[j] = (jenisCountsF[j] || 0) + 1; });
+
+        // Tenaga
+        if (hc.tenaga) {
+          const tenagas = hc.tenaga.split(',').map(t => t.trim()).filter(Boolean);
+          tenagas.forEach(t => tenagaCountsF[t] = (tenagaCountsF[t] || 0) + 1);
+        }
+        // Diagnosis
+        if (hc.diagnosis) {
+          const diagnoses = hc.diagnosis.split(',').map(d => d.trim()).filter(Boolean);
+          diagnoses.forEach(d => diagnosisCountsF[d] = (diagnosisCountsF[d] || 0) + 1);
+        }
       }
     });
     const toArr = (obj) => Object.keys(obj).map(k => ({ name: k, value: obj[k] })).sort((a,b) => b.value - a.value).filter(d => d.value > 0);
+    const toArrText = (obj) => Object.keys(obj).map(k => ({ text: k, value: obj[k] })).sort((a,b) => b.value - a.value).filter(d => d.value > 0);
     return {
       hcStats: {
         proporsiHc: totalFktp > 0 ? (fktpWithHomeCare / totalFktp) * 100 : 0,
@@ -74,15 +102,22 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
       kondisiDataR: toArr(kondisiCountsR), kondisiDataF: toArr(kondisiCountsF),
       jenisDataR: toArr(jenisCountsR),   jenisDataF: toArr(jenisCountsF),
       kepatuhanDataR: toArr(kepatuhanCountsR), kepatuhanDataF: toArr(kepatuhanCountsF),
+      tenagaDataR: toArrText(tenagaCountsR), tenagaDataF: toArrText(tenagaCountsF),
+      diagnosisDataR: toArr(diagnosisCountsR).slice(0, 10), diagnosisDataF: toArr(diagnosisCountsF).slice(0, 10),
     };
   }, [filteredData, uniqueFktpData]);
 
   const jenisData     = jenisView     === 'fktp' ? jenisDataF     : jenisDataR;
   const kondisiData   = kondisiView   === 'fktp' ? kondisiDataF   : kondisiDataR;
   const kepatuhanData = kepatuhanView === 'fktp' ? kepatuhanDataF : kepatuhanDataR;
+  const tenagaData    = tenagaView    === 'fktp' ? tenagaDataF    : tenagaDataR;
+  const diagnosisData = diagnosisView === 'fktp' ? diagnosisDataF : diagnosisDataR;
+
   const jenisLabel     = jenisView     === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
   const kondisiLabel   = kondisiView   === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
   const kepatuhanLabel = kepatuhanView === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
+  const tenagaLabel    = tenagaView    === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
+  const diagnosisLabel = diagnosisView === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
 
 
 
@@ -155,7 +190,7 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
     const rawData = {
       headers: [
         'No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi',
-        'Ada Home Care', 'Jml Kunjungan/Bulan', 'Kolaborasi Nakes', 'Perbaikan Kondisi', 'Kepatuhan',
+        'Ada Home Care', 'SDM Pelaksana', 'Diagnosis Pasien', 'Jml Kunjungan/Bulan', 'Kolaborasi Nakes', 'Perbaikan Kondisi', 'Kepatuhan',
         'Kondisi: Mandiri', 'Kondisi: Bantuan Sebagian', 'Kondisi: Bantuan Penuh', 'Kondisi: Tirah Baring', 'Kondisi: Lainnya',
         'Jenis: Pemeriksaan', 'Jenis: Pmtauan Kronis', 'Jenis: Perawatan Luka', 'Jenis: Rehabilitasi', 'Jenis: Edukasi Keluarga', 'Jenis: Lainnya'
       ],
@@ -168,6 +203,8 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
         return [
           idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
           hc.screening || 'Tidak',
+          hc.tenaga || '-',
+          hc.diagnosis || '-',
           Number(hc.jumlahKunjungan) || 0,
           hc.kolaborasi || '-',
           hc.perbaikan || '-',
@@ -253,6 +290,38 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
                 <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }} width={120} />
                 <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} ${kepatuhanLabel}`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                 <Bar dataKey="value" name={kepatuhanLabel} fill={kepatuhanView === 'fktp' ? '#10b981' : '#0ea5e9'} radius={[0, 6, 6, 0]} barSize={32}>
+                  <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        
+        {/* SDM Pelaksana */}
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-base font-bold text-slate-800 flex items-center"><Users className="w-5 h-5 mr-2 text-blue-600" /> SDM Pelaksana Home Care</h3>
+            {!isPrinting && <ViewToggle value={tenagaView} onChange={setTenagaView} />}
+          </div>
+          <p className="text-xs text-slate-400 mb-4 italic">{tenagaView === 'responden' ? `${filteredData.length} responden` : `${uniqueFktpData.length} FKTP unik`}</p>
+          <CustomWordCloud data={tenagaData} />
+        </div>
+
+        {/* Diagnosis */}
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-base font-bold text-slate-800 flex items-center"><Heart className="w-5 h-5 mr-2 text-rose-600" /> Top 10 Diagnosis Pasien</h3>
+            {!isPrinting && <ViewToggle value={diagnosisView} onChange={setDiagnosisView} />}
+          </div>
+          <p className="text-xs text-slate-400 mb-2 italic">{diagnosisView === 'responden' ? `${filteredData.length} responden` : `${uniqueFktpData.length} FKTP unik`}</p>
+          <div className="h-64">
+            <ResponsiveContainer width="99%" height="100%" minHeight={200} minWidth={0}>
+              <BarChart data={diagnosisData} layout="vertical" margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={120} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} ${diagnosisLabel}`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="value" name={diagnosisLabel} fill={diagnosisView === 'fktp' ? '#10b981' : '#f43f5e'} radius={[0, 6, 6, 0]} barSize={20}>
                   <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
                 </Bar>
               </BarChart>

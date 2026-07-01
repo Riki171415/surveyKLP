@@ -35,13 +35,32 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
     // -- Per FKTP --
     const mekCountsF = { 'Pengingat kunjungan': 0, 'Telepon/WA': 0, 'Kunjungan rumah': 0, 'Tidak ada mekanisme khusus': 0, 'Lainnya': 0 };
     const kendalaMapF = {};
+    
+    // Data arrays for Cross-tabulations
+    const crossSpkklp = { 'Pengingat kunjungan': { 'Ada Sp.KKLP': 0, 'Tidak Ada': 0 }, 'Telepon/WA': { 'Ada Sp.KKLP': 0, 'Tidak Ada': 0 }, 'Kunjungan rumah': { 'Ada Sp.KKLP': 0, 'Tidak Ada': 0 }, 'Tidak ada mekanisme khusus': { 'Ada Sp.KKLP': 0, 'Tidak Ada': 0 }, 'Lainnya': { 'Ada Sp.KKLP': 0, 'Tidak Ada': 0 } };
+    const crossType = { 'Pengingat kunjungan': { 'Puskesmas': 0, 'Klinik': 0, 'DPM': 0 }, 'Telepon/WA': { 'Puskesmas': 0, 'Klinik': 0, 'DPM': 0 }, 'Kunjungan rumah': { 'Puskesmas': 0, 'Klinik': 0, 'DPM': 0 }, 'Tidak ada mekanisme khusus': { 'Puskesmas': 0, 'Klinik': 0, 'DPM': 0 }, 'Lainnya': { 'Puskesmas': 0, 'Klinik': 0, 'DPM': 0 } };
+
     uniqueFktpData.forEach(row => {
       const prb = row.prb || {};
       let hasMekanisme = false;
+      
+      const stKklp = row.doc_kklp === 'Ya' ? 'Ada Sp.KKLP' : 'Tidak Ada';
+      
+      const fName = (row.fktp_name || '').toLowerCase();
+      let type = row.jenis_faskes;
+      if (type !== 'Puskesmas' && type !== 'Klinik' && type !== 'Dokter Praktik Mandiri') {
+        if (row.role === 'Dokter Praktik Mandiri') type = 'DPM';
+        else if (fName.includes('puskesmas') || fName.includes('pkm') || fName.includes('puseksmas') || fName.includes('puskes')) type = 'Puskesmas';
+        else type = 'Klinik';
+      }
+      if (type === 'Dokter Praktik Mandiri') type = 'DPM';
+
       Object.keys(mekCountsF).forEach(mek => {
         if (prb[`mek_${mek}`]) {
           mekCountsF[mek]++;
           if (mek !== 'Tidak ada mekanisme khusus') hasMekanisme = true;
+          crossSpkklp[mek][stKklp]++;
+          if (crossType[mek][type] !== undefined) crossType[mek][type]++;
         }
       });
       if (hasMekanisme) fktpWithMekanisme++;
@@ -57,12 +76,17 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
     const topKendalaF = Object.keys(kendalaMapF).map(k => ({ name: k, value: kendalaMapF[k] })).sort((a,b) => b.value - a.value).slice(0, 10);
     const proporsiMekanisme = uniqueFktpData.length > 0 ? (fktpWithMekanisme / uniqueFktpData.length) * 100 : 0;
 
+    const crossSpkklpData = Object.keys(crossSpkklp).map(k => ({ name: k, ...crossSpkklp[k] }));
+    const crossTypeData = Object.keys(crossType).map(k => ({ name: k, ...crossType[k] }));
+
     return {
       monStats: { fktpWithMekanisme, proporsiMekanisme },
       mekanismeDataR: Object.keys(mekCountsR).map(k => ({ name: k, value: mekCountsR[k] })).filter(d => d.value > 0),
       mekanismeDataF: Object.keys(mekCountsF).map(k => ({ name: k, value: mekCountsF[k] })).filter(d => d.value > 0),
       kendalaDataR: topKendalaR,
-      kendalaDataF: topKendalaF
+      kendalaDataF: topKendalaF,
+      crossSpkklpData,
+      crossTypeData
     };
   }, [filteredData, uniqueFktpData]);
 
@@ -180,6 +204,49 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
             </ResponsiveContainer>
           </div>
         </div>
+
+
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : 'lg:col-span-2'}`}>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-base font-bold text-slate-800 flex items-center"><Activity className="w-5 h-5 mr-2 text-emerald-600" /> Komparasi Mekanisme: Ada vs Tidak Ada Sp.KKLP</h3>
+          </div>
+          <p className="text-xs text-slate-400 mb-4 italic">Berdasarkan {uniqueFktpData.length} FKTP Unik</p>
+          <div className="h-72">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <BarChart data={monStats.crossSpkklpData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11 }} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '12px' }} />
+                <Bar dataKey="Ada Sp.KKLP" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="Tidak Ada" fill="#94a3b8" radius={[4, 4, 0, 0]} maxBarSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : 'lg:col-span-2'}`}>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-base font-bold text-slate-800 flex items-center"><Activity className="w-5 h-5 mr-2 text-indigo-600" /> Komparasi Mekanisme: Berdasarkan Jenis FKTP</h3>
+          </div>
+          <p className="text-xs text-slate-400 mb-4 italic">Berdasarkan {uniqueFktpData.length} FKTP Unik</p>
+          <div className="h-72">
+            <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
+              <BarChart data={monStats.crossTypeData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11 }} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '12px' }} />
+                <Bar dataKey="Puskesmas" fill="#0ea5e9" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="Klinik" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="DPM" fill="#8b5cf6" radius={[4, 4, 0, 0]} maxBarSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
       </div>
     </div>
   );

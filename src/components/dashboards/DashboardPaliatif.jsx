@@ -17,6 +17,7 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
   const [tujuanView, setTujuanView] = useState('responden');
   const [kondisiView, setKondisiView] = useState('responden');
   const [kepatuhanView, setKepatuhanView] = useState('responden');
+  const [diagnosisView, setDiagnosisView] = useState('responden');
   const { palStats, kondisiDataR, kondisiDataF, tujuanDataR, tujuanDataF, kepatuhanDataR, kepatuhanDataF } = useMemo(() => {
     let totalFktp = uniqueFktpData.length;
     let fktpWithPaliatif = 0;
@@ -32,8 +33,9 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
       }
     });
 
-    // ── Per Responden (filteredData) ──
-    const kondisiCountsR = {}, tujuanCountsR = {}, kepatuhanCountsR = { 'Tinggi': 0, 'Sedang': 0, 'Rendah': 0 };
+    // ── Per Responden ──
+    const tujuanCountsR = {}, kondisiCountsR = {}, kepatuhanCountsR = { 'Tinggi': 0, 'Sedang': 0, 'Rendah': 0 };
+    const diagnosisCountsR = {};
     filteredData.forEach(row => {
       const pal = row.paliatif || {};
       if (pal.screening === 'Ya') {
@@ -44,10 +46,17 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
         const tujuanObj = pal.tujuan || {};
         Object.keys(tujuanObj).forEach(j => { if (tujuanObj[j]) tujuanCountsR[j] = (tujuanCountsR[j] || 0) + 1; });
         ['Pengendalian nyeri', 'Pengendalian gejala', 'Dukungan psikososial', 'Edukasi keluarga/caregiver', 'Perawatan akhir kehidupan', 'Lainnya'].forEach(t => { if (pal[`tujuan_${t}`]) tujuanCountsR[t] = (tujuanCountsR[t] || 0) + 1; });
+        
+        // Diagnosis
+        if (pal.diagnosis) {
+          const diagnoses = pal.diagnosis.split(',').map(d => d.trim()).filter(Boolean);
+          diagnoses.forEach(d => diagnosisCountsR[d] = (diagnosisCountsR[d] || 0) + 1);
+        }
       }
     });
     // ── Per FKTP (uniqueFktpData) ──
     const kondisiCountsF = {}, tujuanCountsF = {}, kepatuhanCountsF = { 'Tinggi': 0, 'Sedang': 0, 'Rendah': 0 };
+    const diagnosisCountsF = {};
     uniqueFktpData.forEach(row => {
       const pal = row.paliatif || {};
       if (pal.screening === 'Ya') {
@@ -58,6 +67,12 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
         const tujuanObj = pal.tujuan || {};
         Object.keys(tujuanObj).forEach(j => { if (tujuanObj[j]) tujuanCountsF[j] = (tujuanCountsF[j] || 0) + 1; });
         ['Pengendalian nyeri', 'Pengendalian gejala', 'Dukungan psikososial', 'Edukasi keluarga/caregiver', 'Perawatan akhir kehidupan', 'Lainnya'].forEach(t => { if (pal[`tujuan_${t}`]) tujuanCountsF[t] = (tujuanCountsF[t] || 0) + 1; });
+        
+        // Diagnosis
+        if (pal.diagnosis) {
+          const diagnoses = pal.diagnosis.split(',').map(d => d.trim()).filter(Boolean);
+          diagnoses.forEach(d => diagnosisCountsF[d] = (diagnosisCountsF[d] || 0) + 1);
+        }
       }
     });
     const toArr = (obj) => Object.keys(obj).map(k => ({ name: k, value: obj[k] })).sort((a,b) => b.value - a.value).filter(d => d.value > 0);
@@ -71,15 +86,19 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
       tujuanDataR: toArr(tujuanCountsR), tujuanDataF: toArr(tujuanCountsF),
       kondisiDataR: toArr(kondisiCountsR), kondisiDataF: toArr(kondisiCountsF),
       kepatuhanDataR: toArr(kepatuhanCountsR), kepatuhanDataF: toArr(kepatuhanCountsF),
+      diagnosisDataR: toArr(diagnosisCountsR).slice(0, 10), diagnosisDataF: toArr(diagnosisCountsF).slice(0, 10),
     };
   }, [filteredData, uniqueFktpData]);
 
   const tujuanData   = tujuanView   === 'fktp' ? tujuanDataF   : tujuanDataR;
   const kondisiData  = kondisiView  === 'fktp' ? kondisiDataF  : kondisiDataR;
   const kepatuhanData = kepatuhanView === 'fktp' ? kepatuhanDataF : kepatuhanDataR;
+  const diagnosisData = diagnosisView === 'fktp' ? diagnosisDataF : diagnosisDataR;
+
   const tujuanLabel   = tujuanView   === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
   const kondisiLabel  = kondisiView  === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
   const kepatuhanLabel = kepatuhanView === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
+  const diagnosisLabel = diagnosisView === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
 
   const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
     <div className={`bg-white rounded-2xl p-6 border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
@@ -124,7 +143,7 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
     const rawData = {
       headers: [
         'No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi',
-        'Ada Paliatif', 'Kolaborasi Nakes', 'Perbaikan Kualitas Hidup', 'Kepatuhan',
+        'Ada Paliatif', 'Diagnosis', 'Kolaborasi Nakes', 'Perbaikan Kualitas Hidup', 'Kepatuhan',
         'Tujuan: Kendali Nyeri', 'Tujuan: Kendali Gejala', 'Tujuan: Psikosoial', 'Tujuan: Edukasi Keluarga', 'Tujuan: Akhir Hayat', 'Tujuan: Lainnya',
         'Kondisi: Mandiri', 'Kondisi: Bantuan Sebagian', 'Kondisi: Bantuan Penuh', 'Kondisi: Tirah Baring', 'Kondisi: Lainnya'
       ],
@@ -137,6 +156,7 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
         return [
           idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
           pal.screening || 'Tidak',
+          pal.diagnosis || '-',
           pal.kolaborasi || '-',
           pal.perbaikan || '-',
           pal.kepatuhan || '-',
@@ -220,6 +240,28 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
                 <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }} width={80} />
                 <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} ${kepatuhanLabel}`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                 <Bar dataKey="value" name={kepatuhanLabel} fill={kepatuhanView === 'fktp' ? '#10b981' : '#8b5cf6'} radius={[0, 6, 6, 0]} barSize={32}>
+                  <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Diagnosis */}
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-base font-bold text-slate-800 flex items-center"><Heart className="w-5 h-5 mr-2 text-rose-600" /> Top 10 Diagnosis Pasien</h3>
+            {!isPrinting && <ViewToggle value={diagnosisView} onChange={setDiagnosisView} />}
+          </div>
+          <p className="text-xs text-slate-400 mb-2 italic">{diagnosisView === 'responden' ? `${filteredData.length} responden` : `${uniqueFktpData.length} FKTP unik`}</p>
+          <div className="h-64">
+            <ResponsiveContainer width="99%" height="100%" minHeight={200} minWidth={0}>
+              <BarChart data={diagnosisData} layout="vertical" margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 11, fontWeight: 500 }} width={120} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} ${diagnosisLabel}`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="value" name={diagnosisLabel} fill={diagnosisView === 'fktp' ? '#10b981' : '#f43f5e'} radius={[0, 6, 6, 0]} barSize={20}>
                   <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
                 </Bar>
               </BarChart>

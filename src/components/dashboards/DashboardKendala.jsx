@@ -2,9 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend, LabelList
+  PieChart, Pie, Cell, Legend, LabelList, ComposedChart, Line
 } from 'recharts';
-import { AlertTriangle, Users, FileText, Database, Download } from 'lucide-react';
+import { AlertTriangle, Users, Database, FileText, Download, MessageSquare, Map } from 'lucide-react';
+import CustomWordCloud from '../ui/CustomWordCloud';
 
 const ViewToggle = ({ value, onChange }) => (
   <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-semibold shrink-0">
@@ -16,30 +17,74 @@ const ViewToggle = ({ value, onChange }) => (
 export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const [kendalaView, setKendalaView] = useState('responden');
   const [dukunganView, setDukunganView] = useState('responden');
-  const { kendalaStats, kendalaDataR, kendalaDataF, dukunganDataR, dukunganDataF } = useMemo(() => {
+  const [teksView, setTeksView] = useState('responden');
+  const { kendalaStats, kendalaDataR, kendalaDataF, dukunganDataR, dukunganDataF, teksDataR, teksDataF, heatmapData } = useMemo(() => {
     let fktpWithKendala = 0;
     
+    // Stopwords for Word Cloud
+    const stopWords = ['dan', 'di', 'ke', 'dari', 'yang', 'untuk', 'dengan', 'tidak', 'belum', 'ada', 'kurang', 'karena', 'ini', 'itu', 'atau', 'dalam'];
+    const extractWords = (text) => {
+      if (!text) return [];
+      return text.toLowerCase().replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 3 && !stopWords.includes(w));
+    };
+
     // -- Per Responden --
     const kendalaCountsR = { 'SDM': 0, 'Sarana prasarana': 0, 'Alat kesehatan': 0, 'Obat': 0, 'Pembiayaan': 0, 'Regulasi': 0, 'Lainnya': 0 };
+    const teksCountsR = {};
+    const regionalKendalaCounts = {}; // For heatmap
+
     filteredData.forEach(row => {
       const k = row.spkklp_kendala || {};
+      const regional = row.regional || 'Tidak Diketahui';
+      if (!regionalKendalaCounts[regional]) {
+        regionalKendalaCounts[regional] = { 'SDM': 0, 'Sarana prasarana': 0, 'Alat kesehatan': 0, 'Obat': 0, 'Pembiayaan': 0, 'Regulasi': 0, 'Lainnya': 0 };
+      }
+
       if (k.hasKendala === 'Ya') {
-        Object.keys(kendalaCountsR).forEach(key => { if (k[`kendala_${key}`]) kendalaCountsR[key]++; });
+        Object.keys(kendalaCountsR).forEach(key => { 
+          if (k[`kendala_${key}`]) {
+            kendalaCountsR[key]++; 
+            regionalKendalaCounts[regional][key]++;
+          }
+        });
+        
+        if (k.kendala_lainnya_teks) {
+          const words = extractWords(k.kendala_lainnya_teks);
+          words.forEach(w => teksCountsR[w] = (teksCountsR[w] || 0) + 1);
+        }
       }
     });
 
     // -- Per FKTP --
     const kendalaCountsF = { 'SDM': 0, 'Sarana prasarana': 0, 'Alat kesehatan': 0, 'Obat': 0, 'Pembiayaan': 0, 'Regulasi': 0, 'Lainnya': 0 };
+    const teksCountsF = {};
+    
     uniqueFktpData.forEach(row => {
       const k = row.spkklp_kendala || {};
       if (k.hasKendala === 'Ya') {
         fktpWithKendala++;
         Object.keys(kendalaCountsF).forEach(key => { if (k[`kendala_${key}`]) kendalaCountsF[key]++; });
+        
+        if (k.kendala_lainnya_teks) {
+          const words = extractWords(k.kendala_lainnya_teks);
+          words.forEach(w => teksCountsF[w] = (teksCountsF[w] || 0) + 1);
+        }
       }
     });
 
-    const kDataR = Object.keys(kendalaCountsR).map(k => ({ name: k, value: kendalaCountsR[k] })).sort((a,b) => b.value - a.value);
-    const kDataF = Object.keys(kendalaCountsF).map(k => ({ name: k, value: kendalaCountsF[k] })).sort((a,b) => b.value - a.value);
+    // Compute cumulative percentage for Pareto
+    const computePareto = (counts) => {
+      const arr = Object.keys(counts).map(k => ({ name: k, value: counts[k] })).sort((a,b) => b.value - a.value).filter(d => d.value > 0);
+      let total = arr.reduce((acc, curr) => acc + curr.value, 0);
+      let cumulative = 0;
+      return arr.map(d => {
+        cumulative += d.value;
+        return { ...d, cumulativePerc: total > 0 ? (cumulative / total) * 100 : 0 };
+      });
+    };
+
+    const kDataR = computePareto(kendalaCountsR);
+    const kDataF = computePareto(kendalaCountsF);
 
     const getDukData = (counts) => [
       { name: 'Butuh Dukungan Pendanaan', value: counts['Pembiayaan'] },
@@ -47,21 +92,36 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
       { name: 'Butuh Dukungan SDM/Alkes', value: counts['SDM'] + counts['Alat kesehatan'] + counts['Sarana prasarana'] }
     ].filter(d => d.value > 0);
 
+    const toArrText = (obj) => Object.keys(obj).map(k => ({ text: k, value: obj[k] })).sort((a,b) => b.value - a.value).filter(d => d.value > 1).slice(0, 30);
+
+    // Format heatmap data
+    const heatmapDataArr = Object.keys(regionalKendalaCounts).map(reg => {
+      return {
+        regional: reg,
+        ...regionalKendalaCounts[reg],
+        total: Object.values(regionalKendalaCounts[reg]).reduce((a,b) => a+b, 0)
+      };
+    }).sort((a,b) => b.total - a.total);
+
     return {
       kendalaStats: {
         totalFktpKendala: fktpWithKendala,
         proporsiKendala: uniqueFktpData.length > 0 ? (fktpWithKendala / uniqueFktpData.length) * 100 : 0,
         top3: kDataF.slice(0, 3)
       },
-      kendalaDataR: kDataR.filter(d => d.value > 0),
-      kendalaDataF: kDataF.filter(d => d.value > 0),
+      kendalaDataR: kDataR,
+      kendalaDataF: kDataF,
       dukunganDataR: getDukData(kendalaCountsR),
-      dukunganDataF: getDukData(kendalaCountsF)
+      dukunganDataF: getDukData(kendalaCountsF),
+      teksDataR: toArrText(teksCountsR),
+      teksDataF: toArrText(teksCountsF),
+      heatmapData: heatmapDataArr
     };
   }, [filteredData, uniqueFktpData]);
 
   const kendalaData  = kendalaView  === 'fktp' ? kendalaDataF  : kendalaDataR;
   const dukunganData = dukunganView === 'fktp' ? dukunganDataF : dukunganDataR;
+  const teksData     = teksView     === 'fktp' ? teksDataF     : teksDataR;
   const kendalaLabel = kendalaView  === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
   const dukunganLabel = dukunganView === 'fktp' ? 'Frekuensi FKTP' : 'Frekuensi Responden';
 
@@ -139,21 +199,23 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-base font-bold text-slate-800 flex items-center"><AlertTriangle className="w-5 h-5 mr-2 text-rose-600" /> Distribusi Kendala Pelayanan</h3>
+            <h3 className="text-base font-bold text-slate-800 flex items-center"><AlertTriangle className="w-5 h-5 mr-2 text-rose-600" /> Distribusi Kendala Pelayanan (Pareto)</h3>
             {!isPrinting && <ViewToggle value={kendalaView} onChange={setKendalaView} />}
           </div>
           <p className="text-xs text-slate-400 mb-4 italic">{kendalaView === 'responden' ? `${filteredData.length} responden` : `${uniqueFktpData.length} FKTP unik`}</p>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
-              <BarChart data={kendalaData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
-                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }} width={120} />
-                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} ${kendalaLabel}`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Bar dataKey="value" name={kendalaLabel} fill={kendalaView === 'fktp' ? '#10b981' : '#f43f5e'} radius={[0, 6, 6, 0]} barSize={32}>
-                  <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+              <ComposedChart data={kendalaData} margin={{ top: 20, right: 30, left: 0, bottom: 50 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} angle={-15} textAnchor="end" />
+                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} domain={[0, 100]} tickFormatter={val => `${val}%`} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar yAxisId="left" dataKey="value" name={kendalaLabel} fill={kendalaView === 'fktp' ? '#10b981' : '#f43f5e'} radius={[6, 6, 0, 0]} maxBarSize={60}>
+                  <LabelList dataKey="value" position="top" fill="#475569" fontSize={12} fontWeight={600} />
                 </Bar>
-              </BarChart>
+                <Line yAxisId="right" type="monotone" dataKey="cumulativePerc" name="Kumulatif %" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4, fill: '#8b5cf6', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -174,6 +236,54 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
                 <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px' }} />
               </PieChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Word Cloud */}
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-base font-bold text-slate-800 flex items-center"><MessageSquare className="w-5 h-5 mr-2 text-blue-600" /> Kata Kunci Kendala Spesifik</h3>
+            {!isPrinting && <ViewToggle value={teksView} onChange={setTeksView} />}
+          </div>
+          <p className="text-xs text-slate-400 mb-4 italic">{teksView === 'responden' ? `${filteredData.length} responden` : `${uniqueFktpData.length} FKTP unik`}</p>
+          <CustomWordCloud data={teksData} />
+        </div>
+
+        {/* Heatmap Regional */}
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-base font-bold text-slate-800 flex items-center"><Map className="w-5 h-5 mr-2 text-indigo-600" /> Heatmap Kendala per Regional</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead>
+                <tr>
+                  <th className="px-4 py-3 bg-slate-50 font-semibold text-slate-700 border-b">Regional</th>
+                  {['SDM', 'Sarana prasarana', 'Alat kesehatan', 'Obat', 'Pembiayaan', 'Regulasi', 'Lainnya'].map(k => (
+                    <th key={k} className="px-2 py-3 bg-slate-50 font-semibold text-slate-700 border-b text-center">{k}</th>
+                  ))}
+                  <th className="px-4 py-3 bg-slate-50 font-semibold text-slate-700 border-b text-center">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {heatmapData.map((row, idx) => (
+                  <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50">
+                    <td className="px-4 py-3 font-medium text-slate-800">{row.regional}</td>
+                    {['SDM', 'Sarana prasarana', 'Alat kesehatan', 'Obat', 'Pembiayaan', 'Regulasi', 'Lainnya'].map(k => {
+                      const val = row[k];
+                      const maxVal = heatmapData[0] ? Math.max(...heatmapData.map(r => r[k])) : 1;
+                      const opacity = maxVal > 0 ? (val / maxVal) : 0;
+                      return (
+                        <td key={k} className="px-2 py-3 text-center font-medium" style={{ backgroundColor: val > 0 ? `rgba(244, 63, 94, ${opacity * 0.7 + 0.1})` : 'transparent', color: val > 0 && opacity > 0.6 ? '#fff' : '#334155' }}>
+                          {val > 0 ? val : '-'}
+                        </td>
+                      );
+                    })}
+                    <td className="px-4 py-3 text-center font-bold text-slate-700">{row.total}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
