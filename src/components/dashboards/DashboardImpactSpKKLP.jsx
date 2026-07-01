@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   Legend, LabelList, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
-import { Stethoscope, Activity, Home, HeartPulse, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Stethoscope, Activity, Home, HeartPulse, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 
 export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
