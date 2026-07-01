@@ -238,14 +238,14 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
   const handleExport = () => {
     const tables = [
       {
-        title: 'Top 20 Kata Kunci (Word Cloud)',
+        title: 'Top 30 Kata Kunci (Word Cloud)',
         headers: ['Kata Kunci', 'Frekuensi Kemunculan'],
-        data: topWords.map(w => [w.text, w.value])
+        data: wordCloudData.map(w => [w.text, w.value])
       },
       {
         title: 'Data Verbatim (Difilter)',
         headers: ['FKTP', 'Peran', 'Pertanyaan', 'Jawaban Lengkap'],
-        data: displayData.map(d => [d.fktp, d.role, d.question, d.answer])
+        data: kualitatifData.map(d => [d.fktp, d.role, d.question, d.answer])
       }
     ];
     exportTablesToExcel('ANALISIS KUALITATIF VERBATIM', tables, 'Dashboard_Kualitatif');

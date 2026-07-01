@@ -6,8 +6,9 @@ import {
 } from 'recharts';
 import { 
   LayoutDashboard, Activity, CheckSquare, Stethoscope, AlertTriangle, 
-  MessageSquare, FileText, ChevronRight
+  MessageSquare, FileText, ChevronRight, Download
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
 
@@ -359,10 +360,96 @@ export default function DashboardEksekutif({ data = [] }) {
     { id: 'kualitatif', label: 'Suara Lapangan', icon: MessageSquare }
   ];
 
+  const exportEksekutifToExcel = () => {
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Overview
+    const overviewData = [
+      ['DASHBOARD EKSEKUTIF SURVEY KKLP'],
+      [],
+      ['A. PROFIL UMUM'],
+      ['Metrik', 'Nilai'],
+      ['Total Responden', metrics.total],
+      ['FKTP Memiliki Sp.KKLP', metrics.spkklpCount],
+      [],
+      ['B. PROPORSI JENIS FKTP'],
+      ['Jenis FKTP', 'Jumlah'],
+      ...metrics.pieData.map(d => [d.name, d.value]),
+      [],
+      ['C. SEBARAN TOP 15 KAB/KOTA'],
+      ['Kab/Kota', 'Total', 'Ada Sp.KKLP', 'Tanpa Sp.KKLP'],
+      ...metrics.cityData.map(d => [d.name, d.total, d.withSpKKLP, d.withoutSpKKLP]),
+    ];
+    const ws1 = XLSX.utils.aoa_to_sheet(overviewData);
+    ws1['!cols'] = [{ wch: 45 }, { wch: 20 }, { wch: 20 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, ws1, 'Overview & Profil');
+
+    // Sheet 2: Ketersediaan & JKN
+    const jknData = [
+      ['D. RADAR GAP LAYANAN JKN PER JENIS FKTP (Rata-rata Skala 1-4)'],
+      ['Layanan JKN', 'Puskesmas', 'Klinik', 'DPM'],
+      ...metrics.radarJkn.map(d => [d.subject, d.Puskesmas, d.Klinik, d.DPM]),
+      [],
+      ['E. USULAN LAYANAN BARU MASUK JKN (% Setuju/Sangat Setuju)'],
+      ['Layanan', '% Dukungan'],
+      ...metrics.barUsulan.map(d => [d.name, `${d.value}%`]),
+    ];
+    const ws2 = XLSX.utils.aoa_to_sheet(jknData);
+    ws2['!cols'] = [{ wch: 45 }, { wch: 20 }, { wch: 20 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Ketersediaan & JKN');
+
+    // Sheet 3: Perbandingan Sp.KKLP
+    const relevansiData = [
+      ['F. PERSEPSI RELEVANSI SP.KKLP: ADA vs TIDAK ADA (Rata-rata 1-5)'],
+      ['Aspek Relevansi', 'FKTP Ada Sp.KKLP', 'FKTP Tanpa Sp.KKLP'],
+      ...metrics.barRelevansi.map(d => [d.name, d.withSpkklp, d.withoutSpkklp]),
+      [],
+      ['G. SCATTER: WAKTU POLI vs PROPORSI DALAM GEDUNG'],
+      ['Nama Faskes', 'Waktu Poli (jam)', 'Proporsi Dalam Gedung (%)'],
+      ...metrics.scatterData.map(d => [d.name, d.x, d.y]),
+    ];
+    const ws3 = XLSX.utils.aoa_to_sheet(relevansiData);
+    ws3['!cols'] = [{ wch: 45 }, { wch: 25 }, { wch: 25 }];
+    XLSX.utils.book_append_sheet(wb, ws3, 'Sp.KKLP vs Umum');
+
+    // Sheet 4: Rujukan & PRB
+    const rujukanData = [
+      ['H. TOP 10 LAYANAN SERING DIRUJUK (% dari Total Responden)'],
+      ['Layanan', '% Frekuensi Rujukan'],
+      ...metrics.topRujukan.map(d => [d.name, `${d.value}%`]),
+      [],
+      ['I. KINERJA PRB'],
+      ['Metrik', 'Nilai'],
+      ['Kepatuhan Berkunjung PRB', `${metrics.prbKepatuhan}%`],
+      ['Rata-rata Rujukan PRB per Bulan', metrics.avgRujukanPrb],
+    ];
+    const ws4 = XLSX.utils.aoa_to_sheet(rujukanData);
+    ws4['!cols'] = [{ wch: 55 }, { wch: 25 }];
+    XLSX.utils.book_append_sheet(wb, ws4, 'Rujukan & PRB');
+
+    // Sheet 5: Hambatan
+    const hambatanData = [
+      ['J. KENDALA IMPLEMENTASI SP.KKLP'],
+      ['Kategori Kendala', 'Jumlah FKTP'],
+      ...metrics.barKendala.map(d => [d.name, d.value]),
+      [],
+      ['K. FEEDBACK SUARA LAPANGAN (Hambatan Klinis & PRB)'],
+      ['Jenis', 'Faskes', 'Isi Feedback'],
+      ...metrics.textHambatan.map(d => [d.type, d.faskes, d.text]),
+    ];
+    const ws5 = XLSX.utils.aoa_to_sheet(hambatanData);
+    ws5['!cols'] = [{ wch: 25 }, { wch: 35 }, { wch: 80 }];
+    XLSX.utils.book_append_sheet(wb, ws5, 'Hambatan Operasional');
+
+    XLSX.writeFile(wb, `Dashboard_Eksekutif_${new Date().getTime()}.xlsx`);
+  };
+
   return (
     <div className="flex flex-col gap-6">
-      {/* Tab Navigation Internal */}
-      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
+      {/* Header dengan tombol export */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        {/* Tab Navigation Internal */}
+        <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4 flex-1">
         {tabs.map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -381,6 +468,15 @@ export default function DashboardEksekutif({ data = [] }) {
             </button>
           );
         })}
+        </div>
+        {/* Tombol Download Excel */}
+        <button
+          onClick={exportEksekutifToExcel}
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 text-sm whitespace-nowrap"
+        >
+          <Download className="w-4 h-4" />
+          Download Excel
+        </button>
       </div>
 
       {/* Tab Content */}

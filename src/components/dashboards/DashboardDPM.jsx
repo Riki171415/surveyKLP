@@ -212,6 +212,11 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
         ]
       },
       {
+        title: 'Distribusi Provinsi DPM (Top 10)',
+        headers: ['Provinsi', 'Jumlah DPM'],
+        data: provinsiData.map(d => [d.name, d.value])
+      },
+      {
         title: 'Menangani Keluarga yang Sama',
         headers: ['Kategori', 'Jumlah DPM'],
         data: keluargaSamaData.filter(d => d.name !== 'Belum Ada Data')
@@ -228,13 +233,43 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
       },
       {
         title: 'Beban Pasien',
-        headers: ['Jumlah Pasien', 'Jumlah DPM'],
+        headers: ['Jumlah Pasien/Hari', 'Jumlah DPM'],
         data: bebanPasienData
+      },
+      {
+        title: 'Top Kegiatan Holistik & Aspek yang Digali',
+        headers: ['Kegiatan / Aspek', 'Jumlah DPM'],
+        data: aspekData.map(d => [d.name, d.value])
       },
       {
         title: 'Luaran Pelayanan yang Diukur',
         headers: ['Luaran', 'Jumlah DPM'],
         data: luaranPelayananData
+      },
+      {
+        title: 'Cross-Tab: Lama Praktik vs % Kasus Kronis',
+        headers: ['Lama Praktik', '< 25%', '25–50%', '51–75%', '> 75%'],
+        data: crossTabKronis.map(d => [d.name, d['< 25%'] || 0, d['25–50%'] || 0, d['51–75%'] || 0, d['> 75%'] || 0])
+      },
+      {
+        title: 'Cross-Tab: Lama Praktik vs Jumlah Kunjungan',
+        headers: ['Lama Praktik', '< 10 pasien', '10–20 pasien', '21–30 pasien', '> 30 pasien'],
+        data: crossTabKunjungan.map(d => [d.name, d['< 10 pasien'] || 0, d['10–20 pasien'] || 0, d['21–30 pasien'] || 0, d['> 30 pasien'] || 0])
+      },
+      {
+        title: 'Distribusi Skor Indeks Pelayanan KKLP',
+        headers: ['Rentang Skor', 'Jumlah DPM'],
+        data: skorHistogram.map(d => [d.name, d.value])
+      },
+      {
+        title: 'DPM Need Improvement (Skor < 40)',
+        headers: ['Nama Faskes', 'Skor', 'Provinsi'],
+        data: skorRendah.length > 0 ? skorRendah.map(d => [d.faskes, d.skor, d.provinsi || '-']) : [['Tidak ada DPM dengan skor rendah', '-', '-']]
+      },
+      {
+        title: 'Gap Analysis: Penyakit vs Tindakan (Top 5)',
+        headers: ['Penyakit / Masalah', 'Jumlah Kasus', 'Edukasi Keluarga', 'Home Visit'],
+        data: gapData.map(d => [d.name, d.Penyakit, d.Edukasi, d.HomeVisit])
       }
     ];
     exportTablesToExcel('DOKTER PRAKTIK MANDIRI', tables, 'Dashboard_DPM');
