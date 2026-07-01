@@ -20,7 +20,7 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
   const [kepatuhanView, setKepatuhanView] = useState('responden');
   const [tenagaView, setTenagaView] = useState('responden');
   const [diagnosisView, setDiagnosisView] = useState('responden');
-  const { hcStats, kondisiDataR, kondisiDataF, jenisDataR, jenisDataF, kepatuhanDataR, kepatuhanDataF } = useMemo(() => {
+  const { hcStats, kondisiDataR, kondisiDataF, jenisDataR, jenisDataF, kepatuhanDataR, kepatuhanDataF, tenagaDataR, tenagaDataF, diagnosisDataR, diagnosisDataF } = useMemo(() => {
     let totalFktp = uniqueFktpData.length;
     let fktpWithHomeCare = 0;
     let sumKunjungan = 0;
