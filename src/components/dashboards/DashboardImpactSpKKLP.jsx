@@ -26,7 +26,7 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
       const prb = row.prb || {};
       if (prb.jumlah !== undefined && prb.jumlah !== '') {
         m.prbAktif += Number(prb.jumlah) || 0;
-        m.rujukanFkrtl += Number(prb.rujukan_fkrtl) || 0;
+        m.rujukanFkrtl += Number(prb.rataRujukan) || 0;
         
         const aktif = Number(prb.jumlah) || 0;
         const rutin = Number(prb.rutinKunjungan) || 0;
