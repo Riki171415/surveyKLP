@@ -12,7 +12,13 @@ export default function DeepDiveAIReport({ rawData }) {
   const [tempKey, setTempKey] = useState('');
   const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
   const [geminiError, setGeminiError] = useState('');
-  const [geminiReport, setGeminiReport] = useState(null);
+  const [geminiReport, setGeminiReport] = useState(() => {
+    const cached = localStorage.getItem('GEMINI_CACHED_REPORT');
+    if (cached) {
+      try { return JSON.parse(cached); } catch(e) { return null; }
+    }
+    return null;
+  });
 
   useEffect(() => {
     setIsAnalyzing(true);
@@ -107,6 +113,7 @@ ${JSON.stringify(smartAnswers)}
       const text = data.candidates[0].content.parts[0].text;
       const parsed = JSON.parse(text);
       setGeminiReport(parsed);
+      localStorage.setItem('GEMINI_CACHED_REPORT', JSON.stringify(parsed));
 
     } catch (err) {
       console.error(err);
@@ -239,7 +246,12 @@ ${JSON.stringify(smartAnswers)}
           </div>
           <div className="flex flex-col gap-2">
             {geminiReport ? (
-              <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full text-sm font-bold border border-emerald-100 shadow-sm"><Check className="w-4 h-4" /> Didukung oleh Gemini AI</div>
+              <div className="flex flex-col items-end gap-2">
+                <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full text-sm font-bold border border-emerald-100 shadow-sm"><Check className="w-4 h-4" /> Didukung oleh Gemini AI</div>
+                <button onClick={handleGenerateGemini} className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-medium transition">
+                  <RefreshCw className="w-3 h-3" /> Generate Ulang
+                </button>
+              </div>
             ) : (
               <button onClick={handleGenerateGemini} className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:from-indigo-500 hover:to-purple-500 transition shadow-md active:scale-95">
                 <Cpu className="w-4 h-4" /> Generate dengan Gemini
