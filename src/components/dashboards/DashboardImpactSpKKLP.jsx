@@ -3,8 +3,9 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   Legend, LabelList, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
-import { Stethoscope, Activity, Home, HeartPulse, CheckCircle2, AlertCircle, FileText, Download } from 'lucide-react';
+import { Stethoscope, Activity, Home, HeartPulse, CheckCircle2, AlertCircle, FileText, Download, Image as ImageIcon } from 'lucide-react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 
 // ── Komponen Toggle Pill ──────────────────────────────────────────────────────
 const ViewToggle = ({ value, onChange }) => (
@@ -238,9 +239,12 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div id="dashboard-impact-capture" className="space-y-8 animate-fade-in relative">
       {!isPrinting && (
-        <div className="flex justify-end mb-4 no-print">
+        <div className="flex justify-end mb-4 no-print gap-2 capture-exclude">
+          <button onClick={() => downloadElementAsPNG('dashboard-impact-capture', 'Dashboard_Impact_SpKKLP')} className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md active:scale-95 text-sm">
+            <ImageIcon className="w-4 h-4 mr-2" /> Download PNG
+          </button>
           <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
             <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
           </button>
@@ -265,8 +269,13 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : 'lg:col-span-2'}`}>
-          <div className="flex justify-between items-center mb-6">
+        <div id="impact-kinerja-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : 'lg:col-span-2'}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('impact-kinerja-chart', 'Perbandingan_Kinerja_SpKKLP')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-6 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Activity className="w-5 h-5 mr-2 text-primary-600" /> Perbandingan Kinerja Lintas Program (%)</h3>
           </div>
           <div className="h-80">
@@ -288,8 +297,13 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="impact-radar-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('impact-radar-chart', 'Spektrum_Kemampuan_Radar')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-indigo-600" /> Analisis Spektrum Kemampuan (Radar)</h3>
           </div>
           <p className="text-xs text-slate-400 mb-2 italic">Area semakin luas menandakan kualitas/kapasitas pelayanan yang semakin menyeluruh.</p>

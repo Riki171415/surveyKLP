@@ -4,8 +4,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LabelList, Legend
 } from 'recharts';
-import { HeartPulse, Users, CheckCircle, Heart, Stethoscope, CheckCircle2, Download } from 'lucide-react';
-
+import { HeartPulse, Users, CheckCircle, Heart, Stethoscope, CheckCircle2, Download, Image as ImageIcon } from 'lucide-react';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 const ViewToggle = ({ value, onChange }) => (
   <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-semibold shrink-0">
     <button onClick={() => onChange('responden')} className={`px-3 py-1 rounded-md transition-all ${value === 'responden' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Per Responden</button>
@@ -129,14 +129,14 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
           ['Proporsi Pelaporan Perbaikan Kualitas Hidup', `${palStats.proporsiPerbaikan.toFixed(2)}%`]
         ]
       },
-      { title: 'Tujuan Pelayanan Paliatif (Per Responden)', headers: ['Tujuan', 'Jumlah Responden'], data: tujuanDataR },
-      { title: 'Tujuan Pelayanan Paliatif (Per FKTP)', headers: ['Tujuan', 'Jumlah FKTP'], data: tujuanDataF },
-      { title: 'Kondisi Pasien Paliatif (Per Responden)', headers: ['Kondisi Pasien', 'Jumlah Responden'], data: kondisiDataR },
-      { title: 'Kondisi Pasien Paliatif (Per FKTP)', headers: ['Kondisi Pasien', 'Jumlah FKTP'], data: kondisiDataF },
-      { title: 'Tingkat Kepatuhan Pasien (Per Responden)', headers: ['Tingkat Kepatuhan', 'Jumlah Responden'], data: kepatuhanDataR },
-      { title: 'Tingkat Kepatuhan Pasien (Per FKTP)', headers: ['Tingkat Kepatuhan', 'Jumlah FKTP'], data: kepatuhanDataF },
-      { title: 'Top 10 Diagnosis Pasien (Per Responden)', headers: ['Diagnosis', 'Jumlah Responden'], data: diagnosisDataR },
-      { title: 'Top 10 Diagnosis Pasien (Per FKTP)', headers: ['Diagnosis', 'Jumlah FKTP'], data: diagnosisDataF }
+      { title: 'Tujuan Pelayanan Paliatif (Per Responden)', headers: ['Tujuan', 'Jumlah (Nilai)', 'Persentase (%)'], data: tujuanDataR.map(d => [d.name, d.value, `${filteredData.length > 0 ? ((d.value / filteredData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Tujuan Pelayanan Paliatif (Per FKTP)', headers: ['Tujuan', 'Jumlah FKTP (Nilai)', 'Persentase (%)'], data: tujuanDataF.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Kondisi Pasien Paliatif (Per Responden)', headers: ['Kondisi Pasien', 'Jumlah (Nilai)', 'Persentase (%)'], data: kondisiDataR.map(d => [d.name, d.value, `${filteredData.length > 0 ? ((d.value / filteredData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Kondisi Pasien Paliatif (Per FKTP)', headers: ['Kondisi Pasien', 'Jumlah FKTP (Nilai)', 'Persentase (%)'], data: kondisiDataF.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Tingkat Kepatuhan Pasien (Per Responden)', headers: ['Tingkat Kepatuhan', 'Jumlah (Nilai)', 'Persentase (%)'], data: kepatuhanDataR.map(d => [d.name, d.value, `${filteredData.length > 0 ? ((d.value / filteredData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Tingkat Kepatuhan Pasien (Per FKTP)', headers: ['Tingkat Kepatuhan', 'Jumlah FKTP (Nilai)', 'Persentase (%)'], data: kepatuhanDataF.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Top 10 Diagnosis Pasien (Per Responden)', headers: ['Diagnosis', 'Jumlah (Nilai)'], data: diagnosisDataR.map(d => [d.name, d.value]) },
+      { title: 'Top 10 Diagnosis Pasien (Per FKTP)', headers: ['Diagnosis', 'Jumlah FKTP (Nilai)'], data: diagnosisDataF.map(d => [d.name, d.value]) }
     ];
 
     const tujuanKeys = ['Pengendalian nyeri', 'Pengendalian gejala', 'Dukungan psikososial', 'Edukasi keluarga/caregiver', 'Perawatan akhir kehidupan', 'Lainnya'];
@@ -173,9 +173,12 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
 
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div id="dashboard-pal-capture" className="space-y-8 animate-fade-in relative">
       {!isPrinting && (
-        <div className="flex justify-end mb-4 no-print">
+        <div className="flex justify-end mb-4 no-print gap-2 capture-exclude">
+          <button onClick={() => downloadElementAsPNG('dashboard-pal-capture', 'Dashboard_Paliatif_Full')} className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md active:scale-95 text-sm">
+            <ImageIcon className="w-4 h-4 mr-2" /> Download PNG
+          </button>
           <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
             <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
           </button>
@@ -188,8 +191,13 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="pal-tujuan-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('pal-tujuan-chart', 'Tujuan_Paliatif')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-purple-600" /> Tujuan Utama Pelayanan Paliatif</h3>
             {!isPrinting && <ViewToggle value={tujuanView} onChange={setTujuanView} />}
           </div>
@@ -209,8 +217,13 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="pal-kondisi-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('pal-kondisi-chart', 'Kondisi_Pasien_Paliatif')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Heart className="w-5 h-5 mr-2 text-purple-600" /> Kondisi Pasien Paliatif</h3>
             {!isPrinting && <ViewToggle value={kondisiView} onChange={setKondisiView} />}
           </div>
@@ -228,8 +241,13 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="pal-kepatuhan-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('pal-kepatuhan-chart', 'Kepatuhan_Paliatif')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><CheckCircle className="w-5 h-5 mr-2 text-purple-600" /> Tingkat Kepatuhan Pasien/Keluarga</h3>
             {!isPrinting && <ViewToggle value={kepatuhanView} onChange={setKepatuhanView} />}
           </div>
@@ -250,8 +268,13 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
         </div>
 
         {/* Diagnosis */}
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="pal-diagnosis-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('pal-diagnosis-chart', 'Diagnosis_Paliatif')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Heart className="w-5 h-5 mr-2 text-rose-600" /> Top 10 Diagnosis Pasien</h3>
             {!isPrinting && <ViewToggle value={diagnosisView} onChange={setDiagnosisView} />}
           </div>

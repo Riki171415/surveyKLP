@@ -4,7 +4,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
 } from 'recharts';
-import { Activity, ShieldAlert, CheckCircle, TrendingDown, Download } from 'lucide-react';
+import { Activity, ShieldAlert, CheckCircle, TrendingDown, Download , Image as ImageIcon } from 'lucide-react';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 
 const nonOptimalServices = [
   "Pelayanan lifestyle medicine", "Pelayanan wellness dan healthy aging",
@@ -211,9 +212,14 @@ export default function DashboardNonOptimal({ filteredData, uniqueFktpData, COLO
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div id="dashboard-dashboardnonoptimal-capture" className="space-y-8 animate-fade-in">
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print">
+          {!isPrinting && (
+        <button onClick={() => downloadElementAsPNG('dashboard-dashboardnonoptimal-capture', 'DashboardNonOptimal')} className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md active:scale-95 text-sm capture-exclude mb-4 mr-2">
+          <ImageIcon className="w-4 h-4 mr-2" /> Download PNG
+        </button>
+      )}
           <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
             <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
           </button>

@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X, Lightbulb, Target, Copy, Download } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X, Lightbulb, Target, Copy, Download , Image as ImageIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 
 export default function DashboardKeluhanSentences({ filteredData, isPrinting }) {
   const [expandedCategory, setExpandedCategory] = useState(null);
@@ -352,7 +353,7 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
     );
 
     return (
-      <div className={`border p-8 rounded-2xl shadow-sm relative overflow-hidden ${isAuto ? 'bg-emerald-50 border-emerald-100' : 'bg-indigo-50 border-indigo-100'}`}>
+    <div id="dashboard-dashboardkeluhansentences-capture" className={`border p-8 rounded-2xl shadow-sm relative overflow-hidden ${isAuto ? 'bg-emerald-50 border-emerald-100' : 'bg-indigo-50 border-indigo-100'}`}>
         {showKeyModal && typeof document !== 'undefined' && createPortal(
           <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
@@ -532,6 +533,11 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
     <div className="space-y-6 animate-fade-in">
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print">
+          {!isPrinting && (
+        <button onClick={() => downloadElementAsPNG('dashboard-dashboardkeluhansentences-capture', 'DashboardKeluhanSentences')} className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md active:scale-95 text-sm capture-exclude mb-4 mr-2">
+          <ImageIcon className="w-4 h-4 mr-2" /> Download PNG
+        </button>
+      )}
           <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
             <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
           </button>

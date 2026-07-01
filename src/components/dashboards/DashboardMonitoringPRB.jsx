@@ -4,7 +4,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
 } from 'recharts';
-import { Activity, AlertCircle, FileSearch, ShieldAlert, Download } from 'lucide-react';
+import { Activity, ShieldAlert, FileSearch, AlertCircle, Download, Image as ImageIcon } from 'lucide-react';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 
 const ViewToggle = ({ value, onChange }) => (
   <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-semibold shrink-0">
@@ -123,10 +124,10 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
           ['Proporsi FKTP dengan Mekanisme', `${monStats.proporsiMekanisme.toFixed(2)}%`]
         ]
       },
-      { title: 'Proporsi Mekanisme Utama PRB (Per Responden)', headers: ['Mekanisme', 'Jumlah Responden'], data: mekanismeDataR },
-      { title: 'Proporsi Mekanisme Utama PRB (Per FKTP)', headers: ['Mekanisme', 'Jumlah FKTP'], data: mekanismeDataF },
-      { title: 'Top 10 Kata Kunci Kendala Pelaksanaan (Per Responden)', headers: ['Kata Kunci', 'Frekuensi Penyebutan'], data: kendalaDataR },
-      { title: 'Top 10 Kata Kunci Kendala Pelaksanaan (Per FKTP)', headers: ['Kata Kunci', 'Frekuensi Penyebutan'], data: kendalaDataF },
+      { title: 'Proporsi Mekanisme Utama PRB (Per Responden)', headers: ['Mekanisme', 'Jumlah (Nilai)', 'Persentase (%)'], data: mekanismeDataR.map(d => [d.name, d.value, `${filteredData.length > 0 ? ((d.value / filteredData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Proporsi Mekanisme Utama PRB (Per FKTP)', headers: ['Mekanisme', 'Jumlah FKTP (Nilai)', 'Persentase (%)'], data: mekanismeDataF.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Top 10 Kata Kunci Kendala Pelaksanaan (Per Responden)', headers: ['Kata Kunci', 'Frekuensi Penyebutan'], data: kendalaDataR.map(d => [d.name, d.value]) },
+      { title: 'Top 10 Kata Kunci Kendala Pelaksanaan (Per FKTP)', headers: ['Kata Kunci', 'Frekuensi Penyebutan'], data: kendalaDataF.map(d => [d.name, d.value]) },
       { title: 'Komparasi Mekanisme Berdasarkan Sp.KKLP', headers: ['Mekanisme', 'Ada Sp.KKLP', 'Tidak Ada'], data: crossSpkklpData.map(d => ({ name: d.name, ada: d['Ada Sp.KKLP'], tidak: d['Tidak Ada'] })) },
       { title: 'Komparasi Mekanisme Berdasarkan Jenis FKTP', headers: ['Mekanisme', 'Puskesmas', 'Klinik', 'DPM'], data: crossTypeData.map(d => ({ name: d.name, p: d['Puskesmas'], k: d['Klinik'], dpm: d['DPM'] })) }
     ];
@@ -151,9 +152,12 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div id="dashboard-mon-prb-capture" className="space-y-8 animate-fade-in relative">
       {!isPrinting && (
-        <div className="flex justify-end mb-4 no-print">
+        <div className="flex justify-end mb-4 no-print gap-2 capture-exclude">
+          <button onClick={() => downloadElementAsPNG('dashboard-mon-prb-capture', 'Monitoring_PRB_Full')} className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md active:scale-95 text-sm">
+            <ImageIcon className="w-4 h-4 mr-2" /> Download PNG
+          </button>
           <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
             <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
           </button>
@@ -167,8 +171,13 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="mon-prb-mekanisme" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('mon-prb-mekanisme', 'Proporsi_Mekanisme')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Activity className="w-5 h-5 mr-2 text-blue-600" /> Proporsi Mekanisme Utama PRB</h3>
             {!isPrinting && <ViewToggle value={mekanismeView} onChange={setMekanismeView} />}
           </div>
@@ -186,8 +195,13 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="mon-prb-kendala" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('mon-prb-kendala', 'Top_Kendala_PRB')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><AlertCircle className="w-5 h-5 mr-2 text-amber-600" /> Top 10 Kata Kunci Kendala Pelaksanaan</h3>
             {!isPrinting && <ViewToggle value={kendalaView} onChange={setKendalaView} />}
           </div>
@@ -208,8 +222,13 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
         </div>
 
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : 'lg:col-span-2'}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="mon-prb-cross-sp" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : 'lg:col-span-2'}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('mon-prb-cross-sp', 'Mekanisme_vs_SpKKLP')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Activity className="w-5 h-5 mr-2 text-emerald-600" /> Komparasi Mekanisme: Ada vs Tidak Ada Sp.KKLP</h3>
           </div>
           <p className="text-xs text-slate-400 mb-4 italic">Berdasarkan {uniqueFktpData.length} FKTP Unik</p>
@@ -228,8 +247,13 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : 'lg:col-span-2'}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="mon-prb-cross-type" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : 'lg:col-span-2'}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('mon-prb-cross-type', 'Mekanisme_vs_JenisFKTP')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Activity className="w-5 h-5 mr-2 text-indigo-600" /> Komparasi Mekanisme: Berdasarkan Jenis FKTP</h3>
           </div>
           <p className="text-xs text-slate-400 mb-4 italic">Berdasarkan {uniqueFktpData.length} FKTP Unik</p>

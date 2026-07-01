@@ -5,8 +5,9 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList, ScatterChart, Scatter, ZAxis 
 } from 'recharts';
-import { Stethoscope, Users, Clock, FileText, CheckCircle, Map, Target, AlertTriangle, TrendingUp, Zap, Download } from 'lucide-react';
+import { Stethoscope, Users, Clock, FileText, CheckCircle, Map, Target, AlertTriangle, TrendingUp, Zap, Download , Image as ImageIcon } from 'lucide-react';
 import { normalizeStr, faskesToKabMap } from './DashboardProfil';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 
 export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const dpmDataFiltered = useMemo(() => {
@@ -193,7 +194,7 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
 
   if (dpmDataFiltered.length === 0) {
     return (
-      <div className="text-center py-16 bg-white border border-slate-100 rounded-2xl">
+    <div id="dashboard-dashboarddpm-capture" className="text-center py-16 bg-white border border-slate-100 rounded-2xl">
         <Stethoscope className="w-16 h-16 text-slate-300 mx-auto mb-4" />
         <h3 className="text-xl font-bold text-slate-700">Belum Ada Data DPM</h3>
         <p className="text-slate-500 mt-2">Dashboard ini khusus menampilkan data dari Dokter Praktik Mandiri.</p>
@@ -308,6 +309,11 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
     <div className="space-y-8 animate-fade-in">
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print">
+          {!isPrinting && (
+        <button onClick={() => downloadElementAsPNG('dashboard-dashboarddpm-capture', 'DashboardDPM')} className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md active:scale-95 text-sm capture-exclude mb-4 mr-2">
+          <ImageIcon className="w-4 h-4 mr-2" /> Download PNG
+        </button>
+      )}
           <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
             <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
           </button>

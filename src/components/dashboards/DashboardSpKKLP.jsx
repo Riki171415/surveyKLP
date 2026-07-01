@@ -4,7 +4,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
 } from 'recharts';
-import { Stethoscope, Award, FileSearch, CheckCircle, Activity, HeartPulse, Building, ArrowDownCircle, AlertCircle } from 'lucide-react';
+import { Stethoscope, Award, FileSearch, CheckCircle, Activity, HeartPulse, Building, ArrowDownCircle, AlertCircle , Image as ImageIcon } from 'lucide-react';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 
 const relevansiItems = [
   "Pengelolaan Multimorbiditas",
@@ -326,7 +327,14 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
   );
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div id="dashboard-dashboardspkklp-capture" className="space-y-8 animate-fade-in">
+
+      {!isPrinting && (
+        <button onClick={() => downloadElementAsPNG('dashboard-dashboardspkklp-capture', 'DashboardSpKKLP')} className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md active:scale-95 text-sm capture-exclude mb-4 mr-2">
+          <ImageIcon className="w-4 h-4 mr-2" /> Download PNG
+        </button>
+      )}
+  
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print">
           <button 

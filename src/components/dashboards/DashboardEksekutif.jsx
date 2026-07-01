@@ -6,8 +6,9 @@ import {
 } from 'recharts';
 import { 
   LayoutDashboard, Activity, CheckSquare, Stethoscope, AlertTriangle, 
-  MessageSquare, FileText, ChevronRight, Download
+  MessageSquare, FileText, ChevronRight, Download, Image as ImageIcon
 } from 'lucide-react';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 import * as XLSX from 'xlsx';
 
 const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
@@ -445,8 +446,8 @@ export default function DashboardEksekutif({ data = [] }) {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Header dengan tombol export */}
+    <div id="dashboard-eksekutif-capture" className="space-y-6 relative">
+      {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         {/* Tab Navigation Internal */}
         <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4 flex-1">
@@ -469,14 +470,18 @@ export default function DashboardEksekutif({ data = [] }) {
           );
         })}
         </div>
-        {/* Tombol Download Excel */}
-        <button
-          onClick={exportEksekutifToExcel}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 text-sm whitespace-nowrap"
-        >
-          <Download className="w-4 h-4" />
-          Download Excel
-        </button>
+        <div className="flex gap-2 capture-exclude">
+          <button onClick={() => downloadElementAsPNG('dashboard-eksekutif-capture', 'Dashboard_Eksekutif_Full')} className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md hover:shadow-lg hover:shadow-indigo-500/30 active:scale-95 text-sm whitespace-nowrap">
+            <ImageIcon className="w-4 h-4" /> Download PNG
+          </button>
+          <button
+            onClick={exportEksekutifToExcel}
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 text-sm whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" />
+            Download Excel
+          </button>
+        </div>
       </div>
 
       {/* Tab Content */}
@@ -485,8 +490,11 @@ export default function DashboardEksekutif({ data = [] }) {
         {activeTab === 'overview' && (
           <div className="flex flex-col gap-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200">
-                <h3 className="text-lg font-bold text-slate-700 mb-4">Proporsi Jenis FKTP</h3>
+              <div id="eksekutif-pie-chart" className="bg-white shadow-sm p-6 rounded-2xl border border-slate-200 relative">
+                <button onClick={() => downloadElementAsPNG('eksekutif-pie-chart', 'Proporsi_Jenis_FKTP')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+                  <ImageIcon className="w-4 h-4" />
+                </button>
+                <h3 className="text-lg font-bold text-slate-700 mb-4 pr-10">Proporsi Jenis FKTP</h3>
                 <div className="h-64 min-h-[250px]">
                   <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
                     <PieChart>

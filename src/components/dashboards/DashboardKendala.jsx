@@ -4,8 +4,9 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList, ComposedChart, Line
 } from 'recharts';
-import { AlertTriangle, Users, Database, FileText, Download, MessageSquare, Map } from 'lucide-react';
+import { AlertTriangle, Users, Database, FileText, Download, MessageSquare, Map, Image as ImageIcon } from 'lucide-react';
 import CustomWordCloud from '../ui/CustomWordCloud';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 
 const ViewToggle = ({ value, onChange }) => (
   <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-semibold shrink-0">
@@ -48,8 +49,9 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
           }
         });
         
-        if (k.teks_kendala) {
-          const words = extractWords(k.teks_kendala);
+        const combinedText = [k.diagnosis, k.tindakan].filter(Boolean).join(' ');
+        if (combinedText) {
+          const words = extractWords(combinedText);
           words.forEach(w => teksCountsR[w] = (teksCountsR[w] || 0) + 1);
         }
       }
@@ -65,8 +67,9 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
         fktpWithKendala++;
         Object.keys(kendalaCountsF).forEach(key => { if (k[`kendala_${key}`]) kendalaCountsF[key]++; });
         
-        if (k.teks_kendala) {
-          const words = extractWords(k.teks_kendala);
+        const combinedText = [k.diagnosis, k.tindakan].filter(Boolean).join(' ');
+        if (combinedText) {
+          const words = extractWords(combinedText);
           words.forEach(w => teksCountsF[w] = (teksCountsF[w] || 0) + 1);
         }
       }
@@ -92,7 +95,7 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
       { name: 'Butuh Dukungan SDM/Alkes', value: counts['SDM'] + counts['Alat kesehatan'] + counts['Sarana prasarana'] }
     ].filter(d => d.value > 0);
 
-    const toArrText = (obj) => Object.keys(obj).map(k => ({ text: k, value: obj[k] })).sort((a,b) => b.value - a.value).filter(d => d.value > 1).slice(0, 30);
+    const toArrText = (obj) => Object.keys(obj).map(k => ({ text: k, value: obj[k] })).sort((a,b) => b.value - a.value).filter(d => d.value > 0).slice(0, 30);
 
     // Format heatmap data
     const heatmapDataArr = Object.keys(regionalKendalaCounts).map(reg => {
@@ -153,10 +156,10 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
           ['Proporsi FKTP Mengalami Kendala', `${kendalaStats.proporsiKendala.toFixed(2)}%`]
         ]
       },
-      { title: 'Distribusi Kendala Pelayanan (Per Responden)', headers: ['Kategori Kendala', 'Jumlah Responden'], data: kendalaDataR },
-      { title: 'Distribusi Kendala Pelayanan (Per FKTP)', headers: ['Kategori Kendala', 'Jumlah FKTP'], data: kendalaDataF },
-      { title: 'Proporsi Kebutuhan Dukungan (Per Responden)', headers: ['Kategori Dukungan', 'Frekuensi Jawaban'], data: dukunganDataR },
-      { title: 'Proporsi Kebutuhan Dukungan (Per FKTP)', headers: ['Kategori Dukungan', 'Frekuensi Jawaban'], data: dukunganDataF },
+      { title: 'Distribusi Kendala Pelayanan (Per Responden)', headers: ['Kategori Kendala', 'Jumlah (Nilai)', 'Persentase (%)'], data: kendalaDataR.map(d => [d.name, d.value, `${filteredData.length > 0 ? ((d.value / filteredData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Distribusi Kendala Pelayanan (Per FKTP)', headers: ['Kategori Kendala', 'Jumlah FKTP (Nilai)', 'Persentase (%)'], data: kendalaDataF.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Proporsi Kebutuhan Dukungan (Per Responden)', headers: ['Kategori Dukungan', 'Frekuensi Jawaban'], data: dukunganDataR.map(d => [d.name, d.value]) },
+      { title: 'Proporsi Kebutuhan Dukungan (Per FKTP)', headers: ['Kategori Dukungan', 'Frekuensi Jawaban'], data: dukunganDataF.map(d => [d.name, d.value]) },
       { title: 'Kata Kunci Kendala Spesifik (Per Responden)', headers: ['Kata Kunci', 'Frekuensi'], data: teksDataR.map(d => ({ text: d.text, value: d.value })) },
       { title: 'Kata Kunci Kendala Spesifik (Per FKTP)', headers: ['Kata Kunci', 'Frekuensi'], data: teksDataF.map(d => ({ text: d.text, value: d.value })) },
       { title: 'Heatmap Kendala per Provinsi', headers: ['Provinsi', 'SDM', 'Sarana Prasarana', 'Alat Kesehatan', 'Obat', 'Pembiayaan', 'Regulasi', 'Total'], data: heatmapData.map(d => ({ reg: d.regional, sdm: d['SDM'] || 0, sarpras: d['Sarana prasarana'] || 0, alkes: d['Alat kesehatan'] || 0, obat: d['Obat'] || 0, dana: d['Pembiayaan'] || 0, regu: d['Regulasi'] || 0, tot: d.total })) }
@@ -185,9 +188,12 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div id="dashboard-kendala-capture" className="space-y-8 animate-fade-in relative">
       {!isPrinting && (
-        <div className="flex justify-end mb-4 no-print">
+        <div className="flex justify-end mb-4 no-print gap-2 capture-exclude">
+          <button onClick={() => downloadElementAsPNG('dashboard-kendala-capture', 'Dashboard_Kendala_Full')} className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md active:scale-95 text-sm">
+            <ImageIcon className="w-4 h-4 mr-2" /> Download PNG
+          </button>
           <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
             <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
           </button>
@@ -200,9 +206,14 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
         <StatCard title="Top 3 Kendala Utama" value={kendalaStats.top3[2]?.value || 0} subtitle={kendalaStats.top3[2]?.name || '-'} icon={FileText} colorClass="bg-red-500 text-red-600 bg-red-100" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+      <div className="flex flex-col gap-6">
+        <div id="kendala-distribusi-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('kendala-distribusi-chart', 'Distribusi_Kendala')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><AlertTriangle className="w-5 h-5 mr-2 text-rose-600" /> Distribusi Kendala Pelayanan (Pareto)</h3>
             {!isPrinting && <ViewToggle value={kendalaView} onChange={setKendalaView} />}
           </div>
@@ -224,8 +235,13 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="kendala-dukungan-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('kendala-dukungan-chart', 'Kebutuhan_Dukungan')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Database className="w-5 h-5 mr-2 text-rose-600" /> Proporsi Kebutuhan Dukungan</h3>
             {!isPrinting && <ViewToggle value={dukunganView} onChange={setDukunganView} />}
           </div>
@@ -244,8 +260,13 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
         </div>
 
         {/* Word Cloud */}
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="kendala-teks-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('kendala-teks-chart', 'Kata_Kunci_Kendala')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><MessageSquare className="w-5 h-5 mr-2 text-blue-600" /> Kata Kunci Kendala Spesifik</h3>
             {!isPrinting && <ViewToggle value={teksView} onChange={setTeksView} />}
           </div>
@@ -254,8 +275,13 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
         </div>
 
         {/* Heatmap Regional */}
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-3' : 'lg:col-span-3'}`}>
-          <div className="flex justify-between items-center mb-4">
+        <div id="kendala-heatmap-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-3' : 'lg:col-span-3'}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('kendala-heatmap-chart', 'Heatmap_Kendala')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-4 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Map className="w-5 h-5 mr-2 text-indigo-600" /> Heatmap Kendala per Provinsi</h3>
           </div>
           <div className="overflow-x-auto">

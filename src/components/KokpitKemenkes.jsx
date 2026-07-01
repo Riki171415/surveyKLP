@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import { 
   Target, AlertTriangle, Activity, Map as MapIcon, Users, Stethoscope, Briefcase, ChevronRight, 
-  Database, RefreshCw, Layers, MessageSquare, Zap, FileText, Download
+  Database, RefreshCw, Layers, MessageSquare, Zap, FileText, Download, Image as ImageIcon
 } from 'lucide-react';
+import { downloadElementAsPNG } from '../utils/exportImageUtils';
 import XlsxPopulate from 'xlsx-populate';
 import DashboardEksekutif from './dashboards/DashboardEksekutif';
 import { 
@@ -446,10 +447,13 @@ export default function KokpitKemenkes() {
         </div>
 
         <div className="flex gap-3">
+          <button onClick={() => downloadElementAsPNG('dashboard-kokpit-capture', 'Kokpit_Kemenkes_Full')} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md hover:shadow-lg hover:shadow-indigo-500/30 active:scale-95 text-sm capture-exclude">
+            <ImageIcon className="w-5 h-5" /> Download PNG
+          </button>
           <button
             onClick={exportKokpitNativeExcel}
             disabled={isExportingKokpit}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold transition-all duration-300 ${isExportingKokpit ? 'bg-slate-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 shadow-md hover:shadow-lg'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold transition-all duration-300 ${isExportingKokpit ? 'bg-slate-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 shadow-md hover:shadow-lg'} capture-exclude`}
           >
             {isExportingKokpit ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
             {isExportingKokpit ? 'Memproses...' : 'Unduh Kokpit Excel'}
@@ -466,6 +470,7 @@ export default function KokpitKemenkes() {
       </div>
 
       {/* TAB UTAMA: KOKPIT OVERVIEW */}
+      <div id="dashboard-kokpit-capture">
       {activeTab === 'utama' && (
         <>
           {/* TOP METRICS */}
@@ -522,8 +527,11 @@ export default function KokpitKemenkes() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             
             {/* Heatmap Provinsi */}
-            <div className="bg-white shadow-sm border border-slate-200 rounded-3xl p-6">
-              <div className="flex items-center gap-2 mb-6">
+            <div id="kokpit-heatmap-chart" className="bg-white shadow-sm border border-slate-200 rounded-3xl p-6 relative">
+              <button onClick={() => downloadElementAsPNG('kokpit-heatmap-chart', 'Heatmap_Kesiapan_Wilayah')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+                <ImageIcon className="w-4 h-4" />
+              </button>
+              <div className="flex items-center gap-2 mb-6 pr-10">
                 <MapIcon className="w-5 h-5 text-emerald-600" />
                 <h3 className="text-lg font-bold text-slate-800">Peta Kesiapan Wilayah</h3>
               </div>
@@ -554,8 +562,11 @@ export default function KokpitKemenkes() {
             </div>
 
             {/* Radar Gap Persepsi */}
-            <div className="bg-white shadow-sm border border-slate-200 rounded-3xl p-6 flex flex-col">
-              <div className="flex items-center gap-2 mb-2">
+            <div id="kokpit-radar-chart" className="bg-white shadow-sm border border-slate-200 rounded-3xl p-6 flex flex-col relative">
+              <button onClick={() => downloadElementAsPNG('kokpit-radar-chart', 'Radar_Gap_Persepsi')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+                <ImageIcon className="w-4 h-4" />
+              </button>
+              <div className="flex items-center gap-2 mb-2 pr-10">
                 <Users className="w-5 h-5 text-indigo-600" />
                 <h3 className="text-lg font-bold text-slate-800">Gap Persepsi Antar Profesi</h3>
               </div>
@@ -588,8 +599,11 @@ export default function KokpitKemenkes() {
 
           {/* BOTTOM SECTION: JKN & KUALITATIF */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white shadow-sm border border-slate-200 rounded-3xl p-6 flex flex-col">
-              <div className="flex items-center justify-between mb-6">
+            <div id="kokpit-jkn-chart" className="bg-white shadow-sm border border-slate-200 rounded-3xl p-6 flex flex-col relative">
+              <button onClick={() => downloadElementAsPNG('kokpit-jkn-chart', 'Evaluasi_Paket_Manfaat_JKN')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+                <ImageIcon className="w-4 h-4" />
+              </button>
+              <div className="flex items-center justify-between mb-6 pr-10">
                 <div className="flex items-center gap-2">
                   <Briefcase className="w-5 h-5 text-amber-600" />
                   <h3 className="text-lg font-bold text-slate-800">Evaluasi Paket Manfaat JKN</h3>
@@ -679,6 +693,7 @@ export default function KokpitKemenkes() {
       </div>
         </>
       )}
+      </div>
 
       {/* TAB EKSEKUTIF: KOMPREHENSIF */}
       {activeTab === 'eksekutif' && (

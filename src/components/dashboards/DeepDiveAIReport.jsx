@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Sparkles, BarChart2, Filter, FileText, Check, AlertCircle, RefreshCw, Layers, Users, Zap, Target, Activity, Key, Cpu, X } from 'lucide-react';
+import { Sparkles, BarChart2, Filter, FileText, Check, AlertCircle, RefreshCw, Layers, Users, Zap, Target, Activity, Key, Cpu, X , Image as ImageIcon } from 'lucide-react';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 
 export default function DeepDiveAIReport({ rawData }) {
   const [isAnalyzing, setIsAnalyzing] = useState(true);
@@ -173,7 +174,14 @@ ${JSON.stringify(smartAnswers)}
 
   if (isAnalyzing || isGeneratingGemini) {
     return (
-      <div className="bg-white rounded-2xl p-12 border border-indigo-100 shadow-sm flex flex-col items-center justify-center min-h-[400px]">
+    <div id="dashboard-deepdiveaireport-capture" className="bg-white rounded-2xl p-12 border border-indigo-100 shadow-sm flex flex-col items-center justify-center min-h-[400px]">
+
+      {!isPrinting && (
+        <button onClick={() => downloadElementAsPNG('dashboard-deepdiveaireport-capture', 'DeepDiveAIReport')} className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md active:scale-95 text-sm capture-exclude mb-4 mr-2">
+          <ImageIcon className="w-4 h-4 mr-2" /> Download PNG
+        </button>
+      )}
+  
         <RefreshCw className="w-12 h-12 text-indigo-500 animate-spin mb-4" />
         <h3 className="text-lg font-bold text-slate-800 animate-pulse">{isGeneratingGemini ? 'Menghubungkan ke Gemini API...' : `AI Agent sedang memproses ${rawData.length} verbatim...`}</h3>
         <div className="flex flex-col items-center mt-6 space-y-2 text-sm text-slate-500">

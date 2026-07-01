@@ -4,8 +4,9 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
 } from 'recharts';
-import { Heart, Home, Clock, Users, CheckCircle2, Stethoscope, CheckCircle, Download } from 'lucide-react';
+import { Heart, Home, Clock, Users, CheckCircle2, Stethoscope, CheckCircle, Download, Image as ImageIcon } from 'lucide-react';
 import CustomWordCloud from '../ui/CustomWordCloud';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 
 const ViewToggle = ({ value, onChange }) => (
   <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-semibold shrink-0">
@@ -176,16 +177,16 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
           ['Proporsi Pelaporan Perbaikan Kondisi', `${hcStats.proporsiPerbaikan.toFixed(2)}%`]
         ]
       },
-      { title: 'Jenis Layanan Home Care (Per Responden)', headers: ['Jenis Layanan', 'Jumlah Responden'], data: jenisDataR },
-      { title: 'Jenis Layanan Home Care (Per FKTP)', headers: ['Jenis Layanan', 'Jumlah FKTP'], data: jenisDataF },
-      { title: 'Kondisi Pasien Home Care (Per Responden)', headers: ['Kondisi Pasien', 'Jumlah Responden'], data: kondisiDataR },
-      { title: 'Kondisi Pasien Home Care (Per FKTP)', headers: ['Kondisi Pasien', 'Jumlah FKTP'], data: kondisiDataF },
-      { title: 'Tingkat Kepatuhan Pasien (Per Responden)', headers: ['Tingkat Kepatuhan', 'Jumlah Responden'], data: kepatuhanDataR },
-      { title: 'Tingkat Kepatuhan Pasien (Per FKTP)', headers: ['Tingkat Kepatuhan', 'Jumlah FKTP'], data: kepatuhanDataF },
-      { title: 'SDM Pelaksana (Per Responden)', headers: ['SDM', 'Frekuensi'], data: tenagaDataR },
-      { title: 'SDM Pelaksana (Per FKTP)', headers: ['SDM', 'Frekuensi'], data: tenagaDataF },
-      { title: 'Top 10 Diagnosis Pasien (Per Responden)', headers: ['Diagnosis', 'Jumlah Responden'], data: diagnosisDataR },
-      { title: 'Top 10 Diagnosis Pasien (Per FKTP)', headers: ['Diagnosis', 'Jumlah FKTP'], data: diagnosisDataF }
+      { title: 'Jenis Layanan Home Care (Per Responden)', headers: ['Jenis Layanan', 'Jumlah (Nilai)', 'Persentase (%)'], data: jenisDataR.map(d => [d.name, d.value, `${filteredData.length > 0 ? ((d.value / filteredData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Jenis Layanan Home Care (Per FKTP)', headers: ['Jenis Layanan', 'Jumlah FKTP (Nilai)', 'Persentase (%)'], data: jenisDataF.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Kondisi Pasien Home Care (Per Responden)', headers: ['Kondisi Pasien', 'Jumlah (Nilai)', 'Persentase (%)'], data: kondisiDataR.map(d => [d.name, d.value, `${filteredData.length > 0 ? ((d.value / filteredData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Kondisi Pasien Home Care (Per FKTP)', headers: ['Kondisi Pasien', 'Jumlah FKTP (Nilai)', 'Persentase (%)'], data: kondisiDataF.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Tingkat Kepatuhan Pasien (Per Responden)', headers: ['Tingkat Kepatuhan', 'Jumlah (Nilai)', 'Persentase (%)'], data: kepatuhanDataR.map(d => [d.name, d.value, `${filteredData.length > 0 ? ((d.value / filteredData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'Tingkat Kepatuhan Pasien (Per FKTP)', headers: ['Tingkat Kepatuhan', 'Jumlah FKTP (Nilai)', 'Persentase (%)'], data: kepatuhanDataF.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`]) },
+      { title: 'SDM Pelaksana (Per Responden)', headers: ['SDM', 'Frekuensi'], data: tenagaDataR.map(d => [d.text, d.value]) },
+      { title: 'SDM Pelaksana (Per FKTP)', headers: ['SDM', 'Frekuensi'], data: tenagaDataF.map(d => [d.text, d.value]) },
+      { title: 'Top 10 Diagnosis Pasien (Per Responden)', headers: ['Diagnosis', 'Jumlah (Nilai)'], data: diagnosisDataR.map(d => [d.name, d.value]) },
+      { title: 'Top 10 Diagnosis Pasien (Per FKTP)', headers: ['Diagnosis', 'Jumlah FKTP (Nilai)'], data: diagnosisDataF.map(d => [d.name, d.value]) }
     ];
 
     const kondisiKeys = ['Mandiri (independen)', 'Memerlukan bantuan sebagian', 'Memerlukan bantuan penuh', 'Tirah baring', 'Lainnya'];
@@ -224,9 +225,12 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
 
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div id="dashboard-hc-capture" className="space-y-8 animate-fade-in relative">
       {!isPrinting && (
-        <div className="flex justify-end mb-4 no-print">
+        <div className="flex justify-end mb-4 no-print gap-2 capture-exclude">
+          <button onClick={() => downloadElementAsPNG('dashboard-hc-capture', 'Dashboard_HomeCare_Full')} className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md active:scale-95 text-sm">
+            <ImageIcon className="w-4 h-4 mr-2" /> Download PNG
+          </button>
           <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
             <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
           </button>
@@ -240,8 +244,13 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="hc-jenis-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('hc-jenis-chart', 'Jenis_Layanan_HC')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Stethoscope className="w-5 h-5 mr-2 text-teal-600" /> Jenis Layanan Home Care</h3>
             {!isPrinting && <ViewToggle value={jenisView} onChange={setJenisView} />}
           </div>
@@ -261,8 +270,13 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="hc-kondisi-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('hc-kondisi-chart', 'Kondisi_Pasien_HC')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Heart className="w-5 h-5 mr-2 text-teal-600" /> Kondisi Pasien Home Care</h3>
             {!isPrinting && <ViewToggle value={kondisiView} onChange={setKondisiView} />}
           </div>
@@ -280,8 +294,13 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="hc-kepatuhan-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('hc-kepatuhan-chart', 'Kepatuhan_HC')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><CheckCircle className="w-5 h-5 mr-2 text-teal-600" /> Tingkat Kepatuhan Pasien</h3>
             {!isPrinting && <ViewToggle value={kepatuhanView} onChange={setKepatuhanView} />}
           </div>
@@ -302,8 +321,13 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
         </div>
         
         {/* SDM Pelaksana */}
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="hc-sdm-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('hc-sdm-chart', 'SDM_HC')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Users className="w-5 h-5 mr-2 text-blue-600" /> SDM Pelaksana Home Care</h3>
             {!isPrinting && <ViewToggle value={tenagaView} onChange={setTenagaView} />}
           </div>
@@ -312,8 +336,13 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
         </div>
 
         {/* Diagnosis */}
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-2">
+        <div id="hc-diagnosis-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('hc-diagnosis-chart', 'Diagnosis_HC')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Heart className="w-5 h-5 mr-2 text-rose-600" /> Top 10 Diagnosis Pasien</h3>
             {!isPrinting && <ViewToggle value={diagnosisView} onChange={setDiagnosisView} />}
           </div>

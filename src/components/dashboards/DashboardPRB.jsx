@@ -4,7 +4,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList
 } from 'recharts';
-import { Activity, Users, Clock, AlertTriangle, FileText, Download } from 'lucide-react';
+import { Activity, Users, Clock, AlertTriangle, FileText, Download, Image as ImageIcon } from 'lucide-react';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 
 // ── Komponen Toggle Pill ──────────────────────────────────────────────────────
 const ViewToggle = ({ value, onChange }) => (
@@ -153,31 +154,31 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
       },
       {
         title: 'Kepatuhan PRB',
-        headers: ['Kategori', 'Persentase'],
+        headers: ['Kategori', 'Nilai', 'Persentase'],
         data: [
-          ['Peserta Rutin Berkunjung', `${kepatuhanRate.toFixed(2)}%`],
-          ['Peserta Tidak Berkunjung', `${(prbStats.totalJumlah > 0 ? (prbStats.totalTidakBerkunjung / prbStats.totalJumlah) * 100 : 0).toFixed(2)}%`]
+          ['Peserta Rutin Berkunjung', prbStats.totalRutin, `${kepatuhanRate.toFixed(2)}%`],
+          ['Peserta Tidak Berkunjung', prbStats.totalTidakBerkunjung, `${(prbStats.totalJumlah > 0 ? (prbStats.totalTidakBerkunjung / prbStats.totalJumlah) * 100 : 0).toFixed(2)}%`]
         ]
       },
       {
         title: 'Distribusi Diagnosis PRB (Per Responden — akumulasi peserta)',
-        headers: ['Diagnosis', 'Jumlah Responden'],
-        data: diagnosisDataResponden
+        headers: ['Diagnosis', 'Jumlah (Nilai)', 'Persentase (%)'],
+        data: diagnosisDataResponden.map(d => [d.name, d.value, `${prbStats.totalJumlah > 0 ? ((d.value / prbStats.totalJumlah) * 100).toFixed(1) : 0}%`])
       },
       {
         title: 'Distribusi Diagnosis PRB (Per FKTP — FKTP yang punya peserta diagnosis ini)',
-        headers: ['Diagnosis', 'Jumlah FKTP'],
-        data: diagnosisDataFktp
+        headers: ['Diagnosis', 'Jumlah FKTP', 'Persentase (%)'],
+        data: diagnosisDataFktp.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`])
       },
       {
         title: 'Mekanisme Pemantauan PRB (Per Responden)',
-        headers: ['Mekanisme', 'Jumlah Responden'],
-        data: mekanismeDataResponden
+        headers: ['Mekanisme', 'Jumlah Responden', 'Persentase (%)'],
+        data: mekanismeDataResponden.map(d => [d.name, d.value, `${filteredData.length > 0 ? ((d.value / filteredData.length) * 100).toFixed(1) : 0}%`])
       },
       {
         title: 'Mekanisme Pemantauan PRB (Per FKTP)',
-        headers: ['Mekanisme', 'Jumlah FKTP'],
-        data: mekanismeDataFktp
+        headers: ['Mekanisme', 'Jumlah FKTP', 'Persentase (%)'],
+        data: mekanismeDataFktp.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`])
       }
     ];
 
@@ -217,9 +218,12 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div id="dashboard-prb-capture" className="space-y-8 animate-fade-in relative">
       {!isPrinting && (
-        <div className="flex justify-end mb-4 no-print">
+        <div className="flex justify-end mb-4 no-print gap-2 capture-exclude">
+          <button onClick={() => downloadElementAsPNG('dashboard-prb-capture', 'Dashboard_PRB_Full')} className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md active:scale-95 text-sm">
+            <ImageIcon className="w-4 h-4 mr-2" /> Download PNG
+          </button>
           <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
             <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
           </button>
@@ -233,8 +237,13 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-start mb-6">
+        <div id="prb-kepatuhan-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('prb-kepatuhan-chart', 'Kepatuhan_PRB')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-start mb-6 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Activity className="w-5 h-5 mr-2 text-primary-600" /> Kepatuhan PRB</h3>
           </div>
           <div className="grid grid-cols-2 gap-4 mt-8">
@@ -243,8 +252,13 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-4">
+        <div id="prb-diagnosis-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('prb-diagnosis-chart', 'Distribusi_Diagnosis')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-4 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><FileText className="w-5 h-5 mr-2 text-primary-600" /> Distribusi Diagnosis PRB</h3>
             {!isPrinting && <ViewToggle value={diagView} onChange={setDiagView} />}
           </div>
@@ -264,8 +278,13 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
           </div>
         </div>
 
-        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
-          <div className="flex justify-between items-center mb-4">
+        <div id="prb-mekanisme-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('prb-mekanisme-chart', 'Mekanisme_PRB')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-4 pr-10">
             <h3 className="text-base font-bold text-slate-800 flex items-center"><Clock className="w-5 h-5 mr-2 text-primary-600" /> Mekanisme Pemantauan PRB</h3>
             {!isPrinting && <ViewToggle value={mekView} onChange={setMekView} />}
           </div>

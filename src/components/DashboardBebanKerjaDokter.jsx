@@ -3,9 +3,10 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   ScatterChart, Scatter, ZAxis, Cell
 } from 'recharts';
-import { Clock, AlertTriangle, CheckCircle2, TrendingDown, Target, Info, Loader2, ListChecks, Download } from 'lucide-react';
+import { Clock, AlertTriangle, CheckCircle2, TrendingDown, Target, Info, Loader2, ListChecks, Download, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
+import { downloadElementAsPNG } from '../utils/exportImageUtils';
 
 const DashboardBebanKerjaDokter = () => {
   const [surveys, setSurveys] = useState([]);
@@ -217,20 +218,26 @@ const DashboardBebanKerjaDokter = () => {
 
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
+    <div id="dashboard-bebankerja-capture" className="space-y-6 animate-fade-in-up relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Dashboard Analitik: Kompetensi & Beban Kerja Dokter</h1>
           <p className="text-slate-500 mt-1">Sistem Pemantauan Kapasitas, Kesenjangan Kompetensi, dan Analisis Beban Waktu Harian.</p>
         </div>
-        <button
-          onClick={exportToExcel}
-          disabled={loading || surveys.length === 0}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-        >
-          <Download className="w-4 h-4" />
-          Download Excel
-        </button>
+        <div className="flex gap-2 capture-exclude">
+          <button onClick={() => downloadElementAsPNG('dashboard-bebankerja-capture', 'Dashboard_Beban_Kerja_Dokter_Full')} className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md hover:shadow-lg hover:shadow-indigo-500/30 active:scale-95 text-sm whitespace-nowrap">
+            <ImageIcon className="w-4 h-4" />
+            Download PNG
+          </button>
+          <button
+            onClick={exportToExcel}
+            disabled={loading || surveys.length === 0}
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" />
+            Download Excel
+          </button>
+        </div>
       </div>
 
       {/* EXECUTIVE SUMMARY */}
@@ -307,8 +314,11 @@ const DashboardBebanKerjaDokter = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
-          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <div id="bebankerja-paradoks-chart" className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col relative">
+          <button onClick={() => downloadElementAsPNG('bebankerja-paradoks-chart', 'Paradoks_Beban_Kerja')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+            <ImageIcon className="w-4 h-4" />
+          </button>
+          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 pr-10">
             <TrendingDown className="w-5 h-5 text-primary-600" />
             Paradoks Volume Pasien vs Waktu Tersita (%)
           </h2>
@@ -391,8 +401,11 @@ const DashboardBebanKerjaDokter = () => {
 
       {/* ROW 2: COMPETENCY & FINANCIAL */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h2 className="text-lg font-bold text-slate-800 mb-4">Matriks Prioritas Kesenjangan Kompetensi</h2>
+        <div id="bebankerja-matriks-chart" className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 relative">
+          <button onClick={() => downloadElementAsPNG('bebankerja-matriks-chart', 'Matriks_Kompetensi')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+            <ImageIcon className="w-4 h-4" />
+          </button>
+          <h2 className="text-lg font-bold text-slate-800 mb-4 pr-10">Matriks Prioritas Kesenjangan Kompetensi</h2>
           <p className="text-sm text-slate-500 mb-6">Scatter plot mengukur besaran upaya (Effort) vs dampak klinis (Impact) dari kompetensi yang belum berjalan.</p>
           
           <div className="h-[250px] relative">

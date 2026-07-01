@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, MessageSquare, Filter, User, Sparkles, BarChart2, FileText, Copy, X, Check, Download } from 'lucide-react';
+import { Search, MessageSquare, Filter, User, Sparkles, BarChart2, FileText, Copy, X, Check, Download , Image as ImageIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 
@@ -18,6 +18,7 @@ const interviewQuestions = [
 const STOP_WORDS = new Set(['yang', 'di', 'ke', 'dari', 'pada', 'dalam', 'untuk', 'dengan', 'dan', 'atau', 'ini', 'itu', 'juga', 'sudah', 'saya', 'kami', 'kita', 'mereka', 'dia', 'karena', 'seperti', 'ada', 'bisa', 'tidak', 'belum', 'akan', 'banyak', 'sangat', 'lebih', 'paling', 'saat', 'menjadi', 'tersebut', 'tentang', 'oleh', 'namun', 'tetapi', 'kalau', 'jika', 'bila', 'apa', 'bagaimana', 'kenapa', 'mengapa', 'kapan', 'siapa', 'dimana', 'kemana', 'darimana', 'hal', 'saja', 'terus', 'cuma', 'hanya', 'masih', 'punya', 'buat', 'biar', 'lalu', 'jadi', 'lagi', 'pun', 'sampai', 'sehingga', 'sebagai', 'ya', 'sih', 'dong', 'kan', 'nya', 'adalah', 'yaitu', 'yakni', 'bahwa', 'serta', 'memang', 'agar', 'supaya', 'baik', 'bukan', 'jangan', 'beliau', 'anda', 'kamu']);
 
 import DeepDiveAIReport from './DeepDiveAIReport';
+import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 
 // Comprehensive AI Executive Report Generator
 const generateComprehensiveAIReport = (rawData, topWords) => {
@@ -49,7 +50,7 @@ const generateComprehensiveAIReport = (rawData, topWords) => {
   const top3 = topWords.slice(0, 3).map(w => w.text);
 
   return (
-    <div className="bg-white rounded-2xl p-8 border border-indigo-100 shadow-sm relative overflow-hidden mb-8">
+    <div id="dashboard-dashboardkualitatif-capture" className="bg-white rounded-2xl p-8 border border-indigo-100 shadow-sm relative overflow-hidden mb-8">
       <div className="absolute top-0 right-0 p-6 opacity-5">
         <Sparkles className="w-48 h-48 text-indigo-600" />
       </div>
@@ -255,6 +256,11 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
     <div className="space-y-6 animate-fade-in">
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print">
+          {!isPrinting && (
+        <button onClick={() => downloadElementAsPNG('dashboard-dashboardkualitatif-capture', 'DashboardKualitatif')} className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-400 hover:to-indigo-500 transition shadow-md active:scale-95 text-sm capture-exclude mb-4 mr-2">
+          <ImageIcon className="w-4 h-4 mr-2" /> Download PNG
+        </button>
+      )}
           <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
             <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
           </button>
