@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   Legend, LabelList, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
-import { Stethoscope, Activity, Home, HeartPulse, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
+import { Stethoscope, Activity, Home, HeartPulse, CheckCircle2, AlertCircle, FileText, Download } from 'lucide-react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 
 export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
@@ -119,8 +119,40 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
     );
   };
 
+  const handleExport = () => {
+    const tables = [
+      {
+        title: 'Komparasi Kinerja Lintas Program',
+        headers: ['Indikator Kinerja', 'Ada Sp.KKLP', 'Tanpa Sp.KKLP'],
+        data: spData.map(d => [d.name, `${d['Ada Sp.KKLP'].toFixed(1)}%`, `${d['Tanpa Sp.KKLP'].toFixed(1)}%`])
+      },
+      {
+        title: 'Analisis Spektrum Kemampuan (Radar)',
+        headers: ['Aspek Pelayanan', 'Ada Sp.KKLP', 'Tanpa Sp.KKLP'],
+        data: radarData.map(d => [d.subject, `${d['Ada'].toFixed(1)}%`, `${d['Tanpa'].toFixed(1)}%`])
+      }
+    ];
+
+    const rawData = {
+      headers: ['No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi', 'Ada Sp.KKLP'],
+      rows: uniqueFktpData.map((row, idx) => [
+        idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
+        row.doc_kklp || '-'
+      ])
+    };
+
+    exportTablesToExcel('IMPACT SP.KKLP', tables, 'Dashboard_Impact_SpKKLP', rawData);
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
+      {!isPrinting && (
+        <div className="flex justify-end mb-4 no-print">
+          <button onClick={handleExport} className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-md active:scale-95 text-sm">
+            <Download className="w-4 h-4 mr-2" /> Download Excel Dashboard
+          </button>
+        </div>
+      )}
       <div className="bg-gradient-to-r from-primary-600 to-indigo-600 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
         <div className="absolute right-0 top-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/3"></div>
         <div className="relative z-10 flex flex-col sm:flex-row justify-between items-center">

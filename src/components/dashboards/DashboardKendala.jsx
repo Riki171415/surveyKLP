@@ -156,11 +156,14 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
       { title: 'Distribusi Kendala Pelayanan (Per Responden)', headers: ['Kategori Kendala', 'Jumlah Responden'], data: kendalaDataR },
       { title: 'Distribusi Kendala Pelayanan (Per FKTP)', headers: ['Kategori Kendala', 'Jumlah FKTP'], data: kendalaDataF },
       { title: 'Proporsi Kebutuhan Dukungan (Per Responden)', headers: ['Kategori Dukungan', 'Frekuensi Jawaban'], data: dukunganDataR },
-      { title: 'Proporsi Kebutuhan Dukungan (Per FKTP)', headers: ['Kategori Dukungan', 'Frekuensi Jawaban'], data: dukunganDataF }
+      { title: 'Proporsi Kebutuhan Dukungan (Per FKTP)', headers: ['Kategori Dukungan', 'Frekuensi Jawaban'], data: dukunganDataF },
+      { title: 'Kata Kunci Kendala Spesifik (Per Responden)', headers: ['Kata Kunci', 'Frekuensi'], data: teksDataR.map(d => ({ text: d.text, value: d.value })) },
+      { title: 'Kata Kunci Kendala Spesifik (Per FKTP)', headers: ['Kata Kunci', 'Frekuensi'], data: teksDataF.map(d => ({ text: d.text, value: d.value })) },
+      { title: 'Heatmap Kendala per Regional', headers: ['Regional', 'SDM', 'Sarana Prasarana', 'Alat Kesehatan', 'Obat', 'Pembiayaan', 'Regulasi', 'Total'], data: heatmapData.map(d => ({ reg: d.regional, sdm: d['SDM'] || 0, sarpras: d['Sarana prasarana'] || 0, alkes: d['Alat kesehatan'] || 0, obat: d['Obat'] || 0, dana: d['Pembiayaan'] || 0, regu: d['Regulasi'] || 0, tot: d.total })) }
     ];
 
     const rawData = {
-      headers: ['No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi', 'Ada Kendala', 'Kendala: SDM', 'Kendala: Sarana Prasarana', 'Kendala: Alat Kesehatan', 'Kendala: Obat', 'Kendala: Pembiayaan', 'Kendala: Regulasi', 'Kendala: Lainnya'],
+      headers: ['No', 'Nama Responden', 'Peran', 'Nama Faskes', 'Provinsi', 'Ada Kendala', 'Kendala: SDM', 'Kendala: Sarana Prasarana', 'Kendala: Alat Kesehatan', 'Kendala: Obat', 'Kendala: Pembiayaan', 'Kendala: Regulasi', 'Kendala: Lainnya', 'Teks Kendala Spesifik'],
       rows: filteredData.map((row, idx) => {
         const k = row.spkklp_kendala || {};
         return [
@@ -172,7 +175,8 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
           k['kendala_Obat'] ? 'Ya' : 'Tidak',
           k['kendala_Pembiayaan'] ? 'Ya' : 'Tidak',
           k['kendala_Regulasi'] ? 'Ya' : 'Tidak',
-          k['kendala_Lainnya'] ? 'Ya' : 'Tidak'
+          k['kendala_Lainnya'] ? 'Ya' : 'Tidak',
+          k.teks_kendala || '-'
         ];
       })
     };

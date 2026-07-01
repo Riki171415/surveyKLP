@@ -135,6 +135,8 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
       { title: 'Kondisi Pasien Paliatif (Per FKTP)', headers: ['Kondisi Pasien', 'Jumlah FKTP'], data: kondisiDataF },
       { title: 'Tingkat Kepatuhan Pasien (Per Responden)', headers: ['Tingkat Kepatuhan', 'Jumlah Responden'], data: kepatuhanDataR },
       { title: 'Tingkat Kepatuhan Pasien (Per FKTP)', headers: ['Tingkat Kepatuhan', 'Jumlah FKTP'], data: kepatuhanDataF },
+      { title: 'Top 10 Diagnosis Pasien (Per Responden)', headers: ['Diagnosis', 'Jumlah Responden'], data: diagnosisDataR },
+      { title: 'Top 10 Diagnosis Pasien (Per FKTP)', headers: ['Diagnosis', 'Jumlah FKTP'], data: diagnosisDataF }
     ];
 
     const tujuanKeys = ['Pengendalian nyeri', 'Pengendalian gejala', 'Dukungan psikososial', 'Edukasi keluarga/caregiver', 'Perawatan akhir kehidupan', 'Lainnya'];

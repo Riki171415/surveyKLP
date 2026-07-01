@@ -126,7 +126,9 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
       { title: 'Proporsi Mekanisme Utama PRB (Per Responden)', headers: ['Mekanisme', 'Jumlah Responden'], data: mekanismeDataR },
       { title: 'Proporsi Mekanisme Utama PRB (Per FKTP)', headers: ['Mekanisme', 'Jumlah FKTP'], data: mekanismeDataF },
       { title: 'Top 10 Kata Kunci Kendala Pelaksanaan (Per Responden)', headers: ['Kata Kunci', 'Frekuensi Penyebutan'], data: kendalaDataR },
-      { title: 'Top 10 Kata Kunci Kendala Pelaksanaan (Per FKTP)', headers: ['Kata Kunci', 'Frekuensi Penyebutan'], data: kendalaDataF }
+      { title: 'Top 10 Kata Kunci Kendala Pelaksanaan (Per FKTP)', headers: ['Kata Kunci', 'Frekuensi Penyebutan'], data: kendalaDataF },
+      { title: 'Komparasi Mekanisme Berdasarkan Sp.KKLP', headers: ['Mekanisme', 'Ada Sp.KKLP', 'Tidak Ada'], data: crossSpkklpData.map(d => ({ name: d.name, ada: d['Ada Sp.KKLP'], tidak: d['Tidak Ada'] })) },
+      { title: 'Komparasi Mekanisme Berdasarkan Jenis FKTP', headers: ['Mekanisme', 'Puskesmas', 'Klinik', 'DPM'], data: crossTypeData.map(d => ({ name: d.name, p: d['Puskesmas'], k: d['Klinik'], dpm: d['DPM'] })) }
     ];
 
     const rawData = {

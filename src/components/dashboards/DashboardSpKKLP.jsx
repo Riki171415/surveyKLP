@@ -77,7 +77,10 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
       if (row.doc_kklp === 'Ya') spkklpYa++; else spkklpTidak++;
       
       if (row.spkklp_status) {
-        statusCounts[row.spkklp_status] = (statusCounts[row.spkklp_status] || 0) + 1;
+        let statusStr = row.spkklp_status;
+        if (statusStr === 'RKL Kolegium') statusStr = 'Rekognisi Kompetensi Lulusan (RKL) Kolegium';
+        if (statusStr === 'RKL universitas' || statusStr === 'RPL universitas') statusStr = 'Rekognisi Pembelajaran Lampau (RPL) yang dikelola universitas';
+        statusCounts[statusStr] = (statusCounts[statusStr] || 0) + 1;
       }
 
       totalDocUmum += Number(row.doc_umum) || 0;
