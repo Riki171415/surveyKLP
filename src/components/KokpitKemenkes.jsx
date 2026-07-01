@@ -91,7 +91,7 @@ export default function KokpitKemenkes() {
         {
           title: 'Persepsi Peran Sp.KKLP (Radar Analysis)',
           headers: ['Aspek Peran', 'Kepala Puskesmas', 'Dokter Umum', 'Dokter Sp.KKLP'],
-          data: metrics.radarData.map(r => [r.fullName, r.Kapus, r.Umum, r.Spkklp])
+          data: metrics.radarData.map(r => [r.fullName, r.Kapus, r.DUmum, r.SpKKLP])
         },
         {
           title: 'Evaluasi Manfaat JKN Saat Ini',
