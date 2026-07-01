@@ -18,7 +18,7 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
   const [kondisiView, setKondisiView] = useState('responden');
   const [kepatuhanView, setKepatuhanView] = useState('responden');
   const [diagnosisView, setDiagnosisView] = useState('responden');
-  const { palStats, kondisiDataR, kondisiDataF, tujuanDataR, tujuanDataF, kepatuhanDataR, kepatuhanDataF } = useMemo(() => {
+  const { palStats, kondisiDataR, kondisiDataF, tujuanDataR, tujuanDataF, kepatuhanDataR, kepatuhanDataF, diagnosisDataR, diagnosisDataF } = useMemo(() => {
     let totalFktp = uniqueFktpData.length;
     let fktpWithPaliatif = 0;
     let adaKolaborasi = 0;
