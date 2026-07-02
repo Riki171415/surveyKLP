@@ -36,44 +36,83 @@ const DashboardPersepsiNegatif = () => {
     fetchData();
   }, []);
 
-  // Mock data for Persepsi Negatif if actual data structure is not fully known for this specific topic yet
-  // Adjust these metrics based on actual survey fields in the future
-  const persepsiUmum = [
-    { name: 'Beban Administrasi Tinggi', value: 85, fill: '#ef4444' },
-    { name: 'Ketidakjelasan Jenjang Karir', value: 65, fill: '#f97316' },
-    { name: 'Insentif Tidak Sesuai', value: 72, fill: '#f59e0b' },
-    { name: 'Fasilitas Kurang Memadai', value: 45, fill: '#eab308' },
-    { name: 'Waktu Pelayanan Tersita', value: 90, fill: '#84cc16' }
-  ];
+  const { persepsiUmum, trenKepuasan, pieData, dataSkeptisisme } = React.useMemo(() => {
+    let bebanAdmin = 0, regulasi = 0, sdm = 0, dana = 0, waktu = 0;
+    let skeptisismeTinggi = 0, skeptisismeSedang = 0, skeptisismeRendah = 0;
+    let keluhanPerBulan = {};
 
-  const trenKepuasan = [
-    { bulan: 'Jan', 'Tingkat Keluhan': 65 },
-    { bulan: 'Feb', 'Tingkat Keluhan': 59 },
-    { bulan: 'Mar', 'Tingkat Keluhan': 80 },
-    { bulan: 'Apr', 'Tingkat Keluhan': 81 },
-    { bulan: 'Mei', 'Tingkat Keluhan': 56 },
-    { bulan: 'Jun', 'Tingkat Keluhan': 55 },
-    { bulan: 'Jul', 'Tingkat Keluhan': 40 },
-  ];
+    surveys.forEach(row => {
+      let allText = '';
+      if (row.wawancara) {
+         Object.values(row.wawancara).forEach(val => {
+           if (val) allText += String(val).toLowerCase() + ' ';
+         });
+      }
 
-  const pieData = [
-    { name: 'Masalah Sistem/IT', value: 400 },
-    { name: 'Masalah SDM/Beban Kerja', value: 300 },
-    { name: 'Regulasi Berubah-ubah', value: 300 },
-    { name: 'Pendanaan/Klaim', value: 200 },
-  ];
+      // 1. Persepsi Umum & Pie Data
+      if (allText.match(/pcare|p-care|aplikasi|input|jaringan|klaim|beban|administrasi|ribet|kertas/)) bebanAdmin++;
+      if (allText.match(/regulasi|aturan|berubah|sosialisasi|rujukan|wewenang|kompetensi/)) regulasi++;
+      if (allText.match(/insentif|jasa|medis|kapitasi|sdm|perawat|tenaga|kurang/)) sdm++;
+      if (allText.match(/dana|biaya|bayar|tunggak/)) dana++;
+      if (allText.match(/waktu|lama|antre|tunggu/)) waktu++;
+
+      // 2. Skeptisisme Sp.KKLP
+      if (allText.match(/tidak berpengaruh|sama saja|percuma|tidak ada bedanya|rujukan tetap/)) skeptisismeTinggi++;
+      else if (allText.match(/sia-sia|ragu|tidak ada perubahan/)) skeptisismeSedang++;
+      else if (allText.match(/biasa|tidak signifikan|tidak perlu|belum terasa/)) skeptisismeRendah++;
+
+      // 3. Tren per bulan
+      const date = row.created_at ? new Date(row.created_at) : new Date();
+      const month = date.toLocaleString('default', { month: 'short' });
+      if (!keluhanPerBulan[month]) keluhanPerBulan[month] = { total: 0, keluhan: 0 };
+      keluhanPerBulan[month].total++;
+      if (bebanAdmin || regulasi || sdm || dana) keluhanPerBulan[month].keluhan++;
+    });
+
+    const total = surveys.length || 1;
+    
+    const persepsi = [
+      { name: 'Beban Administrasi Tinggi', value: Math.round((bebanAdmin / total) * 100) || 0, fill: '#ef4444', count: bebanAdmin },
+      { name: 'Ketidakjelasan Regulasi', value: Math.round((regulasi / total) * 100) || 0, fill: '#f97316', count: regulasi },
+      { name: 'Masalah SDM & Insentif', value: Math.round((sdm / total) * 100) || 0, fill: '#f59e0b', count: sdm },
+      { name: 'Pendanaan/Klaim', value: Math.round((dana / total) * 100) || 0, fill: '#eab308', count: dana },
+      { name: 'Waktu Pelayanan Tersita', value: Math.round((waktu / total) * 100) || 0, fill: '#84cc16', count: waktu }
+    ].sort((a,b) => b.value - a.value);
+
+    const pie = [
+      { name: 'Masalah Sistem/IT', value: bebanAdmin },
+      { name: 'Regulasi Berubah-ubah', value: regulasi },
+      { name: 'Masalah SDM/Beban Kerja', value: sdm },
+      { name: 'Pendanaan/Klaim', value: dana },
+    ].filter(d => d.value > 0);
+    if (pie.length === 0) pie.push({ name: 'Belum Ada Keluhan', value: 1 });
+
+    const skeptisisme = [
+      { name: 'Skeptisisme Tinggi (Regulasi/Rujukan)', value: skeptisismeTinggi, fill: '#ef4444' },
+      { name: 'Skeptisisme Sedang (Beban Administrasi)', value: skeptisismeSedang, fill: '#f97316' },
+      { name: 'Skeptisisme Rendah (Hanya Teknis)', value: skeptisismeRendah, fill: '#3b82f6' }
+    ].filter(d => d.value > 0);
+    if (skeptisisme.length === 0) skeptisisme.push({ name: 'Belum Ada Indikasi Skeptisisme', value: 1, fill: '#22c55e' });
+
+    let tren = Object.keys(keluhanPerBulan).map(m => ({
+      bulan: m,
+      'Tingkat Keluhan': Math.round((keluhanPerBulan[m].keluhan / keluhanPerBulan[m].total) * 100) || 0
+    }));
+    if (tren.length === 0) {
+      tren = [{ bulan: new Date().toLocaleString('default', { month: 'short' }), 'Tingkat Keluhan': 0 }];
+    }
+
+    return { persepsiUmum: persepsi, trenKepuasan: tren, pieData: pie, dataSkeptisisme: skeptisisme };
+  }, [surveys]);
+
   const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#3b82f6'];
-
-  const dataSkeptisisme = [
-    { name: 'Skeptisisme Tinggi (Regulasi/Rujukan)', value: 30, fill: '#ef4444' },
-    { name: 'Skeptisisme Sedang (Beban Administrasi)', value: 45, fill: '#f97316' },
-    { name: 'Skeptisisme Rendah (Hanya Teknis)', value: 25, fill: '#3b82f6' }
-  ];
 
   const exportToExcel = () => {
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(persepsiUmum);
-    XLSX.utils.book_append_sheet(wb, ws, "Data Persepsi");
+    const ws1 = XLSX.utils.json_to_sheet(persepsiUmum.map(d => ({ 'Kategori': d.name, 'Persentase (%)': d.value, 'Jumlah Responden': d.count })));
+    XLSX.utils.book_append_sheet(wb, ws1, "Persepsi Umum");
+    const ws2 = XLSX.utils.json_to_sheet(dataSkeptisisme);
+    XLSX.utils.book_append_sheet(wb, ws2, "Tingkat Skeptisisme");
     XLSX.writeFile(wb, `Export_Persepsi_Negatif_${new Date().getTime()}.xlsx`);
   };
 
