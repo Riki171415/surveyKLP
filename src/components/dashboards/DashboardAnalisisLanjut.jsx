@@ -85,11 +85,11 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
         headers: ['Rata-rata Ada Sp.KKLP', 'Rata-rata Tanpa Sp.KKLP', 'Selisih (Beda)', 'T-Statistic', 'P-Value', 'Signifikansi'],
         data: [
           [
-            res.tMean.toFixed(4),
-            res.cMean.toFixed(4),
-            res.diff.toFixed(4),
-            res.tStat.toFixed(4),
-            res.pValue.toFixed(4),
+            res.tMean?.toFixed(4) ?? 0,
+            res.cMean?.toFixed(4) ?? 0,
+            res.diff?.toFixed(4) ?? 0,
+            res.tStat?.toFixed(4) ?? 0,
+            res.pValue?.toFixed(4) ?? 1,
             res.isSignificant ? 'SIGNIFIKAN' : 'TIDAK SIGNIFIKAN'
           ]
         ]
@@ -116,11 +116,11 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
         headers: ['Efek Sp.KKLP (Beta)', 'Standard Error', 'T-Statistic', 'P-Value', 'R-Squared', 'Signifikansi'],
         data: [
           [
-            res.treatmentEffect.toFixed(4),
-            res.standardError.toFixed(4),
-            res.tStat.toFixed(4),
-            res.pValue.toFixed(4),
-            res.rSquared ? res.rSquared.toFixed(4) : '-',
+            res.treatmentEffect?.toFixed(4) ?? 0,
+            res.standardError?.toFixed(4) ?? 0,
+            res.tStat?.toFixed(4) ?? 0,
+            res.pValue?.toFixed(4) ?? 1,
+            res.rSquared ? res.rSquared?.toFixed(4) : '-',
             res.isSignificant ? 'SIGNIFIKAN' : 'TIDAK SIGNIFIKAN'
           ]
         ]

@@ -247,9 +247,9 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
         type: 'ChiSquare',
         title: 'B. Uji Chi-Square (Kepatuhan vs Sp.KKLP)',
         description: [
-          `Nilai Uji Chi-Square (χ²): ${chi2.toFixed(4)}`,
-          `Derajat Kebebasan (df): ${df}`,
-          `P-Value: ${pValue.toFixed(4)}`
+          `Nilai Uji Chi-Square (χ²): ${chi2?.toFixed(4) ?? 0}`,
+          `Derajat Kebebasan (df): ${df ?? 0}`,
+          `P-Value: ${pValue?.toFixed(4) ?? 1}`
         ],
         tables: [
           {
