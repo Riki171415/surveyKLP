@@ -5,7 +5,7 @@ import Login from './components/Login';
 import SurveyForm from './components/SurveyForm';
 import PrintForms from './components/PrintForms';
 import ListResponden from './components/ListResponden';
-import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList, Loader2, ChevronRight, Target, Printer, Menu, X, Activity } from 'lucide-react';
+import { LayoutDashboard, FileText, Database, Users, LogOut, ClipboardList, Loader2, ChevronRight, Target, Printer, Menu, X, Activity, AlertTriangle } from 'lucide-react';
 import logoKemenkes from './assets/logo-kemenkes.png';
 
 // Lazy load komponen berat — hanya di-download saat dibutuhkan
@@ -15,7 +15,7 @@ const UserManagement = lazy(() => import('./components/UserManagement'));
 const DataManagement = lazy(() => import('./components/DataManagement'));
 const KokpitKemenkes = lazy(() => import('./components/KokpitKemenkes'));
 const DashboardBebanKerjaDokter = lazy(() => import('./components/DashboardBebanKerjaDokter'));
-
+const DashboardPersepsiNegatif = lazy(() => import('./components/DashboardPersepsiNegatif'));
 const PageLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-[400px]">
     <Loader2 className="w-8 h-8 text-primary-600 animate-spin mb-3" />
@@ -128,6 +128,7 @@ function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
             <NavItem to="/kokpit" icon={Target} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Kokpit Kemenkes</NavItem>
             <NavItem to="/dashboard" icon={LayoutDashboard} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Dashboard Laporan</NavItem>
             <NavItem to="/dashboardbebankerjadokter" icon={Activity} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Beban Kerja Dokter</NavItem>
+            <NavItem to="/dashboard-persepsi-negatif" icon={AlertTriangle} collapsed={isCollapsed} onClick={() => setIsMobileMenuOpen(false)}>Persepsi Negatif</NavItem>
           </>
         )}
 
@@ -215,6 +216,7 @@ function AppContent() {
                 <Route path="/data" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><DataManagement /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><Dashboard /></ProtectedRoute>} />
                 <Route path="/dashboardbebankerjadokter" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><DashboardBebanKerjaDokter /></ProtectedRoute>} />
+                <Route path="/dashboard-persepsi-negatif" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><DashboardPersepsiNegatif /></ProtectedRoute>} />
                 <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
                 <Route path="/cetak-form" element={<ProtectedRoute allowedRoles={['admin', 'tim survey']}><PrintForms /></ProtectedRoute>} />
                 <Route path="/list-responden" element={<ProtectedRoute allowedRoles={['tim survey', 'admin']}><ListResponden /></ProtectedRoute>} />
