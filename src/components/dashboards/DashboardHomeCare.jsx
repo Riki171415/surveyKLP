@@ -20,8 +20,8 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
   const [kondisiView, setKondisiView] = useState('responden');
   const [kepatuhanView, setKepatuhanView] = useState('responden');
   const [tenagaView, setTenagaView] = useState('responden');
-  const [diagnosisView, setDiagnosisView] = useState('responden');
-  const { hcStats, kondisiDataR, kondisiDataF, jenisDataR, jenisDataF, kepatuhanDataR, kepatuhanDataF, tenagaDataR, tenagaDataF, diagnosisDataR, diagnosisDataF } = useMemo(() => {
+  const [kunjunganView, setKunjunganView] = useState('responden');
+  const { hcStats, kondisiDataR, kondisiDataF, jenisDataR, jenisDataF, kepatuhanDataR, kepatuhanDataF, tenagaDataR, tenagaDataF, diagnosisDataR, diagnosisDataF, kunjunganDataR, kunjunganDataF } = useMemo(() => {
     let totalFktp = uniqueFktpData.length;
     let fktpWithHomeCare = 0;
     let sumKunjungan = 0;
@@ -40,7 +40,7 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
 
     // ── Per Responden ──
     const kondisiCountsR = {}, jenisCountsR = {}, kepatuhanCountsR = { 'Tinggi (>80%)': 0, 'Sedang (50–80%)': 0, 'Rendah (<50%)': 0 };
-    const tenagaCountsR = {}, diagnosisCountsR = {};
+    const tenagaCountsR = {}, diagnosisCountsR = {}, kunjunganCountsR = { '1x': 0, '2x': 0, '3x': 0, '4x': 0, '>4x': 0 };
     filteredData.forEach(row => {
       const hc = row.home_care || {};
       if (hc.screening === 'Ya') {
@@ -62,11 +62,17 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
           const diagnoses = hc.diagnosis.split(',').map(d => d.trim()).filter(Boolean);
           diagnoses.forEach(d => diagnosisCountsR[d] = (diagnosisCountsR[d] || 0) + 1);
         }
+        // Kunjungan
+        let jml = Number(hc.jumlahKunjungan) || 0;
+        if (jml > 0) {
+          let label = jml > 4 ? '>4x' : `${jml}x`;
+          kunjunganCountsR[label] = (kunjunganCountsR[label] || 0) + 1;
+        }
       }
     });
     // ── Per FKTP ──
     const kondisiCountsF = {}, jenisCountsF = {}, kepatuhanCountsF = { 'Tinggi (>80%)': 0, 'Sedang (50–80%)': 0, 'Rendah (<50%)': 0 };
-    const tenagaCountsF = {}, diagnosisCountsF = {};
+    const tenagaCountsF = {}, diagnosisCountsF = {}, kunjunganCountsF = { '1x': 0, '2x': 0, '3x': 0, '4x': 0, '>4x': 0 };
     uniqueFktpData.forEach(row => {
       const hc = row.home_care || {};
       if (hc.screening === 'Ya') {
@@ -88,6 +94,12 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
           const diagnoses = hc.diagnosis.split(',').map(d => d.trim()).filter(Boolean);
           diagnoses.forEach(d => diagnosisCountsF[d] = (diagnosisCountsF[d] || 0) + 1);
         }
+        // Kunjungan
+        let jml = Number(hc.jumlahKunjungan) || 0;
+        if (jml > 0) {
+          let label = jml > 4 ? '>4x' : `${jml}x`;
+          kunjunganCountsF[label] = (kunjunganCountsF[label] || 0) + 1;
+        }
       }
     });
     const toArr = (obj) => Object.keys(obj).map(k => ({ name: k, value: obj[k] })).sort((a,b) => b.value - a.value).filter(d => d.value > 0);
@@ -105,6 +117,7 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
       kepatuhanDataR: toArr(kepatuhanCountsR), kepatuhanDataF: toArr(kepatuhanCountsF),
       tenagaDataR: toArrText(tenagaCountsR), tenagaDataF: toArrText(tenagaCountsF),
       diagnosisDataR: toArr(diagnosisCountsR).slice(0, 10), diagnosisDataF: toArr(diagnosisCountsF).slice(0, 10),
+      kunjunganDataR: toArr(kunjunganCountsR), kunjunganDataF: toArr(kunjunganCountsF),
     };
   }, [filteredData, uniqueFktpData]);
 
@@ -113,12 +126,14 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
   const kepatuhanData = kepatuhanView === 'fktp' ? kepatuhanDataF : kepatuhanDataR;
   const tenagaData    = tenagaView    === 'fktp' ? tenagaDataF    : tenagaDataR;
   const diagnosisData = diagnosisView === 'fktp' ? diagnosisDataF : diagnosisDataR;
+  const kunjunganData = kunjunganView === 'fktp' ? kunjunganDataF : kunjunganDataR;
 
   const jenisLabel     = jenisView     === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
   const kondisiLabel   = kondisiView   === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
   const kepatuhanLabel = kepatuhanView === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
   const tenagaLabel    = tenagaView    === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
   const diagnosisLabel = diagnosisView === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
+  const kunjunganLabel = kunjunganView === 'fktp' ? 'Jumlah FKTP' : 'Jumlah Responden';
 
 
 
@@ -186,7 +201,9 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
       { title: 'SDM Pelaksana (Per Responden)', headers: ['SDM', 'Frekuensi'], data: tenagaDataR.map(d => [d.text, d.value]) },
       { title: 'SDM Pelaksana (Per FKTP)', headers: ['SDM', 'Frekuensi'], data: tenagaDataF.map(d => [d.text, d.value]) },
       { title: 'Top 10 Diagnosis Pasien (Per Responden)', headers: ['Diagnosis', 'Jumlah (Nilai)'], data: diagnosisDataR.map(d => [d.name, d.value]) },
-      { title: 'Top 10 Diagnosis Pasien (Per FKTP)', headers: ['Diagnosis', 'Jumlah FKTP (Nilai)'], data: diagnosisDataF.map(d => [d.name, d.value]) }
+      { title: 'Top 10 Diagnosis Pasien (Per FKTP)', headers: ['Diagnosis', 'Jumlah FKTP (Nilai)'], data: diagnosisDataF.map(d => [d.name, d.value]) },
+      { title: 'Distribusi Kunjungan (Per Responden)', headers: ['Distribusi Kunjungan', 'Jumlah (Nilai)'], data: kunjunganDataR.map(d => [d.name, d.value]) },
+      { title: 'Distribusi Kunjungan (Per FKTP)', headers: ['Distribusi Kunjungan', 'Jumlah FKTP (Nilai)'], data: kunjunganDataF.map(d => [d.name, d.value]) }
     ];
 
     const kondisiKeys = ['Mandiri (independen)', 'Memerlukan bantuan sebagian', 'Memerlukan bantuan penuh', 'Tirah baring', 'Lainnya'];
@@ -356,6 +373,33 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
                 <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} ${diagnosisLabel}`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                 <Bar dataKey="value" name={diagnosisLabel} fill={diagnosisView === 'fktp' ? '#10b981' : '#f43f5e'} radius={[0, 6, 6, 0]} barSize={20}>
                   <LabelList dataKey="value" position="right" fill="#475569" fontSize={12} fontWeight={600} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Distribusi Kunjungan */}
+        <div id="hc-kunjungan-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+          {!isPrinting && (
+            <button onClick={() => downloadElementAsPNG('hc-kunjungan-chart', 'Distribusi_Kunjungan_HC')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
+              <ImageIcon className="w-4 h-4" />
+            </button>
+          )}
+          <div className="flex justify-between items-center mb-2 pr-10">
+            <h3 className="text-base font-bold text-slate-800 flex items-center"><Clock className="w-5 h-5 mr-2 text-blue-600" /> Distribusi Jumlah Kunjungan/Bulan</h3>
+            {!isPrinting && <ViewToggle value={kunjunganView} onChange={setKunjunganView} />}
+          </div>
+          <p className="text-xs text-slate-400 mb-2 italic">{kunjunganView === 'responden' ? `${filteredData.length} responden` : `${uniqueFktpData.length} FKTP unik`}</p>
+          <div className="h-64">
+            <ResponsiveContainer width="99%" height="100%" minHeight={200} minWidth={0}>
+              <BarChart data={kunjunganData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 12, fontWeight: 500 }} />
+                <RechartsTooltip cursor={{ fill: '#F1F5F9' }} formatter={(value) => [`${value} ${kunjunganLabel}`, 'Jumlah']} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="value" name={kunjunganLabel} fill={kunjunganView === 'fktp' ? '#10b981' : '#3b82f6'} radius={[6, 6, 0, 0]} barSize={40}>
+                  <LabelList dataKey="value" position="top" fill="#475569" fontSize={12} fontWeight={600} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
