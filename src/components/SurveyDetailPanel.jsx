@@ -274,18 +274,18 @@ export default function DataManagement() {
           }
           base["PRB_Mekanisme"] = meks.length > 0 ? meks.join(', ') : '-';
           base["PRB_Rata Rujukan ke FKRTL"] = row.prb?.rataRujukan || '-';
-          base["PRB_Total Peserta"] = row.prb?.totalPeserta || '-';
-          base["PRB_Kunjungan Rutin"] = row.prb?.kunjunganRutin || '-';
+          base["PRB_Total Peserta"] = row.prb?.jumlah || '-';
+          base["PRB_Kunjungan Rutin"] = row.prb?.rutinKunjungan || '-';
           base["PRB_Tidak Berkunjung"] = row.prb?.tidakBerkunjung || '-';
-          base["PRB_Kasus_DM"] = row.prb?.kasus?.DM || '-';
-          base["PRB_Kasus_Hipertensi"] = row.prb?.kasus?.Hipertensi || '-';
-          base["PRB_Kasus_Jantung"] = row.prb?.kasus?.Jantung || '-';
-          base["PRB_Kasus_PPOK"] = row.prb?.kasus?.PPOK || '-';
-          base["PRB_Kasus_Asma"] = row.prb?.kasus?.Asma || '-';
-          base["PRB_Kasus_Stroke"] = row.prb?.kasus?.Stroke || '-';
-          base["PRB_Kasus_Epilepsi"] = row.prb?.kasus?.Epilepsi || '-';
-          base["PRB_Kasus_Skizofrenia"] = row.prb?.kasus?.Skizofrenia || '-';
-          base["PRB_Kasus_SLE"] = row.prb?.kasus?.SLE || '-';
+          base["PRB_Kasus_DM"] = row.prb?.peserta_dm || '-';
+          base["PRB_Kasus_Hipertensi"] = row.prb?.peserta_ht || '-';
+          base["PRB_Kasus_Jantung"] = row.prb?.peserta_jantung || '-';
+          base["PRB_Kasus_PPOK"] = row.prb?.peserta_ppok || '-';
+          base["PRB_Kasus_Asma"] = row.prb?.peserta_asma || '-';
+          base["PRB_Kasus_Stroke"] = row.prb?.peserta_stroke || '-';
+          base["PRB_Kasus_Epilepsi"] = row.prb?.peserta_epilepsi || '-';
+          base["PRB_Kasus_Skizofrenia"] = row.prb?.peserta_skizofrenia || '-';
+          base["PRB_Kasus_SLE"] = row.prb?.peserta_sle || '-';
 
           // JKN Benefits
           jknBenefits.forEach((jkn, i) => {

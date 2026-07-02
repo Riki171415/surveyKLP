@@ -118,13 +118,15 @@ export default function Dashboard() {
     const headers = [
       "No", "Tanggal Pengisian", "Provinsi", "Kabupaten/Kota", "Nama Puskesmas / Klinik", "Kode Faskes", "Nama Responden", "Jabatan", "Ada Sp.KKLP?", "Status Sp.KKLP", "Obat Khusus Sp.KKLP",
       "Total Dokter Umum", "Total Dokter Gigi", "Waktu Poli (jam)", "Waktu Home Visit (jam)", "Beban Dalam Gedung (%)", "Beban Luar Gedung (%)",
-      "Kepatuhan PRB", "Kolaborasi Homecare", "Kolaborasi Paliatif",
+      "Total Peserta PRB", "Kunjungan Rutin PRB", "Tidak Berkunjung PRB",
+      "PRB DM", "PRB Hipertensi", "PRB Jantung", "PRB PPOK", "PRB Asma", "PRB Stroke", "PRB Epilepsi", "PRB Skizofrenia", "PRB SLE",
+      "Rata Rujukan PRB", "Kendala PRB", "Kolaborasi Homecare", "Kolaborasi Paliatif",
       ...penyakitPasienBulanan.map(p => `Pasien_Bulanan_${p.label}`)
     ];
 
     // Kolom indeks numerik (0-based, setelah header) yang bisa dihitung rata-ratanya
-    // Indeks: 11=dok.umum, 12=dok.gigi, 13=waktuPoli, 14=waktuHV, 15=bebanDlm, 16=bebanLuar, + pasien bulanan (mulai indeks 20)
-    const numericColIndices = [11, 12, 13, 14, 15, 16, ...penyakitPasienBulanan.map((_, i) => 20 + i)];
+    // Indeks: 11=dok.umum, 12=dok.gigi, 13=waktuPoli, 14=waktuHV, 15=bebanDlm, 16=bebanLuar, 17=Total PRB, 18=Rutin PRB, 19=Tidak Berkunjung, 20-28=Penyakit PRB, 29=Rata Rujukan, + pasien bulanan (mulai indeks 33)
+    const numericColIndices = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, ...penyakitPasienBulanan.map((_, i) => 33 + i)];
 
     const rows = filteredData.map((row, index) => {
       return [
@@ -135,7 +137,21 @@ export default function Dashboard() {
         row.time_home_visit !== undefined && row.time_home_visit !== '' ? Number(row.time_home_visit) : '',
         row.prop_in_fktp !== undefined && row.prop_in_fktp !== '' ? Number(row.prop_in_fktp) : '',
         row.prop_out_fktp !== undefined && row.prop_out_fktp !== '' ? Number(row.prop_out_fktp) : '',
-        row.prb?.rutinKunjungan || '', row.home_care?.kolaborasi || '', row.paliatif?.kolaborasi || '',
+        row.prb?.jumlah !== undefined && row.prb?.jumlah !== '' ? Number(row.prb.jumlah) : '',
+        row.prb?.rutinKunjungan !== undefined && row.prb?.rutinKunjungan !== '' ? Number(row.prb.rutinKunjungan) : '',
+        row.prb?.tidakBerkunjung !== undefined && row.prb?.tidakBerkunjung !== '' ? Number(row.prb.tidakBerkunjung) : '',
+        row.prb?.peserta_dm !== undefined && row.prb?.peserta_dm !== '' ? Number(row.prb.peserta_dm) : '',
+        row.prb?.peserta_ht !== undefined && row.prb?.peserta_ht !== '' ? Number(row.prb.peserta_ht) : '',
+        row.prb?.peserta_jantung !== undefined && row.prb?.peserta_jantung !== '' ? Number(row.prb.peserta_jantung) : '',
+        row.prb?.peserta_ppok !== undefined && row.prb?.peserta_ppok !== '' ? Number(row.prb.peserta_ppok) : '',
+        row.prb?.peserta_asma !== undefined && row.prb?.peserta_asma !== '' ? Number(row.prb.peserta_asma) : '',
+        row.prb?.peserta_stroke !== undefined && row.prb?.peserta_stroke !== '' ? Number(row.prb.peserta_stroke) : '',
+        row.prb?.peserta_epilepsi !== undefined && row.prb?.peserta_epilepsi !== '' ? Number(row.prb.peserta_epilepsi) : '',
+        row.prb?.peserta_skizofrenia !== undefined && row.prb?.peserta_skizofrenia !== '' ? Number(row.prb.peserta_skizofrenia) : '',
+        row.prb?.peserta_sle !== undefined && row.prb?.peserta_sle !== '' ? Number(row.prb.peserta_sle) : '',
+        row.prb?.rataRujukan !== undefined && row.prb?.rataRujukan !== '' ? Number(row.prb.rataRujukan) : '',
+        row.prb?.kendala || '',
+        row.home_care?.kolaborasi || '', row.paliatif?.kolaborasi || '',
         ...penyakitPasienBulanan.map(p => {
           const val = row.data_pasien_bulanan?.[p.id];
           return val !== undefined && val !== '' ? Number(val) : '';
