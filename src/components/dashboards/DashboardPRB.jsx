@@ -37,20 +37,20 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
 
     filteredData.forEach(row => {
       const prb = row.prb || {};
-      totalJumlah += Number(prb.jumlah) || 0;
-      totalRutin  += Number(prb.rutinKunjungan) || 0;
+      totalJumlah += Number(prb.jumlah) || Number(prb.totalPeserta) || 0;
+      totalRutin  += Number(prb.rutinKunjungan) || Number(prb.kunjunganRutin) || 0;
       totalTidakBerkunjung += Number(prb.tidakBerkunjung) || 0;
       if (prb.rataRujukan) { totalRujukan += Number(prb.rataRujukan); countRujukan++; }
 
-      diagCountsR['DM']          += Number(prb.peserta_dm) || 0;
-      diagCountsR['Hipertensi']  += Number(prb.peserta_ht) || 0;
-      diagCountsR['Jantung']     += Number(prb.peserta_jantung) || 0;
-      diagCountsR['PPOK']        += Number(prb.peserta_ppok) || 0;
-      diagCountsR['Asma']        += Number(prb.peserta_asma) || 0;
-      diagCountsR['Stroke']      += Number(prb.peserta_stroke) || 0;
-      diagCountsR['Epilepsi']    += Number(prb.peserta_epilepsi) || 0;
-      diagCountsR['Skizofrenia'] += Number(prb.peserta_skizofrenia) || 0;
-      diagCountsR['SLE']         += Number(prb.peserta_sle) || 0;
+      diagCountsR['DM']          += Number(prb.peserta_dm) || Number(prb.kasus?.DM) || 0;
+      diagCountsR['Hipertensi']  += Number(prb.peserta_ht) || Number(prb.kasus?.Hipertensi) || 0;
+      diagCountsR['Jantung']     += Number(prb.peserta_jantung) || Number(prb.kasus?.Jantung) || 0;
+      diagCountsR['PPOK']        += Number(prb.peserta_ppok) || Number(prb.kasus?.PPOK) || 0;
+      diagCountsR['Asma']        += Number(prb.peserta_asma) || Number(prb.kasus?.Asma) || 0;
+      diagCountsR['Stroke']      += Number(prb.peserta_stroke) || Number(prb.kasus?.Stroke) || 0;
+      diagCountsR['Epilepsi']    += Number(prb.peserta_epilepsi) || Number(prb.kasus?.Epilepsi) || 0;
+      diagCountsR['Skizofrenia'] += Number(prb.peserta_skizofrenia) || Number(prb.kasus?.Skizofrenia) || 0;
+      diagCountsR['SLE']         += Number(prb.peserta_sle) || Number(prb.kasus?.SLE) || 0;
       Object.keys(mekCountsR).forEach(mek => { if (prb[`mek_${mek}`]) mekCountsR[mek]++; });
     });
 
@@ -201,17 +201,23 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
       ],
       rows: filteredData.map((row, idx) => {
         const prb = row.prb || {};
-        const jumlah = Number(prb.jumlah) || 0;
-        const rutin = Number(prb.rutinKunjungan) || 0;
+        const jumlah = Number(prb.jumlah) || Number(prb.totalPeserta) || 0;
+        const rutin = Number(prb.rutinKunjungan) || Number(prb.kunjunganRutin) || 0;
         return [
           idx + 1, row.nama_responden || '-', row.role || '-', row.fktp_name || '-', row.provinsi || '-',
           jumlah, rutin,
           Number(prb.tidakBerkunjung) || 0,
           jumlah > 0 ? Number(((rutin / jumlah) * 100).toFixed(1)) : 0,
           Number(prb.rataRujukan) || 0,
-          Number(prb.peserta_dm) || 0, Number(prb.peserta_ht) || 0, Number(prb.peserta_jantung) || 0,
-          Number(prb.peserta_ppok) || 0, Number(prb.peserta_asma) || 0, Number(prb.peserta_stroke) || 0,
-          Number(prb.peserta_epilepsi) || 0, Number(prb.peserta_skizofrenia) || 0, Number(prb.peserta_sle) || 0,
+          Number(prb.peserta_dm) || Number(prb.kasus?.DM) || 0,
+          Number(prb.peserta_ht) || Number(prb.kasus?.Hipertensi) || 0,
+          Number(prb.peserta_jantung) || Number(prb.kasus?.Jantung) || 0,
+          Number(prb.peserta_ppok) || Number(prb.kasus?.PPOK) || 0,
+          Number(prb.peserta_asma) || Number(prb.kasus?.Asma) || 0,
+          Number(prb.peserta_stroke) || Number(prb.kasus?.Stroke) || 0,
+          Number(prb.peserta_epilepsi) || Number(prb.kasus?.Epilepsi) || 0,
+          Number(prb.peserta_skizofrenia) || Number(prb.kasus?.Skizofrenia) || 0,
+          Number(prb.peserta_sle) || Number(prb.kasus?.SLE) || 0,
           prb['mek_Pengingat kunjungan'] ? 'Ya' : 'Tidak',
           prb['mek_Telepon/WA'] ? 'Ya' : 'Tidak',
           prb['mek_Kunjungan rumah'] ? 'Ya' : 'Tidak',
