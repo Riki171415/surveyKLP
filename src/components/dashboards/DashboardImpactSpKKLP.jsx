@@ -6,6 +6,7 @@ import {
 import { Stethoscope, Activity, Home, HeartPulse, CheckCircle2, AlertCircle, FileText, Download, Image as ImageIcon } from 'lucide-react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import { performRandomSampling, performPSM, performIPW, performStratifiedMatching } from '../../utils/statisticsUtils';
 
 // ── Komponen Toggle Pill ──────────────────────────────────────────────────────
 const ViewToggle = ({ value, onChange }) => (
@@ -27,6 +28,7 @@ const ViewToggle = ({ value, onChange }) => (
 
 export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const [view, setView] = useState('responden');
+  const [statMethod, setStatMethod] = useState('as-is');
   
   const calculateMetrics = (dataset) => {
     let adaSp = 0, tanpaSp = 0;
@@ -38,35 +40,37 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
 
     dataset.forEach(row => {
       const isAdaSp = row.doc_kklp === 'Ya';
-      if (isAdaSp) adaSp++; else tanpaSp++;
+      const w = row._weight || 1;
+      
+      if (isAdaSp) adaSp += w; else tanpaSp += w;
 
       const m = isAdaSp ? metrikAda : metrikTanpa;
       
       // PRB
       const prb = row.prb || {};
       if (prb.jumlah !== undefined && prb.jumlah !== '') {
-        m.prbAktif += Number(prb.jumlah) || 0;
-        m.rujukanFkrtl += Number(prb.rataRujukan) || 0;
+        m.prbAktif += (Number(prb.jumlah) || 0) * w;
+        m.rujukanFkrtl += (Number(prb.rataRujukan) || 0) * w;
         
         const aktif = Number(prb.jumlah) || 0;
         const rutin = Number(prb.rutinKunjungan) || 0;
         if (aktif > 0) {
-          m.kepatuhanPrb += (rutin / aktif) * 100;
-          if (isAdaSp) countPrbAda++; else countPrbTanpa++;
+          m.kepatuhanPrb += (rutin / aktif) * 100 * w;
+          if (isAdaSp) countPrbAda += w; else countPrbTanpa += w;
         }
       }
 
       // Home Care
       const hc = row.home_care || {};
       if (hc.screening === 'Ya') {
-        m.hc++;
-        if (hc.kolaborasi === 'Ya') m.kolaborasiHc++;
-        if (hc.perbaikan === 'Ya') m.perbaikanHc++;
+        m.hc += w;
+        if (hc.kolaborasi === 'Ya') m.kolaborasiHc += w;
+        if (hc.perbaikan === 'Ya') m.perbaikanHc += w;
       }
 
       // Paliatif
       const pal = row.paliatif || {};
-      if (pal.screening === 'Ya') m.paliatif++;
+      if (pal.screening === 'Ya') m.paliatif += w;
     });
 
     const getAvg = (sum, count) => count > 0 ? (sum / count) : 0;
@@ -112,18 +116,37 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
     Object.keys(dataAda).forEach(k => dataAda[k] = Number(dataAda[k].toFixed(1)));
     Object.keys(dataTanpa).forEach(k => dataTanpa[k] = Number(dataTanpa[k].toFixed(1)));
 
-    const rawAda = { countPrb: countPrbAda, hc: metrikAda.hc, paliatif: metrikAda.paliatif, kolaborasi: metrikAda.kolaborasiHc, perbaikan: metrikAda.perbaikanHc, total: adaSp };
-    const rawTanpa = { countPrb: countPrbTanpa, hc: metrikTanpa.hc, paliatif: metrikTanpa.paliatif, kolaborasi: metrikTanpa.kolaborasiHc, perbaikan: metrikTanpa.perbaikanHc, total: tanpaSp };
+    const rawAda = { countPrb: countPrbAda.toFixed(0), hc: metrikAda.hc.toFixed(0), paliatif: metrikAda.paliatif.toFixed(0), kolaborasi: metrikAda.kolaborasiHc.toFixed(0), perbaikan: metrikAda.perbaikanHc.toFixed(0), total: adaSp.toFixed(0) };
+    const rawTanpa = { countPrb: countPrbTanpa.toFixed(0), hc: metrikTanpa.hc.toFixed(0), paliatif: metrikTanpa.paliatif.toFixed(0), kolaborasi: metrikTanpa.kolaborasiHc.toFixed(0), perbaikan: metrikTanpa.perbaikanHc.toFixed(0), total: tanpaSp.toFixed(0) };
 
-    return { spData: barKinerja, radarData: radar, stats: { adaSp, tanpaSp, dataAda, dataTanpa, rawAda, rawTanpa } };
+    return { spData: barKinerja, radarData: radar, stats: { adaSp: adaSp.toFixed(0), tanpaSp: tanpaSp.toFixed(0), dataAda, dataTanpa, rawAda, rawTanpa } };
+  };
+
+  const applyStatistics = (data, method) => {
+    if (!data || data.length === 0) return data;
+    if (method === 'as-is') return data;
+    
+    const treatmentFn = (d) => d.doc_kklp === 'Ya';
+    const covariates = ['provinsi', 'kab_kota', 'jenis_faskes'];
+    
+    switch (method) {
+      case 'random': return performRandomSampling(data, treatmentFn);
+      case 'psm': return performPSM(data, treatmentFn, covariates);
+      case 'ipw': return performIPW(data, treatmentFn, covariates);
+      case 'stratified': return performStratifiedMatching(data, treatmentFn, covariates);
+      default: return data;
+    }
   };
 
   const { metricsR, metricsF } = useMemo(() => {
+    const dataR = applyStatistics(filteredData, statMethod);
+    const dataF = applyStatistics(uniqueFktpData, statMethod);
+    
     return {
-      metricsR: calculateMetrics(filteredData),
-      metricsF: calculateMetrics(uniqueFktpData)
+      metricsR: calculateMetrics(dataR),
+      metricsF: calculateMetrics(dataF)
     };
-  }, [filteredData, uniqueFktpData]);
+  }, [filteredData, uniqueFktpData, statMethod]);
 
   const activeMetrics = view === 'responden' ? metricsR : metricsF;
   const { spData, radarData, stats } = activeMetrics;
@@ -252,12 +275,32 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
       )}
       <div className="bg-gradient-to-r from-primary-600 to-indigo-600 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
         <div className="absolute right-0 top-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/3"></div>
-        <div className="relative z-10 flex flex-col sm:flex-row justify-between items-center">
+        <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
             <h2 className="text-2xl font-bold mb-2 flex items-center"><Stethoscope className="w-6 h-6 mr-2" /> Dampak Keberadaan Sp.KKLP</h2>
-            <p className="text-primary-100 font-medium">Komparasi capaian indikator pelayanan antara {stats.adaSp} dengan Sp.KKLP vs {stats.tanpaSp} tanpa Sp.KKLP ({view === 'responden' ? 'Responden' : 'FKTP'})</p>
+            <p className="text-primary-100 font-medium text-sm">
+              Komparasi indikator pelayanan antara {stats.adaSp} (Ada Sp.KKLP) vs {stats.tanpaSp} (Tanpa Sp.KKLP)
+            </p>
           </div>
-          {!isPrinting && <ViewToggle value={view} onChange={setView} />}
+          {!isPrinting && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-1.5 flex items-center shadow-inner">
+                <select 
+                  value={statMethod}
+                  onChange={(e) => setStatMethod(e.target.value)}
+                  className="bg-white/10 text-white border border-white/20 rounded-md text-xs font-semibold px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-white/50"
+                  title="Metode Statistik"
+                >
+                  <option value="as-is" className="text-slate-800">1. As Is (Data Mentah)</option>
+                  <option value="random" className="text-slate-800">2. Random Sampling (1:1)</option>
+                  <option value="psm" className="text-slate-800">3. Propensity Score Matching (PSM)</option>
+                  <option value="ipw" className="text-slate-800">4. Inverse Probability Weighting (IPW)</option>
+                  <option value="stratified" className="text-slate-800">5. Stratified Analysis</option>
+                </select>
+              </div>
+              <ViewToggle value={view} onChange={setView} />
+            </div>
+          )}
         </div>
       </div>
 
