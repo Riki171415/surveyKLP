@@ -432,32 +432,36 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
               </div>
 
               <div className="space-y-3 text-sm text-slate-300 leading-relaxed relative z-10">
-                {aiReports.logistic ? (
-                  aiReports.logistic.map((p, i) => <p key={i}>{p}</p>)
-                ) : (
-                  <>
-                    <p>
-                      Berdasarkan pemodelan <strong>Regresi Logistik</strong>, prediktor terbaik untuk menentukan apakah suatu FKTP mampu mencapai kepatuhan PRB di atas 50% adalah faktor dengan Odds Ratio tertinggi yang signifikan secara statistik.
-                    </p>
-                    <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20">
-                      {logisticData.filter(d => d.isSignificant && d.oddsRatio > 1).length > 0 ? (
-                        <div>
-                          <span className="font-bold text-white block mb-2 text-sm">Prediktor Positif Signifikan Utama:</span>
-                          <ul className="list-disc pl-5 space-y-1 text-emerald-200">
-                            {logisticData.filter(d => d.isSignificant && d.oddsRatio > 1).sort((a,b) => b.oddsRatio - a.oddsRatio).map((item, idx) => (
-                              <li key={idx}><strong>{item.name}</strong> (Meningkatkan probabilitas sukses sebesar {(item.oddsRatio * 100 - 100).toFixed(1)}%)</li>
-                            ))}
-                          </ul>
-                          <p className="mt-3 text-xs italic opacity-90">Kehadiran faktor-faktor ini secara eksponensial meningkatkan kemungkinan pasien kronis untuk patuh minum obat dan berkunjung secara rutin.</p>
-                        </div>
-                      ) : (
-                        <div className="flex items-start text-amber-200">
-                          <AlertTriangle className="w-5 h-5 mr-2 shrink-0" />
-                          <span>Belum ditemukan prediktor positif yang cukup kuat secara statistik (α=0.05) pada observasi ini.</span>
-                        </div>
-                      )}
+                <p>
+                  Berdasarkan pemodelan <strong>Regresi Logistik</strong>, prediktor terbaik untuk menentukan apakah suatu FKTP mampu mencapai kepatuhan PRB di atas 50% adalah faktor dengan Odds Ratio tertinggi yang signifikan secara statistik.
+                </p>
+                <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20 mb-6">
+                  {logisticData.filter(d => d.isSignificant && d.oddsRatio > 1).length > 0 ? (
+                    <div>
+                      <span className="font-bold text-white block mb-2 text-sm">Prediktor Positif Signifikan Utama:</span>
+                      <ul className="list-disc pl-5 space-y-1 text-emerald-200">
+                        {logisticData.filter(d => d.isSignificant && d.oddsRatio > 1).sort((a,b) => b.oddsRatio - a.oddsRatio).map((item, idx) => (
+                          <li key={idx}><strong>{item.name}</strong> (Meningkatkan probabilitas sukses sebesar {(item.oddsRatio * 100 - 100).toFixed(1)}%)</li>
+                        ))}
+                      </ul>
+                      <p className="mt-3 text-xs italic opacity-90">Kehadiran faktor-faktor ini secara eksponensial meningkatkan kemungkinan pasien kronis untuk patuh minum obat dan berkunjung secara rutin.</p>
                     </div>
-                  </>
+                  ) : (
+                    <div className="flex items-start text-amber-200">
+                      <AlertTriangle className="w-5 h-5 mr-2 shrink-0" />
+                      <span>Belum ditemukan prediktor positif yang cukup kuat secara statistik (α=0.05) pada observasi ini.</span>
+                    </div>
+                  )}
+                </div>
+
+                {aiReports.logistic && (
+                  <div className="mt-6 pt-6 border-t border-emerald-500/30 space-y-3">
+                    <h4 className="text-sm font-bold text-emerald-300 mb-2 flex items-center">
+                      <Cpu className="w-4 h-4 mr-2" />
+                      Insight Tambahan (AI Generated)
+                    </h4>
+                    {aiReports.logistic.map((p, i) => <p key={i}>{p}</p>)}
+                  </div>
                 )}
               </div>
             </div>
@@ -544,31 +548,35 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
                 </div>
 
                 <div className="space-y-3 text-sm text-slate-300 leading-relaxed relative z-10">
-                  {aiReports.chisquare ? (
-                    aiReports.chisquare.map((p, i) => <p key={i}>{p}</p>)
-                  ) : (
-                    <>
-                      <p>
-                        Uji independensi <strong>Chi-Square</strong> mengukur apakah distribusi kategori (tinggi vs rendah) memiliki ketergantungan yang signifikan secara statistik terhadap status keberadaan Sp.KKLP.
-                      </p>
-                      <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20">
-                        {chiSquareData.isSignificant ? (
-                          <div>
-                            <span className="font-bold text-emerald-300 block mb-1 text-sm flex items-center">
-                              <CheckCircle2 className="w-4 h-4 mr-2" /> Ditemukan Asosiasi Signifikan
-                            </span>
-                            <p>Nilai p-Value sebesar {chiSquareData.pValue < 0.001 ? '< 0.001' : chiSquareData.pValue.toFixed(4)} membuktikan secara matematis bahwa keberhasilan FKTP mencapai kategori kepatuhan PRB yang tinggi secara signifikan <strong>bergantung / berkaitan erat</strong> dengan kehadiran Sp.KKLP. (Menolak hipotesis nol).</p>
-                          </div>
-                        ) : (
-                          <div>
-                            <span className="font-bold text-amber-300 block mb-1 text-sm flex items-center">
-                              <AlertTriangle className="w-4 h-4 mr-2" /> Tidak Ditemukan Asosiasi Signifikan
-                            </span>
-                            <p>Berdasarkan uji ini, perbedaan proporsi kepatuhan antara FKTP dengan dan tanpa Sp.KKLP masih bisa dijelaskan oleh variansi kebetulan (p-Value = {chiSquareData.pValue.toFixed(4)} {'>'} 0.05). Kategori capaian saat ini belum menunjukkan dependensi statistik yang meyakinkan terhadap peran Sp.KKLP.</p>
-                          </div>
-                        )}
+                  <p>
+                    Uji independensi <strong>Chi-Square</strong> mengukur apakah distribusi kategori (tinggi vs rendah) memiliki ketergantungan yang signifikan secara statistik terhadap status keberadaan Sp.KKLP.
+                  </p>
+                  <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20 mb-6">
+                    {chiSquareData.isSignificant ? (
+                      <div>
+                        <span className="font-bold text-emerald-300 block mb-1 text-sm flex items-center">
+                          <CheckCircle2 className="w-4 h-4 mr-2" /> Ditemukan Asosiasi Signifikan
+                        </span>
+                        <p>Nilai p-Value sebesar {chiSquareData.pValue < 0.001 ? '< 0.001' : chiSquareData.pValue.toFixed(4)} membuktikan secara matematis bahwa keberhasilan FKTP mencapai kategori kepatuhan PRB yang tinggi secara signifikan <strong>bergantung / berkaitan erat</strong> dengan kehadiran Sp.KKLP. (Menolak hipotesis nol).</p>
                       </div>
-                    </>
+                    ) : (
+                      <div>
+                        <span className="font-bold text-amber-300 block mb-1 text-sm flex items-center">
+                          <AlertTriangle className="w-4 h-4 mr-2" /> Tidak Ditemukan Asosiasi Signifikan
+                        </span>
+                        <p>Berdasarkan uji ini, perbedaan proporsi kepatuhan antara FKTP dengan dan tanpa Sp.KKLP masih bisa dijelaskan oleh variansi kebetulan (p-Value = {chiSquareData.pValue.toFixed(4)} {'>'} 0.05). Kategori capaian saat ini belum menunjukkan dependensi statistik yang meyakinkan terhadap peran Sp.KKLP.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {aiReports.chisquare && (
+                    <div className="mt-6 pt-6 border-t border-indigo-500/30 space-y-3">
+                      <h4 className="text-sm font-bold text-indigo-300 mb-2 flex items-center">
+                        <Cpu className="w-4 h-4 mr-2" />
+                        Insight Tambahan (AI Generated)
+                      </h4>
+                      {aiReports.chisquare.map((p, i) => <p key={i}>{p}</p>)}
+                    </div>
                   )}
                 </div>
               </div>
@@ -651,32 +659,36 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
                 </div>
 
                 <div className="space-y-3 text-sm text-slate-300 leading-relaxed relative z-10">
-                  {aiReports.internal ? (
-                    aiReports.internal.map((p, i) => <p key={i}>{p}</p>)
-                  ) : (
-                    <>
-                      <p>
-                        Analisis ini mengisolasi faskes yang sudah memiliki Sp.KKLP untuk mencari tahu <strong>peran spesifik apa</strong> yang paling menentukan tingginya kepatuhan PRB.
-                      </p>
-                      <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20">
-                        {internalData.filter(d => d.isSignificant && d.oddsRatio > 1).length > 0 ? (
-                          <div>
-                            <span className="font-bold text-white block mb-2 text-sm">Peran Paling Berdampak Positif (Signifikan):</span>
-                            <ul className="list-disc pl-5 space-y-1 text-indigo-200">
-                              {internalData.filter(d => d.isSignificant && d.oddsRatio > 1).sort((a,b) => b.oddsRatio - a.oddsRatio).map((item, idx) => (
-                                <li key={idx}><strong>{item.name}</strong> (Meningkatkan probabilitas sukses sebesar {(item.oddsRatio * 100 - 100).toFixed(1)}%)</li>
-                              ))}
-                            </ul>
-                            <p className="mt-3 text-xs italic opacity-90">Fokus utama pengembangan kapasitas Sp.KKLP di masa depan sebaiknya diarahkan pada kompetensi-kompetensi di atas, karena terbukti memberikan ROI (Return on Investment) klinis tertinggi.</p>
-                          </div>
-                        ) : (
-                          <div className="flex items-start text-amber-200">
-                            <AlertTriangle className="w-5 h-5 mr-2 shrink-0" />
-                            <span>Belum ditemukan peran spesifik yang mendominasi kesuksesan kepatuhan PRB secara statistik signifikan di antara sesama Sp.KKLP (butuh ukuran sampel Sp.KKLP yang lebih besar untuk konfirmasi).</span>
-                          </div>
-                        )}
+                  <p>
+                    Analisis ini mengisolasi faskes yang sudah memiliki Sp.KKLP untuk mencari tahu <strong>peran spesifik apa</strong> yang paling menentukan tingginya kepatuhan PRB.
+                  </p>
+                  <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20 mb-6">
+                    {internalData.filter(d => d.isSignificant && d.oddsRatio > 1).length > 0 ? (
+                      <div>
+                        <span className="font-bold text-white block mb-2 text-sm">Peran Paling Berdampak Positif (Signifikan):</span>
+                        <ul className="list-disc pl-5 space-y-1 text-indigo-200">
+                          {internalData.filter(d => d.isSignificant && d.oddsRatio > 1).sort((a,b) => b.oddsRatio - a.oddsRatio).map((item, idx) => (
+                            <li key={idx}><strong>{item.name}</strong> (Meningkatkan probabilitas sukses sebesar {(item.oddsRatio * 100 - 100).toFixed(1)}%)</li>
+                          ))}
+                        </ul>
+                        <p className="mt-3 text-xs italic opacity-90">Fokus utama pengembangan kapasitas Sp.KKLP di masa depan sebaiknya diarahkan pada kompetensi-kompetensi di atas, karena terbukti memberikan ROI (Return on Investment) klinis tertinggi.</p>
                       </div>
-                    </>
+                    ) : (
+                      <div className="flex items-start text-amber-200">
+                        <AlertTriangle className="w-5 h-5 mr-2 shrink-0" />
+                        <span>Belum ditemukan peran spesifik yang mendominasi kesuksesan kepatuhan PRB secara statistik signifikan di antara sesama Sp.KKLP (butuh ukuran sampel Sp.KKLP yang lebih besar untuk konfirmasi).</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {aiReports.internal && (
+                    <div className="mt-6 pt-6 border-t border-indigo-500/30 space-y-3">
+                      <h4 className="text-sm font-bold text-indigo-300 mb-2 flex items-center">
+                        <Cpu className="w-4 h-4 mr-2" />
+                        Insight Tambahan (AI Generated)
+                      </h4>
+                      {aiReports.internal.map((p, i) => <p key={i}>{p}</p>)}
+                    </div>
                   )}
                 </div>
               </div>
