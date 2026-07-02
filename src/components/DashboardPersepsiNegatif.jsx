@@ -36,7 +36,7 @@ const DashboardPersepsiNegatif = () => {
     fetchData();
   }, []);
 
-  const { persepsiUmum, trenKepuasan, pieData, dataSkeptisisme, skeptisismeQuotes } = React.useMemo(() => {
+  const { persepsiUmum, trenKepuasan, pieData, dataSkeptisisme, skeptisismeQuotes, kpiData } = React.useMemo(() => {
     let bebanAdmin = 0, regulasi = 0, sdm = 0, dana = 0, waktu = 0;
     let skeptisismeTinggi = 0, skeptisismeSedang = 0, skeptisismeRendah = 0;
     let keluhanPerBulan = {};
