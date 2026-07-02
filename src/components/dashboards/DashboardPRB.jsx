@@ -152,9 +152,12 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
           ['Total Responden', filteredData.length],
           ['Total FKTP (Unik)', uniqueFktpData.length],
           ['Total Peserta PRB Aktif', prbStats.totalJumlah],
+          ['Rata-rata Peserta PRB per Faskes', prbStats.avgJumlahFktp],
           ['Peserta Rutin Berkunjung', prbStats.totalRutin],
+          ['Rata-rata Peserta Rutin per Faskes', prbStats.avgRutinFktp],
           ['Peserta Tidak Berkunjung', prbStats.totalTidakBerkunjung],
-          ['Rata-rata Rujukan FKRTL', prbStats.avgRujukan]
+          ['Rata-rata Peserta Tidak Berkunjung per Faskes', prbStats.avgTidakBerkunjungFktp],
+          ['Rata-rata Rujukan FKRTL per Faskes/Bulan', prbStats.avgRujukan]
         ]
       },
       {
