@@ -7,8 +7,9 @@ import { saveAs } from 'file-saver';
  * @param {Array} tables - Array of table objects: { title: string, headers: Array<string>, data: Array<Array|Object> }
  * @param {string} filenamePrefix - Prefix for the output filename.
  * @param {Object|null} rawData - Optional: { headers: string[], rows: any[][] } for a "Data Mentah Responden" sheet.
+ * @param {Array|null} statsDetails - Optional: Array of detailed statistic calculations.
  */
-export const exportTablesToExcel = async (dashboardTitle, tables, filenamePrefix, rawData = null) => {
+export const exportTablesToExcel = async (dashboardTitle, tables, filenamePrefix, rawData = null, statsDetails = null) => {
   try {
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'Dashboard Survey KKLP';
@@ -140,6 +141,75 @@ export const exportTablesToExcel = async (dashboardTitle, tables, filenamePrefix
       });
     }
 
+    // ── Sheet 3: Detail Perhitungan Statistik (opsional) ──
+    if (statsDetails && statsDetails.length > 0) {
+      const statSheet = workbook.addWorksheet('Detail Perhitungan');
+      statSheet.columns = [
+        { header: '', key: 'col1', width: 5 },
+        { header: '', key: 'col2', width: 35 },
+        { header: '', key: 'col3', width: 25 },
+        { header: '', key: 'col4', width: 25 },
+        { header: '', key: 'col5', width: 25 },
+        { header: '', key: 'col6', width: 25 },
+      ];
+
+      statSheet.mergeCells('B1:F1');
+      const statTitle = statSheet.getCell('B1');
+      statTitle.value = `DETAIL PERHITUNGAN STATISTIK — ${dashboardTitle.toUpperCase()}`;
+      statTitle.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+      statTitle.alignment = { vertical: 'middle', horizontal: 'center' };
+      statTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF8B5CF6' } };
+      statSheet.getRow(1).height = 25;
+
+      statsDetails.forEach(stat => {
+        statSheet.addRow([]);
+        const sectionRow = statSheet.addRow(['', stat.title]);
+        sectionRow.getCell(2).font = { bold: true, size: 12, color: { argb: 'FF4338ca' } };
+        
+        if (stat.description && stat.description.length > 0) {
+          stat.description.forEach(desc => {
+            statSheet.addRow(['', desc]);
+            statSheet.lastRow.getCell(2).font = { italic: true, color: { argb: 'FF475569' } };
+          });
+        }
+        statSheet.addRow([]);
+
+        if (stat.tables && stat.tables.length > 0) {
+          stat.tables.forEach(table => {
+            statSheet.addRow(['', table.title]);
+            statSheet.lastRow.getCell(2).font = { bold: true, size: 11 };
+            
+            const hRowVals = ['', ...table.headers];
+            statSheet.addRow(hRowVals);
+            const hRow = statSheet.lastRow;
+            hRow.font = { bold: true };
+            
+            table.headers.forEach((_, i) => {
+              const cell = hRow.getCell(i + 2);
+              cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
+              cell.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
+              cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            });
+
+            table.data.forEach(item => {
+              let rowVals = [''];
+              if (Array.isArray(item)) rowVals.push(...item);
+              else if (typeof item === 'object') rowVals.push(item.name || '-', item.value !== undefined ? item.value : 0);
+              
+              statSheet.addRow(rowVals);
+              const dataRow = statSheet.lastRow;
+              table.headers.forEach((_, i) => {
+                const cell = dataRow.getCell(i + 2);
+                cell.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
+                if (typeof cell.value === 'number') cell.alignment = { horizontal: 'center' };
+              });
+            });
+            statSheet.addRow([]);
+          });
+        }
+      });
+    }
+
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     saveAs(blob, `${filenamePrefix}_${new Date().getTime()}.xlsx`);
@@ -153,7 +223,7 @@ export const exportTablesToExcel = async (dashboardTitle, tables, filenamePrefix
 /**
  * Export for Analisis Kaidah Statistik
  */
-export const exportAnalisisLanjutToExcel = async (dataAsIs, dataMatched, psHistogram, smdData, allOutcomesResults) => {
+export const exportAnalisisLanjutToExcel = async (dataAsIs, dataMatched, psHistogram, smdData, allOutcomesResults, statsDetails = null) => {
   try {
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'Dashboard Survey KKLP';
@@ -263,6 +333,75 @@ export const exportAnalisisLanjutToExcel = async (dataAsIs, dataMatched, psHisto
         d._weight || 1
       ]);
     });
+
+    // ── Sheet 5: Detail Perhitungan Statistik (opsional) ──
+    if (statsDetails && statsDetails.length > 0) {
+      const statSheet = workbook.addWorksheet('5. Detail Perhitungan');
+      statSheet.columns = [
+        { header: '', key: 'col1', width: 5 },
+        { header: '', key: 'col2', width: 35 },
+        { header: '', key: 'col3', width: 25 },
+        { header: '', key: 'col4', width: 25 },
+        { header: '', key: 'col5', width: 25 },
+        { header: '', key: 'col6', width: 25 },
+      ];
+
+      statSheet.mergeCells('B1:F1');
+      const statTitle = statSheet.getCell('B1');
+      statTitle.value = `DETAIL PERHITUNGAN STATISTIK`;
+      statTitle.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+      statTitle.alignment = { vertical: 'middle', horizontal: 'center' };
+      statTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF8B5CF6' } };
+      statSheet.getRow(1).height = 25;
+
+      statsDetails.forEach(stat => {
+        statSheet.addRow([]);
+        const sectionRow = statSheet.addRow(['', stat.title]);
+        sectionRow.getCell(2).font = { bold: true, size: 12, color: { argb: 'FF4338ca' } };
+        
+        if (stat.description && stat.description.length > 0) {
+          stat.description.forEach(desc => {
+            statSheet.addRow(['', desc]);
+            statSheet.lastRow.getCell(2).font = { italic: true, color: { argb: 'FF475569' } };
+          });
+        }
+        statSheet.addRow([]);
+
+        if (stat.tables && stat.tables.length > 0) {
+          stat.tables.forEach(table => {
+            statSheet.addRow(['', table.title]);
+            statSheet.lastRow.getCell(2).font = { bold: true, size: 11 };
+            
+            const hRowVals = ['', ...table.headers];
+            statSheet.addRow(hRowVals);
+            const hRow = statSheet.lastRow;
+            hRow.font = { bold: true };
+            
+            table.headers.forEach((_, i) => {
+              const cell = hRow.getCell(i + 2);
+              cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
+              cell.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
+              cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            });
+
+            table.data.forEach(item => {
+              let rowVals = [''];
+              if (Array.isArray(item)) rowVals.push(...item);
+              else if (typeof item === 'object') rowVals.push(item.name || '-', item.value !== undefined ? item.value : 0);
+              
+              statSheet.addRow(rowVals);
+              const dataRow = statSheet.lastRow;
+              table.headers.forEach((_, i) => {
+                const cell = dataRow.getCell(i + 2);
+                cell.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
+                if (typeof cell.value === 'number') cell.alignment = { horizontal: 'center' };
+              });
+            });
+            statSheet.addRow([]);
+          });
+        }
+      });
+    }
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });

@@ -74,7 +74,72 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
   const handleExportExcel = async () => {
     if (!dataAsIs) return;
     setIsExporting(true);
-    await exportAnalisisLanjutToExcel(dataAsIs, dataMatched, psHistogram, smdData, allOutcomesResults);
+
+    const statsDetails = [];
+
+    // 1. Tambahkan detail PSM T-Test
+    const tTestTables = allOutcomesResults.filter(o => o.tTestResult).map(o => {
+      const res = o.tTestResult;
+      return {
+        title: `Uji T (T-Test) setelah Matching: ${o.label}`,
+        headers: ['Rata-rata Ada Sp.KKLP', 'Rata-rata Tanpa Sp.KKLP', 'Selisih (Beda)', 'T-Statistic', 'P-Value', 'Signifikansi'],
+        data: [
+          [
+            res.tMean.toFixed(4),
+            res.cMean.toFixed(4),
+            res.diff.toFixed(4),
+            res.tStat.toFixed(4),
+            res.pValue.toFixed(4),
+            res.isSignificant ? 'SIGNIFIKAN' : 'TIDAK SIGNIFIKAN'
+          ]
+        ]
+      };
+    });
+
+    if (tTestTables.length > 0) {
+      statsDetails.push({
+        type: 'TTest',
+        title: 'A. Detail Uji Beda Rata-rata (T-Test) Post-Matching',
+        description: [
+          'Pengujian T-Test dilakukan pada dataset yang sudah diseimbangkan (Matched Data).',
+          'Tujuannya adalah menguji apakah selisih (beda) rata-rata antara fasilitas yang memiliki Sp.KKLP dan tidak memiliki Sp.KKLP bermakna secara statistik (p < 0.05).'
+        ],
+        tables: tTestTables
+      });
+    }
+
+    // 2. Tambahkan detail Regression
+    const regTables = allOutcomesResults.filter(o => o.regressionResult).map(o => {
+      const res = o.regressionResult;
+      return {
+        title: `Regresi Multivariat: ${o.label}`,
+        headers: ['Efek Sp.KKLP (Beta)', 'Standard Error', 'T-Statistic', 'P-Value', 'R-Squared', 'Signifikansi'],
+        data: [
+          [
+            res.treatmentEffect.toFixed(4),
+            res.standardError.toFixed(4),
+            res.tStat.toFixed(4),
+            res.pValue.toFixed(4),
+            res.rSquared ? res.rSquared.toFixed(4) : '-',
+            res.isSignificant ? 'SIGNIFIKAN' : 'TIDAK SIGNIFIKAN'
+          ]
+        ]
+      };
+    });
+
+    if (regTables.length > 0) {
+      statsDetails.push({
+        type: 'Regression',
+        title: 'B. Detail Regresi Linier Multivariat (As-Is Data)',
+        description: [
+          'Regresi Linier Multivariat menggunakan dataset awal tanpa matching (As-Is Data).',
+          'Tujuannya adalah melihat efek murni (koefisien Beta) dari keberadaan Sp.KKLP setelah dikontrol terhadap berbagai variabel perancu (seperti Provinsi dan Jenis Faskes).'
+        ],
+        tables: regTables
+      });
+    }
+
+    await exportAnalisisLanjutToExcel(dataAsIs, dataMatched, psHistogram, smdData, allOutcomesResults, statsDetails);
     setIsExporting(false);
   };
 

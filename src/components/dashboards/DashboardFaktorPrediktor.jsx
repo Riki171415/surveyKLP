@@ -1,12 +1,39 @@
-import React, { useMemo, useState } from 'react';
-import { Target, Activity, Stethoscope, AlertTriangle, Info, FileSearch, CheckCircle2 } from 'lucide-react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { Target, Activity, Stethoscope, AlertTriangle, Info, FileSearch, CheckCircle2, Cpu, RefreshCw, Key, X, Download } from 'lucide-react';
 import { performChiSquare, performLogisticRegression } from '../../utils/advancedStatsUtils';
+import { callGeminiApi, saveAiReportToDb, fetchAiReportFromDb } from '../../utils/aiUtils';
+import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine, Cell
 } from 'recharts';
 
 export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting }) {
   const [activeTab, setActiveTab] = useState('logistic');
+  const [isExporting, setIsExporting] = useState(false);
+
+  const [aiReports, setAiReports] = useState({ logistic: null, chisquare: null, internal: null });
+  const [isGenerating, setIsGenerating] = useState({ logistic: false, chisquare: false, internal: false });
+  const [aiErrors, setAiErrors] = useState({ logistic: '', chisquare: '', internal: '' });
+  
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [tempKey, setTempKey] = useState('');
+  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+  const [activeModalContext, setActiveModalContext] = useState('');
+
+  useEffect(() => {
+    const loadReports = async () => {
+      const logReport = await fetchAiReportFromDb('prediktor_logistic');
+      const chiReport = await fetchAiReportFromDb('prediktor_chisquare');
+      const intReport = await fetchAiReportFromDb('prediktor_internal');
+      setAiReports({
+        logistic: logReport,
+        chisquare: chiReport,
+        internal: intReport
+      });
+    };
+    loadReports();
+  }, []);
 
   const { logisticData, chiSquareData, internalData } = useMemo(() => {
     if (!uniqueFktpData || uniqueFktpData.length === 0) return { logisticData: [], chiSquareData: null };
@@ -109,7 +136,175 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
     }
 
     return { logisticData, chiSquareData: chiRes, internalData, internalValidCount: internalValidData.length };
+    return { logisticData, chiSquareData: chiRes, internalData, internalValidCount: internalValidData.length };
   }, [uniqueFktpData]);
+
+  const handleGenerateAi = async (context, overrideKey, overrideModel) => {
+    try {
+      setIsGenerating(prev => ({ ...prev, [context]: true }));
+      setAiErrors(prev => ({ ...prev, [context]: '' }));
+      
+      const key = overrideKey || tempKey;
+      const model = overrideModel || tempModel;
+
+      let prompt = '';
+      if (context === 'logistic') {
+        const str = logisticData.map(d => `${d.name}: OR=${d.oddsRatio.toFixed(2)} (p=${d.pValue.toFixed(3)})`).join(', ');
+        prompt = `Kamu analis kesehatan. Berikut hasil regresi logistik faktor prediktor kepatuhan PRB: ${str}. Buat 2-3 paragraf ringkas interpretasi eksekutif. KEMBALIKAN DALAM FORMAT JSON murni: { "paragraphs": ["Paragraf 1..."] }`;
+      } else if (context === 'chisquare') {
+        const { table, pValue } = chiSquareData;
+        const str = `Tinggi: Ada(${table['Ada Sp.KKLP']['Kepatuhan Tinggi (>60%)']}) Tanpa(${table['Tanpa Sp.KKLP']['Kepatuhan Tinggi (>60%)']}), Rendah: Ada(${table['Ada Sp.KKLP']['Kepatuhan Rendah']}) Tanpa(${table['Tanpa Sp.KKLP']['Kepatuhan Rendah']}). p-value=${pValue.toFixed(3)}`;
+        prompt = `Kamu analis kesehatan. Berikut hasil chi-square kepatuhan PRB vs keberadaan Sp.KKLP: ${str}. Buat 2-3 paragraf ringkas interpretasi eksekutif. KEMBALIKAN DALAM FORMAT JSON murni: { "paragraphs": ["Paragraf 1..."] }`;
+      } else {
+        const str = internalData.map(d => `${d.name}: OR=${d.oddsRatio.toFixed(2)} (p=${d.pValue.toFixed(3)})`).join(', ');
+        prompt = `Kamu analis kesehatan. Berikut hasil regresi spesifik peran Sp.KKLP terhadap kepatuhan PRB: ${str}. Buat 2-3 paragraf ringkas interpretasi eksekutif tentang peran mana yang paling berdampak. KEMBALIKAN DALAM FORMAT JSON murni: { "paragraphs": ["Paragraf 1..."] }`;
+      }
+      
+      const text = await callGeminiApi(prompt, key, model);
+      let textSum = [text];
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed.paragraphs) textSum = parsed.paragraphs;
+      } catch (e) {}
+      
+      setAiReports(prev => ({ ...prev, [context]: textSum }));
+      await saveAiReportToDb(`prediktor_${context}`, textSum);
+      
+    } catch (err) {
+      if (err.message === "API_KEY_MISSING") {
+        setActiveModalContext(context);
+        setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
+        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+        setShowKeyModal(true);
+      } else {
+        setAiErrors(prev => ({ ...prev, [context]: err.message || 'Terjadi kesalahan saat memanggil Gemini API.' }));
+      }
+    } finally {
+      setIsGenerating(prev => ({ ...prev, [context]: false }));
+    }
+  };
+
+  const handleExportExcel = async () => {
+    if (!logisticData || logisticData.length === 0) return;
+    setIsExporting(true);
+    
+    // Setup tables for export (just a basic one to pass as `tables`)
+    const tables = [
+      {
+        title: 'Ringkasan Faktor Prediktor',
+        headers: ['Prediktor', 'Odds Ratio', 'P-Value', 'Signifikansi'],
+        data: logisticData.map(d => [d.name, Number(d.oddsRatio?.toFixed(4)), Number(d.pValue?.toFixed(4)), d.isSignificant ? 'Ya' : 'Tidak'])
+      }
+    ];
+
+    // Setup detail statistik
+    const statsDetails = [];
+
+    // 1. Logistic
+    statsDetails.push({
+      type: 'LogisticRegression',
+      title: 'A. Regresi Logistik Multivariat',
+      description: [
+        'Model regresi logistik ini menggunakan metode Iteratively Reweighted Least Squares (IRLS).',
+        'Tujuannya adalah mencari nilai Odds Ratio (OR) yang merepresentasikan peluang suatu prediktor meningkatkan Kepatuhan PRB.'
+      ],
+      tables: [
+        {
+          title: 'Tabel Koefisien & Odds Ratio',
+          headers: ['Variabel', 'Koefisien (Beta)', 'Standard Error', 'Wald Z', 'P-Value', 'Odds Ratio'],
+          data: logisticData.map(d => [
+            d.name, 
+            Number(d.coefficient?.toFixed(4)) || 0,
+            Number(d.standardError?.toFixed(4)) || 0,
+            Number(d.waldZ?.toFixed(4)) || 0,
+            Number(d.pValue?.toFixed(4)) || 0,
+            Number(d.oddsRatio?.toFixed(4)) || 0
+          ])
+        }
+      ]
+    });
+
+    // 2. Chi-Square
+    if (chiSquareData && chiSquareData.table && chiSquareData.expectedTable) {
+      const { table, expectedTable, chi2, df, pValue } = chiSquareData;
+      
+      const observedData = [];
+      const expectedData = [];
+      const cols = chiSquareData.cols || [];
+      
+      chiSquareData.rows.forEach(r => {
+        const obsRow = [r];
+        const expRow = [r];
+        cols.forEach(c => {
+          obsRow.push(table[r][c] || 0);
+          expRow.push(Number(expectedTable[r][c]?.toFixed(2)) || 0);
+        });
+        observedData.push(obsRow);
+        expectedData.push(expRow);
+      });
+
+      statsDetails.push({
+        type: 'ChiSquare',
+        title: 'B. Uji Chi-Square (Kepatuhan vs Sp.KKLP)',
+        description: [
+          `Nilai Uji Chi-Square (χ²): ${chi2.toFixed(4)}`,
+          `Derajat Kebebasan (df): ${df}`,
+          `P-Value: ${pValue.toFixed(4)}`
+        ],
+        tables: [
+          {
+            title: 'Tabel Frekuensi Observasi (Observed)',
+            headers: ['Kategori Sp.KKLP', ...cols],
+            data: observedData
+          },
+          {
+            title: 'Tabel Frekuensi Ekspektasi (Expected)',
+            headers: ['Kategori Sp.KKLP', ...cols],
+            data: expectedData
+          }
+        ]
+      });
+    }
+
+    // 3. Internal
+    if (internalData && internalData.length > 0) {
+      statsDetails.push({
+        type: 'LogisticRegressionInternal',
+        title: 'C. Regresi Logistik Internal Sp.KKLP',
+        description: [
+          'Model regresi logistik ini difokuskan hanya pada FKTP yang memiliki Sp.KKLP.',
+          'Bertujuan mencari peran mana dari Sp.KKLP yang paling memengaruhi Kepatuhan PRB.'
+        ],
+        tables: [
+          {
+            title: 'Tabel Koefisien & Odds Ratio (Internal)',
+            headers: ['Peran', 'Koefisien (Beta)', 'Standard Error', 'Wald Z', 'P-Value', 'Odds Ratio'],
+            data: internalData.map(d => [
+              d.name, 
+              Number(d.coefficient?.toFixed(4)) || 0,
+              Number(d.standardError?.toFixed(4)) || 0,
+              Number(d.waldZ?.toFixed(4)) || 0,
+              Number(d.pValue?.toFixed(4)) || 0,
+              Number(d.oddsRatio?.toFixed(4)) || 0
+            ])
+          }
+        ]
+      });
+    }
+
+    await exportTablesToExcel('Faktor Prediktor', tables, 'Dashboard_FaktorPrediktor', null, statsDetails);
+    
+    setIsExporting(false);
+  };
+
+  const handleSaveKey = () => {
+    localStorage.setItem('GEMINI_API_KEY', tempKey);
+    localStorage.setItem('GEMINI_MODEL', tempModel);
+    setShowKeyModal(false);
+    if (activeModalContext) {
+      handleGenerateAi(activeModalContext, tempKey, tempModel);
+    }
+  };
 
   if (!logisticData || logisticData.length === 0) return (
     <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center text-slate-500">
@@ -121,7 +316,20 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
     <div className="space-y-8 animate-fade-in pb-12">
       <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-        <h2 className="text-2xl font-black text-slate-800 mb-2 flex items-center relative z-10"><Target className="w-7 h-7 mr-3 text-emerald-600" /> Analisis Faktor Prediktor</h2>
+        <div className="flex flex-col md:flex-row justify-between md:items-center relative z-10 gap-4 mb-4">
+          <h2 className="text-2xl font-black text-slate-800 flex items-center"><Target className="w-7 h-7 mr-3 text-emerald-600" /> Analisis Faktor Prediktor</h2>
+          <div className="flex flex-wrap items-center gap-3">
+            {!isPrinting && (
+              <button 
+                onClick={handleExportExcel}
+                disabled={isExporting}
+                className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-sm active:scale-95 text-sm disabled:opacity-50"
+              >
+                {isExporting ? 'Mengekspor...' : <><Download className="w-4 h-4 mr-2" /> Export Excel</>}
+              </button>
+            )}
+          </div>
+        </div>
         <p className="text-slate-500 relative z-10 text-sm md:text-base max-w-4xl">
           Dashboard ini menggunakan <strong>Regresi Logistik</strong> dan <strong>Uji Chi-Square</strong> untuk mencari tahu faktor apa yang paling memprediksi <strong>Kepatuhan PRB</strong> yang tinggi.
         </p>
@@ -205,29 +413,52 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
             {/* AI Insight for Logistic Regression */}
             <div className={`bg-gradient-to-br from-emerald-900 to-slate-900 p-6 rounded-2xl text-white shadow-lg relative overflow-hidden mt-6 ${isPrinting ? 'break-inside-avoid shadow-none' : ''}`}>
               <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-              <h4 className="text-lg font-bold mb-3 flex items-center"><Activity className="w-5 h-5 mr-3 text-emerald-400" /> Insight Regresi Logistik</h4>
-              <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
-                <p>
-                  Berdasarkan pemodelan <strong>Regresi Logistik</strong>, prediktor terbaik untuk menentukan apakah suatu FKTP mampu mencapai kepatuhan PRB di atas 50% adalah faktor dengan Odds Ratio tertinggi yang signifikan secara statistik.
-                </p>
-                <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20">
-                  {logisticData.filter(d => d.isSignificant && d.oddsRatio > 1).length > 0 ? (
-                    <div>
-                      <span className="font-bold text-white block mb-2 text-sm">Prediktor Positif Signifikan Utama:</span>
-                      <ul className="list-disc pl-5 space-y-1 text-emerald-200">
-                        {logisticData.filter(d => d.isSignificant && d.oddsRatio > 1).sort((a,b) => b.oddsRatio - a.oddsRatio).map((item, idx) => (
-                          <li key={idx}><strong>{item.name}</strong> (Meningkatkan probabilitas sukses sebesar {(item.oddsRatio * 100 - 100).toFixed(1)}%)</li>
-                        ))}
-                      </ul>
-                      <p className="mt-3 text-xs italic opacity-90">Kehadiran faktor-faktor ini secara eksponensial meningkatkan kemungkinan pasien kronis untuk patuh minum obat dan berkunjung secara rutin.</p>
+              
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 relative z-10">
+                <h4 className="text-lg font-bold flex items-center"><Cpu className="w-5 h-5 mr-3 text-emerald-400" /> Insight Regresi Logistik</h4>
+                {!isPrinting && (
+                  <div className="flex items-center gap-3">
+                    {aiErrors.logistic && <span className="text-rose-400 text-xs font-semibold">{aiErrors.logistic}</span>}
+                    <button
+                      onClick={() => handleGenerateAi('logistic')}
+                      disabled={isGenerating.logistic}
+                      className={`flex items-center px-4 py-2 text-sm font-bold rounded-xl transition shadow-md active:scale-95 ${isGenerating.logistic ? 'bg-emerald-700/50 text-emerald-300 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}`}
+                    >
+                      {isGenerating.logistic ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Cpu className="w-4 h-4 mr-2" />}
+                      {isGenerating.logistic ? 'Menganalisis...' : 'Generate AI Insight'}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3 text-sm text-slate-300 leading-relaxed relative z-10">
+                {aiReports.logistic ? (
+                  aiReports.logistic.map((p, i) => <p key={i}>{p}</p>)
+                ) : (
+                  <>
+                    <p>
+                      Berdasarkan pemodelan <strong>Regresi Logistik</strong>, prediktor terbaik untuk menentukan apakah suatu FKTP mampu mencapai kepatuhan PRB di atas 50% adalah faktor dengan Odds Ratio tertinggi yang signifikan secara statistik.
+                    </p>
+                    <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20">
+                      {logisticData.filter(d => d.isSignificant && d.oddsRatio > 1).length > 0 ? (
+                        <div>
+                          <span className="font-bold text-white block mb-2 text-sm">Prediktor Positif Signifikan Utama:</span>
+                          <ul className="list-disc pl-5 space-y-1 text-emerald-200">
+                            {logisticData.filter(d => d.isSignificant && d.oddsRatio > 1).sort((a,b) => b.oddsRatio - a.oddsRatio).map((item, idx) => (
+                              <li key={idx}><strong>{item.name}</strong> (Meningkatkan probabilitas sukses sebesar {(item.oddsRatio * 100 - 100).toFixed(1)}%)</li>
+                            ))}
+                          </ul>
+                          <p className="mt-3 text-xs italic opacity-90">Kehadiran faktor-faktor ini secara eksponensial meningkatkan kemungkinan pasien kronis untuk patuh minum obat dan berkunjung secara rutin.</p>
+                        </div>
+                      ) : (
+                        <div className="flex items-start text-amber-200">
+                          <AlertTriangle className="w-5 h-5 mr-2 shrink-0" />
+                          <span>Belum ditemukan prediktor positif yang cukup kuat secara statistik (α=0.05) pada observasi ini.</span>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="flex items-start text-amber-200">
-                      <AlertTriangle className="w-5 h-5 mr-2 shrink-0" />
-                      <span>Belum ditemukan prediktor positif yang cukup kuat secara statistik (α=0.05) pada observasi ini.</span>
-                    </div>
-                  )}
-                </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -294,28 +525,51 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
             {chiSquareData && chiSquareData.table && (
               <div className={`bg-gradient-to-br from-indigo-900 to-slate-900 p-6 rounded-2xl text-white shadow-lg relative overflow-hidden mt-6 ${isPrinting ? 'break-inside-avoid shadow-none' : ''}`}>
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                <h4 className="text-lg font-bold mb-3 flex items-center"><FileSearch className="w-5 h-5 mr-3 text-indigo-400" /> Insight Uji Chi-Square</h4>
-                <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
-                  <p>
-                    Uji independensi <strong>Chi-Square</strong> mengukur apakah distribusi kategori (tinggi vs rendah) memiliki ketergantungan yang signifikan secara statistik terhadap status keberadaan Sp.KKLP.
-                  </p>
-                  <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20">
-                    {chiSquareData.isSignificant ? (
-                      <div>
-                        <span className="font-bold text-emerald-300 block mb-1 text-sm flex items-center">
-                          <CheckCircle2 className="w-4 h-4 mr-2" /> Ditemukan Asosiasi Signifikan
-                        </span>
-                        <p>Nilai p-Value sebesar {chiSquareData.pValue < 0.001 ? '< 0.001' : chiSquareData.pValue.toFixed(4)} membuktikan secara matematis bahwa keberhasilan FKTP mencapai kategori kepatuhan PRB yang tinggi secara signifikan <strong>bergantung / berkaitan erat</strong> dengan kehadiran Sp.KKLP. (Menolak hipotesis nol).</p>
+                
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 relative z-10">
+                  <h4 className="text-lg font-bold flex items-center"><Cpu className="w-5 h-5 mr-3 text-indigo-400" /> Insight Uji Chi-Square</h4>
+                  {!isPrinting && (
+                    <div className="flex items-center gap-3">
+                      {aiErrors.chisquare && <span className="text-rose-400 text-xs font-semibold">{aiErrors.chisquare}</span>}
+                      <button
+                        onClick={() => handleGenerateAi('chisquare')}
+                        disabled={isGenerating.chisquare}
+                        className={`flex items-center px-4 py-2 text-sm font-bold rounded-xl transition shadow-md active:scale-95 ${isGenerating.chisquare ? 'bg-indigo-700/50 text-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
+                      >
+                        {isGenerating.chisquare ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Cpu className="w-4 h-4 mr-2" />}
+                        {isGenerating.chisquare ? 'Menganalisis...' : 'Generate AI Insight'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3 text-sm text-slate-300 leading-relaxed relative z-10">
+                  {aiReports.chisquare ? (
+                    aiReports.chisquare.map((p, i) => <p key={i}>{p}</p>)
+                  ) : (
+                    <>
+                      <p>
+                        Uji independensi <strong>Chi-Square</strong> mengukur apakah distribusi kategori (tinggi vs rendah) memiliki ketergantungan yang signifikan secara statistik terhadap status keberadaan Sp.KKLP.
+                      </p>
+                      <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20">
+                        {chiSquareData.isSignificant ? (
+                          <div>
+                            <span className="font-bold text-emerald-300 block mb-1 text-sm flex items-center">
+                              <CheckCircle2 className="w-4 h-4 mr-2" /> Ditemukan Asosiasi Signifikan
+                            </span>
+                            <p>Nilai p-Value sebesar {chiSquareData.pValue < 0.001 ? '< 0.001' : chiSquareData.pValue.toFixed(4)} membuktikan secara matematis bahwa keberhasilan FKTP mencapai kategori kepatuhan PRB yang tinggi secara signifikan <strong>bergantung / berkaitan erat</strong> dengan kehadiran Sp.KKLP. (Menolak hipotesis nol).</p>
+                          </div>
+                        ) : (
+                          <div>
+                            <span className="font-bold text-amber-300 block mb-1 text-sm flex items-center">
+                              <AlertTriangle className="w-4 h-4 mr-2" /> Tidak Ditemukan Asosiasi Signifikan
+                            </span>
+                            <p>Berdasarkan uji ini, perbedaan proporsi kepatuhan antara FKTP dengan dan tanpa Sp.KKLP masih bisa dijelaskan oleh variansi kebetulan (p-Value = {chiSquareData.pValue.toFixed(4)} {'>'} 0.05). Kategori capaian saat ini belum menunjukkan dependensi statistik yang meyakinkan terhadap peran Sp.KKLP.</p>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div>
-                        <span className="font-bold text-amber-300 block mb-1 text-sm flex items-center">
-                          <AlertTriangle className="w-4 h-4 mr-2" /> Tidak Ditemukan Asosiasi Signifikan
-                        </span>
-                        <p>Berdasarkan uji ini, perbedaan proporsi kepatuhan antara FKTP dengan dan tanpa Sp.KKLP masih bisa dijelaskan oleh variansi kebetulan (p-Value = {chiSquareData.pValue.toFixed(4)} {'>'} 0.05). Kategori capaian saat ini belum menunjukkan dependensi statistik yang meyakinkan terhadap peran Sp.KKLP.</p>
-                      </div>
-                    )}
-                  </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -378,33 +632,74 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
             {internalData && internalData.length > 0 && (
               <div className={`bg-gradient-to-br from-indigo-900 to-slate-900 p-6 rounded-2xl text-white shadow-lg relative overflow-hidden mt-6 ${isPrinting ? 'break-inside-avoid shadow-none' : ''}`}>
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                <h4 className="text-lg font-bold mb-3 flex items-center"><Stethoscope className="w-5 h-5 mr-3 text-indigo-400" /> Insight Peran Spesifik Sp.KKLP</h4>
-                <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
-                  <p>
-                    Analisis ini mengisolasi faskes yang sudah memiliki Sp.KKLP untuk mencari tahu <strong>peran spesifik apa</strong> yang paling menentukan tingginya kepatuhan PRB.
-                  </p>
-                  <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20">
-                    {internalData.filter(d => d.isSignificant && d.oddsRatio > 1).length > 0 ? (
-                      <div>
-                        <span className="font-bold text-white block mb-2 text-sm">Peran Paling Berdampak Positif (Signifikan):</span>
-                        <ul className="list-disc pl-5 space-y-1 text-indigo-200">
-                          {internalData.filter(d => d.isSignificant && d.oddsRatio > 1).sort((a,b) => b.oddsRatio - a.oddsRatio).map((item, idx) => (
-                            <li key={idx}><strong>{item.name}</strong> (Meningkatkan probabilitas sukses sebesar {(item.oddsRatio * 100 - 100).toFixed(1)}%)</li>
-                          ))}
-                        </ul>
-                        <p className="mt-3 text-xs italic opacity-90">Fokus utama pengembangan kapasitas Sp.KKLP di masa depan sebaiknya diarahkan pada kompetensi-kompetensi di atas, karena terbukti memberikan ROI (Return on Investment) klinis tertinggi.</p>
+                
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 relative z-10">
+                  <h4 className="text-lg font-bold flex items-center"><Cpu className="w-5 h-5 mr-3 text-indigo-400" /> Insight Peran Spesifik Sp.KKLP</h4>
+                  {!isPrinting && (
+                    <div className="flex items-center gap-3">
+                      {aiErrors.internal && <span className="text-rose-400 text-xs font-semibold">{aiErrors.internal}</span>}
+                      <button
+                        onClick={() => handleGenerateAi('internal')}
+                        disabled={isGenerating.internal}
+                        className={`flex items-center px-4 py-2 text-sm font-bold rounded-xl transition shadow-md active:scale-95 ${isGenerating.internal ? 'bg-indigo-700/50 text-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
+                      >
+                        {isGenerating.internal ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Cpu className="w-4 h-4 mr-2" />}
+                        {isGenerating.internal ? 'Menganalisis...' : 'Generate AI Insight'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3 text-sm text-slate-300 leading-relaxed relative z-10">
+                  {aiReports.internal ? (
+                    aiReports.internal.map((p, i) => <p key={i}>{p}</p>)
+                  ) : (
+                    <>
+                      <p>
+                        Analisis ini mengisolasi faskes yang sudah memiliki Sp.KKLP untuk mencari tahu <strong>peran spesifik apa</strong> yang paling menentukan tingginya kepatuhan PRB.
+                      </p>
+                      <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20">
+                        {internalData.filter(d => d.isSignificant && d.oddsRatio > 1).length > 0 ? (
+                          <div>
+                            <span className="font-bold text-white block mb-2 text-sm">Peran Paling Berdampak Positif (Signifikan):</span>
+                            <ul className="list-disc pl-5 space-y-1 text-indigo-200">
+                              {internalData.filter(d => d.isSignificant && d.oddsRatio > 1).sort((a,b) => b.oddsRatio - a.oddsRatio).map((item, idx) => (
+                                <li key={idx}><strong>{item.name}</strong> (Meningkatkan probabilitas sukses sebesar {(item.oddsRatio * 100 - 100).toFixed(1)}%)</li>
+                              ))}
+                            </ul>
+                            <p className="mt-3 text-xs italic opacity-90">Fokus utama pengembangan kapasitas Sp.KKLP di masa depan sebaiknya diarahkan pada kompetensi-kompetensi di atas, karena terbukti memberikan ROI (Return on Investment) klinis tertinggi.</p>
+                          </div>
+                        ) : (
+                          <div className="flex items-start text-amber-200">
+                            <AlertTriangle className="w-5 h-5 mr-2 shrink-0" />
+                            <span>Belum ditemukan peran spesifik yang mendominasi kesuksesan kepatuhan PRB secara statistik signifikan di antara sesama Sp.KKLP (butuh ukuran sampel Sp.KKLP yang lebih besar untuk konfirmasi).</span>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="flex items-start text-amber-200">
-                        <AlertTriangle className="w-5 h-5 mr-2 shrink-0" />
-                        <span>Belum ditemukan peran spesifik yang mendominasi kesuksesan kepatuhan PRB secara statistik signifikan di antara sesama Sp.KKLP (butuh ukuran sampel Sp.KKLP yang lebih besar untuk konfirmasi).</span>
-                      </div>
-                    )}
-                  </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}
           </div>
+        )}
+
+        {showKeyModal && typeof document !== 'undefined' && createPortal(
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+              <button onClick={() => setShowKeyModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><X className="w-5 h-5"/></button>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><Key className="w-5 h-5"/></div>
+                <h3 className="text-lg font-bold text-slate-800">Set Gemini API Key</h3>
+              </div>
+              <p className="text-sm text-slate-600 mb-4">Masukkan API Key Anda untuk menghubungkan data dengan mesin LLM Gemini secara langsung.</p>
+              <input type="password" value={tempKey} onChange={e => setTempKey(e.target.value)} placeholder="AIzaSy..." className="w-full border border-slate-200 rounded-xl px-4 py-2 mb-4 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
+              <p className="text-sm text-slate-600 mb-2">Versi Model Gemini:</p>
+              <input type="text" value={tempModel} onChange={e => setTempModel(e.target.value)} placeholder="gemini-1.5-pro" className="w-full border border-slate-200 rounded-xl px-4 py-2 mb-6 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
+              <button onClick={handleSaveKey} className="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl hover:bg-indigo-700 transition">Simpan & Mulai Analisis</button>
+            </div>
+          </div>,
+          document.body
         )}
 
       </div>

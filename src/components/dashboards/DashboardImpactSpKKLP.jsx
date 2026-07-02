@@ -1,12 +1,14 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   Legend, LabelList, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
-import { Stethoscope, Activity, Home, HeartPulse, CheckCircle2, AlertCircle, FileText, Download, Image as ImageIcon, TrendingUp, TrendingDown } from 'lucide-react';
+import { Stethoscope, Activity, Home, HeartPulse, CheckCircle2, AlertCircle, FileText, Download, Image as ImageIcon, TrendingUp, TrendingDown, Cpu, Key, X, RefreshCw, Check } from 'lucide-react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 import { performRandomSampling, performPSM, performIPW, performStratifiedMatching } from '../../utils/statisticsUtils';
+import { callGeminiApi, saveAiReportToDb, fetchAiReportFromDb } from '../../utils/aiUtils';
 
 // ── Komponen Toggle Pill ──────────────────────────────────────────────────────
 const ViewToggle = ({ value, onChange }) => (
@@ -29,6 +31,23 @@ const ViewToggle = ({ value, onChange }) => (
 export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const [view, setView] = useState('responden');
   const [statMethod, setStatMethod] = useState('psm');
+  
+  const [aiInsight, setAiInsight] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [aiError, setAiError] = useState('');
+  
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [tempKey, setTempKey] = useState('');
+  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+
+  useEffect(() => {
+    const loadReport = async () => {
+      const data = await fetchAiReportFromDb(`impact_spkklp_${statMethod}`);
+      if (data) setAiInsight(data);
+      else setAiInsight(null);
+    };
+    loadReport();
+  }, [statMethod]);
   
   const calculateMetrics = (dataset) => {
     let adaSp = 0, tanpaSp = 0;
@@ -205,6 +224,52 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
   // We use Matched metrics for the main StatCards and summaries, and fallback stats where needed
   const { stats } = activeMetricsMatched;
   const statsAsIs = activeMetricsAsIs.stats;
+
+  const handleGenerateAi = async (overrideKey, overrideModel) => {
+    try {
+      setIsGenerating(true);
+      setAiError('');
+      
+      const key = overrideKey || tempKey;
+      const model = overrideModel || tempModel;
+
+      const dataStr = combinedSpData.map(d => `${d.name}: Ada(${d['Ada (Matched)'].toFixed(1)}%) vs Tanpa(${d['Tanpa (Matched)'].toFixed(1)}%)`).join(', ');
+      
+      const prompt = `Kamu adalah pakar kesehatan publik. Berikan interpretasi kinerja untuk metode statistik ${statMethod.toUpperCase()} berdasarkan data perbandingan fasilitas primer dengan Sp.KKLP vs tanpa Sp.KKLP berikut (dalam persentase): 
+${dataStr}. 
+Buatlah 2-3 paragraf ringkas yang menyoroti keunggulan atau kekurangan pada indikator tersebut. 
+KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
+{ "paragraphs": ["Paragraf 1...", "Paragraf 2..."] }`;
+      
+      const text = await callGeminiApi(prompt, key, model);
+      let textSum = [text];
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed.paragraphs) textSum = parsed.paragraphs;
+      } catch (e) {}
+      
+      setAiInsight(textSum);
+      await saveAiReportToDb(`impact_spkklp_${statMethod}`, textSum);
+      
+    } catch (err) {
+      if (err.message === "API_KEY_MISSING") {
+        setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
+        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+        setShowKeyModal(true);
+      } else {
+        setAiError(err.message || 'Terjadi kesalahan saat memanggil Gemini API.');
+      }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSaveKey = () => {
+    localStorage.setItem('GEMINI_API_KEY', tempKey);
+    localStorage.setItem('GEMINI_MODEL', tempModel);
+    setShowKeyModal(false);
+    handleGenerateAi(tempKey, tempModel);
+  };
 
   const StatCard = ({ title, valueAda, valueTanpa, subtitle, icon: Icon, colorClass }) => {
     const diff = valueAda - valueTanpa;
@@ -411,12 +476,29 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
         {/* AI Insight Box for Bar Chart */}
         <div className={`bg-gradient-to-br from-indigo-900 to-slate-900 p-6 rounded-2xl text-white shadow-lg relative overflow-hidden lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none' : ''}`}>
           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-          <h4 className="text-lg font-bold mb-3 flex items-center"><Activity className="w-5 h-5 mr-3 text-indigo-400" /> Interpretasi Kinerja Berdasarkan {statMethod.toUpperCase()}</h4>
-          <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
+          
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 relative z-10">
+            <h4 className="text-lg font-bold flex items-center"><Cpu className="w-5 h-5 mr-3 text-indigo-400" /> Interpretasi Kinerja Berdasarkan {statMethod.toUpperCase()}</h4>
+            {!isPrinting && (
+              <div className="flex items-center gap-3">
+                {aiError && <span className="text-rose-400 text-xs font-semibold">{aiError}</span>}
+                <button
+                  onClick={() => handleGenerateAi()}
+                  disabled={isGenerating}
+                  className={`flex items-center px-4 py-2 text-sm font-bold rounded-xl transition shadow-md active:scale-95 ${isGenerating ? 'bg-indigo-700/50 text-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
+                >
+                  {isGenerating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Cpu className="w-4 h-4 mr-2" />}
+                  {isGenerating ? 'Menganalisis...' : 'Generate AI Insight'}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3 text-sm text-slate-300 leading-relaxed relative z-10">
             <p>
               Berdasarkan perbandingan kinerja setelah penyesuaian (Matched), FKTP dengan Sp.KKLP secara konsisten menunjukkan hasil yang lebih unggul dibandingkan FKTP tanpa Sp.KKLP pada berbagai indikator klinis.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 mb-6">
               {combinedSpData.map((item, idx) => {
                 const diff = item['Ada (Matched)'] - item['Tanpa (Matched)'];
                 const isPositive = diff > 0;
@@ -433,6 +515,16 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
                 );
               })}
             </div>
+
+            {aiInsight && (
+              <div className="mt-6 pt-6 border-t border-indigo-500/30 space-y-3">
+                <h4 className="text-sm font-bold text-indigo-300 mb-2 flex items-center">
+                  <Cpu className="w-4 h-4 mr-2" />
+                  Insight Tambahan (AI Generated)
+                </h4>
+                {aiInsight.map((p, i) => <p key={i}>{p}</p>)}
+              </div>
+            )}
           </div>
         </div>
 
@@ -576,6 +668,24 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
             </div>
           </div>
         </div>
+        
+        {showKeyModal && typeof document !== 'undefined' && createPortal(
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+              <button onClick={() => setShowKeyModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><X className="w-5 h-5"/></button>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><Key className="w-5 h-5"/></div>
+                <h3 className="text-lg font-bold text-slate-800">Set Gemini API Key</h3>
+              </div>
+              <p className="text-sm text-slate-600 mb-4">Masukkan API Key Anda untuk menghubungkan data dengan mesin LLM Gemini secara langsung.</p>
+              <input type="password" value={tempKey} onChange={e => setTempKey(e.target.value)} placeholder="AIzaSy..." className="w-full border border-slate-200 rounded-xl px-4 py-2 mb-4 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
+              <p className="text-sm text-slate-600 mb-2">Versi Model Gemini:</p>
+              <input type="text" value={tempModel} onChange={e => setTempModel(e.target.value)} placeholder="gemini-1.5-pro" className="w-full border border-slate-200 rounded-xl px-4 py-2 mb-6 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
+              <button onClick={handleSaveKey} className="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl hover:bg-indigo-700 transition">Simpan & Mulai Analisis</button>
+            </div>
+          </div>,
+          document.body
+        )}
 
       </div>
     </div>

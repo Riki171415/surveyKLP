@@ -291,10 +291,15 @@ export function performChiSquare(dataset, cat1Fn, cat2Fn) {
   });
   
   let chi2 = 0;
+  const expectedTable = {};
+
   rows.forEach(r => {
+    expectedTable[r] = {};
     colArray.forEach(c => {
       const observed = table[r][c] || 0;
       const expected = (rowMarginals[r] * colMarginals[c]) / total;
+      expectedTable[r][c] = expected;
+      
       if (expected > 0) {
         chi2 += Math.pow(observed - expected, 2) / expected;
       }
@@ -310,11 +315,14 @@ export function performChiSquare(dataset, cat1Fn, cat2Fn) {
     pValue,
     isSignificant: pValue < 0.05,
     table,
+    expectedTable,
+    rowMarginals,
+    colMarginals,
+    total,
     rows,
     cols: colArray
   };
 }
-
 /**
  * Regresi Logistik menggunakan metode Newton-Raphson (IRLS)
  */
