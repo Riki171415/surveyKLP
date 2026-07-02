@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { Users, Stethoscope, Building, Map, ChevronDown, ChevronUp, CheckCircle, XCircle, Download , Image as ImageIcon } from 'lucide-react';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 
 export const normalizeStr = (s) => s ? s.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
 export const normalizeProv = (p) => p ? p.toLowerCase().replace(/[^a-z0-9]/g, '') : 'lainnya';
@@ -698,5 +699,11 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
         </div>
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="profil"
+      dashboardName="Profil Responden dan FKTP"
+      promptContext={`Total responden: ${filteredData?.length ?? 0}. Total institusi FKTP unik: ${uniqueFktpData?.length ?? 0}. FKTP dengan Sp.KKLP: ${spkklpCount ?? 0}. Provinsi terjangkau: ${new Set(uniqueFktpData?.map(d => d.provinsi).filter(Boolean)).size ?? 0}. Distribusi jenis FKTP (responden): ${fktpTypeData?.map(d => `${d.name}: ${d.value}`).join(', ') ?? '-'}. Distribusi FKTP unik: ${uniqueFktpTypeData?.map(d => `${d.name}: ${d.value}`).join(', ') ?? '-'}. Distribusi jabatan responden: ${roleChartData?.map(d => `${d.name}: ${d.value}`).join(', ') ?? '-'}. Jumlah provinsi dalam data partisipasi: ${partisipasiData?.length ?? 0}. Rata-rata capaian partisipasi: ${partisipasiData?.length > 0 ? (partisipasiData.reduce((s, r) => s + (r.persentase ?? 0), 0) / partisipasiData.length).toFixed(1) : 0}%.`}
+    />
   );
 }

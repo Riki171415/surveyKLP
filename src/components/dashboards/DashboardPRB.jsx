@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { Activity, Users, Clock, AlertTriangle, FileText, Download, Image as ImageIcon } from 'lucide-react';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 
 // ── Komponen Toggle Pill ──────────────────────────────────────────────────────
 const ViewToggle = ({ value, onChange }) => (
@@ -321,5 +322,11 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
         </div>
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="prb"
+      dashboardName="Monitoring PRB (Program Rujuk Balik)"
+      promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. Total peserta PRB aktif: ${prbStats?.totalJumlah ?? 0}. Peserta rutin berkunjung: ${prbStats?.totalRutin ?? 0}. Peserta tidak berkunjung: ${prbStats?.totalTidakBerkunjung ?? 0}. Tingkat kepatuhan (proporsi rutin): ${kepatuhanRate?.toFixed(1) ?? 0}%. Rata-rata peserta PRB per faskes: ${prbStats?.avgJumlahFktp ?? 0}. Rata-rata peserta rutin per faskes: ${prbStats?.avgRutinFktp ?? 0}. Rata-rata peserta tidak berkunjung per faskes: ${prbStats?.avgTidakBerkunjungFktp ?? 0}. Rata-rata rujukan FKRTL per faskes/bulan: ${prbStats?.avgRujukan ?? 0}. Diagnosis terbanyak (responden): ${diagnosisDataResponden?.[0]?.name ?? '-'} (${diagnosisDataResponden?.[0]?.value ?? 0} peserta). Mekanisme pemantauan terbanyak (responden): ${mekanismeDataResponden?.[0]?.name ?? '-'} (${mekanismeDataResponden?.[0]?.value ?? 0} faskes).`}
+    />
   );
 }

@@ -9,6 +9,7 @@ import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 import { performRandomSampling, performPSM, performIPW, performStratifiedMatching } from '../../utils/statisticsUtils';
 import { callGeminiApi, saveAiReportToDb, fetchAiReportFromDb } from '../../utils/aiUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 
 // ── Komponen Toggle Pill ──────────────────────────────────────────────────────
 const ViewToggle = ({ value, onChange }) => (
@@ -758,5 +759,11 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
 
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="impact_spkklp"
+      dashboardName="Dampak Keberadaan Sp.KKLP"
+      promptContext={`Dashboard: Dampak Keberadaan Sp.KKLP. Metode: ${statMethod}. Total responden: ${filteredData?.length ?? 0}. Faskes Ada Sp.KKLP: ${statsAsIs?.adaSp ?? 0}, Tanpa: ${statsAsIs?.tanpaSp ?? 0}. Kepatuhan PRB - Ada: ${stats?.dataAda?.avgKepatuhan?.toFixed(1) ?? 0}%, Tanpa: ${stats?.dataTanpa?.avgKepatuhan?.toFixed(1) ?? 0}%. Rata-rata Rujukan FKRTL - Ada: ${stats?.dataAda?.avgRujukan?.toFixed(2) ?? 0}x, Tanpa: ${stats?.dataTanpa?.avgRujukan?.toFixed(2) ?? 0}x. Home Care - Ada: ${stats?.dataAda?.percHc?.toFixed(1) ?? 0}%, Tanpa: ${stats?.dataTanpa?.percHc?.toFixed(1) ?? 0}%. Perbaikan Kondisi - Ada: ${stats?.dataAda?.percPerbaikan?.toFixed(1) ?? 0}%, Tanpa: ${stats?.dataTanpa?.percPerbaikan?.toFixed(1) ?? 0}%. Paliatif - Ada: ${stats?.dataAda?.percPaliatif?.toFixed(1) ?? 0}%, Tanpa: ${stats?.dataTanpa?.percPaliatif?.toFixed(1) ?? 0}%.`}
+    />
   );
 }

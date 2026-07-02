@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 import { supabase } from '../../supabaseClient';
+import ReportGenerator from '../ui/ReportGenerator';
 
 export default function DashboardKeluhanSentences({ filteredData, isPrinting }) {
   const [expandedCategory, setExpandedCategory] = useState(null);
@@ -680,5 +681,11 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
         </div>
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="keluhan"
+      dashboardName="Analisis Keluhan dan Sentimen"
+      promptContext={`Total responden wawancara: ${totalRespondents ?? 0}. Jumlah kategori keluhan teridentifikasi: ${chartData?.length ?? 0}. Kategori keluhan dominan: ${chartData?.[0]?.name ?? '-'} (${chartData?.[0]?.percent ?? 0}%). Kategori keluhan kedua: ${chartData?.[1]?.name ?? '-'} (${chartData?.[1]?.percent ?? 0}%). Kategori keluhan ketiga: ${chartData?.[2]?.name ?? '-'} (${chartData?.[2]?.percent ?? 0}%). Total kalimat teranalisis (semua pertanyaan W1-W8): ${allSentences?.length ?? 0}. Jumlah klaster auto-benchmark terdeteksi: ${autoClusters?.length ?? 0}. Klaster kalimat paling dominan: "${autoClusters?.[0]?.name ?? '-'}" (${autoClusters?.[0]?.percent ?? 0}% responden).`}
+    />
   );
 }

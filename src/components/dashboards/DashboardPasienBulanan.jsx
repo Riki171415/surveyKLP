@@ -7,6 +7,7 @@ import {
 import { Activity, Users, FileText, BarChart3, Download , Image as ImageIcon } from 'lucide-react';
 import { penyakitPasienBulanan } from '../SurveyForm';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 
 export default function DashboardPasienBulanan({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const { totalPatientsByDisease, averagePatientsByFaskes, generalStats } = useMemo(() => {
@@ -205,5 +206,11 @@ export default function DashboardPasienBulanan({ filteredData, uniqueFktpData, C
         </div>
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="pasien_bulanan"
+      dashboardName="Tren Pasien Bulanan"
+      promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. Total pasien dilayani (1 bln): ${generalStats?.totalPasien ?? 0}. Rata-rata pasien per faskes: ${Math.round(generalStats?.rataRataTotal ?? 0)}. Jumlah FKTP yang mengisi data pasien bulanan: ${generalStats?.totalFaskesIsi ?? 0}. Proporsi FKTP yang mengisi: ${(generalStats?.proporsiIsi ?? 0).toFixed(1)}%. Penyakit dengan kasus terbanyak: ${totalPatientsByDisease?.[0]?.name ?? '-'} (${totalPatientsByDisease?.[0]?.value ?? 0} pasien).`}
+    />
   );
 }

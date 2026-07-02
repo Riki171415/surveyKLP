@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { Activity, ShieldAlert, FileSearch, AlertCircle, Download, Image as ImageIcon } from 'lucide-react';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 
 const ViewToggle = ({ value, onChange }) => (
   <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-semibold shrink-0">
@@ -275,5 +276,11 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
 
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="monitoring_prb"
+      dashboardName="Monitoring PRB Detail"
+      promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. FKTP dengan mekanisme PRB: ${monStats?.fktpWithMekanisme ?? 0} (${monStats?.proporsiMekanisme?.toFixed(1) ?? '0'}% dari total FKTP). Top mekanisme: ${mekanismeDataR?.[0]?.name ?? '-'} (${mekanismeDataR?.[0]?.value ?? 0} responden). Kendala kata #1: ${kendalaDataR?.[0]?.name ?? '-'} (${kendalaDataR?.[0]?.value ?? 0} sebutan). Kendala kata #2: ${kendalaDataR?.[1]?.name ?? '-'} (${kendalaDataR?.[1]?.value ?? 0} sebutan).`}
+    />
   );
 }

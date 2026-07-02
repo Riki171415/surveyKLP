@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { Stethoscope, Award, FileSearch, CheckCircle, Activity, HeartPulse, Building, ArrowDownCircle, AlertCircle , Image as ImageIcon } from 'lucide-react';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 
 const relevansiItems = [
   "Pengelolaan Multimorbiditas",
@@ -561,5 +562,11 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
         </div>
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="spkklp"
+      dashboardName="Profil dan Data Sp.KKLP"
+      promptContext={`Total responden: ${filteredData?.length ?? 0}. FKTP memiliki Sp.KKLP: ${docStats?.spkklpYa ?? 0}, belum memiliki: ${docStats?.spkklpTidak ?? 0}. Total dokter umum: ${docStats?.totalDocUmum ?? 0}, dokter gigi: ${docStats?.totalDocGigi ?? 0}. Relevansi peran tertinggi: ${topRelevansi?.[0]?.name ?? '-'} (skor ${topRelevansi?.[0]?.avgScore ?? 0}), kedua: ${topRelevansi?.[1]?.name ?? '-'} (skor ${topRelevansi?.[1]?.avgScore ?? 0}). Layanan paling sering dirujuk ke FKRTL: ${dirujukData?.[0]?.name ?? '-'} (${dirujukData?.[0]?.value ?? 0} FKTP). Peran optimalisasi tertinggi: ${peranData?.[0]?.name ?? '-'} (skor ${peranData?.[0]?.avgScore ?? 0}). Layanan belum berjalan terbanyak: ${layananBelumData?.[0]?.name ?? '-'} (${layananBelumData?.[0]?.value ?? 0} responden).`}
+    />
   );
 }

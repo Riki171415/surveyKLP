@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 import * as XLSX from 'xlsx';
+import ReportGenerator from '../ui/ReportGenerator';
 
 const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
 
@@ -788,5 +789,11 @@ export default function DashboardEksekutif({ data = [] }) {
 
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="eksekutif"
+      dashboardName="Ringkasan Eksekutif"
+      promptContext={`Total responden: ${metrics?.total ?? 0}. FKTP dengan Sp.KKLP: ${metrics?.spkklpCount ?? 0} dari ${metrics?.total ?? 0} (${metrics?.total ? Math.round(((metrics?.spkklpCount ?? 0) / metrics.total) * 100) : 0}%). Kepatuhan kunjungan PRB: ${metrics?.prbKepatuhan ?? 0}%. Rata-rata rujukan balik PRB per FKTP: ${metrics?.avgRujukanPrb ?? 0} kasus/bulan. Layanan paling sering dirujuk ke RS: ${metrics?.topRujukan?.[0]?.name ?? '-'} (${metrics?.topRujukan?.[0]?.value ?? 0}% FKTP). Usulan layanan JKN baru dengan dukungan tertinggi: ${metrics?.barUsulan?.[0]?.name ?? '-'} (${metrics?.barUsulan?.[0]?.value ?? 0}% setuju). Kendala utama implementasi Sp.KKLP: ${metrics?.barKendala?.[0]?.name ?? '-'} (${metrics?.barKendala?.[0]?.value ?? 0} keluhan). Total feedback kualitatif lapangan: ${metrics?.textHambatan?.length ?? 0} entri.`}
+    />
   );
 }

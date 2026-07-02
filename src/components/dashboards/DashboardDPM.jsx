@@ -8,6 +8,7 @@ import {
 import { Stethoscope, Users, Clock, FileText, CheckCircle, Map, Target, AlertTriangle, TrendingUp, Zap, Download , Image as ImageIcon } from 'lucide-react';
 import { normalizeStr, faskesToKabMap } from './DashboardProfil';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 
 export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const dpmDataFiltered = useMemo(() => {
@@ -537,5 +538,11 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
         </div>
       )}
     </div>
+
+    <ReportGenerator
+      dashboardId="dpm"
+      dashboardName="Dashboard Pelayanan Medis (DPM)"
+      promptContext={`Total responden DPM: ${dpmStats?.totalDpm ?? 0}. Kegiatan terbanyak 1: ${dpmStats?.top3Layanan?.[0]?.name ?? '-'} (${dpmStats?.top3Layanan?.[0]?.value ?? 0}). Kegiatan terbanyak 2: ${dpmStats?.top3Layanan?.[1]?.name ?? '-'} (${dpmStats?.top3Layanan?.[1]?.value ?? 0}). Kegiatan terbanyak 3: ${dpmStats?.top3Layanan?.[2]?.name ?? '-'} (${dpmStats?.top3Layanan?.[2]?.value ?? 0}). DPM perlu perbaikan (skor < 40): ${skorRendah?.length ?? 0}. Provinsi terwakili (top): ${provinsiData?.[0]?.name ?? '-'} (${provinsiData?.[0]?.value ?? 0} DPM). Total provinsi dalam data: ${provinsiData?.length ?? 0}. Luaran pelayanan tercatat: ${luaranPelayananData?.length ?? 0} jenis.`}
+    />
   );
 }

@@ -7,6 +7,7 @@ import {
 import { Heart, Home, Clock, Users, CheckCircle2, Stethoscope, CheckCircle, Download, Image as ImageIcon } from 'lucide-react';
 import CustomWordCloud from '../ui/CustomWordCloud';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 
 const ViewToggle = ({ value, onChange }) => (
   <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-semibold shrink-0">
@@ -409,5 +410,11 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
 
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="home_care"
+      dashboardName="Layanan Home Care"
+      promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. FKTP yang memberikan home care: ${hcStats?.fktpWithHomeCare ?? 0} (${hcStats?.proporsiHc?.toFixed(1) ?? 0}%). Rata-rata kunjungan per bulan: ${hcStats?.avgKunjungan ?? 0}x. Proporsi kolaborasi nakes lain: ${hcStats?.proporsiKolaborasi?.toFixed(1) ?? 0}%. Proporsi FKTP melaporkan perbaikan kondisi pasien: ${hcStats?.proporsiPerbaikan?.toFixed(1) ?? 0}%. Top jenis layanan: ${jenisDataR?.[0]?.name ?? '-'} (${jenisDataR?.[0]?.value ?? 0}). Top kondisi pasien: ${kondisiDataR?.[0]?.name ?? '-'} (${kondisiDataR?.[0]?.value ?? 0}). Top diagnosis: ${diagnosisDataR?.[0]?.name ?? '-'} (${diagnosisDataR?.[0]?.value ?? 0}).`}
+    />
   );
 }

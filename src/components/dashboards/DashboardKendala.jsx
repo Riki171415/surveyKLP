@@ -7,6 +7,7 @@ import {
 import { AlertTriangle, Users, Database, FileText, Download, MessageSquare, Map, Image as ImageIcon } from 'lucide-react';
 import CustomWordCloud from '../ui/CustomWordCloud';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 
 const ViewToggle = ({ value, onChange }) => (
   <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-semibold shrink-0">
@@ -318,5 +319,11 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
         </div>
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="kendala"
+      dashboardName="Analisis Kendala Implementasi Sp.KKLP"
+      promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. FKTP melaporkan kendala: ${kendalaStats?.totalFktpKendala ?? 0} (${kendalaStats?.proporsiKendala?.toFixed(1) ?? 0}%). Top kendala #1: ${kendalaStats?.top3?.[0]?.name ?? '-'} (${kendalaStats?.top3?.[0]?.value ?? 0}). Top kendala #2: ${kendalaStats?.top3?.[1]?.name ?? '-'} (${kendalaStats?.top3?.[1]?.value ?? 0}). Top kendala #3: ${kendalaStats?.top3?.[2]?.name ?? '-'} (${kendalaStats?.top3?.[2]?.value ?? 0}). Distribusi kendala per FKTP: ${kendalaDataF?.map(d => d.name + ': ' + d.value).join(', ') ?? '-'}. Kebutuhan dukungan per FKTP: ${dukunganDataF?.map(d => d.name + ': ' + d.value).join(', ') ?? '-'}. Jumlah provinsi terdampak: ${heatmapData?.length ?? 0}.`}
+    />
   );
 }

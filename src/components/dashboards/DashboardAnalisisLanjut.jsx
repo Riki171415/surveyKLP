@@ -7,6 +7,7 @@ import { Activity, Beaker, FileText, CheckCircle2, AlertTriangle, TrendingUp, Tr
 import { performPSM } from '../../utils/statisticsUtils';
 import { calculateSMD, getPropensityScoreHistogram, performTTest, performMultivariateRegression } from '../../utils/advancedStatsUtils';
 import { exportAnalisisLanjutToExcel } from '../../utils/exportExcelUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 
 export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) {
   const [isExporting, setIsExporting] = useState(false);
@@ -301,5 +302,11 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
         </div>
       ))}
     </div>
+
+    <ReportGenerator
+      dashboardId="analisis_lanjut"
+      dashboardName="Analisis Statistik Lanjut (T-Test dan Regresi)"
+      promptContext={`Total FKTP: ${uniqueFktpData?.length ?? 0}. Jumlah outcome dianalisis: ${allOutcomesResults?.length ?? 0}. Outcome pertama (${allOutcomesResults?.[0]?.label ?? 'N/A'}): T-Test diff: ${allOutcomesResults?.[0]?.tTestResult?.diff?.toFixed(4) ?? 'N/A'}, T-Test p-value: ${allOutcomesResults?.[0]?.tTestResult?.pValue?.toFixed(4) ?? 'N/A'}, Signifikan: ${allOutcomesResults?.[0]?.tTestResult?.isSignificant ? 'Ya' : 'Tidak'}. Regresi treatment effect: ${allOutcomesResults?.[0]?.regressionResult?.treatmentEffect?.toFixed(4) ?? 'N/A'}, Regresi p-value: ${allOutcomesResults?.[0]?.regressionResult?.pValue?.toFixed(4) ?? 'N/A'}, Signifikan: ${allOutcomesResults?.[0]?.regressionResult?.isSignificant ? 'Ya' : 'Tidak'}.`}
+    />
   );
 }

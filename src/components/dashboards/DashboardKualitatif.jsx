@@ -19,6 +19,7 @@ const STOP_WORDS = new Set(['yang', 'di', 'ke', 'dari', 'pada', 'dalam', 'untuk'
 
 import DeepDiveAIReport from './DeepDiveAIReport';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 
 // Comprehensive AI Executive Report Generator
 const generateComprehensiveAIReport = (rawData, topWords) => {
@@ -413,5 +414,11 @@ export default function DashboardKualitatif({ filteredData, isPrinting }) {
         )}
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="kualitatif"
+      dashboardName="Analisis Kualitatif Survei"
+      promptContext={`Total responden: ${filteredData?.length ?? 0}. Total entri verbatim: ${rawData?.length ?? 0}. Verbatim setelah filter: ${kualitatifData?.length ?? 0}. Jumlah kata kunci unik: ${wordCloudData?.length ?? 0}. Top 3 kata kunci: ${topWords?.[0]?.text ?? '-'} (${topWords?.[0]?.value ?? 0}x), ${topWords?.[1]?.text ?? '-'} (${topWords?.[1]?.value ?? 0}x), ${topWords?.[2]?.text ?? '-'} (${topWords?.[2]?.value ?? 0}x).`}
+    />
   );
 }

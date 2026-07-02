@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { HeartPulse, Users, CheckCircle, Heart, Stethoscope, CheckCircle2, Download, Image as ImageIcon } from 'lucide-react';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 const ViewToggle = ({ value, onChange }) => (
   <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-semibold shrink-0">
     <button onClick={() => onChange('responden')} className={`px-3 py-1 rounded-md transition-all ${value === 'responden' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Per Responden</button>
@@ -341,5 +342,11 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
 
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="paliatif"
+      dashboardName="Layanan Paliatif"
+      promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. FKTP dengan pelayanan paliatif: ${palStats?.fktpWithPaliatif ?? 0} (${palStats?.proporsiPaliatif?.toFixed(1) ?? 0}%). Tingkat kolaborasi nakes lain: ${palStats?.proporsiKolaborasi?.toFixed(1) ?? 0}%. Proporsi perbaikan kualitas hidup: ${palStats?.proporsiPerbaikan?.toFixed(1) ?? 0}%. Tujuan terbanyak (responden): ${tujuanDataR?.[0]?.name ?? '-'} (${tujuanDataR?.[0]?.value ?? 0}). Kondisi pasien terbanyak (responden): ${kondisiDataR?.[0]?.name ?? '-'} (${kondisiDataR?.[0]?.value ?? 0}). Kepatuhan terbanyak (responden): ${kepatuhanDataR?.[0]?.name ?? '-'} (${kepatuhanDataR?.[0]?.value ?? 0}). Diagnosis teratas: ${diagnosisDataR?.[0]?.name ?? '-'} (${diagnosisDataR?.[0]?.value ?? 0}). Terapi teratas: ${terapiDataR?.[0]?.name ?? '-'} (${terapiDataR?.[0]?.value ?? 0}).`}
+    />
   );
 }

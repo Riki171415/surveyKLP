@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { Activity, ShieldAlert, CheckCircle, TrendingDown, Download , Image as ImageIcon } from 'lucide-react';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
+import ReportGenerator from '../ui/ReportGenerator';
 
 const nonOptimalServices = [
   "Pelayanan lifestyle medicine", "Pelayanan wellness dan healthy aging",
@@ -300,5 +301,11 @@ export default function DashboardNonOptimal({ filteredData, uniqueFktpData, COLO
         </div>
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="non_optimal"
+      dashboardName="FKTP Non-Optimal"
+      promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. Total respon layanan non-optimal teridentifikasi: ${nonOptStats?.totalIdentified ?? 0}. Total FKTP teridentifikasi layanan non-optimal: ${nonOptStats?.totalIdentifiedF ?? 0}. Top 1 layanan (per FKTP): ${nonOptStats?.top3?.[0]?.name ?? '-'} (${nonOptStats?.top3?.[0]?.identifiedCount ?? 0} FKTP). Top 2 layanan: ${nonOptStats?.top3?.[1]?.name ?? '-'} (${nonOptStats?.top3?.[1]?.identifiedCount ?? 0} FKTP). Top 3 layanan: ${nonOptStats?.top3?.[2]?.name ?? '-'} (${nonOptStats?.top3?.[2]?.identifiedCount ?? 0} FKTP). Diusulkan masuk JKN (per responden): ${jknDataR?.find(d => d.name === 'Diusulkan Masuk JKN')?.value ?? 0}. Tidak diusulkan JKN (per responden): ${jknDataR?.find(d => d.name === 'Tidak Diusulkan')?.value ?? 0}. Diusulkan masuk JKN (per FKTP): ${jknDataF?.find(d => d.name === 'Diusulkan Masuk JKN')?.value ?? 0}. Layanan dengan hambatan terbanyak: ${hambatanDataR?.[0]?.name ?? '-'} (total ${hambatanDataR?.[0]?.total ?? 0} respon). Layanan usulan JKN terbanyak: ${usulanDetailDataR?.[0]?.name ?? '-'} (${usulanDetailDataR?.[0]?.['Diusulkan JKN'] ?? 0} diusulkan).`}
+    />
   );
 }

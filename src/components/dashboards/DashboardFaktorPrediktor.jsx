@@ -7,6 +7,7 @@ import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine, Cell
 } from 'recharts';
+import ReportGenerator from '../ui/ReportGenerator';
 
 export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting }) {
   const [activeTab, setActiveTab] = useState('logistic');
@@ -716,5 +717,11 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
 
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="faktor_prediktor"
+      dashboardName="Faktor Prediktor Kepatuhan PRB"
+      promptContext={`Total FKTP dianalisis: ${uniqueFktpData?.length ?? 0}. Prediktor logistik: ${logisticData?.length ?? 0} variabel. Prediktor signifikan (logistik): ${logisticData?.filter(d => d.isSignificant)?.length ?? 0}. Prediktor positif signifikan (OR>1): ${logisticData?.filter(d => d.isSignificant && d.oddsRatio > 1)?.length ?? 0}. Chi-Square p-value: ${chiSquareData?.pValue?.toFixed(4) ?? 'N/A'}. Chi-Square signifikan: ${chiSquareData?.isSignificant ? 'Ya' : 'Tidak'}. Chi2: ${chiSquareData?.chi2?.toFixed(2) ?? 'N/A'}, df: ${chiSquareData?.df ?? 'N/A'}. Analisis internal Sp.KKLP: ${internalData?.length ?? 0} variabel. Peran internal signifikan: ${internalData?.filter(d => d.isSignificant)?.length ?? 0}. Prediktor logistik utama (tertinggi OR): ${logisticData?.[0]?.name ?? 'N/A'} OR=${logisticData?.[0]?.oddsRatio?.toFixed(2) ?? 'N/A'} p=${logisticData?.[0]?.pValue?.toFixed(3) ?? 'N/A'}. Peran internal tertinggi: ${internalData?.[0]?.name ?? 'N/A'} OR=${internalData?.[0]?.oddsRatio?.toFixed(2) ?? 'N/A'} p=${internalData?.[0]?.pValue?.toFixed(3) ?? 'N/A'}.`}
+    />
   );
 }

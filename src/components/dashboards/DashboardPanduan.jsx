@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, Users, Activity, HeartPulse, Stethoscope, AlertTriangle, MessageSquare, Database, Printer, Filter, Home, ShieldAlert, Beaker, Lightbulb, ChevronDown, ChevronUp, Info, HelpCircle, FileSearch } from 'lucide-react';
+import ReportGenerator from '../ui/ReportGenerator';
 
 const GUIDES = [
   {
@@ -241,5 +242,11 @@ export default function DashboardPanduan({ isPrinting }) {
         </div>
       </div>
     </div>
+
+    <ReportGenerator
+      dashboardId="panduan"
+      dashboardName="Panduan Penggunaan Dashboard"
+      promptContext={`Halaman Panduan Penggunaan Dashboard Survei Sp.KKLP. Dashboard ini berisi ${filteredData?.length ?? 0} responden dari ${new Set((filteredData ?? []).map(d => d.provinsi).filter(Boolean)).size} provinsi.`}
+    />
   );
 }
