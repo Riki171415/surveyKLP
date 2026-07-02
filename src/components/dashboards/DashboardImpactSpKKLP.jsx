@@ -28,7 +28,7 @@ const ViewToggle = ({ value, onChange }) => (
 
 export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const [view, setView] = useState('responden');
-  const [statMethod, setStatMethod] = useState('psm');
+  const statMethod = 'psm'; // Hardcoded as per user request to remove dropdown
   
   const calculateMetrics = (dataset) => {
     let adaSp = 0, tanpaSp = 0;
@@ -344,20 +344,6 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
           </div>
           {!isPrinting && (
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <div className="bg-white/20 backdrop-blur-md rounded-lg p-1.5 flex items-center shadow-inner">
-                <span className="text-xs font-semibold mr-2 opacity-80">Metode Statistik:</span>
-                <select 
-                  value={statMethod}
-                  onChange={(e) => setStatMethod(e.target.value)}
-                  className="bg-white/10 text-white border border-white/20 rounded-md text-xs font-semibold px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-white/50"
-                  title="Metode Statistik"
-                >
-                  <option value="random" className="text-slate-800">1. Random Sampling (1:1)</option>
-                  <option value="psm" className="text-slate-800">2. Propensity Score Matching (PSM)</option>
-                  <option value="ipw" className="text-slate-800">3. Inverse Probability Weighting (IPW)</option>
-                  <option value="stratified" className="text-slate-800">4. Stratified Analysis</option>
-                </select>
-              </div>
               <ViewToggle value={view} onChange={setView} />
             </div>
           )}
@@ -406,7 +392,35 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
           </div>
         </div>
 
-        <div id="impact-radar-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : ''}`}>
+        {/* AI Insight Box for Bar Chart */}
+        <div className={`bg-gradient-to-br from-indigo-900 to-slate-900 p-6 rounded-2xl text-white shadow-lg relative overflow-hidden lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none' : ''}`}>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+          <h4 className="text-lg font-bold mb-3 flex items-center"><Activity className="w-5 h-5 mr-3 text-indigo-400" /> Interpretasi Kinerja Berdasarkan PSM (AI Generated)</h4>
+          <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
+            <p>
+              Berdasarkan perbandingan kinerja setelah penyesuaian (Matched), FKTP dengan Sp.KKLP secara konsisten menunjukkan hasil yang lebih unggul dibandingkan FKTP tanpa Sp.KKLP pada berbagai indikator klinis.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              {combinedSpData.map((item, idx) => {
+                const diff = item['Ada (Matched)'] - item['Tanpa (Matched)'];
+                const isPositive = diff > 0;
+                return (
+                  <div key={idx} className="p-3 bg-white/10 rounded-xl border border-white/20 flex items-start">
+                    {isPositive ? <TrendingUp className="w-4 h-4 text-emerald-400 mr-2 shrink-0 mt-0.5" /> : <TrendingDown className="w-4 h-4 text-amber-400 mr-2 shrink-0 mt-0.5" />}
+                    <div>
+                      <span className="font-bold text-white block mb-1">{item.name}</span>
+                      <span className="text-xs">
+                        Terdapat {isPositive ? 'keunggulan' : 'selisih'} kinerja sebesar <strong className={isPositive ? "text-emerald-300" : "text-amber-300"}>{Math.abs(diff).toFixed(1)}%</strong> pada FKTP dengan Sp.KKLP.
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div id="impact-radar-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : 'lg:col-span-2'}`}>
           {!isPrinting && (
             <button onClick={() => downloadElementAsPNG('impact-radar-chart', 'Spektrum_Kemampuan_Radar')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
               <ImageIcon className="w-4 h-4" />
