@@ -36,10 +36,11 @@ const DashboardPersepsiNegatif = () => {
     fetchData();
   }, []);
 
-  const { persepsiUmum, trenKepuasan, pieData, dataSkeptisisme } = React.useMemo(() => {
+  const { persepsiUmum, trenKepuasan, pieData, dataSkeptisisme, skeptisismeQuotes } = React.useMemo(() => {
     let bebanAdmin = 0, regulasi = 0, sdm = 0, dana = 0, waktu = 0;
     let skeptisismeTinggi = 0, skeptisismeSedang = 0, skeptisismeRendah = 0;
     let keluhanPerBulan = {};
+    let quotes = [];
 
     surveys.forEach(row => {
       let allText = '';
@@ -57,9 +58,24 @@ const DashboardPersepsiNegatif = () => {
       if (allText.match(/waktu|lama|antre|tunggu/)) waktu++;
 
       // 2. Skeptisisme Sp.KKLP
-      if (allText.match(/tidak berpengaruh|sama saja|percuma|tidak ada bedanya|rujukan tetap/)) skeptisismeTinggi++;
-      else if (allText.match(/sia-sia|ragu|tidak ada perubahan/)) skeptisismeSedang++;
-      else if (allText.match(/biasa|tidak signifikan|tidak perlu|belum terasa/)) skeptisismeRendah++;
+      let level = null;
+      if (allText.match(/tidak berpengaruh|sama saja|percuma|tidak ada bedanya|rujukan tetap/)) { skeptisismeTinggi++; level = 'Tinggi'; }
+      else if (allText.match(/sia-sia|ragu|tidak ada perubahan/)) { skeptisismeSedang++; level = 'Sedang'; }
+      else if (allText.match(/biasa|tidak signifikan|tidak perlu|belum terasa/)) { skeptisismeRendah++; level = 'Rendah'; }
+
+      if (level && quotes.length < 20) {
+        let matchedAns = '';
+        if (row.wawancara) {
+           Object.values(row.wawancara).forEach(val => {
+               if (val && new RegExp(/tidak berpengaruh|sama saja|percuma|tidak ada bedanya|rujukan tetap|sia-sia|ragu|tidak ada perubahan|biasa|tidak signifikan|tidak perlu|belum terasa/, 'i').test(val)) {
+                   matchedAns = val;
+               }
+           });
+        }
+        if (matchedAns) {
+           quotes.push({ level, fktp: row.fktp_name || 'Tidak diketahui', text: matchedAns });
+        }
+      }
 
       // 3. Tren per bulan
       const date = row.created_at ? new Date(row.created_at) : new Date();
@@ -102,7 +118,7 @@ const DashboardPersepsiNegatif = () => {
       tren = [{ bulan: new Date().toLocaleString('default', { month: 'short' }), 'Tingkat Keluhan': 0 }];
     }
 
-    return { persepsiUmum: persepsi, trenKepuasan: tren, pieData: pie, dataSkeptisisme: skeptisisme };
+    return { persepsiUmum: persepsi, trenKepuasan: tren, pieData: pie, dataSkeptisisme: skeptisisme, skeptisismeQuotes: quotes };
   }, [surveys]);
 
   const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#3b82f6'];
@@ -336,6 +352,36 @@ const DashboardPersepsiNegatif = () => {
           </div>
         </div>
       </div>
+
+      {/* Tabel Verbatim Skeptisisme */}
+      {skeptisismeQuotes.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+          <div className="flex items-center space-x-2 mb-4">
+             <div className="p-2 bg-indigo-50 rounded-lg">
+                <MessageSquare className="w-5 h-5 text-indigo-600" />
+             </div>
+             <h3 className="text-lg font-bold text-slate-800">Suara Lapangan: Detail Keraguan (Verbatim)</h3>
+          </div>
+          <p className="text-sm text-slate-500 mb-6">Berikut adalah kutipan langsung dari jawaban kualitatif tenaga medis yang mencerminkan skeptisisme terhadap efektivitas kebijakan saat ini.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {skeptisismeQuotes.map((quote, idx) => (
+              <div key={idx} className="p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-xs font-bold px-2 py-1 rounded-md ${quote.level === 'Tinggi' ? 'bg-red-100 text-red-700' : quote.level === 'Sedang' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
+                      Skeptis {quote.level}
+                    </span>
+                    <span className="text-xs font-semibold text-slate-500 line-clamp-1 max-w-[150px] truncate" title={quote.fktp}>{quote.fktp}</span>
+                  </div>
+                  <p className="text-sm text-slate-700 leading-relaxed italic">"{quote.text}"</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
