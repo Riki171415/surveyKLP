@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FileText, Download, Loader, RefreshCw, CheckCircle, AlertTriangle, Save, ChevronDown, ChevronUp, Cpu } from 'lucide-react';
-import { callGeminiApi, saveAiReportToDb, fetchAiReportFromDb } from '../../utils/aiUtils';
+import { callGeminiApiText, saveAiReportToDb, fetchAiReportFromDb } from '../../utils/aiUtils';
 
 /**
  * Mengekspor konten HTML ke file .doc yang bisa dibuka di Microsoft Word.
@@ -116,7 +116,7 @@ ATURAN KETAT (WAJIB DIIKUTI):
 
 Output dimulai LANGSUNG dengan: <h1>`;
 
-      const rawText = await callGeminiApi(prompt, apiKey, null);
+      const rawText = await callGeminiApiText(prompt, apiKey, null);
       
       // Strip semua kemungkinan wrapper: JSON, markdown code block, leading/trailing whitespace
       let htmlOutput = rawText.trim();
@@ -149,7 +149,26 @@ Output dimulai LANGSUNG dengan: <h1>`;
       
       htmlOutput = htmlOutput.trim();
 
-      setReportHtml(htmlOutput);
+      // Inject style Times New Roman ke dalam HTML output
+      const styleInject = `<style>
+        * { font-family: 'Times New Roman', Times, serif !important; font-size: 12pt; }
+        h1 { font-size: 14pt !important; font-weight: bold; text-align: center; border-bottom: 2px solid #000; padding-bottom: 6pt; margin-bottom: 8pt; }
+        h2 { font-size: 13pt !important; font-weight: bold; margin-top: 14pt; margin-bottom: 6pt; }
+        h3 { font-size: 12pt !important; font-weight: bold; margin-top: 10pt; margin-bottom: 4pt; }
+        p, li, td, th { font-size: 12pt !important; line-height: 1.8; }
+        p { text-align: justify; margin-bottom: 8pt; }
+        table { width: 100%; border-collapse: collapse; margin: 10pt 0; }
+        th { border: 1px solid #000; padding: 5pt 8pt; background: #e0e0e0; font-weight: bold; }
+        td { border: 1px solid #000; padding: 4pt 8pt; }
+        .meta { font-style: italic; color: #444; text-align: center; margin-bottom: 12pt; }
+        .highlight { border-left: 4px solid #555; padding: 6pt 12pt; background: #f0f0f0; margin: 8pt 0; }
+        .warning  { border-left: 4px solid #888; padding: 6pt 12pt; background: #f8f8f8; margin: 8pt 0; }
+        .footer   { border-top: 1px solid #999; padding-top: 6pt; margin-top: 20pt; font-size: 10pt !important; color: #666; text-align: center; font-style: italic; }
+      </style>`;
+
+      const finalHtml = styleInject + htmlOutput.trim();
+
+      setReportHtml(finalHtml);
       setIsExpanded(true);
       setStatus('success');
       setStatusMsg('Laporan berhasil di-generate!');

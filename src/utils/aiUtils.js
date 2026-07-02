@@ -50,6 +50,50 @@ export const callGeminiApi = async (prompt, overrideKey, overrideModel, retryCou
   return resData.candidates[0].content.parts[0].text;
 };
 
+// Versi tanpa responseMimeType — digunakan untuk generate laporan HTML murni
+// agar Gemini tidak memaksa output dalam format JSON
+export const callGeminiApiText = async (prompt, overrideKey, overrideModel, retryCount = 0) => {
+  const apiKey = overrideKey || localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
+  const model = overrideModel || localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
+  
+  if (!apiKey) throw new Error("API_KEY_MISSING");
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.3 }, // tanpa responseMimeType
+      safetySettings: [
+        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    let rawError = '';
+    try {
+      const errJson = await response.json();
+      rawError = errJson.error ? errJson.error.message : JSON.stringify(errJson);
+    } catch(e) {}
+    const errMsg = rawError ? `[API Error]: ${rawError}` : `(Status: ${response.status})`;
+    if (response.status === 503) {
+      if (retryCount < 3) {
+        await new Promise(resolve => setTimeout(resolve, 3000 * (retryCount + 1)));
+        return callGeminiApiText(prompt, overrideKey, overrideModel, retryCount + 1);
+      }
+      throw new Error(`Server Gemini Error 503 setelah 3x percobaan. ${errMsg}`);
+    }
+    throw new Error(`Gagal terhubung ke API Gemini. ${errMsg}`);
+  }
+
+  const resData = await response.json();
+  return resData.candidates[0].content.parts[0].text;
+};
+
 export const saveAiReportToDb = async (id, content) => {
   try {
     const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
