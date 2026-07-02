@@ -9,7 +9,7 @@ import { format, parseISO } from 'date-fns';
 import { 
   Users, Activity, HeartPulse, Stethoscope, AlertTriangle, 
   MessageSquare, Database, Printer, Download, Filter, Home, ShieldAlert,
-  Search, ChevronLeft, ChevronRight, FileSearch, Copy
+  Search, ChevronLeft, ChevronRight, FileSearch, Copy, Beaker
 } from 'lucide-react';
 
 import DashboardProfil from './dashboards/DashboardProfil';
@@ -25,6 +25,7 @@ import DashboardKualitatif from './dashboards/DashboardKualitatif';
 import DashboardDPM from './dashboards/DashboardDPM';
 import DashboardPasienBulanan from './dashboards/DashboardPasienBulanan';
 import DashboardKeluhanSentences from './dashboards/DashboardKeluhanSentences';
+import DashboardAnalisisLanjut from './dashboards/DashboardAnalisisLanjut';
 
 const COLORS = ['#00857A', '#00A68A', '#45B669', '#00B4D5', '#F28322', '#D8C700', '#D5DF00', '#f43f5e', '#a855f7', '#3b82f6'];
 
@@ -695,6 +696,7 @@ export default function Dashboard() {
     { id: 'nonopt', label: 'Non-Optimal', icon: ShieldAlert },
     { id: 'spkklp', label: 'Peran Sp.KKLP', icon: Stethoscope },
     { id: 'impact_spkklp', label: 'Impact Sp.KKLP', icon: Activity },
+    { id: 'analisis_lanjut', label: 'Analisis Kaidah Statistik', icon: Beaker },
     { id: 'kendala', label: 'Kendala JKN', icon: AlertTriangle },
     { id: 'kualitatif', label: 'Kualitatif (NVIVO)', icon: MessageSquare },
     { id: 'keluhan_kalimat', label: 'Analisis Keluhan', icon: Filter },
@@ -843,6 +845,7 @@ export default function Dashboard() {
                 <DashboardNonOptimal filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
                 <DashboardSpKKLP filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
                 <DashboardImpactSpKKLP filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
+                <DashboardAnalisisLanjut uniqueFktpData={uniqueFktpData} isPrinting={true} />
                 <DashboardKendala filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
                 <DashboardKualitatif filteredData={filteredData} uniqueFktpData={uniqueFktpData} isPrinting={true} />
                 <DashboardKeluhanSentences filteredData={filteredData} isPrinting={true} />
@@ -860,6 +863,7 @@ export default function Dashboard() {
                   {activeTab === 'nonopt' && <DashboardNonOptimal filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
                   {activeTab === 'spkklp' && <DashboardSpKKLP filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
                   {activeTab === 'impact_spkklp' && <DashboardImpactSpKKLP filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
+                  {activeTab === 'analisis_lanjut' && <DashboardAnalisisLanjut uniqueFktpData={uniqueFktpData} isPrinting={false} />}
                   {activeTab === 'kendala' && <DashboardKendala filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
                   {activeTab === 'kualitatif' && <DashboardKualitatif filteredData={filteredData} uniqueFktpData={uniqueFktpData} isPrinting={false} />}
                   {activeTab === 'keluhan_kalimat' && <DashboardKeluhanSentences filteredData={filteredData} isPrinting={false} />}
