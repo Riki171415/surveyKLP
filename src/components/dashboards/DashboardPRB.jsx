@@ -54,21 +54,23 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
       Object.keys(mekCountsR).forEach(mek => { if (prb[`mek_${mek}`]) mekCountsR[mek]++; });
     });
 
-    // ── Per FKTP (uniqueFktpData) ──
-    const diagCountsF = { 'DM': 0, 'Hipertensi': 0, 'Jantung': 0, 'PPOK': 0, 'Asma': 0, 'Stroke': 0, 'Epilepsi': 0, 'Skizofrenia': 0, 'SLE': 0 };
-    const mekCountsF  = { 'Pengingat kunjungan': 0, 'Telepon/WA': 0, 'Kunjungan rumah': 0, 'Tidak ada mekanisme khusus': 0, 'Lainnya': 0 };
+    // ── Per FKTP (Rata-rata per Faskes) ──
+    const totalFktp = uniqueFktpData.length || 1;
+    const diagCountsF = {
+      'DM': Number((diagCountsR['DM'] / totalFktp).toFixed(1)),
+      'Hipertensi': Number((diagCountsR['Hipertensi'] / totalFktp).toFixed(1)),
+      'Jantung': Number((diagCountsR['Jantung'] / totalFktp).toFixed(1)),
+      'PPOK': Number((diagCountsR['PPOK'] / totalFktp).toFixed(1)),
+      'Asma': Number((diagCountsR['Asma'] / totalFktp).toFixed(1)),
+      'Stroke': Number((diagCountsR['Stroke'] / totalFktp).toFixed(1)),
+      'Epilepsi': Number((diagCountsR['Epilepsi'] / totalFktp).toFixed(1)),
+      'Skizofrenia': Number((diagCountsR['Skizofrenia'] / totalFktp).toFixed(1)),
+      'SLE': Number((diagCountsR['SLE'] / totalFktp).toFixed(1))
+    };
 
+    const mekCountsF  = { 'Pengingat kunjungan': 0, 'Telepon/WA': 0, 'Kunjungan rumah': 0, 'Tidak ada mekanisme khusus': 0, 'Lainnya': 0 };
     uniqueFktpData.forEach(row => {
       const prb = row.prb || {};
-      diagCountsF['DM']          += Number(prb.peserta_dm) > 0 ? 1 : 0;
-      diagCountsF['Hipertensi']  += Number(prb.peserta_ht) > 0 ? 1 : 0;
-      diagCountsF['Jantung']     += Number(prb.peserta_jantung) > 0 ? 1 : 0;
-      diagCountsF['PPOK']        += Number(prb.peserta_ppok) > 0 ? 1 : 0;
-      diagCountsF['Asma']        += Number(prb.peserta_asma) > 0 ? 1 : 0;
-      diagCountsF['Stroke']      += Number(prb.peserta_stroke) > 0 ? 1 : 0;
-      diagCountsF['Epilepsi']    += Number(prb.peserta_epilepsi) > 0 ? 1 : 0;
-      diagCountsF['Skizofrenia'] += Number(prb.peserta_skizofrenia) > 0 ? 1 : 0;
-      diagCountsF['SLE']         += Number(prb.peserta_sle) > 0 ? 1 : 0;
       Object.keys(mekCountsF).forEach(mek => { if (prb[`mek_${mek}`]) mekCountsF[mek]++; });
     });
 
@@ -81,8 +83,11 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
         totalJumlah: Math.round(totalJumlah), totalRutin: Math.round(totalRutin),
         totalTidakBerkunjung: Math.round(totalTidakBerkunjung),
         avgJumlah: filteredData.length > 0 ? Math.round(totalJumlah / filteredData.length) : 0,
+        avgJumlahFktp: uniqueFktpData.length > 0 ? Math.round(totalJumlah / uniqueFktpData.length) : 0,
         avgRutin: filteredData.length > 0 ? Math.round(totalRutin / filteredData.length) : 0,
         avgTidakBerkunjung: filteredData.length > 0 ? Math.round(totalTidakBerkunjung / filteredData.length) : 0,
+        avgRutinFktp: uniqueFktpData.length > 0 ? Math.round(totalRutin / uniqueFktpData.length) : 0,
+        avgTidakBerkunjungFktp: uniqueFktpData.length > 0 ? Math.round(totalTidakBerkunjung / uniqueFktpData.length) : 0,
         avgRujukan: countRujukan > 0 ? Math.round(totalRujukan / countRujukan) : 0
       },
       kepatuhanRate: kepatuhan,
@@ -96,7 +101,7 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
   // Data aktif berdasarkan toggle
   const diagnosisData  = diagView  === 'fktp' ? diagnosisDataFktp  : diagnosisDataResponden;
   const mekanismeData  = mekView   === 'fktp' ? mekanismeDataFktp  : mekanismeDataResponden;
-  const diagLabel      = diagView  === 'fktp' ? 'Jumlah FKTP'      : 'Jumlah Responden';
+  const diagLabel      = diagView  === 'fktp' ? 'Rata-rata Pasien / Faskes' : 'Total Pasien';
   const mekLabel       = mekView   === 'fktp' ? 'Jumlah FKTP'      : 'Jumlah Responden';
 
   const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
@@ -166,9 +171,9 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
         data: diagnosisDataResponden.map(d => [d.name, d.value, `${prbStats.totalJumlah > 0 ? ((d.value / prbStats.totalJumlah) * 100).toFixed(1) : 0}%`])
       },
       {
-        title: 'Distribusi Diagnosis PRB (Per FKTP — FKTP yang punya peserta diagnosis ini)',
-        headers: ['Diagnosis', 'Jumlah FKTP', 'Persentase (%)'],
-        data: diagnosisDataFktp.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`])
+        title: 'Distribusi Diagnosis PRB (Rata-rata per FKTP)',
+        headers: ['Diagnosis', 'Rata-rata Pasien / Faskes'],
+        data: diagnosisDataFktp.map(d => [d.name, d.value])
       },
       {
         title: 'Mekanisme Pemantauan PRB (Per Responden)',
@@ -230,10 +235,10 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
         </div>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Responden PRB" value={filteredData.length} subtitle={`Dari ${uniqueFktpData.length} FKTP unik`} icon={Users} colorClass="bg-blue-500 text-blue-600 bg-blue-100" />
-        <StatCard title="Peserta Rutin Berkunjung" value={prbStats.totalRutin} subtitle={`Rata-rata: ${prbStats.avgRutin} per responden`} icon={Activity} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
-        <StatCard title="Peserta Tidak Berkunjung" value={prbStats.totalTidakBerkunjung} subtitle={`Rata-rata: ${prbStats.avgTidakBerkunjung} per responden`} icon={AlertTriangle} colorClass="bg-rose-500 text-rose-600 bg-rose-100" />
-        <StatCard title="Rata-rata Rujukan FKRTL" value={prbStats.avgRujukan} subtitle="Per bulan per responden" icon={FileText} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
+        <StatCard title="Total & Rata² Peserta PRB" value={prbStats.totalJumlah} subtitle={`Rata-rata: ${prbStats.avgJumlahFktp} pasien / faskes`} icon={Users} colorClass="bg-blue-500 text-blue-600 bg-blue-100" />
+        <StatCard title="Peserta Rutin Berkunjung" value={prbStats.totalRutin} subtitle={`Rata-rata: ${prbStats.avgRutinFktp} pasien / faskes`} icon={Activity} colorClass="bg-emerald-500 text-emerald-600 bg-emerald-100" />
+        <StatCard title="Peserta Tidak Berkunjung" value={prbStats.totalTidakBerkunjung} subtitle={`Rata-rata: ${prbStats.avgTidakBerkunjungFktp} pasien / faskes`} icon={AlertTriangle} colorClass="bg-rose-500 text-rose-600 bg-rose-100" />
+        <StatCard title="Rata-rata Rujukan FKRTL" value={prbStats.avgRujukan} subtitle="Per faskes / bulan" icon={FileText} colorClass="bg-amber-500 text-amber-600 bg-amber-100" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -263,7 +268,7 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
             {!isPrinting && <ViewToggle value={diagView} onChange={setDiagView} />}
           </div>
           <p className="text-xs text-slate-400 mb-3 italic">
-            {diagView === 'responden' ? `Akumulasi peserta dari ${filteredData.length} responden` : `FKTP yang memiliki peserta per diagnosis (dari ${uniqueFktpData.length} FKTP)`}
+            {diagView === 'responden' ? `Akumulasi peserta dari ${filteredData.length} responden` : `Rata-rata peserta per faskes (dari ${uniqueFktpData.length} FKTP)`}
           </p>
           <div className="h-64">
             <ResponsiveContainer width="99%" height="100%" minHeight={200} minWidth={0}>
