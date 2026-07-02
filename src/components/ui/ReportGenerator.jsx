@@ -8,21 +8,21 @@ import { callGeminiApi, saveAiReportToDb, fetchAiReportFromDb } from '../../util
 const exportHTMLToWord = (htmlContent, filename = 'Laporan') => {
   const style = `
     <style>
-      body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.6; color: #000; margin: 2cm; }
-      h1 { font-size: 16pt; font-weight: bold; text-align: center; margin-bottom: 4pt; color: #003366; border-bottom: 2px solid #003366; padding-bottom: 6pt; }
-      h2 { font-size: 14pt; font-weight: bold; color: #003366; margin-top: 14pt; margin-bottom: 6pt; }
-      h3 { font-size: 12pt; font-weight: bold; color: #1a5276; margin-top: 10pt; margin-bottom: 4pt; }
-      p  { margin-bottom: 8pt; text-align: justify; }
-      ul, ol { margin-left: 20pt; margin-bottom: 8pt; }
-      li { margin-bottom: 4pt; }
-      table { width: 100%; border-collapse: collapse; margin: 10pt 0; }
-      th { background-color: #1a5276; color: #fff; font-weight: bold; padding: 6pt 8pt; text-align: left; border: 1px solid #aaa; }
-      td { padding: 5pt 8pt; border: 1px solid #aaa; vertical-align: top; }
-      tr:nth-child(even) td { background-color: #f2f2f2; }
-      .meta { font-size: 10pt; color: #555; text-align: center; margin-bottom: 12pt; }
-      .highlight { background-color: #e8f5e9; border-left: 4px solid #2e7d32; padding: 8pt 12pt; margin: 8pt 0; }
-      .warning  { background-color: #fff8e1; border-left: 4px solid #f57f17; padding: 8pt 12pt; margin: 8pt 0; }
-      .footer   { margin-top: 20pt; font-size: 9pt; color: #888; text-align: center; border-top: 1px solid #ddd; padding-top: 6pt; }
+      body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.8; color: #000; margin: 2.5cm; }
+      h1 { font-family: 'Times New Roman', Times, serif; font-size: 14pt; font-weight: bold; text-align: center; margin-bottom: 4pt; color: #000; border-bottom: 2px solid #000; padding-bottom: 6pt; }
+      h2 { font-family: 'Times New Roman', Times, serif; font-size: 13pt; font-weight: bold; color: #000; margin-top: 16pt; margin-bottom: 6pt; }
+      h3 { font-family: 'Times New Roman', Times, serif; font-size: 12pt; font-weight: bold; color: #000; margin-top: 12pt; margin-bottom: 4pt; }
+      p  { font-family: 'Times New Roman', Times, serif; font-size: 12pt; margin-bottom: 8pt; text-align: justify; }
+      ul, ol { margin-left: 20pt; margin-bottom: 8pt; font-size: 12pt; }
+      li { margin-bottom: 4pt; font-size: 12pt; }
+      table { width: 100%; border-collapse: collapse; margin: 10pt 0; font-size: 12pt; }
+      th { font-weight: bold; padding: 5pt 8pt; text-align: left; border: 1px solid #000; background-color: #d0d0d0; }
+      td { padding: 4pt 8pt; border: 1px solid #000; vertical-align: top; font-size: 12pt; }
+      tr:nth-child(even) td { background-color: #f5f5f5; }
+      .meta { font-size: 11pt; color: #333; text-align: center; margin-bottom: 12pt; font-style: italic; }
+      .highlight { border-left: 4px solid #333; padding: 8pt 12pt; margin: 8pt 0; background-color: #f0f0f0; font-size: 12pt; }
+      .warning  { border-left: 4px solid #666; padding: 8pt 12pt; margin: 8pt 0; background-color: #f8f8f8; font-size: 12pt; }
+      .footer   { margin-top: 20pt; font-size: 10pt; color: #555; text-align: center; border-top: 1px solid #999; padding-top: 6pt; font-style: italic; }
     </style>
   `;
 
@@ -106,24 +106,48 @@ Laporan harus memiliki struktur:
 6. Bab IV - Kesimpulan dan Rekomendasi (<h2>, <p>, gunakan <div class="highlight"> untuk rekomendasi positif dan <div class="warning"> untuk hal yang perlu perhatian)
 7. Footer (<div class="footer">) berisi: "Laporan dihasilkan oleh Sistem Survei Sp.KKLP • ${today}"
 
-ATURAN KETAT:
-- HANYA kembalikan HTML murni (tidak ada teks markdown, tidak ada blok kode, tidak ada \`\`\`html, tidak ada tulisan di luar tag HTML).
+ATURAN KETAT (WAJIB DIIKUTI):
+- Kembalikan HANYA tag HTML murni. JANGAN ada teks di luar tag HTML.
+- JANGAN gunakan markdown (\`\`\`, ##, **, dll).
+- JANGAN wrap dalam JSON atau objek apapun. Output harus dimulai langsung dengan <h1> dan diakhiri dengan </div>.
 - Gunakan gaya formal bahasa Indonesia yang baik.
 - Pastikan HTML valid dan bisa langsung di-render di browser.
 - Jangan batasi panjang laporan; buat selengkap mungkin.
 
-Kembalikan HANYA string JSON berikut (tanpa markdown):
-{ "html": "<h1>...</h1>..." }`;
+Output dimulai LANGSUNG dengan: <h1>`;
 
       const rawText = await callGeminiApi(prompt, apiKey, null);
-      let htmlOutput = rawText;
+      
+      // Strip semua kemungkinan wrapper: JSON, markdown code block, leading/trailing whitespace
+      let htmlOutput = rawText.trim();
+      
+      // Coba parse sebagai JSON dulu
       try {
-        const parsed = JSON.parse(rawText);
-        if (parsed.html) htmlOutput = parsed.html;
+        const parsed = JSON.parse(htmlOutput);
+        if (parsed && parsed.html) {
+          htmlOutput = parsed.html;
+        }
       } catch (e) {
-        // kalau AI langsung kirim HTML mentah
-        htmlOutput = rawText.replace(/```html\n?/g, '').replace(/```\n?/g, '');
+        // Bukan JSON — coba strip markdown code block
+        htmlOutput = htmlOutput
+          .replace(/^```html\s*/i, '')
+          .replace(/^```\s*/i, '')
+          .replace(/\s*```$/i, '');
+        
+        // Jika masih ada JSON-like string di awal, strip-nya
+        if (htmlOutput.startsWith('{') && htmlOutput.includes('"html"')) {
+          const match = htmlOutput.match(/"html"\s*:\s*"([\s\S]*)"\s*}\s*$/);
+          if (match) {
+            htmlOutput = match[1]
+              .replace(/\\n/g, '\n')
+              .replace(/\\t/g, '\t')
+              .replace(/\\"/g, '"')
+              .replace(/\\\\/g, '\\');
+          }
+        }
       }
+      
+      htmlOutput = htmlOutput.trim();
 
       setReportHtml(htmlOutput);
       setIsExpanded(true);
@@ -244,9 +268,9 @@ Kembalikan HANYA string JSON berikut (tanpa markdown):
               width: '210mm',
               minHeight: '297mm',
               padding: '25mm 20mm',
-              fontFamily: '"Times New Roman", serif',
+              fontFamily: '"Times New Roman", Times, serif',
               fontSize: '12pt',
-              lineHeight: '1.6',
+              lineHeight: '1.8',
               color: '#000',
               boxSizing: 'border-box',
             }}
