@@ -153,7 +153,7 @@ export const exportTablesToExcel = async (dashboardTitle, tables, filenamePrefix
 /**
  * Export for Analisis Kaidah Statistik
  */
-export const exportAnalisisLanjutToExcel = async (dataAsIs, dataMatched, psHistogram, smdData, tTestResult, regressionResult, outcomeLabel) => {
+export const exportAnalisisLanjutToExcel = async (dataAsIs, dataMatched, psHistogram, smdData, allOutcomesResults) => {
   try {
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'Dashboard Survey KKLP';
@@ -177,28 +177,30 @@ export const exportAnalisisLanjutToExcel = async (dataAsIs, dataMatched, psHisto
       c.alignment = { vertical: 'middle', horizontal: 'center' };
     });
 
-    if (tTestResult) {
-      sheet1.addRow([
-        'Uji Beda Rata-rata (T-Test) setelah PSM',
-        outcomeLabel,
-        tTestResult.diff.toFixed(4),
-        '-',
-        tTestResult.tStat.toFixed(4),
-        tTestResult.pValue.toFixed(4),
-        tTestResult.isSignificant ? 'SIGNIFIKAN' : 'TIDAK SIGNIFIKAN'
-      ]);
-    }
-    if (regressionResult) {
-      sheet1.addRow([
-        'Regresi Linier Multivariat (As Is Data)',
-        outcomeLabel,
-        regressionResult.treatmentEffect.toFixed(4),
-        regressionResult.standardError.toFixed(4),
-        regressionResult.tStat.toFixed(4),
-        regressionResult.pValue.toFixed(4),
-        regressionResult.isSignificant ? 'SIGNIFIKAN' : 'TIDAK SIGNIFIKAN'
-      ]);
-    }
+    allOutcomesResults.forEach(({ label, tTestResult, regressionResult }) => {
+      if (tTestResult) {
+        sheet1.addRow([
+          'Uji Beda Rata-rata (T-Test) setelah PSM',
+          label,
+          tTestResult.diff.toFixed(4),
+          '-',
+          tTestResult.tStat.toFixed(4),
+          tTestResult.pValue.toFixed(4),
+          tTestResult.isSignificant ? 'SIGNIFIKAN' : 'TIDAK SIGNIFIKAN'
+        ]);
+      }
+      if (regressionResult) {
+        sheet1.addRow([
+          'Regresi Linier Multivariat (As Is Data)',
+          label,
+          regressionResult.treatmentEffect.toFixed(4),
+          regressionResult.standardError.toFixed(4),
+          regressionResult.tStat.toFixed(4),
+          regressionResult.pValue.toFixed(4),
+          regressionResult.isSignificant ? 'SIGNIFIKAN' : 'TIDAK SIGNIFIKAN'
+        ]);
+      }
+    });
 
     // ── Sheet 2: Keseimbangan Variabel (SMD) ──
     const sheet2 = workbook.addWorksheet('2. Keseimbangan Variabel (SMD)');

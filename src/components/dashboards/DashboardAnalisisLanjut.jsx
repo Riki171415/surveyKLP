@@ -3,13 +3,12 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
   ScatterChart, Scatter, ReferenceLine, ZAxis 
 } from 'recharts';
-import { Activity, Beaker, FileText, CheckCircle2, AlertTriangle, TrendingUp, TrendingDown, Stethoscope, Filter, Download } from 'lucide-react';
+import { Activity, Beaker, FileText, CheckCircle2, AlertTriangle, TrendingUp, TrendingDown, Stethoscope, Download } from 'lucide-react';
 import { performPSM } from '../../utils/statisticsUtils';
 import { calculateSMD, getPropensityScoreHistogram, performTTest, performMultivariateRegression } from '../../utils/advancedStatsUtils';
 import { exportAnalisisLanjutToExcel } from '../../utils/exportExcelUtils';
 
 export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) {
-  const [selectedOutcomeId, setSelectedOutcomeId] = useState('kepatuhan_prb');
   const [isExporting, setIsExporting] = useState(false);
 
   const outcomeOptions = [
@@ -24,14 +23,10 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
     { id: 'waktu_homevisit', label: 'Waktu Rata-rata Home Visit (Menit)', fn: (d) => Number(d.time_home_visit) || 0 }
   ];
 
-  const { dataAsIs, dataMatched, psHistogram, smdData, tTestResult, regressionResult, outcomeLabel } = useMemo(() => {
+  const { dataAsIs, dataMatched, psHistogram, smdData, allOutcomesResults } = useMemo(() => {
     if (!uniqueFktpData || uniqueFktpData.length === 0) return {};
 
-    const activeOutcome = outcomeOptions.find(o => o.id === selectedOutcomeId) || outcomeOptions[0];
-    const outcomeFn = activeOutcome.fn;
-    const outcomeLabel = activeOutcome.label;
-
-    // 1. Definisikan Fungsi Perlakuan & Outcome & Kovariat
+    // 1. Definisikan Fungsi Perlakuan & Kovariat
     const treatmentFn = (d) => d.doc_kklp === 'Ya';
     const covariates = ['provinsi', 'jenis_faskes'];
 
@@ -56,24 +51,30 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
       };
     });
 
-    // 5. Kausalitas: T-Test
-    const tTestResult = performTTest(dataMatched, treatmentFn, outcomeFn);
+    // 5. Calculate T-Test and Regression for ALL outcomes
+    const allOutcomesResults = outcomeOptions.map(opt => {
+      const tTestResult = performTTest(dataMatched, treatmentFn, opt.fn);
+      let regressionResult = null;
+      try {
+        regressionResult = performMultivariateRegression(dataAsIs, treatmentFn, opt.fn, covariates);
+      } catch (err) {
+        console.warn(`Regression failed for ${opt.id}:`, err);
+      }
+      return {
+        id: opt.id,
+        label: opt.label,
+        tTestResult,
+        regressionResult
+      };
+    });
 
-    // 6. Regresi Multivariat
-    let regressionResult = null;
-    try {
-      regressionResult = performMultivariateRegression(dataAsIs, treatmentFn, outcomeFn, covariates);
-    } catch (err) {
-      console.warn("Regression failed (singular matrix or small sample):", err);
-    }
-
-    return { dataAsIs, dataMatched, psHistogram, smdData, tTestResult, regressionResult, outcomeLabel };
-  }, [uniqueFktpData, selectedOutcomeId]);
+    return { dataAsIs, dataMatched, psHistogram, smdData, allOutcomesResults };
+  }, [uniqueFktpData]);
 
   const handleExportExcel = async () => {
     if (!dataAsIs) return;
     setIsExporting(true);
-    await exportAnalisisLanjutToExcel(dataAsIs, dataMatched, psHistogram, smdData, tTestResult, regressionResult, outcomeLabel);
+    await exportAnalisisLanjutToExcel(dataAsIs, dataMatched, psHistogram, smdData, allOutcomesResults);
     setIsExporting(false);
   };
 
@@ -87,20 +88,6 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
           <h2 className="text-2xl font-black text-slate-800 flex items-center"><Beaker className="w-7 h-7 mr-3 text-indigo-600" /> Analisis Statistik & Pembuktian Kausalitas</h2>
           
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center space-x-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
-              <Filter className="w-4 h-4 text-slate-500" />
-              <span className="text-sm font-semibold text-slate-600">Variabel Target (Y):</span>
-              <select 
-                value={selectedOutcomeId}
-                onChange={(e) => setSelectedOutcomeId(e.target.value)}
-                className="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2 outline-none font-medium"
-              >
-                {outcomeOptions.map(opt => (
-                  <option key={opt.id} value={opt.id}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-            
             {!isPrinting && (
               <button 
                 onClick={handleExportExcel}
@@ -114,7 +101,7 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
         </div>
 
         <p className="text-slate-500 relative z-10 text-sm md:text-base max-w-4xl">
-          Dashboard ini melakukan perhitungan statistik lanjutan menggunakan <strong>Propensity Score Matching (PSM)</strong> dan <strong>Regresi Linear Multivariat</strong> untuk membuktikan secara matematis apakah FKTP yang memiliki Sp.KKLP secara signifikan menghasilkan nilai <strong>{outcomeLabel}</strong> yang lebih tinggi/baik dibandingkan FKTP tanpa Sp.KKLP.
+          Dashboard ini melakukan perhitungan statistik lanjutan menggunakan <strong>Propensity Score Matching (PSM)</strong> dan <strong>Regresi Linear Multivariat</strong> untuk membuktikan secara matematis dampak dari kehadiran Sp.KKLP di FKTP terhadap berbagai indikator performa klinis secara komprehensif.
         </p>
       </div>
 
@@ -165,90 +152,89 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
         </div>
       </div>
 
-      <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid' : ''}`}>
-        <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center"><FileText className="w-5 h-5 mr-2 text-slate-600" /> Hasil Pengujian Kausalitas: Dampak Sp.KKLP terhadap {outcomeLabel}</h3>
-        
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead>
-              <tr className="bg-slate-50 border-b">
-                <th className="px-4 py-3 font-semibold text-slate-700">Metode Uji Statistik</th>
-                <th className="px-4 py-3 font-semibold text-slate-700 text-center">Estimasi Dampak (Koefisien / Selisih)</th>
-                <th className="px-4 py-3 font-semibold text-slate-700 text-center">Standard Error</th>
-                <th className="px-4 py-3 font-semibold text-slate-700 text-center">T-Statistic</th>
-                <th className="px-4 py-3 font-semibold text-slate-700 text-center">P-Value</th>
-                <th className="px-4 py-3 font-semibold text-slate-700 text-center">Signifikansi (α=0.05)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* T-Test Row */}
-              <tr className="border-b border-slate-100 hover:bg-slate-50">
-                <td className="px-4 py-4 font-medium text-slate-800">Uji Beda Rata-rata (T-Test) setelah PSM</td>
-                <td className="px-4 py-4 text-center font-bold text-primary-600">{tTestResult ? `+${tTestResult.diff.toFixed(2)}%` : '-'}</td>
-                <td className="px-4 py-4 text-center text-slate-500">-</td>
-                <td className="px-4 py-4 text-center text-slate-500">{tTestResult ? tTestResult.tStat.toFixed(3) : '-'}</td>
-                <td className="px-4 py-4 text-center text-slate-500">{tTestResult ? tTestResult.pValue.toFixed(4) : '-'}</td>
-                <td className="px-4 py-4 text-center">
-                  {tTestResult?.isSignificant ? 
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"><CheckCircle2 className="w-3 h-3 mr-1"/> Signifikan</span> : 
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">Tidak Signifikan</span>}
-                </td>
-              </tr>
-              {/* Regression Row */}
-              <tr className="border-b border-slate-100 hover:bg-slate-50">
-                <td className="px-4 py-4 font-medium text-slate-800">Regresi Linier Multivariat (As Is Data)</td>
-                <td className="px-4 py-4 text-center font-bold text-indigo-600">{regressionResult ? `${regressionResult.treatmentEffect > 0 ? '+' : ''}${regressionResult.treatmentEffect.toFixed(2)}%` : '-'}</td>
-                <td className="px-4 py-4 text-center text-slate-500">{regressionResult ? regressionResult.standardError.toFixed(3) : '-'}</td>
-                <td className="px-4 py-4 text-center text-slate-500">{regressionResult ? regressionResult.tStat.toFixed(3) : '-'}</td>
-                <td className="px-4 py-4 text-center text-slate-500">{regressionResult ? regressionResult.pValue.toFixed(4) : '-'}</td>
-                <td className="px-4 py-4 text-center">
-                  {regressionResult?.isSignificant ? 
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"><CheckCircle2 className="w-3 h-3 mr-1"/> Signifikan</span> : 
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">Tidak Signifikan</span>}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {allOutcomesResults.map(({ id, label, tTestResult, regressionResult }) => (
+        <div key={id} className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid' : ''}`}>
+          <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center"><FileText className="w-5 h-5 mr-2 text-slate-600" /> Hasil Pengujian Kausalitas: Dampak Sp.KKLP terhadap {label}</h3>
+          
+          <div className="overflow-x-auto mb-6">
+            <table className="w-full text-sm text-left">
+              <thead>
+                <tr className="bg-slate-50 border-b">
+                  <th className="px-4 py-3 font-semibold text-slate-700">Metode Uji Statistik</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700 text-center">Estimasi Dampak (Koefisien / Selisih)</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700 text-center">Standard Error</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700 text-center">T-Statistic</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700 text-center">P-Value</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700 text-center">Signifikansi (α=0.05)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* T-Test Row */}
+                <tr className="border-b border-slate-100 hover:bg-slate-50">
+                  <td className="px-4 py-4 font-medium text-slate-800">Uji Beda Rata-rata (T-Test) setelah PSM</td>
+                  <td className="px-4 py-4 text-center font-bold text-primary-600">{tTestResult ? `${tTestResult.diff > 0 ? '+' : ''}${tTestResult.diff.toFixed(2)}` : '-'}</td>
+                  <td className="px-4 py-4 text-center text-slate-500">-</td>
+                  <td className="px-4 py-4 text-center text-slate-500">{tTestResult ? tTestResult.tStat.toFixed(3) : '-'}</td>
+                  <td className="px-4 py-4 text-center text-slate-500">{tTestResult ? tTestResult.pValue.toFixed(4) : '-'}</td>
+                  <td className="px-4 py-4 text-center">
+                    {tTestResult?.isSignificant ? 
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"><CheckCircle2 className="w-3 h-3 mr-1"/> Signifikan</span> : 
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">Tidak Signifikan</span>}
+                  </td>
+                </tr>
+                {/* Regression Row */}
+                <tr className="border-b border-slate-100 hover:bg-slate-50">
+                  <td className="px-4 py-4 font-medium text-slate-800">Regresi Linier Multivariat (As Is Data)</td>
+                  <td className="px-4 py-4 text-center font-bold text-indigo-600">{regressionResult ? `${regressionResult.treatmentEffect > 0 ? '+' : ''}${regressionResult.treatmentEffect.toFixed(2)}` : '-'}</td>
+                  <td className="px-4 py-4 text-center text-slate-500">{regressionResult ? regressionResult.standardError.toFixed(3) : '-'}</td>
+                  <td className="px-4 py-4 text-center text-slate-500">{regressionResult ? regressionResult.tStat.toFixed(3) : '-'}</td>
+                  <td className="px-4 py-4 text-center text-slate-500">{regressionResult ? regressionResult.pValue.toFixed(4) : '-'}</td>
+                  <td className="px-4 py-4 text-center">
+                    {regressionResult?.isSignificant ? 
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"><CheckCircle2 className="w-3 h-3 mr-1"/> Signifikan</span> : 
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">Tidak Signifikan</span>}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-      <div className={`bg-gradient-to-br from-slate-800 to-indigo-900 p-8 rounded-3xl text-white shadow-xl relative overflow-hidden ${isPrinting ? 'break-inside-avoid shadow-none' : ''}`}>
-         <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-         <h3 className="text-xl font-bold mb-4 flex items-center"><Activity className="w-6 h-6 mr-3 text-indigo-400" /> Interpretasi Naratif (AI Generated)</h3>
-         <div className="space-y-4 text-slate-300 leading-relaxed">
-            <p>
-              Berdasarkan uji statistik terhadap data observasional, proses <strong>Propensity Score Matching (PSM)</strong> telah menyeimbangkan karakteristik FKTP (berdasarkan Provinsi dan Jenis Faskes) agar kelompok yang memiliki Sp.KKLP setara (apple-to-apple) dengan kelompok yang tidak memilikinya. Hal ini terlihat dari <em>Love Plot</em> di mana titik-titik (SMD) bergeser mendekati atau berada di bawah batas ambang 0.1 setelah matching.
-            </p>
-            <p>
-              {tTestResult && tTestResult.isSignificant ? (
-                <span className="text-emerald-300 font-medium">Berdasarkan Uji-T pada data yang telah disetarakan (matched), kehadiran Sp.KKLP terbukti memberikan peningkatan rata-rata Kepatuhan PRB sebesar {tTestResult.diff.toFixed(1)}%. Perbedaan ini signifikan secara statistik (p &lt; 0.05). </span>
-              ) : (
-                <span className="text-amber-300 font-medium">Berdasarkan Uji-T pada data yang disetarakan (matched), meskipun terdapat {tTestResult ? (tTestResult.diff > 0 ? 'peningkatan' : 'penurunan') : ''} sebesar {tTestResult ? Math.abs(tTestResult.diff).toFixed(1) : 0}%, secara matematis perbedaan ini belum cukup kuat untuk dinyatakan signifikan secara statistik pada selang kepercayaan 95% (p &gt; 0.05). </span>
-              )}
-            </p>
-            <p>
-              {regressionResult && regressionResult.isSignificant ? (
-                <span>Lebih lanjut, hasil pemodelan <strong>Regresi Linier Multivariat</strong> yang mengontrol seluruh kovariat sekaligus juga mengonfirmasi adanya efek murni yang positif dan signifikan dari Sp.KKLP terhadap kinerja fasilitas sebesar <strong>+{regressionResult.treatmentEffect.toFixed(2)}%</strong> (p = {regressionResult.pValue.toFixed(3)}). </span>
-              ) : (
-                <span>Hasil pemodelan <strong>Regresi Linier Multivariat</strong> juga mengonfirmasi temuan tersebut, di mana efek murni Sp.KKLP (setelah dikontrol terhadap kovariat) adalah <strong>{regressionResult && regressionResult.treatmentEffect > 0 ? '+' : ''}{regressionResult ? regressionResult.treatmentEffect.toFixed(2) : 0}%</strong> dan belum signifikan (p = {regressionResult ? regressionResult.pValue.toFixed(3) : 1}). </span>
-              )}
-            </p>
-            <div className="mt-4 p-4 bg-white/10 rounded-xl border border-white/20">
-              <h4 className="text-white font-bold text-sm mb-2">Kesimpulan Utama:</h4>
-              {tTestResult?.isSignificant || regressionResult?.isSignificant ? (
-                <div className="flex items-start">
-                  <TrendingUp className="w-5 h-5 text-emerald-400 mr-2 shrink-0 mt-0.5" />
-                  <span className="text-sm">Secara ilmiah (dengan tingkat signifikansi 5%), dapat disimpulkan bahwa FKTP yang didukung oleh Dokter Spesialis Kedokteran Keluarga Layanan Primer (Sp.KKLP) memiliki Kepatuhan PRB yang secara meyakinkan <strong>lebih baik/lebih tinggi</strong> dibandingkan FKTP sejenis yang tidak memiliki Sp.KKLP.</span>
-                </div>
-              ) : (
-                <div className="flex items-start">
-                  <AlertTriangle className="w-5 h-5 text-amber-400 mr-2 shrink-0 mt-0.5" />
-                  <span className="text-sm">Saat ini belum ditemukan bukti statistik yang cukup kuat untuk menyimpulkan bahwa Sp.KKLP memengaruhi peningkatan nilai FKTP setelah dikontrol perancu. Hal ini bisa jadi disebabkan oleh jumlah sampel (N) FKTP tanpa Sp.KKLP yang terlalu kecil untuk mendeteksi perbedaan secara akurat (low statistical power).</span>
-                </div>
-              )}
+          <div className={`bg-gradient-to-br from-slate-800 to-indigo-900 p-6 rounded-2xl text-white shadow-lg relative overflow-hidden ${isPrinting ? 'break-inside-avoid shadow-none' : ''}`}>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+            <h4 className="text-lg font-bold mb-3 flex items-center"><Activity className="w-5 h-5 mr-3 text-indigo-400" /> Interpretasi Naratif (AI Generated) - {label}</h4>
+            <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
+              <p>
+                {tTestResult && tTestResult.isSignificant ? (
+                  <span className="text-emerald-300 font-medium">Berdasarkan Uji-T pada data yang telah disetarakan (matched), kehadiran Sp.KKLP terbukti memberikan efek sebesar {tTestResult.diff.toFixed(2)} pada {label}. Perbedaan ini signifikan secara statistik (p &lt; 0.05). </span>
+                ) : (
+                  <span className="text-amber-300 font-medium">Berdasarkan Uji-T pada data yang disetarakan (matched), efek Sp.KKLP sebesar {tTestResult ? tTestResult.diff.toFixed(2) : 0} pada {label} tidak signifikan secara statistik (p &gt; 0.05). </span>
+                )}
+              </p>
+              <p>
+                {regressionResult && regressionResult.isSignificant ? (
+                  <span>Lebih lanjut, hasil pemodelan <strong>Regresi Linier Multivariat</strong> yang mengontrol seluruh kovariat sekaligus juga mengonfirmasi adanya efek murni yang signifikan dari Sp.KKLP terhadap {label} sebesar <strong>{regressionResult.treatmentEffect > 0 ? '+' : ''}{regressionResult.treatmentEffect.toFixed(2)}</strong> (p = {regressionResult.pValue.toFixed(3)}). </span>
+                ) : (
+                  <span>Hasil pemodelan <strong>Regresi Linier Multivariat</strong> juga mengonfirmasi temuan tersebut, di mana efek murni Sp.KKLP (setelah dikontrol terhadap kovariat) adalah <strong>{regressionResult && regressionResult.treatmentEffect > 0 ? '+' : ''}{regressionResult ? regressionResult.treatmentEffect.toFixed(2) : 0}</strong> dan belum signifikan (p = {regressionResult ? regressionResult.pValue.toFixed(3) : 1}). </span>
+                )}
+              </p>
+              <div className="mt-4 p-3 bg-white/10 rounded-xl border border-white/20">
+                <h5 className="text-white font-bold text-xs mb-1">Kesimpulan Utama:</h5>
+                {tTestResult?.isSignificant || regressionResult?.isSignificant ? (
+                  <div className="flex items-start">
+                    <TrendingUp className="w-4 h-4 text-emerald-400 mr-2 shrink-0 mt-0.5" />
+                    <span>Secara ilmiah (dengan tingkat signifikansi 5%), dapat disimpulkan bahwa kehadiran Sp.KKLP memiliki dampak yang secara meyakinkan dan signifikan terhadap {label}.</span>
+                  </div>
+                ) : (
+                  <div className="flex items-start">
+                    <AlertTriangle className="w-4 h-4 text-amber-400 mr-2 shrink-0 mt-0.5" />
+                    <span>Saat ini belum ditemukan bukti statistik yang cukup kuat untuk menyimpulkan bahwa Sp.KKLP memengaruhi {label} secara signifikan setelah dikontrol perancu.</span>
+                  </div>
+                )}
+              </div>
             </div>
-         </div>
-      </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
