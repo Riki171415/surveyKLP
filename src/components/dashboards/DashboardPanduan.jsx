@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, Users, Activity, HeartPulse, Stethoscope, AlertTriangle, MessageSquare, Database, Printer, Filter, Home, ShieldAlert, Beaker, Lightbulb, ChevronDown, ChevronUp, Info, HelpCircle } from 'lucide-react';
+import { BookOpen, Users, Activity, HeartPulse, Stethoscope, AlertTriangle, MessageSquare, Database, Printer, Filter, Home, ShieldAlert, Beaker, Lightbulb, ChevronDown, ChevronUp, Info, HelpCircle, FileSearch } from 'lucide-react';
 
 const GUIDES = [
   {
