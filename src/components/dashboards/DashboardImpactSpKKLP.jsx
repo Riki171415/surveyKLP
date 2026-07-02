@@ -281,6 +281,11 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
         title: 'Analisis Spektrum Kemampuan (Radar - Per FKTP)',
         headers: ['Aspek Pelayanan', 'Ada (As Is)', 'Tanpa (As Is)', 'Ada (Matched)', 'Tanpa (Matched)'],
         data: combinedRadarData.map(d => [d.subject, `${d['Ada (As Is)'].toFixed(1)}%`, `${d['Tanpa (As Is)'].toFixed(1)}%`, `${d['Ada (Matched)'].toFixed(1)}%`, `${d['Tanpa (Matched)'].toFixed(1)}%`])
+      },
+      {
+        title: `Distribusi Kovariat (Jenis Faskes) - ${view === 'responden' ? 'Per Responden' : 'Per FKTP'}`,
+        headers: ['Jenis Faskes', 'As Is (Ada)', 'As Is (Tanpa)', 'Matched (Ada)', 'Matched (Tanpa)'],
+        data: (view === 'responden' ? covBalanceR : covBalanceF).map(row => [row.name, row.asIsAda.toFixed(0), row.asIsTanpa.toFixed(0), row.matchedAda.toFixed(1), row.matchedTanpa.toFixed(1)])
       }
     ];
 
