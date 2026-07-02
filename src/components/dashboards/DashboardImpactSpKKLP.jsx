@@ -344,20 +344,6 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
           </div>
           {!isPrinting && (
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <div className="bg-white/20 backdrop-blur-md rounded-lg p-1.5 flex items-center shadow-inner">
-                <span className="text-xs font-semibold mr-2 opacity-80">Metode Statistik:</span>
-                <select 
-                  value={statMethod}
-                  onChange={(e) => setStatMethod(e.target.value)}
-                  className="bg-white/10 text-white border border-white/20 rounded-md text-xs font-semibold px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-white/50"
-                  title="Metode Statistik"
-                >
-                  <option value="random" className="text-slate-800">1. Random Sampling (1:1)</option>
-                  <option value="psm" className="text-slate-800">2. Propensity Score Matching (PSM)</option>
-                  <option value="ipw" className="text-slate-800">3. Inverse Probability Weighting (IPW)</option>
-                  <option value="stratified" className="text-slate-800">4. Stratified Analysis</option>
-                </select>
-              </div>
               <ViewToggle value={view} onChange={setView} />
             </div>
           )}
@@ -378,8 +364,24 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
               <ImageIcon className="w-4 h-4" />
             </button>
           )}
-          <div className="flex justify-between items-center mb-6 pr-10">
-            <h3 className="text-base font-bold text-slate-800 flex items-center"><Activity className="w-5 h-5 mr-2 text-primary-600" /> Perbandingan Kinerja Lintas Program (%)</h3>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 pr-0 lg:pr-10">
+            <h3 className="text-base font-bold text-slate-800 flex items-center shrink-0"><Activity className="w-5 h-5 mr-2 text-primary-600" /> Perbandingan Kinerja Lintas Program (%)</h3>
+            {!isPrinting && (
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-1.5 flex items-center shadow-sm w-fit z-20">
+                <span className="text-xs font-semibold text-slate-500 mr-2">Metode Statistik:</span>
+                <select 
+                  value={statMethod}
+                  onChange={(e) => setStatMethod(e.target.value)}
+                  className="bg-white text-slate-700 border border-slate-300 rounded-md text-xs font-semibold px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  title="Pilih Metode Statistik"
+                >
+                  <option value="random">1. Random Sampling (1:1)</option>
+                  <option value="psm">2. Propensity Score Matching (PSM)</option>
+                  <option value="ipw">3. Inverse Probability Weighting (IPW)</option>
+                  <option value="stratified">4. Stratified Analysis</option>
+                </select>
+              </div>
+            )}
           </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
