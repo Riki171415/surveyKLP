@@ -356,54 +356,71 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
 
     const statsDetails = [];
 
-    let methodDesc = [];
-    if (statMethod === 'psm') {
-      methodDesc = [
-        'Metode: Propensity Score Matching (PSM)',
-        '1. Menghitung Propensity Score menggunakan regresi logistik untuk setiap fasilitas berdasarkan karakteristik faskes (Region, Akreditasi, Beban Pasien, dll).',
-        '2. Memasangkan (Matching) 1 Faskes dengan Sp.KKLP ke 1 Faskes tanpa Sp.KKLP yang memiliki skor kemiripan terdekat (Nearest Neighbor).',
-        '3. Mengukur selisih (Average Treatment Effect) pada sampel yang sudah diseimbangkan.'
-      ];
-    } else if (statMethod === 'ipw') {
-      methodDesc = [
-        'Metode: Inverse Probability Weighting (IPW)',
-        '1. Menghitung Propensity Score untuk setiap fasilitas.',
-        '2. Memberikan bobot (weight) pada setiap observasi berbanding terbalik dengan probabilitas mereka menerima status saat ini.',
-        '3. Faskes yang "tidak biasa" (misal faskes kecil tapi punya Sp.KKLP) diberi bobot lebih besar untuk menyetarakan populasi secara sintetis.'
-      ];
-    } else if (statMethod === 'stratified') {
-      methodDesc = [
-        'Metode: Stratified Analysis (Stratifikasi)',
-        '1. Mengelompokkan faskes ke dalam beberapa strata berdasarkan kuantil Propensity Score.',
-        '2. Membandingkan efek Sp.KKLP di dalam masing-masing strata yang memiliki karakteristik homogen.',
-        '3. Menggabungkan rata-rata efek dari seluruh strata.'
-      ];
-    } else {
-      methodDesc = [
-        'Metode: Random Sampling (1:1)',
-        '1. Mengambil sampel secara acak dari kelompok tanpa Sp.KKLP dengan jumlah yang persis sama dengan kelompok yang memiliki Sp.KKLP.',
-        '2. Menciptakan keseimbangan jumlah absolut, namun belum menjamin keseimbangan karakteristik perancu (covariates).'
-      ];
-    }
+    const methods = [
+      {
+        id: 'psm',
+        name: 'Propensity Score Matching (PSM)',
+        desc: [
+          '1. Menghitung Propensity Score menggunakan regresi logistik untuk setiap fasilitas berdasarkan karakteristik faskes (Region, Akreditasi, Beban Pasien, dll).',
+          '2. Memasangkan (Matching) 1 Faskes dengan Sp.KKLP ke 1 Faskes tanpa Sp.KKLP yang memiliki skor kemiripan terdekat (Nearest Neighbor).',
+          '3. Mengukur selisih (Average Treatment Effect) pada sampel yang sudah diseimbangkan.'
+        ]
+      },
+      {
+        id: 'ipw',
+        name: 'Inverse Probability Weighting (IPW)',
+        desc: [
+          '1. Menghitung Propensity Score untuk setiap fasilitas.',
+          '2. Memberikan bobot (weight) pada setiap observasi berbanding terbalik dengan probabilitas mereka menerima status saat ini.',
+          '3. Faskes yang "tidak biasa" (misal faskes kecil tapi punya Sp.KKLP) diberi bobot lebih besar untuk menyetarakan populasi secara sintetis.'
+        ]
+      },
+      {
+        id: 'stratified',
+        name: 'Stratified Analysis (Stratifikasi)',
+        desc: [
+          '1. Mengelompokkan faskes ke dalam beberapa strata berdasarkan kuantil Propensity Score.',
+          '2. Membandingkan efek Sp.KKLP di dalam masing-masing strata yang memiliki karakteristik homogen.',
+          '3. Menggabungkan rata-rata efek dari seluruh strata.'
+        ]
+      },
+      {
+        id: 'random',
+        name: 'Random Sampling (1:1)',
+        desc: [
+          '1. Mengambil sampel secara acak dari kelompok tanpa Sp.KKLP dengan jumlah yang persis sama dengan kelompok yang memiliki Sp.KKLP.',
+          '2. Menciptakan keseimbangan jumlah absolut, namun belum menjamin keseimbangan karakteristik perancu (covariates).'
+        ]
+      }
+    ];
 
-    statsDetails.push({
-      type: 'MatchingSummary',
-      title: 'A. Ringkasan Metode Penyeimbang (Matching)',
-      description: methodDesc,
-      tables: [
-        {
-          title: `Distribusi Kesamaan Karakteristik (Covariate Balance) - ${view === 'responden' ? 'Per Responden' : 'Per FKTP'}`,
-          headers: ['Jenis Faskes', 'As Is (Ada)', 'As Is (Tanpa)', 'Matched (Ada)', 'Matched (Tanpa)', 'Selisih Matched'],
-          data: (view === 'responden' ? covBalanceR : covBalanceF).map(row => [
-            row.name, 
-            row.asIsAda.toFixed(0), 
-            row.asIsTanpa.toFixed(0), 
-            row.matchedAda.toFixed(1), 
-            row.matchedTanpa.toFixed(1),
-            Math.abs(row.matchedAda - row.matchedTanpa).toFixed(1)
-          ])
-        }
-      ]
+    const dataRAsIs = applyStatistics(filteredData, 'as-is');
+    const dataFAsIs = applyStatistics(uniqueFktpData, 'as-is');
+
+    methods.forEach((m, idx) => {
+      const dataMatched = applyStatistics(view === 'responden' ? filteredData : uniqueFktpData, m.id);
+      const dataAsIs = view === 'responden' ? dataRAsIs : dataFAsIs;
+      const covBalance = getCovariateBalance(dataAsIs, dataMatched);
+
+      statsDetails.push({
+        type: `MatchingSummary_${m.id}`,
+        title: `${String.fromCharCode(65 + idx)}. Metode: ${m.name}`,
+        description: m.desc,
+        tables: [
+          {
+            title: `Distribusi Kesamaan Karakteristik (Covariate Balance) - ${m.name}`,
+            headers: ['Jenis Faskes', 'As Is (Ada)', 'As Is (Tanpa)', 'Matched (Ada)', 'Matched (Tanpa)', 'Selisih Matched'],
+            data: covBalance.map(row => [
+              row.name, 
+              row.asIsAda.toFixed(0), 
+              row.asIsTanpa.toFixed(0), 
+              row.matchedAda.toFixed(1), 
+              row.matchedTanpa.toFixed(1),
+              Math.abs(row.matchedAda - row.matchedTanpa).toFixed(1)
+            ])
+          }
+        ]
+      });
     });
 
     const rawData = {
