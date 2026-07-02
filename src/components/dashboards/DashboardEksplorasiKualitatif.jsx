@@ -157,17 +157,24 @@ export default function DashboardEksplorasiKualitatif({ filteredData, isPrinting
   };
 
   const extractTextData = () => {
-    // Ambil jawaban kualitatif relevan dari G1-G8
     const texts = filteredData.map(d => {
       let answers = [];
-      if (d.g1) answers.push(`G1: ${d.g1}`);
-      if (d.g2) answers.push(`G2: ${d.g2}`);
-      if (d.g3) answers.push(`G3: ${d.g3}`);
-      if (d.g4) answers.push(`G4: ${d.g4}`);
-      if (d.g5) answers.push(`G5: ${d.g5}`);
-      if (d.g6) answers.push(`G6: ${d.g6}`);
-      if (d.g7) answers.push(`G7: ${d.g7}`);
-      if (d.g8) answers.push(`G8: ${d.g8}`);
+      // 1. Ambil data wawancara (Pendalaman Kualitatif F)
+      if (d.wawancara) {
+        Object.keys(d.wawancara).forEach(k => {
+          if (k !== 'pewawancara' && d.wawancara[k] && d.wawancara[k].trim().length > 5) {
+             answers.push(`Q${k}: ${d.wawancara[k]}`);
+          }
+        });
+      }
+      
+      // 2. Ambil teks bebas dari PRB & Kendala
+      if (d.prb?.kendala) answers.push(`Kendala PRB: ${d.prb.kendala}`);
+      if (d.spkklpKendala?.diagnosis) answers.push(`Kendala Diagnosis SpKKLP: ${d.spkklpKendala.diagnosis}`);
+      if (d.spkklpKendala?.tindakan) answers.push(`Kendala Tindakan SpKKLP: ${d.spkklpKendala.tindakan}`);
+      if (d.layanan_dirujuk?.lainnya) answers.push(`Lainnya dirujuk: ${d.layanan_dirujuk.lainnya}`);
+      if (d.layanan_belum_berjalan?.lainnya) answers.push(`Lainnya belum jalan: ${d.layanan_belum_berjalan.lainnya}`);
+
       if (answers.length === 0) return null;
       return `[Faskes: ${d.fktp_name || 'NN'}, Wilayah: ${d.provinsi || 'NN'}]: ${answers.join(' | ')}`;
     }).filter(Boolean);

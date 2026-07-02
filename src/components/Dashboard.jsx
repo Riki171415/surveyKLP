@@ -9,7 +9,7 @@ import { format, parseISO } from 'date-fns';
 import { 
   Users, Activity, HeartPulse, Stethoscope, AlertTriangle, 
   MessageSquare, Database, Printer, Download, Filter, Home, ShieldAlert,
-  Search, ChevronLeft, ChevronRight, FileSearch, Copy, Beaker, Lightbulb, BookOpen
+  Search, ChevronLeft, ChevronRight, FileSearch, Copy, Beaker, Lightbulb, BookOpen, Target
 } from 'lucide-react';
 
 import DashboardProfil from './dashboards/DashboardProfil';
@@ -23,6 +23,7 @@ import DashboardImpactSpKKLP from './dashboards/DashboardImpactSpKKLP';
 import DashboardKendala from './dashboards/DashboardKendala';
 import DashboardKualitatif from './dashboards/DashboardKualitatif';
 import DashboardDPM from './dashboards/DashboardDPM';
+import DashboardFaktorPrediktor from './dashboards/DashboardFaktorPrediktor';
 import DashboardPasienBulanan from './dashboards/DashboardPasienBulanan';
 import DashboardKeluhanSentences from './dashboards/DashboardKeluhanSentences';
 import DashboardAnalisisLanjut from './dashboards/DashboardAnalisisLanjut';
@@ -712,6 +713,7 @@ export default function Dashboard() {
     { id: 'spkklp', label: 'Peran Sp.KKLP', icon: Stethoscope },
     { id: 'impact_spkklp', label: 'Impact Sp.KKLP', icon: Activity },
     { id: 'analisis_lanjut', label: 'Analisis Kaidah Statistik', icon: Beaker },
+    { id: 'prediktor', label: 'Faktor Prediktor', icon: Target },
     { id: 'kendala', label: 'Kendala JKN', icon: AlertTriangle },
     { id: 'kualitatif', label: 'Kualitatif (NVIVO)', icon: MessageSquare },
     { id: 'eksplorasi_kualitatif', label: 'Eksplorasi AI', icon: Lightbulb },
@@ -863,6 +865,7 @@ export default function Dashboard() {
                 <DashboardSpKKLP filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
                 <DashboardImpactSpKKLP filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
                 <DashboardAnalisisLanjut uniqueFktpData={uniqueFktpData} isPrinting={true} />
+                <DashboardFaktorPrediktor uniqueFktpData={uniqueFktpData} isPrinting={true} />
                 <DashboardKendala filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
                 <DashboardKualitatif filteredData={filteredData} uniqueFktpData={uniqueFktpData} isPrinting={true} />
                 <DashboardEksplorasiKualitatif filteredData={filteredData} isPrinting={true} />
@@ -883,6 +886,7 @@ export default function Dashboard() {
                   {activeTab === 'spkklp' && <DashboardSpKKLP filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
                   {activeTab === 'impact_spkklp' && <DashboardImpactSpKKLP filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
                   {activeTab === 'analisis_lanjut' && <DashboardAnalisisLanjut uniqueFktpData={uniqueFktpData} isPrinting={false} />}
+                  {activeTab === 'prediktor' && <DashboardFaktorPrediktor uniqueFktpData={uniqueFktpData} isPrinting={false} />}
                   {activeTab === 'kendala' && <DashboardKendala filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
                   {activeTab === 'kualitatif' && <DashboardKualitatif filteredData={filteredData} uniqueFktpData={uniqueFktpData} isPrinting={false} />}
                   {activeTab === 'eksplorasi_kualitatif' && <DashboardEksplorasiKualitatif filteredData={filteredData} isPrinting={false} />}
