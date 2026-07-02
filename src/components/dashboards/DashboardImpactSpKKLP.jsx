@@ -28,7 +28,7 @@ const ViewToggle = ({ value, onChange }) => (
 
 export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, COLORS, isPrinting }) {
   const [view, setView] = useState('responden');
-  const [statMethod, setStatMethod] = useState('as-is');
+  const [statMethod, setStatMethod] = useState('psm');
   
   const calculateMetrics = (dataset) => {
     let adaSp = 0, tanpaSp = 0;
@@ -135,21 +135,73 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
       case 'ipw': return performIPW(data, treatmentFn, covariates);
       case 'stratified': return performStratifiedMatching(data, treatmentFn, covariates);
       default: return data;
-    }
+  const getCovariateBalance = (dataAsIs, dataMatched) => {
+    const balance = {};
+    const processData = (data, type) => {
+      data.forEach(d => {
+        const val = d.jenis_faskes || 'Lainnya';
+        if (!balance[val]) balance[val] = { name: val, asIsAda: 0, asIsTanpa: 0, matchedAda: 0, matchedTanpa: 0 };
+        const isT = d.doc_kklp === 'Ya';
+        const w = d._weight || 1;
+        if (type === 'asIs') {
+          if (isT) balance[val].asIsAda += w; else balance[val].asIsTanpa += w;
+        } else {
+          if (isT) balance[val].matchedAda += w; else balance[val].matchedTanpa += w;
+        }
+      });
+    };
+    processData(dataAsIs || [], 'asIs');
+    processData(dataMatched || [], 'matched');
+    return Object.values(balance).sort((a,b) => b.asIsAda - a.asIsAda);
   };
 
-  const { metricsR, metricsF } = useMemo(() => {
-    const dataR = applyStatistics(filteredData, statMethod);
-    const dataF = applyStatistics(uniqueFktpData, statMethod);
+  const { metricsRAsIs, metricsRMatched, metricsFAsIs, metricsFMatched, covBalanceR, covBalanceF } = useMemo(() => {
+    const dataRAsIs = applyStatistics(filteredData, 'as-is');
+    const dataRMatched = applyStatistics(filteredData, statMethod);
+    const dataFAsIs = applyStatistics(uniqueFktpData, 'as-is');
+    const dataFMatched = applyStatistics(uniqueFktpData, statMethod);
     
     return {
-      metricsR: calculateMetrics(dataR),
-      metricsF: calculateMetrics(dataF)
+      metricsRAsIs: calculateMetrics(dataRAsIs),
+      metricsRMatched: calculateMetrics(dataRMatched),
+      metricsFAsIs: calculateMetrics(dataFAsIs),
+      metricsFMatched: calculateMetrics(dataFMatched),
+      covBalanceR: getCovariateBalance(dataRAsIs, dataRMatched),
+      covBalanceF: getCovariateBalance(dataFAsIs, dataFMatched)
     };
   }, [filteredData, uniqueFktpData, statMethod]);
 
-  const activeMetrics = view === 'responden' ? metricsR : metricsF;
-  const { spData, radarData, stats } = activeMetrics;
+  const activeMetricsAsIs = view === 'responden' ? metricsRAsIs : metricsFAsIs;
+  const activeMetricsMatched = view === 'responden' ? metricsRMatched : metricsFMatched;
+  
+  // Combine spData for BarChart
+  const combinedSpData = activeMetricsAsIs.spData.map((item, i) => {
+    const matchedItem = activeMetricsMatched.spData[i];
+    return {
+      name: item.name,
+      'Ada (As Is)': item['Ada Sp.KKLP'],
+      'Tanpa (As Is)': item['Tanpa Sp.KKLP'],
+      'Ada (Matched)': matchedItem['Ada Sp.KKLP'],
+      'Tanpa (Matched)': matchedItem['Tanpa Sp.KKLP'],
+    };
+  });
+
+  // Combine radarData for RadarChart
+  const combinedRadarData = activeMetricsAsIs.radarData.map((item, i) => {
+    const matchedItem = activeMetricsMatched.radarData[i];
+    return {
+      subject: item.subject,
+      'Ada (As Is)': item.Ada,
+      'Tanpa (As Is)': item.Tanpa,
+      'Ada (Matched)': matchedItem.Ada,
+      'Tanpa (Matched)': matchedItem.Tanpa,
+      fullMark: item.fullMark
+    };
+  });
+
+  // We use Matched metrics for the main StatCards and summaries, and fallback stats where needed
+  const { stats } = activeMetricsMatched;
+  const statsAsIs = activeMetricsAsIs.stats;
 
   const StatCard = ({ title, valueAda, valueTanpa, subtitle, icon: Icon, colorClass }) => {
     const diff = valueAda - valueTanpa;
@@ -208,24 +260,24 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
 
     const tables = [
       {
-        title: 'Ringkasan Kinerja Keseluruhan (Per Responden)',
+        title: 'Ringkasan Kinerja Keseluruhan (Per Responden) - Matched',
         headers: headersList,
-        data: formatExportData(metricsR)
+        data: formatExportData(metricsRMatched)
       },
       {
-        title: 'Ringkasan Kinerja Keseluruhan (Per FKTP)',
+        title: 'Ringkasan Kinerja Keseluruhan (Per FKTP) - Matched',
         headers: headersList,
-        data: formatExportData(metricsF)
+        data: formatExportData(metricsFMatched)
       },
       {
         title: 'Analisis Spektrum Kemampuan (Radar - Per Responden)',
-        headers: ['Aspek Pelayanan', 'Ada Sp.KKLP (%)', 'Tanpa Sp.KKLP (%)'],
-        data: metricsR.radarData.map(d => [d.subject, `${d['Ada'].toFixed(1)}%`, `${d['Tanpa'].toFixed(1)}%`])
+        headers: ['Aspek Pelayanan', 'Ada (As Is)', 'Tanpa (As Is)', 'Ada (Matched)', 'Tanpa (Matched)'],
+        data: combinedRadarData.map(d => [d.subject, `${d['Ada (As Is)'].toFixed(1)}%`, `${d['Tanpa (As Is)'].toFixed(1)}%`, `${d['Ada (Matched)'].toFixed(1)}%`, `${d['Tanpa (Matched)'].toFixed(1)}%`])
       },
       {
         title: 'Analisis Spektrum Kemampuan (Radar - Per FKTP)',
-        headers: ['Aspek Pelayanan', 'Ada Sp.KKLP (%)', 'Tanpa Sp.KKLP (%)'],
-        data: metricsF.radarData.map(d => [d.subject, `${d['Ada'].toFixed(1)}%`, `${d['Tanpa'].toFixed(1)}%`])
+        headers: ['Aspek Pelayanan', 'Ada (As Is)', 'Tanpa (As Is)', 'Ada (Matched)', 'Tanpa (Matched)'],
+        data: combinedRadarData.map(d => [d.subject, `${d['Ada (As Is)'].toFixed(1)}%`, `${d['Tanpa (As Is)'].toFixed(1)}%`, `${d['Ada (Matched)'].toFixed(1)}%`, `${d['Tanpa (Matched)'].toFixed(1)}%`])
       }
     ];
 
@@ -279,23 +331,23 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
           <div>
             <h2 className="text-2xl font-bold mb-2 flex items-center"><Stethoscope className="w-6 h-6 mr-2" /> Dampak Keberadaan Sp.KKLP</h2>
             <p className="text-primary-100 font-medium text-sm">
-              Komparasi indikator pelayanan antara {stats.adaSp} (Ada Sp.KKLP) vs {stats.tanpaSp} (Tanpa Sp.KKLP)
+              Komparasi indikator pelayanan antara {statsAsIs.adaSp} (Ada) vs {statsAsIs.tanpaSp} (Tanpa) ➔ Diubah menjadi proporsional (Matched)
             </p>
           </div>
           {!isPrinting && (
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
               <div className="bg-white/20 backdrop-blur-md rounded-lg p-1.5 flex items-center shadow-inner">
+                <span className="text-xs font-semibold mr-2 opacity-80">Metode Statistik:</span>
                 <select 
                   value={statMethod}
                   onChange={(e) => setStatMethod(e.target.value)}
                   className="bg-white/10 text-white border border-white/20 rounded-md text-xs font-semibold px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-white/50"
                   title="Metode Statistik"
                 >
-                  <option value="as-is" className="text-slate-800">1. As Is (Data Mentah)</option>
-                  <option value="random" className="text-slate-800">2. Random Sampling (1:1)</option>
-                  <option value="psm" className="text-slate-800">3. Propensity Score Matching (PSM)</option>
-                  <option value="ipw" className="text-slate-800">4. Inverse Probability Weighting (IPW)</option>
-                  <option value="stratified" className="text-slate-800">5. Stratified Analysis</option>
+                  <option value="random" className="text-slate-800">1. Random Sampling (1:1)</option>
+                  <option value="psm" className="text-slate-800">2. Propensity Score Matching (PSM)</option>
+                  <option value="ipw" className="text-slate-800">3. Inverse Probability Weighting (IPW)</option>
+                  <option value="stratified" className="text-slate-800">4. Stratified Analysis</option>
                 </select>
               </div>
               <ViewToggle value={view} onChange={setView} />
@@ -323,17 +375,23 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
           </div>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
-              <BarChart data={spData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
+              <BarChart data={combinedSpData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
                 <RechartsTooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value) => [Number(value).toFixed(1) + '%', 'Capaian']} />
                 <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '13px', fontWeight: 500 }} />
-                <Bar dataKey="Ada Sp.KKLP" fill="#0ea5e9" radius={[4, 4, 0, 0]} maxBarSize={50}>
-                  <LabelList dataKey="Ada Sp.KKLP" position="top" fill="#0284c7" fontSize={11} fontWeight={600} formatter={(val) => Number(val).toFixed(1) + '%'} />
+                <Bar dataKey="Ada (As Is)" fill="#7dd3fc" radius={[4, 4, 0, 0]} maxBarSize={30}>
+                  <LabelList dataKey="Ada (As Is)" position="top" fill="#38bdf8" fontSize={9} fontWeight={600} formatter={(val) => Number(val).toFixed(1)} />
                 </Bar>
-                <Bar dataKey="Tanpa Sp.KKLP" fill="#94a3b8" radius={[4, 4, 0, 0]} maxBarSize={50}>
-                  <LabelList dataKey="Tanpa Sp.KKLP" position="top" fill="#64748b" fontSize={11} fontWeight={600} formatter={(val) => Number(val).toFixed(1) + '%'} />
+                <Bar dataKey="Tanpa (As Is)" fill="#cbd5e1" radius={[4, 4, 0, 0]} maxBarSize={30}>
+                  <LabelList dataKey="Tanpa (As Is)" position="top" fill="#94a3b8" fontSize={9} fontWeight={600} formatter={(val) => Number(val).toFixed(1)} />
+                </Bar>
+                <Bar dataKey="Ada (Matched)" fill="#0284c7" radius={[4, 4, 0, 0]} maxBarSize={30}>
+                  <LabelList dataKey="Ada (Matched)" position="top" fill="#0369a1" fontSize={11} fontWeight={600} formatter={(val) => Number(val).toFixed(1) + '%'} />
+                </Bar>
+                <Bar dataKey="Tanpa (Matched)" fill="#475569" radius={[4, 4, 0, 0]} maxBarSize={30}>
+                  <LabelList dataKey="Tanpa (Matched)" position="top" fill="#334155" fontSize={11} fontWeight={600} formatter={(val) => Number(val).toFixed(1) + '%'} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -352,12 +410,14 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
           <p className="text-xs text-slate-400 mb-2 italic">Area semakin luas menandakan kualitas/kapasitas pelayanan yang semakin menyeluruh.</p>
           <div className="h-80">
             <ResponsiveContainer width="99%" height="100%" minHeight={250} minWidth={0}>
-              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={combinedRadarData}>
                 <PolarGrid stroke="#E2E8F0" />
                 <PolarAngleAxis dataKey="subject" tick={{ fill: '#475569', fontSize: 11, fontWeight: 500 }} />
                 <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                <Radar name="Ada Sp.KKLP" dataKey="Ada" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.4} />
-                <Radar name="Tanpa Sp.KKLP" dataKey="Tanpa" stroke="#94a3b8" fill="#94a3b8" fillOpacity={0.4} />
+                <Radar name="Ada (As Is)" dataKey="Ada (As Is)" stroke="#7dd3fc" fill="#7dd3fc" fillOpacity={0.1} />
+                <Radar name="Tanpa (As Is)" dataKey="Tanpa (As Is)" stroke="#cbd5e1" fill="#cbd5e1" fillOpacity={0.1} />
+                <Radar name="Ada (Matched)" dataKey="Ada (Matched)" stroke="#0284c7" fill="#0284c7" fillOpacity={0.4} />
+                <Radar name="Tanpa (Matched)" dataKey="Tanpa (Matched)" stroke="#475569" fill="#475569" fillOpacity={0.4} />
                 <Legend wrapperStyle={{ fontSize: '12px' }} />
                 <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value) => [Number(value).toFixed(1) + '%']} />
               </RadarChart>
@@ -371,26 +431,72 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
             <table className="w-full text-sm text-left">
               <thead>
                 <tr>
-                  <th className="px-4 py-3 bg-slate-50 font-semibold text-slate-700 border-b">Indikator Kinerja</th>
-                  <th className="px-4 py-3 bg-slate-50 font-semibold text-slate-700 border-b text-center">Ada Sp.KKLP</th>
-                  <th className="px-4 py-3 bg-slate-50 font-semibold text-slate-700 border-b text-center">Tanpa Sp.KKLP</th>
-                  <th className="px-4 py-3 bg-slate-50 font-semibold text-slate-700 border-b text-center">Selisih</th>
+                  <th rowSpan={2} className="px-4 py-3 bg-slate-50 font-semibold text-slate-700 border-b border-r align-middle">Indikator Kinerja</th>
+                  <th colSpan={3} className="px-4 py-2 bg-slate-50 font-semibold text-slate-700 border-b border-r text-center">Sebelum Matching (As Is)</th>
+                  <th colSpan={3} className="px-4 py-2 bg-indigo-50 font-semibold text-indigo-900 border-b text-center">Sesudah Matching ({statMethod.toUpperCase()})</th>
+                </tr>
+                <tr>
+                  <th className="px-3 py-2 bg-slate-50 font-semibold text-slate-600 border-b text-center border-r">Ada</th>
+                  <th className="px-3 py-2 bg-slate-50 font-semibold text-slate-600 border-b text-center border-r">Tanpa</th>
+                  <th className="px-3 py-2 bg-slate-50 font-semibold text-slate-600 border-b text-center border-r">Selisih</th>
+                  <th className="px-3 py-2 bg-indigo-50 font-semibold text-indigo-700 border-b text-center border-r">Ada</th>
+                  <th className="px-3 py-2 bg-indigo-50 font-semibold text-indigo-700 border-b text-center border-r">Tanpa</th>
+                  <th className="px-3 py-2 bg-indigo-50 font-semibold text-indigo-700 border-b text-center">Selisih</th>
                 </tr>
               </thead>
               <tbody>
-                {spData.map((row, idx) => {
-                  const diff = row['Ada Sp.KKLP'] - row['Tanpa Sp.KKLP'];
+                {combinedSpData.map((row, idx) => {
+                  const diffAsIs = row['Ada (As Is)'] - row['Tanpa (As Is)'];
+                  const diffMatched = row['Ada (Matched)'] - row['Tanpa (Matched)'];
                   return (
                     <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50">
-                      <td className="px-4 py-3 font-medium text-slate-800">{row.name}</td>
-                      <td className="px-4 py-3 text-center text-primary-600 font-bold">{row['Ada Sp.KKLP'].toFixed(1)}%</td>
-                      <td className="px-4 py-3 text-center text-slate-500 font-medium">{row['Tanpa Sp.KKLP'].toFixed(1)}%</td>
-                      <td className={`px-4 py-3 text-center font-bold ${diff > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        {diff > 0 ? '+' : ''}{diff.toFixed(1)}%
+                      <td className="px-4 py-3 font-medium text-slate-800 border-r">{row.name}</td>
+                      <td className="px-3 py-3 text-center font-semibold text-slate-500 border-r">{row['Ada (As Is)'].toFixed(1)}%</td>
+                      <td className="px-3 py-3 text-center text-slate-400 border-r">{row['Tanpa (As Is)'].toFixed(1)}%</td>
+                      <td className={`px-3 py-3 text-center font-bold border-r ${diffAsIs > 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
+                        {diffAsIs > 0 ? '+' : ''}{diffAsIs.toFixed(1)}%
+                      </td>
+                      <td className="px-3 py-3 text-center font-bold text-primary-600 bg-indigo-50/30 border-r">{row['Ada (Matched)'].toFixed(1)}%</td>
+                      <td className="px-3 py-3 text-center font-medium text-slate-500 bg-indigo-50/30 border-r">{row['Tanpa (Matched)'].toFixed(1)}%</td>
+                      <td className={`px-3 py-3 text-center font-bold bg-indigo-50/30 ${diffMatched > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        {diffMatched > 0 ? '+' : ''}{diffMatched.toFixed(1)}%
                       </td>
                     </tr>
                   )
                 })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-2' : ''}`}>
+          <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center"><FileText className="w-5 h-5 mr-2 text-slate-600" /> Distribusi Kovariat (Jenis Faskes)</h3>
+          <p className="text-xs text-slate-500 mb-4">Menunjukkan keseimbangan populasi (N) antara kelompok Ada dan Tanpa Sp.KKLP sebelum dan sesudah matching statistik.</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead>
+                <tr>
+                  <th rowSpan={2} className="px-4 py-3 bg-slate-50 font-semibold text-slate-700 border-b border-r align-middle">Jenis Faskes</th>
+                  <th colSpan={2} className="px-4 py-2 bg-slate-50 font-semibold text-slate-700 border-b border-r text-center">As Is (Raw N)</th>
+                  <th colSpan={2} className="px-4 py-2 bg-indigo-50 font-semibold text-indigo-900 border-b text-center">Matched (Weighted N)</th>
+                </tr>
+                <tr>
+                  <th className="px-3 py-2 bg-slate-50 font-semibold text-slate-600 border-b text-center border-r">Ada</th>
+                  <th className="px-3 py-2 bg-slate-50 font-semibold text-slate-600 border-b text-center border-r">Tanpa</th>
+                  <th className="px-3 py-2 bg-indigo-50 font-semibold text-indigo-700 border-b text-center border-r">Ada</th>
+                  <th className="px-3 py-2 bg-indigo-50 font-semibold text-indigo-700 border-b text-center">Tanpa</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(view === 'responden' ? covBalanceR : covBalanceF).map((row, idx) => (
+                    <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50">
+                      <td className="px-4 py-3 font-medium text-slate-800 border-r">{row.name}</td>
+                      <td className="px-3 py-3 text-center font-semibold text-slate-500 border-r">{row.asIsAda.toFixed(0)}</td>
+                      <td className="px-3 py-3 text-center text-slate-400 border-r">{row.asIsTanpa.toFixed(0)}</td>
+                      <td className="px-3 py-3 text-center font-bold text-primary-600 bg-indigo-50/30 border-r">{row.matchedAda.toFixed(1)}</td>
+                      <td className="px-3 py-3 text-center font-medium text-slate-500 bg-indigo-50/30">{row.matchedTanpa.toFixed(1)}</td>
+                    </tr>
+                ))}
               </tbody>
             </table>
           </div>
