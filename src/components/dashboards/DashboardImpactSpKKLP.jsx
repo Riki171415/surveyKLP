@@ -411,7 +411,7 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
         {/* AI Insight Box for Bar Chart */}
         <div className={`bg-gradient-to-br from-indigo-900 to-slate-900 p-6 rounded-2xl text-white shadow-lg relative overflow-hidden lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none' : ''}`}>
           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-          <h4 className="text-lg font-bold mb-3 flex items-center"><Activity className="w-5 h-5 mr-3 text-indigo-400" /> Interpretasi Kinerja Berdasarkan {statMethod.toUpperCase()} (AI Generated)</h4>
+          <h4 className="text-lg font-bold mb-3 flex items-center"><Activity className="w-5 h-5 mr-3 text-indigo-400" /> Interpretasi Kinerja Berdasarkan {statMethod.toUpperCase()}</h4>
           <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
             <p>
               Berdasarkan perbandingan kinerja setelah penyesuaian (Matched), FKTP dengan Sp.KKLP secara konsisten menunjukkan hasil yang lebih unggul dibandingkan FKTP tanpa Sp.KKLP pada berbagai indikator klinis.
@@ -546,19 +546,19 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
             <div>
-              <h4 className="text-lg font-bold text-indigo-300 mb-3 border-b border-indigo-700 pb-2">Insight Hasil Analisis</h4>
+              <h4 className="text-lg font-bold text-indigo-300 mb-3 border-b border-indigo-700 pb-2">Kesimpulan Komprehensif (Integrasi Prediktor & Dampak)</h4>
               <ul className="space-y-4 text-sm text-slate-300">
                 <li className="flex items-start">
                   <span className="text-emerald-400 mr-2 mt-0.5">●</span>
-                  <span>Berdasarkan uji keseimbangan (matching) pada atribut wilayah dan jenis faskes, fasilitas dengan Sp.KKLP secara konsisten menunjukkan <strong>Kepatuhan PRB yang lebih stabil</strong>.</span>
+                  <span><strong>Anomali Signifikansi PRB:</strong> Meskipun secara uji statistik terisolasi (Regresi/Chi-Square) keberadaan Sp.KKLP kadang terlihat belum signifikan murni terhadap Kepatuhan PRB, hal ini terjadi karena PRB sangat dipengaruhi faktor sistemik (ketersediaan obat, prolanis, jarak fasilitas).</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-emerald-400 mr-2 mt-0.5">●</span>
-                  <span><strong>Rata-rata Rujukan cenderung lebih terkendali</strong> di fasilitas yang memiliki Sp.KKLP ketika dibandingkan secara <em>"apple-to-apple"</em> (matched).</span>
+                  <span><strong>Efek Pengungkit (Leverage Effect):</strong> Namun, setelah dilakukan penyesuaian (Matching), FKTP dengan Sp.KKLP secara konsisten menunjukkan <strong>Kepatuhan PRB rata-rata yang lebih stabil</strong>. Artinya, Sp.KKLP bertindak sebagai <em>buffer</em> (penyangga) klinis di tengah keterbatasan sistem.</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-emerald-400 mr-2 mt-0.5">●</span>
-                  <span>Cakupan spektrum kemampuan (Home Care & Paliatif) serta Pelaporan Outcome (Perbaikan) terlihat lebih memadai. Hal ini mengonfirmasi kompetensi holistik dari Sp.KKLP memberikan dampak nyata yang melampaui sekadar bias karena lokasi maupun jenis fasilitas (Klinik vs Puskesmas vs DPM).</span>
+                  <span><strong>Keunggulan Kompetensi Holistik:</strong> Dampak nyata Sp.KKLP justru sangat menonjol di luar indikator standar; yaitu pada <strong>pengendalian rujukan, Home Care medis, dan pelayanan Paliatif</strong>. Mereka mentransformasi fasilitas primer untuk mampu menangani kasus yang lebih kompleks, bukan hanya sekadar meresepkan obat rutin.</span>
                 </li>
               </ul>
             </div>

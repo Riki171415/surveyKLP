@@ -205,7 +205,7 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
             {/* AI Insight for Logistic Regression */}
             <div className={`bg-gradient-to-br from-emerald-900 to-slate-900 p-6 rounded-2xl text-white shadow-lg relative overflow-hidden mt-6 ${isPrinting ? 'break-inside-avoid shadow-none' : ''}`}>
               <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-              <h4 className="text-lg font-bold mb-3 flex items-center"><Activity className="w-5 h-5 mr-3 text-emerald-400" /> Insight Regresi Logistik (AI Generated)</h4>
+              <h4 className="text-lg font-bold mb-3 flex items-center"><Activity className="w-5 h-5 mr-3 text-emerald-400" /> Insight Regresi Logistik</h4>
               <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
                 <p>
                   Berdasarkan pemodelan <strong>Regresi Logistik</strong>, prediktor terbaik untuk menentukan apakah suatu FKTP mampu mencapai kepatuhan PRB di atas 50% adalah faktor dengan Odds Ratio tertinggi yang signifikan secara statistik.
@@ -294,7 +294,7 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
             {chiSquareData && chiSquareData.table && (
               <div className={`bg-gradient-to-br from-indigo-900 to-slate-900 p-6 rounded-2xl text-white shadow-lg relative overflow-hidden mt-6 ${isPrinting ? 'break-inside-avoid shadow-none' : ''}`}>
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                <h4 className="text-lg font-bold mb-3 flex items-center"><FileSearch className="w-5 h-5 mr-3 text-indigo-400" /> Insight Uji Chi-Square (AI Generated)</h4>
+                <h4 className="text-lg font-bold mb-3 flex items-center"><FileSearch className="w-5 h-5 mr-3 text-indigo-400" /> Insight Uji Chi-Square</h4>
                 <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
                   <p>
                     Uji independensi <strong>Chi-Square</strong> mengukur apakah distribusi kategori (tinggi vs rendah) memiliki ketergantungan yang signifikan secara statistik terhadap status keberadaan Sp.KKLP.
@@ -378,7 +378,7 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
             {internalData && internalData.length > 0 && (
               <div className={`bg-gradient-to-br from-indigo-900 to-slate-900 p-6 rounded-2xl text-white shadow-lg relative overflow-hidden mt-6 ${isPrinting ? 'break-inside-avoid shadow-none' : ''}`}>
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                <h4 className="text-lg font-bold mb-3 flex items-center"><Stethoscope className="w-5 h-5 mr-3 text-indigo-400" /> Insight Peran Spesifik Sp.KKLP (AI Generated)</h4>
+                <h4 className="text-lg font-bold mb-3 flex items-center"><Stethoscope className="w-5 h-5 mr-3 text-indigo-400" /> Insight Peran Spesifik Sp.KKLP</h4>
                 <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
                   <p>
                     Analisis ini mengisolasi faskes yang sudah memiliki Sp.KKLP untuk mencari tahu <strong>peran spesifik apa</strong> yang paling menentukan tingginya kepatuhan PRB.
