@@ -9,7 +9,7 @@ import { format, parseISO } from 'date-fns';
 import { 
   Users, Activity, HeartPulse, Stethoscope, AlertTriangle, 
   MessageSquare, Database, Printer, Download, Filter, Home, ShieldAlert,
-  Search, ChevronLeft, ChevronRight, FileSearch, Copy, Beaker, Lightbulb
+  Search, ChevronLeft, ChevronRight, FileSearch, Copy, Beaker, Lightbulb, BookOpen
 } from 'lucide-react';
 
 import DashboardProfil from './dashboards/DashboardProfil';
@@ -27,6 +27,7 @@ import DashboardPasienBulanan from './dashboards/DashboardPasienBulanan';
 import DashboardKeluhanSentences from './dashboards/DashboardKeluhanSentences';
 import DashboardAnalisisLanjut from './dashboards/DashboardAnalisisLanjut';
 import DashboardEksplorasiKualitatif from './dashboards/DashboardEksplorasiKualitatif';
+import DashboardPanduan from './dashboards/DashboardPanduan';
 
 const COLORS = ['#00857A', '#00A68A', '#45B669', '#00B4D5', '#F28322', '#D8C700', '#D5DF00', '#f43f5e', '#a855f7', '#3b82f6'];
 
@@ -689,6 +690,7 @@ export default function Dashboard() {
   }
 
   const TABS = [
+    { id: 'panduan', label: 'Buku Panduan', icon: BookOpen },
     { id: 'profil', label: 'Profil', icon: Users },
     { id: 'prb', label: 'PRB', icon: Activity },
     { id: 'mon_prb', label: 'Monitoring PRB', icon: FileSearch },
@@ -839,6 +841,7 @@ export default function Dashboard() {
           <>
             {isPrinting ? (
               <div className="print-layout flex flex-col gap-12">
+                <DashboardPanduan isPrinting={true} />
                 <DashboardProfil filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
                 <DashboardPRB filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
                 <DashboardMonitoringPRB filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={true} />
@@ -858,6 +861,7 @@ export default function Dashboard() {
             ) : (
               <AnimatePresence mode="wait">
                 <motion.div key={activeTab} variants={tabVariants} initial="hidden" animate="show" exit="exit" className={`h-full transition-opacity duration-300 ${isPending ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                  {activeTab === 'panduan' && <DashboardPanduan isPrinting={false} />}
                   {activeTab === 'profil' && <DashboardProfil filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
                   {activeTab === 'prb' && <DashboardPRB filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
                   {activeTab === 'mon_prb' && <DashboardMonitoringPRB filteredData={filteredData} uniqueFktpData={uniqueFktpData} COLORS={COLORS} isPrinting={false} />}
