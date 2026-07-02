@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -328,6 +328,7 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
   );
 
   return (
+    <>
     <div id="dashboard-dashboardspkklp-capture" className="space-y-8 animate-fade-in">
 
       {!isPrinting && (
@@ -568,5 +569,6 @@ export default function DashboardSpKKLP({ filteredData, uniqueFktpData, COLORS, 
       dashboardName="Profil dan Data Sp.KKLP"
       promptContext={`Total responden: ${filteredData?.length ?? 0}. FKTP memiliki Sp.KKLP: ${docStats?.spkklpYa ?? 0}, belum memiliki: ${docStats?.spkklpTidak ?? 0}. Total dokter umum: ${docStats?.totalDocUmum ?? 0}, dokter gigi: ${docStats?.totalDocGigi ?? 0}. Relevansi peran tertinggi: ${topRelevansi?.[0]?.name ?? '-'} (skor ${topRelevansi?.[0]?.avgScore ?? 0}), kedua: ${topRelevansi?.[1]?.name ?? '-'} (skor ${topRelevansi?.[1]?.avgScore ?? 0}). Layanan paling sering dirujuk ke FKRTL: ${dirujukData?.[0]?.name ?? '-'} (${dirujukData?.[0]?.value ?? 0} FKTP). Peran optimalisasi tertinggi: ${peranData?.[0]?.name ?? '-'} (skor ${peranData?.[0]?.avgScore ?? 0}). Layanan belum berjalan terbanyak: ${layananBelumData?.[0]?.name ?? '-'} (${layananBelumData?.[0]?.value ?? 0} responden).`}
     />
+    </>
   );
 }

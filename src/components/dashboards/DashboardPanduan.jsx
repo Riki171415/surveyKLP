@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { BookOpen, Users, Activity, HeartPulse, Stethoscope, AlertTriangle, MessageSquare, Database, Printer, Filter, Home, ShieldAlert, Beaker, Lightbulb, ChevronDown, ChevronUp, Info, HelpCircle, FileSearch } from 'lucide-react';
 import ReportGenerator from '../ui/ReportGenerator';
 
@@ -169,6 +169,7 @@ export default function DashboardPanduan({ isPrinting }) {
   const [expandedId, setExpandedId] = useState(GUIDES[0].id);
 
   return (
+    <>
     <div className={`space-y-6 animate-fade-in pb-12 ${isPrinting ? 'print:p-0 print:bg-white print:m-0' : ''}`}>
       <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
@@ -248,5 +249,6 @@ export default function DashboardPanduan({ isPrinting }) {
       dashboardName="Panduan Penggunaan Dashboard"
       promptContext={`Halaman Panduan Penggunaan Dashboard Survei Sp.KKLP. Dashboard ini berisi ${filteredData?.length ?? 0} responden dari ${new Set((filteredData ?? []).map(d => d.provinsi).filter(Boolean)).size} provinsi.`}
     />
+    </>
   );
 }

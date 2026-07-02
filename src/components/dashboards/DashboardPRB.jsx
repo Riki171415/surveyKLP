@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -233,6 +233,7 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
   };
 
   return (
+    <>
     <div id="dashboard-prb-capture" className="space-y-8 animate-fade-in relative">
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print gap-2 capture-exclude">
@@ -328,5 +329,6 @@ export default function DashboardPRB({ filteredData, uniqueFktpData, COLORS, isP
       dashboardName="Monitoring PRB (Program Rujuk Balik)"
       promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. Total peserta PRB aktif: ${prbStats?.totalJumlah ?? 0}. Peserta rutin berkunjung: ${prbStats?.totalRutin ?? 0}. Peserta tidak berkunjung: ${prbStats?.totalTidakBerkunjung ?? 0}. Tingkat kepatuhan (proporsi rutin): ${kepatuhanRate?.toFixed(1) ?? 0}%. Rata-rata peserta PRB per faskes: ${prbStats?.avgJumlahFktp ?? 0}. Rata-rata peserta rutin per faskes: ${prbStats?.avgRutinFktp ?? 0}. Rata-rata peserta tidak berkunjung per faskes: ${prbStats?.avgTidakBerkunjungFktp ?? 0}. Rata-rata rujukan FKRTL per faskes/bulan: ${prbStats?.avgRujukan ?? 0}. Diagnosis terbanyak (responden): ${diagnosisDataResponden?.[0]?.name ?? '-'} (${diagnosisDataResponden?.[0]?.value ?? 0} peserta). Mekanisme pemantauan terbanyak (responden): ${mekanismeDataResponden?.[0]?.name ?? '-'} (${mekanismeDataResponden?.[0]?.value ?? 0} faskes).`}
     />
+    </>
   );
 }

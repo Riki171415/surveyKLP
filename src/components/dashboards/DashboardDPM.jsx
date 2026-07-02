@@ -307,6 +307,7 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
 
 
   return (
+    <>
     <div className="space-y-8 animate-fade-in">
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print">
@@ -544,5 +545,6 @@ export default function DashboardDPM({ filteredData, uniqueFktpData, COLORS, isP
       dashboardName="Dashboard Pelayanan Medis (DPM)"
       promptContext={`Total responden DPM: ${dpmStats?.totalDpm ?? 0}. Kegiatan terbanyak 1: ${dpmStats?.top3Layanan?.[0]?.name ?? '-'} (${dpmStats?.top3Layanan?.[0]?.value ?? 0}). Kegiatan terbanyak 2: ${dpmStats?.top3Layanan?.[1]?.name ?? '-'} (${dpmStats?.top3Layanan?.[1]?.value ?? 0}). Kegiatan terbanyak 3: ${dpmStats?.top3Layanan?.[2]?.name ?? '-'} (${dpmStats?.top3Layanan?.[2]?.value ?? 0}). DPM perlu perbaikan (skor < 40): ${skorRendah?.length ?? 0}. Provinsi terwakili (top): ${provinsiData?.[0]?.name ?? '-'} (${provinsiData?.[0]?.value ?? 0} DPM). Total provinsi dalam data: ${provinsiData?.length ?? 0}. Luaran pelayanan tercatat: ${luaranPelayananData?.length ?? 0} jenis.`}
     />
+    </>
   );
 }

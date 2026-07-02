@@ -589,6 +589,7 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
 
 
   return (
+    <>
     <div className="space-y-6 animate-fade-in">
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print">
@@ -687,5 +688,6 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
       dashboardName="Analisis Keluhan dan Sentimen"
       promptContext={`Total responden wawancara: ${totalRespondents ?? 0}. Jumlah kategori keluhan teridentifikasi: ${chartData?.length ?? 0}. Kategori keluhan dominan: ${chartData?.[0]?.name ?? '-'} (${chartData?.[0]?.percent ?? 0}%). Kategori keluhan kedua: ${chartData?.[1]?.name ?? '-'} (${chartData?.[1]?.percent ?? 0}%). Kategori keluhan ketiga: ${chartData?.[2]?.name ?? '-'} (${chartData?.[2]?.percent ?? 0}%). Total kalimat teranalisis (semua pertanyaan W1-W8): ${allSentences?.length ?? 0}. Jumlah klaster auto-benchmark terdeteksi: ${autoClusters?.length ?? 0}. Klaster kalimat paling dominan: "${autoClusters?.[0]?.name ?? '-'}" (${autoClusters?.[0]?.percent ?? 0}% responden).`}
     />
+    </>
   );
 }

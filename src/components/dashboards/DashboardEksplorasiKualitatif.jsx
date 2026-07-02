@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Lightbulb, Key, X, RefreshCw, CheckCircle2, ChevronRight, MessageSquare, Map, AlertCircle, Coins, Scale, BrainCircuit } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
 import ReportGenerator from '../ui/ReportGenerator';
@@ -219,6 +219,7 @@ export default function DashboardEksplorasiKualitatif({ filteredData, isPrinting
   const currentReport = reports[`eksplorasi_${activeTab}`];
 
   return (
+    <>
     <div className="space-y-6 animate-fade-in pb-12">
       <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-amber-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
@@ -348,5 +349,6 @@ export default function DashboardEksplorasiKualitatif({ filteredData, isPrinting
       dashboardName="Eksplorasi Kualitatif"
       promptContext={`Total responden: ${filteredData?.length ?? 0}. Total topik eksplorasi: ${EXPLORATIONS?.length ?? 0}. Topik telah dianalisis AI: ${Object.keys(reports ?? {}).filter(k => k.startsWith('eksplorasi_')).length}. Topik aktif saat ini: ${EXPLORATIONS.find(e => e.id === activeTab)?.title ?? '-'}.`}
     />
+    </>
   );
 }

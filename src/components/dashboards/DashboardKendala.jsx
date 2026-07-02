@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -189,6 +189,7 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
   };
 
   return (
+    <>
     <div id="dashboard-kendala-capture" className="space-y-8 animate-fade-in relative">
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print gap-2 capture-exclude">
@@ -325,5 +326,6 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
       dashboardName="Analisis Kendala Implementasi Sp.KKLP"
       promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. FKTP melaporkan kendala: ${kendalaStats?.totalFktpKendala ?? 0} (${kendalaStats?.proporsiKendala?.toFixed(1) ?? 0}%). Top kendala #1: ${kendalaStats?.top3?.[0]?.name ?? '-'} (${kendalaStats?.top3?.[0]?.value ?? 0}). Top kendala #2: ${kendalaStats?.top3?.[1]?.name ?? '-'} (${kendalaStats?.top3?.[1]?.value ?? 0}). Top kendala #3: ${kendalaStats?.top3?.[2]?.name ?? '-'} (${kendalaStats?.top3?.[2]?.value ?? 0}). Distribusi kendala per FKTP: ${kendalaDataF?.map(d => d.name + ': ' + d.value).join(', ') ?? '-'}. Kebutuhan dukungan per FKTP: ${dukunganDataF?.map(d => d.name + ': ' + d.value).join(', ') ?? '-'}. Jumlah provinsi terdampak: ${heatmapData?.length ?? 0}.`}
     />
+    </>
   );
 }

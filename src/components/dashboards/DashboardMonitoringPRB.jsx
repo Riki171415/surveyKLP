@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -153,6 +153,7 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
   };
 
   return (
+    <>
     <div id="dashboard-mon-prb-capture" className="space-y-8 animate-fade-in relative">
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print gap-2 capture-exclude">
@@ -282,5 +283,6 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
       dashboardName="Monitoring PRB Detail"
       promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. FKTP dengan mekanisme PRB: ${monStats?.fktpWithMekanisme ?? 0} (${monStats?.proporsiMekanisme?.toFixed(1) ?? '0'}% dari total FKTP). Top mekanisme: ${mekanismeDataR?.[0]?.name ?? '-'} (${mekanismeDataR?.[0]?.value ?? 0} responden). Kendala kata #1: ${kendalaDataR?.[0]?.name ?? '-'} (${kendalaDataR?.[0]?.value ?? 0} sebutan). Kendala kata #2: ${kendalaDataR?.[1]?.name ?? '-'} (${kendalaDataR?.[1]?.value ?? 0} sebutan).`}
     />
+    </>
   );
 }

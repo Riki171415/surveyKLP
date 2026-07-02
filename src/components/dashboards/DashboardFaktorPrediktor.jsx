@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+﻿import React, { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Target, Activity, Stethoscope, AlertTriangle, Info, FileSearch, CheckCircle2, Cpu, RefreshCw, Key, X, Download } from 'lucide-react';
 import { performChiSquare, performLogisticRegression } from '../../utils/advancedStatsUtils';
@@ -314,6 +314,7 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
   );
 
   return (
+    <>
     <div className="space-y-8 animate-fade-in pb-12">
       <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
@@ -723,5 +724,6 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
       dashboardName="Faktor Prediktor Kepatuhan PRB"
       promptContext={`Total FKTP dianalisis: ${uniqueFktpData?.length ?? 0}. Prediktor logistik: ${logisticData?.length ?? 0} variabel. Prediktor signifikan (logistik): ${logisticData?.filter(d => d.isSignificant)?.length ?? 0}. Prediktor positif signifikan (OR>1): ${logisticData?.filter(d => d.isSignificant && d.oddsRatio > 1)?.length ?? 0}. Chi-Square p-value: ${chiSquareData?.pValue?.toFixed(4) ?? 'N/A'}. Chi-Square signifikan: ${chiSquareData?.isSignificant ? 'Ya' : 'Tidak'}. Chi2: ${chiSquareData?.chi2?.toFixed(2) ?? 'N/A'}, df: ${chiSquareData?.df ?? 'N/A'}. Analisis internal Sp.KKLP: ${internalData?.length ?? 0} variabel. Peran internal signifikan: ${internalData?.filter(d => d.isSignificant)?.length ?? 0}. Prediktor logistik utama (tertinggi OR): ${logisticData?.[0]?.name ?? 'N/A'} OR=${logisticData?.[0]?.oddsRatio?.toFixed(2) ?? 'N/A'} p=${logisticData?.[0]?.pValue?.toFixed(3) ?? 'N/A'}. Peran internal tertinggi: ${internalData?.[0]?.name ?? 'N/A'} OR=${internalData?.[0]?.oddsRatio?.toFixed(2) ?? 'N/A'} p=${internalData?.[0]?.pValue?.toFixed(3) ?? 'N/A'}.`}
     />
+    </>
   );
 }

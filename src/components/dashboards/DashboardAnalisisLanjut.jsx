@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
   ScatterChart, Scatter, ReferenceLine, ZAxis 
@@ -147,6 +147,7 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
   if (!dataAsIs) return null;
 
   return (
+    <>
     <div className="space-y-8 animate-fade-in pb-12">
       <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
@@ -308,5 +309,6 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
       dashboardName="Analisis Statistik Lanjut (T-Test dan Regresi)"
       promptContext={`Total FKTP: ${uniqueFktpData?.length ?? 0}. Jumlah outcome dianalisis: ${allOutcomesResults?.length ?? 0}. Outcome pertama (${allOutcomesResults?.[0]?.label ?? 'N/A'}): T-Test diff: ${allOutcomesResults?.[0]?.tTestResult?.diff?.toFixed(4) ?? 'N/A'}, T-Test p-value: ${allOutcomesResults?.[0]?.tTestResult?.pValue?.toFixed(4) ?? 'N/A'}, Signifikan: ${allOutcomesResults?.[0]?.tTestResult?.isSignificant ? 'Ya' : 'Tidak'}. Regresi treatment effect: ${allOutcomesResults?.[0]?.regressionResult?.treatmentEffect?.toFixed(4) ?? 'N/A'}, Regresi p-value: ${allOutcomesResults?.[0]?.regressionResult?.pValue?.toFixed(4) ?? 'N/A'}, Signifikan: ${allOutcomesResults?.[0]?.regressionResult?.isSignificant ? 'Ya' : 'Tidak'}.`}
     />
+    </>
   );
 }

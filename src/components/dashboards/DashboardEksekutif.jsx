@@ -447,6 +447,7 @@ export default function DashboardEksekutif({ data = [] }) {
   };
 
   return (
+    <>
     <div id="dashboard-eksekutif-capture" className="space-y-6 relative">
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -795,5 +796,6 @@ export default function DashboardEksekutif({ data = [] }) {
       dashboardName="Ringkasan Eksekutif"
       promptContext={`Total responden: ${metrics?.total ?? 0}. FKTP dengan Sp.KKLP: ${metrics?.spkklpCount ?? 0} dari ${metrics?.total ?? 0} (${metrics?.total ? Math.round(((metrics?.spkklpCount ?? 0) / metrics.total) * 100) : 0}%). Kepatuhan kunjungan PRB: ${metrics?.prbKepatuhan ?? 0}%. Rata-rata rujukan balik PRB per FKTP: ${metrics?.avgRujukanPrb ?? 0} kasus/bulan. Layanan paling sering dirujuk ke RS: ${metrics?.topRujukan?.[0]?.name ?? '-'} (${metrics?.topRujukan?.[0]?.value ?? 0}% FKTP). Usulan layanan JKN baru dengan dukungan tertinggi: ${metrics?.barUsulan?.[0]?.name ?? '-'} (${metrics?.barUsulan?.[0]?.value ?? 0}% setuju). Kendala utama implementasi Sp.KKLP: ${metrics?.barKendala?.[0]?.name ?? '-'} (${metrics?.barKendala?.[0]?.value ?? 0} keluhan). Total feedback kualitatif lapangan: ${metrics?.textHambatan?.length ?? 0} entri.`}
     />
+    </>
   );
 }

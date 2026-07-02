@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -192,6 +192,7 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
 
 
   return (
+    <>
     <div id="dashboard-pal-capture" className="space-y-8 animate-fade-in relative">
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print gap-2 capture-exclude">
@@ -348,5 +349,6 @@ export default function DashboardPaliatif({ filteredData, uniqueFktpData, COLORS
       dashboardName="Layanan Paliatif"
       promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. FKTP dengan pelayanan paliatif: ${palStats?.fktpWithPaliatif ?? 0} (${palStats?.proporsiPaliatif?.toFixed(1) ?? 0}%). Tingkat kolaborasi nakes lain: ${palStats?.proporsiKolaborasi?.toFixed(1) ?? 0}%. Proporsi perbaikan kualitas hidup: ${palStats?.proporsiPerbaikan?.toFixed(1) ?? 0}%. Tujuan terbanyak (responden): ${tujuanDataR?.[0]?.name ?? '-'} (${tujuanDataR?.[0]?.value ?? 0}). Kondisi pasien terbanyak (responden): ${kondisiDataR?.[0]?.name ?? '-'} (${kondisiDataR?.[0]?.value ?? 0}). Kepatuhan terbanyak (responden): ${kepatuhanDataR?.[0]?.name ?? '-'} (${kepatuhanDataR?.[0]?.value ?? 0}). Diagnosis teratas: ${diagnosisDataR?.[0]?.name ?? '-'} (${diagnosisDataR?.[0]?.value ?? 0}). Terapi teratas: ${terapiDataR?.[0]?.name ?? '-'} (${terapiDataR?.[0]?.value ?? 0}).`}
     />
+    </>
   );
 }

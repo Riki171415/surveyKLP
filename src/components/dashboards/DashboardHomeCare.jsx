@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -244,6 +244,7 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
 
 
   return (
+    <>
     <div id="dashboard-hc-capture" className="space-y-8 animate-fade-in relative">
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print gap-2 capture-exclude">
@@ -416,5 +417,6 @@ export default function DashboardHomeCare({ filteredData, uniqueFktpData, COLORS
       dashboardName="Layanan Home Care"
       promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. FKTP yang memberikan home care: ${hcStats?.fktpWithHomeCare ?? 0} (${hcStats?.proporsiHc?.toFixed(1) ?? 0}%). Rata-rata kunjungan per bulan: ${hcStats?.avgKunjungan ?? 0}x. Proporsi kolaborasi nakes lain: ${hcStats?.proporsiKolaborasi?.toFixed(1) ?? 0}%. Proporsi FKTP melaporkan perbaikan kondisi pasien: ${hcStats?.proporsiPerbaikan?.toFixed(1) ?? 0}%. Top jenis layanan: ${jenisDataR?.[0]?.name ?? '-'} (${jenisDataR?.[0]?.value ?? 0}). Top kondisi pasien: ${kondisiDataR?.[0]?.name ?? '-'} (${kondisiDataR?.[0]?.value ?? 0}). Top diagnosis: ${diagnosisDataR?.[0]?.name ?? '-'} (${diagnosisDataR?.[0]?.value ?? 0}).`}
     />
+    </>
   );
 }

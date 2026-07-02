@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import wilayahMapping from '../../data/wilayahMapping.json';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -409,6 +409,7 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
   );
 
   return (
+    <>
     <div id="dashboard-dashboardprofil-capture" className="space-y-6">
 
       {!isPrinting && (
@@ -705,5 +706,6 @@ export default function DashboardProfil({ filteredData, uniqueFktpData, COLORS, 
       dashboardName="Profil Responden dan FKTP"
       promptContext={`Total responden: ${filteredData?.length ?? 0}. Total institusi FKTP unik: ${uniqueFktpData?.length ?? 0}. FKTP dengan Sp.KKLP: ${spkklpCount ?? 0}. Provinsi terjangkau: ${new Set(uniqueFktpData?.map(d => d.provinsi).filter(Boolean)).size ?? 0}. Distribusi jenis FKTP (responden): ${fktpTypeData?.map(d => `${d.name}: ${d.value}`).join(', ') ?? '-'}. Distribusi FKTP unik: ${uniqueFktpTypeData?.map(d => `${d.name}: ${d.value}`).join(', ') ?? '-'}. Distribusi jabatan responden: ${roleChartData?.map(d => `${d.name}: ${d.value}`).join(', ') ?? '-'}. Jumlah provinsi dalam data partisipasi: ${partisipasiData?.length ?? 0}. Rata-rata capaian partisipasi: ${partisipasiData?.length > 0 ? (partisipasiData.reduce((s, r) => s + (r.persentase ?? 0), 0) / partisipasiData.length).toFixed(1) : 0}%.`}
     />
+    </>
   );
 }

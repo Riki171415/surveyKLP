@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+﻿import React, { useMemo } from 'react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -145,6 +145,7 @@ export default function DashboardPasienBulanan({ filteredData, uniqueFktpData, C
 
 
   return (
+    <>
     <div id="dashboard-dashboardpasienbulanan-capture" className="space-y-8 animate-fade-in">
       {!isPrinting && (
         <div className="flex justify-end mb-4 no-print">
@@ -212,5 +213,6 @@ export default function DashboardPasienBulanan({ filteredData, uniqueFktpData, C
       dashboardName="Tren Pasien Bulanan"
       promptContext={`Total responden: ${filteredData?.length ?? 0}. Total FKTP unik: ${uniqueFktpData?.length ?? 0}. Total pasien dilayani (1 bln): ${generalStats?.totalPasien ?? 0}. Rata-rata pasien per faskes: ${Math.round(generalStats?.rataRataTotal ?? 0)}. Jumlah FKTP yang mengisi data pasien bulanan: ${generalStats?.totalFaskesIsi ?? 0}. Proporsi FKTP yang mengisi: ${(generalStats?.proporsiIsi ?? 0).toFixed(1)}%. Penyakit dengan kasus terbanyak: ${totalPatientsByDisease?.[0]?.name ?? '-'} (${totalPatientsByDisease?.[0]?.value ?? 0} pasien).`}
     />
+    </>
   );
 }
