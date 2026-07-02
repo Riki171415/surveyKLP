@@ -8,7 +8,7 @@ import {
 export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting }) {
   const [activeTab, setActiveTab] = useState('logistic');
 
-  const { logisticData, chiSquareData } = useMemo(() => {
+  const { logisticData, chiSquareData, internalData } = useMemo(() => {
     if (!uniqueFktpData || uniqueFktpData.length === 0) return { logisticData: [], chiSquareData: null };
 
     // Valid data filter (we need fktps with valid PRB data)
