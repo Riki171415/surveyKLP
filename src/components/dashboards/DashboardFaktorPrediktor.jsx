@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Target, Activity, Stethoscope, AlertTriangle, Info, FileSearch } from 'lucide-react';
+import { Target, Activity, Stethoscope, AlertTriangle, Info, FileSearch, CheckCircle2 } from 'lucide-react';
 import { performChiSquare, performLogisticRegression } from '../../utils/advancedStatsUtils';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine, Cell

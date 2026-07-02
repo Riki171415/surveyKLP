@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   Legend, LabelList, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
-import { Stethoscope, Activity, Home, HeartPulse, CheckCircle2, AlertCircle, FileText, Download, Image as ImageIcon } from 'lucide-react';
+import { Stethoscope, Activity, Home, HeartPulse, CheckCircle2, AlertCircle, FileText, Download, Image as ImageIcon, TrendingUp, TrendingDown } from 'lucide-react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 import { performRandomSampling, performPSM, performIPW, performStratifiedMatching } from '../../utils/statisticsUtils';
