@@ -1,35 +1,45 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
   ScatterChart, Scatter, ReferenceLine, ZAxis 
 } from 'recharts';
-import { Activity, Beaker, FileText, CheckCircle2, AlertTriangle, TrendingUp, TrendingDown, Stethoscope } from 'lucide-react';
+import { Activity, Beaker, FileText, CheckCircle2, AlertTriangle, TrendingUp, TrendingDown, Stethoscope, Filter, Download } from 'lucide-react';
 import { performPSM } from '../../utils/statisticsUtils';
 import { calculateSMD, getPropensityScoreHistogram, performTTest, performMultivariateRegression } from '../../utils/advancedStatsUtils';
+import { exportAnalisisLanjutToExcel } from '../../utils/exportExcelUtils';
 
 export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) {
-  const { dataAsIs, dataMatched, psHistogram, smdData, tTestResult, regressionResult } = useMemo(() => {
+  const [selectedOutcomeId, setSelectedOutcomeId] = useState('kepatuhan_prb');
+  const [isExporting, setIsExporting] = useState(false);
+
+  const outcomeOptions = [
+    { id: 'kepatuhan_prb', label: 'Kepatuhan PRB (%)', fn: (d) => {
+      const aktif = Number(d.prb?.jumlah) || 0;
+      const rutin = Number(d.prb?.rutinKunjungan) || 0;
+      return aktif > 0 ? (rutin / aktif) * 100 : 0;
+    }},
+    { id: 'beban_luar_gedung', label: 'Proporsi Beban Luar Gedung (%)', fn: (d) => Number(d.prop_out_fktp) || 0 },
+    { id: 'rata_rujukan', label: 'Rata-Rata Rujukan PRB (%)', fn: (d) => Number(d.prb?.rataRujukan) || 0 },
+    { id: 'waktu_poli', label: 'Waktu Rata-rata Poli (Menit)', fn: (d) => Number(d.time_in_poli) || 0 },
+    { id: 'waktu_homevisit', label: 'Waktu Rata-rata Home Visit (Menit)', fn: (d) => Number(d.time_home_visit) || 0 }
+  ];
+
+  const { dataAsIs, dataMatched, psHistogram, smdData, tTestResult, regressionResult, outcomeLabel } = useMemo(() => {
     if (!uniqueFktpData || uniqueFktpData.length === 0) return {};
+
+    const activeOutcome = outcomeOptions.find(o => o.id === selectedOutcomeId) || outcomeOptions[0];
+    const outcomeFn = activeOutcome.fn;
+    const outcomeLabel = activeOutcome.label;
 
     // 1. Definisikan Fungsi Perlakuan & Outcome & Kovariat
     const treatmentFn = (d) => d.doc_kklp === 'Ya';
     const covariates = ['provinsi', 'jenis_faskes'];
-    const outcomeFn = (d) => {
-      const aktif = Number(d.prb?.jumlah) || 0;
-      const rutin = Number(d.prb?.rutinKunjungan) || 0;
-      return aktif > 0 ? (rutin / aktif) * 100 : 0; // Kepatuhan PRB (%)
-    };
 
     // 2. Perform Matching
-    // Note: performPSM uses calculatePropensityScores internally and assigns _propensityScore and _weight
     const dataAsIs = uniqueFktpData.map(d => ({ ...d, _weight: 1 })); 
     const dataMatched = performPSM(uniqueFktpData, treatmentFn, covariates);
 
     // 3. PSM Histogram
-    // We compute PS on As-Is for histogram to see the initial overlap
-    // performPSM doesn't export the scores for the unmatched control neatly if it drops them,
-    // so we can compute it on dataMatched (since it retains all data if we use weighting/matching).
-    // Actually, performPSM returns the matched sample.
     const psHistogram = getPropensityScoreHistogram(dataMatched, treatmentFn);
 
     // 4. Standardized Mean Differences (Love Plot)
@@ -57,8 +67,15 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
       console.warn("Regression failed (singular matrix or small sample):", err);
     }
 
-    return { dataAsIs, dataMatched, psHistogram, smdData, tTestResult, regressionResult };
-  }, [uniqueFktpData]);
+    return { dataAsIs, dataMatched, psHistogram, smdData, tTestResult, regressionResult, outcomeLabel };
+  }, [uniqueFktpData, selectedOutcomeId]);
+
+  const handleExportExcel = async () => {
+    if (!dataAsIs) return;
+    setIsExporting(true);
+    await exportAnalisisLanjutToExcel(dataAsIs, dataMatched, psHistogram, smdData, tTestResult, regressionResult, outcomeLabel);
+    setIsExporting(false);
+  };
 
   if (!dataAsIs) return null;
 
@@ -66,9 +83,38 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
     <div className="space-y-8 animate-fade-in pb-12">
       <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-        <h2 className="text-2xl font-black text-slate-800 mb-2 flex items-center relative z-10"><Beaker className="w-7 h-7 mr-3 text-indigo-600" /> Analisis Statistik & Pembuktian Kausalitas</h2>
+        <div className="flex flex-col md:flex-row justify-between md:items-center relative z-10 gap-4 mb-4">
+          <h2 className="text-2xl font-black text-slate-800 flex items-center"><Beaker className="w-7 h-7 mr-3 text-indigo-600" /> Analisis Statistik & Pembuktian Kausalitas</h2>
+          
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center space-x-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
+              <Filter className="w-4 h-4 text-slate-500" />
+              <span className="text-sm font-semibold text-slate-600">Variabel Target (Y):</span>
+              <select 
+                value={selectedOutcomeId}
+                onChange={(e) => setSelectedOutcomeId(e.target.value)}
+                className="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2 outline-none font-medium"
+              >
+                {outcomeOptions.map(opt => (
+                  <option key={opt.id} value={opt.id}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            
+            {!isPrinting && (
+              <button 
+                onClick={handleExportExcel}
+                disabled={isExporting}
+                className="flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-500 transition shadow-sm active:scale-95 text-sm disabled:opacity-50"
+              >
+                {isExporting ? 'Mengekspor...' : <><Download className="w-4 h-4 mr-2" /> Export Excel</>}
+              </button>
+            )}
+          </div>
+        </div>
+
         <p className="text-slate-500 relative z-10 text-sm md:text-base max-w-4xl">
-          Dashboard ini melakukan perhitungan statistik lanjutan menggunakan <strong>Propensity Score Matching (PSM)</strong> dan <strong>Regresi Linear Multivariat</strong> untuk membuktikan secara matematis apakah FKTP yang memiliki Sp.KKLP secara signifikan menghasilkan nilai Kepatuhan PRB yang lebih tinggi dibandingkan FKTP tanpa Sp.KKLP.
+          Dashboard ini melakukan perhitungan statistik lanjutan menggunakan <strong>Propensity Score Matching (PSM)</strong> dan <strong>Regresi Linear Multivariat</strong> untuk membuktikan secara matematis apakah FKTP yang memiliki Sp.KKLP secara signifikan menghasilkan nilai <strong>{outcomeLabel}</strong> yang lebih tinggi/baik dibandingkan FKTP tanpa Sp.KKLP.
         </p>
       </div>
 
@@ -120,7 +166,7 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
       </div>
 
       <div className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm ${isPrinting ? 'break-inside-avoid' : ''}`}>
-        <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center"><FileText className="w-5 h-5 mr-2 text-slate-600" /> Hasil Pengujian Kausalitas: Dampak Sp.KKLP terhadap Kepatuhan PRB</h3>
+        <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center"><FileText className="w-5 h-5 mr-2 text-slate-600" /> Hasil Pengujian Kausalitas: Dampak Sp.KKLP terhadap {outcomeLabel}</h3>
         
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">

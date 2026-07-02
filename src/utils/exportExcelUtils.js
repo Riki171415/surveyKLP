@@ -149,3 +149,125 @@ export const exportTablesToExcel = async (dashboardTitle, tables, filenamePrefix
     alert('Gagal mengekspor Excel: ' + err.message);
   }
 };
+
+/**
+ * Export for Analisis Kaidah Statistik
+ */
+export const exportAnalisisLanjutToExcel = async (dataAsIs, dataMatched, psHistogram, smdData, tTestResult, regressionResult, outcomeLabel) => {
+  try {
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'Dashboard Survey KKLP';
+    workbook.created = new Date();
+
+    // ── Sheet 1: Ringkasan Kausalitas ──
+    const sheet1 = workbook.addWorksheet('1. Hasil Pengujian Kausalitas');
+    sheet1.columns = [
+      { header: 'Metode Pengujian', key: 'metode', width: 40 },
+      { header: 'Variabel Target (Outcome)', key: 'outcome', width: 30 },
+      { header: 'Estimasi Dampak Sp.KKLP', key: 'dampak', width: 25 },
+      { header: 'Standard Error', key: 'se', width: 20 },
+      { header: 'T-Statistic', key: 'tstat', width: 20 },
+      { header: 'P-Value', key: 'pvalue', width: 20 },
+      { header: 'Signifikansi (α=0.05)', key: 'sig', width: 25 },
+    ];
+    // Style headers
+    sheet1.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    sheet1.getRow(1).eachCell(c => {
+      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0f172a' } };
+      c.alignment = { vertical: 'middle', horizontal: 'center' };
+    });
+
+    if (tTestResult) {
+      sheet1.addRow([
+        'Uji Beda Rata-rata (T-Test) setelah PSM',
+        outcomeLabel,
+        tTestResult.diff.toFixed(4),
+        '-',
+        tTestResult.tStat.toFixed(4),
+        tTestResult.pValue.toFixed(4),
+        tTestResult.isSignificant ? 'SIGNIFIKAN' : 'TIDAK SIGNIFIKAN'
+      ]);
+    }
+    if (regressionResult) {
+      sheet1.addRow([
+        'Regresi Linier Multivariat (As Is Data)',
+        outcomeLabel,
+        regressionResult.treatmentEffect.toFixed(4),
+        regressionResult.standardError.toFixed(4),
+        regressionResult.tStat.toFixed(4),
+        regressionResult.pValue.toFixed(4),
+        regressionResult.isSignificant ? 'SIGNIFIKAN' : 'TIDAK SIGNIFIKAN'
+      ]);
+    }
+
+    // ── Sheet 2: Keseimbangan Variabel (SMD) ──
+    const sheet2 = workbook.addWorksheet('2. Keseimbangan Variabel (SMD)');
+    sheet2.columns = [
+      { header: 'Kovariat', key: 'kovariat', width: 35 },
+      { header: 'SMD (Sebelum Matching)', key: 'smd_asis', width: 25 },
+      { header: 'SMD (Sesudah Matching)', key: 'smd_matched', width: 25 },
+      { header: 'Keterangan', key: 'ket', width: 35 },
+    ];
+    sheet2.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    sheet2.getRow(1).eachCell(c => {
+      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0ea5e9' } };
+    });
+
+    smdData.forEach(d => {
+      sheet2.addRow([
+        d.variable,
+        d['SMD As Is'],
+        d['SMD Matched'],
+        d['SMD Matched'] < 0.1 ? 'Kovariat Setara (Bebas Bias)' : 'Kovariat Masih Bias (> 0.1)'
+      ]);
+    });
+
+    // ── Sheet 3: Propensity Score Histogram ──
+    const sheet3 = workbook.addWorksheet('3. Distribusi Propensity Score');
+    sheet3.columns = [
+      { header: 'Skor Probabilitas (Bin)', key: 'bin', width: 25 },
+      { header: 'Frekuensi Ada Sp.KKLP', key: 'ada', width: 25 },
+      { header: 'Frekuensi Tanpa Sp.KKLP', key: 'tanpa', width: 25 },
+    ];
+    sheet3.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    sheet3.getRow(1).eachCell(c => c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF8b5cf6' } });
+
+    psHistogram.forEach(d => {
+      sheet3.addRow([d.bin, d.Ada, d.Tanpa]);
+    });
+
+    // ── Sheet 4: Data Responden & Bobot ──
+    const sheet4 = workbook.addWorksheet('4. Data Propensity & Bobot');
+    sheet4.columns = [
+      { header: 'Kode Faskes', key: 'kode', width: 20 },
+      { header: 'Nama Faskes', key: 'nama', width: 35 },
+      { header: 'Provinsi', key: 'prov', width: 20 },
+      { header: 'Jenis Faskes', key: 'jenis', width: 20 },
+      { header: 'Sp.KKLP', key: 'kklp', width: 15 },
+      { header: 'Propensity Score', key: 'ps', width: 20 },
+      { header: 'Bobot (Weight) setelah Matching', key: 'weight', width: 30 },
+    ];
+    sheet4.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    sheet4.getRow(1).eachCell(c => c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF334155' } });
+
+    dataMatched.forEach(d => {
+      sheet4.addRow([
+        d.kode_faskes,
+        d.fktp_name,
+        d.provinsi,
+        d.jenis_faskes,
+        d.doc_kklp,
+        d._propensityScore || 0,
+        d._weight || 1
+      ]);
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Analisis_Kaidah_Statistik_${new Date().getTime()}.xlsx`);
+    
+  } catch (err) {
+    console.error('Failed to export analisis lanjut to excel:', err);
+    alert('Gagal mengekspor Excel: ' + err.message);
+  }
+};
