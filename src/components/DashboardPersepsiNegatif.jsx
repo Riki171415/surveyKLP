@@ -118,7 +118,49 @@ const DashboardPersepsiNegatif = () => {
       tren = [{ bulan: new Date().toLocaleString('default', { month: 'short' }), 'Tingkat Keluhan': 0 }];
     }
 
-    return { persepsiUmum: persepsi, trenKepuasan: tren, pieData: pie, dataSkeptisisme: skeptisisme, skeptisismeQuotes: quotes };
+    let kpiData = {
+      keluhanTertinggi: 'Belum Ada',
+      trenBulanIni: '0%',
+      keluhanSdm: 0,
+      faskesMelapor: '0%'
+    };
+
+    if (persepsi.length > 0 && persepsi[0].value > 0) {
+      const highest = persepsi[0].name;
+      if (highest.includes('Administrasi')) kpiData.keluhanTertinggi = 'Beban Admin';
+      else if (highest.includes('Regulasi')) kpiData.keluhanTertinggi = 'Regulasi';
+      else if (highest.includes('SDM')) kpiData.keluhanTertinggi = 'Masalah SDM';
+      else if (highest.includes('Pendanaan')) kpiData.keluhanTertinggi = 'Pendanaan';
+      else if (highest.includes('Waktu')) kpiData.keluhanTertinggi = 'Waktu Pelayanan';
+      else kpiData.keluhanTertinggi = highest;
+    }
+
+    if (tren.length > 1) {
+      const currentMonth = tren[tren.length - 1]['Tingkat Keluhan'];
+      const prevMonth = tren[tren.length - 2]['Tingkat Keluhan'];
+      const diff = currentMonth - prevMonth;
+      kpiData.trenBulanIni = diff > 0 ? `+${diff}%` : `${diff}%`;
+    } else if (tren.length === 1) {
+      kpiData.trenBulanIni = `${tren[0]['Tingkat Keluhan']}%`;
+    }
+
+    kpiData.keluhanSdm = sdm;
+
+    let faskesDenganKendala = 0;
+    surveys.forEach(row => {
+      let allText = '';
+      if (row.wawancara) {
+         Object.values(row.wawancara).forEach(val => {
+           if (val) allText += String(val).toLowerCase() + ' ';
+         });
+      }
+      if (allText.match(/pcare|p-care|aplikasi|input|jaringan|klaim|beban|administrasi|ribet|kertas|regulasi|aturan|berubah|sosialisasi|rujukan|wewenang|kompetensi|insentif|jasa|medis|kapitasi|sdm|perawat|tenaga|kurang|dana|biaya|bayar|tunggak|waktu|lama|antre|tunggu/)) {
+        faskesDenganKendala++;
+      }
+    });
+    kpiData.faskesMelapor = total > 0 ? `${Math.round((faskesDenganKendala / total) * 100)}%` : '0%';
+
+    return { persepsiUmum: persepsi, trenKepuasan: tren, pieData: pie, dataSkeptisisme: skeptisisme, skeptisismeQuotes: quotes, kpiData };
   }, [surveys]);
 
   const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#3b82f6'];
@@ -182,10 +224,10 @@ const DashboardPersepsiNegatif = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { title: 'Tingkat Keluhan Tertinggi', value: 'Beban Adm', icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100' },
-          { title: 'Tren Komplain (Bulan ini)', value: '+12%', icon: TrendingDown, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
-          { title: 'Waktu Tersita Rata-rata', value: '45 mnt', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
-          { title: 'Faskes Melapor Kendala', value: '68%', icon: Frown, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100' }
+          { title: 'Tingkat Keluhan Tertinggi', value: kpiData.keluhanTertinggi, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100' },
+          { title: 'Tren Komplain (Bulan ini)', value: kpiData.trenBulanIni, icon: TrendingDown, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
+          { title: 'Responden Mengeluh SDM', value: `${kpiData.keluhanSdm} Orang`, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+          { title: 'Proporsi Melapor Kendala', value: kpiData.faskesMelapor, icon: Frown, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100' }
         ].map((kpi, idx) => (
           <div key={idx} className={`p-6 rounded-2xl bg-white border ${kpi.border} shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group`}>
             <div className={`absolute -right-4 -top-4 w-20 h-20 rounded-full ${kpi.bg} opacity-50 group-hover:scale-150 transition-transform duration-500`}></div>
