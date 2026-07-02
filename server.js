@@ -53,6 +53,17 @@ app.get('/api/ai-reports/:id', async (req, res) => {
   }
 });
 
+// GET /api/ai-reports (Fetch all)
+app.get('/api/ai-reports', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT id, content FROM ai_reports');
+    res.json({ data: rows, error: null });
+  } catch (err) {
+    console.error('Fetch all ai-reports error:', err);
+    res.status(500).json({ data: null, error: { message: err.message } });
+  }
+});
+
 // POST /api/ai-reports
 app.post('/api/ai-reports', async (req, res) => {
   const { id, content } = req.body;
