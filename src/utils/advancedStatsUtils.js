@@ -258,3 +258,157 @@ export function performMultivariateRegression(dataset, treatmentFn, outcomeFn, c
     rSquared: 1 - (rss / (jStat.variance(Y.map(y=>y[0])) * N)) // Approx R^2
   };
 }
+
+/**
+ * Uji Chi-Square untuk Independensi (Hubungan Kategorikal)
+ */
+export function performChiSquare(dataset, cat1Fn, cat2Fn) {
+  const table = {};
+  let total = 0;
+  
+  dataset.forEach(d => {
+    const v1 = cat1Fn(d) || 'Unknown';
+    const v2 = cat2Fn(d) || 'Unknown';
+    if (!table[v1]) table[v1] = {};
+    if (!table[v1][v2]) table[v1][v2] = 0;
+    table[v1][v2]++;
+    total++;
+  });
+  
+  const rows = Object.keys(table);
+  const cols = new Set();
+  rows.forEach(r => Object.keys(table[r]).forEach(c => cols.add(c)));
+  const colArray = Array.from(cols);
+  
+  const rowMarginals = {};
+  const colMarginals = {};
+  
+  rows.forEach(r => {
+    rowMarginals[r] = colArray.reduce((sum, c) => sum + (table[r][c] || 0), 0);
+  });
+  colArray.forEach(c => {
+    colMarginals[c] = rows.reduce((sum, r) => sum + (table[r][c] || 0), 0);
+  });
+  
+  let chi2 = 0;
+  rows.forEach(r => {
+    colArray.forEach(c => {
+      const observed = table[r][c] || 0;
+      const expected = (rowMarginals[r] * colMarginals[c]) / total;
+      if (expected > 0) {
+        chi2 += Math.pow(observed - expected, 2) / expected;
+      }
+    });
+  });
+  
+  const df = (rows.length - 1) * (colArray.length - 1);
+  const pValue = df > 0 ? 1 - jStat.chisquare.cdf(chi2, df) : 1;
+  
+  return {
+    chi2,
+    df,
+    pValue,
+    isSignificant: pValue < 0.05,
+    table,
+    rows,
+    cols: colArray
+  };
+}
+
+/**
+ * Regresi Logistik menggunakan metode Newton-Raphson (IRLS)
+ */
+export function performLogisticRegression(dataset, predictors, outcomeFn) {
+  const Y = dataset.map(d => [outcomeFn(d) ? 1 : 0]);
+  const X = dataset.map(d => {
+    const row = [1];
+    predictors.forEach(p => {
+      row.push(Number(p.fn(d)) || 0);
+    });
+    return row;
+  });
+
+  const N = X.length;
+  const K = X[0].length;
+  let Beta = Array(K).fill(0);
+  
+  const invert2 = (M) => {
+    const n = M.length;
+    const I = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
+    const A = M.map((row, i) => [...row, ...I[i]]);
+    for (let i = 0; i < n; i++) {
+      let maxEl = Math.abs(A[i][i]), maxRow = i;
+      for (let k = i + 1; k < n; k++) if (Math.abs(A[k][i]) > maxEl) { maxEl = Math.abs(A[k][i]); maxRow = k; }
+      [A[i], A[maxRow]] = [A[maxRow], A[i]];
+      if (Math.abs(A[i][i]) < 1e-10) A[i][i] += 1e-5;
+      const diag = A[i][i];
+      for (let k = 0; k < 2 * n; k++) A[i][k] /= diag;
+      for (let k = 0; k < n; k++) {
+        if (k !== i) {
+          const factor = A[k][i];
+          for (let j = 0; j < 2 * n; j++) A[k][j] -= factor * A[i][j];
+        }
+      }
+    }
+    return A.map(row => row.slice(n));
+  };
+
+  for (let iter = 0; iter < 15; iter++) {
+    const XBeta = X.map(row => row.reduce((sum, val, i) => sum + val * Beta[i], 0));
+    const P = XBeta.map(xb => 1 / (1 + Math.exp(-xb)));
+    const W = P.map(p => Math.max(p * (1 - p), 1e-8));
+    const Z = XBeta.map((xb, i) => xb + (Y[i][0] - P[i]) / W[i]);
+    const XtWX = Array.from({ length: K }, () => Array(K).fill(0));
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < K; j++) {
+        for (let k = 0; k < K; k++) {
+          XtWX[j][k] += X[i][j] * W[i] * X[i][k];
+        }
+      }
+    }
+    for (let i = 0; i < K; i++) XtWX[i][i] += 1e-5;
+    const XtWX_inv = invert2(XtWX);
+    const XtWZ = Array(K).fill(0);
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < K; j++) {
+        XtWZ[j] += X[i][j] * W[i] * Z[i];
+      }
+    }
+    const Beta_new = XtWX_inv.map(row => row.reduce((sum, val, k) => sum + val * XtWZ[k], 0));
+    let diff = 0;
+    for (let i = 0; i < K; i++) diff += Math.abs(Beta_new[i] - Beta[i]);
+    Beta = Beta_new;
+    if (diff < 1e-6 || isNaN(diff)) break;
+  }
+  
+  const XBeta = X.map(row => row.reduce((sum, val, i) => sum + val * Beta[i], 0));
+  const P = XBeta.map(xb => 1 / (1 + Math.exp(-xb)));
+  const W = P.map(p => Math.max(p * (1 - p), 1e-8));
+  const XtWX = Array.from({ length: K }, () => Array(K).fill(0));
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < K; j++) {
+      for (let k = 0; k < K; k++) {
+        XtWX[j][k] += X[i][j] * W[i] * X[i][k];
+      }
+    }
+  }
+  for (let i = 0; i < K; i++) XtWX[i][i] += 1e-5;
+  const covBeta = invert2(XtWX);
+  const seBeta = covBeta.map((row, i) => Math.sqrt(row[i]));
+  
+  const tStats = Beta.map((b, i) => b / seBeta[i]);
+  const pValues = tStats.map(t => 2 * (1 - jStat.normal.cdf(Math.abs(t), 0, 1)));
+  
+  return predictors.map((p, idx) => {
+    const k = idx + 1; // 0 is intercept
+    return {
+      name: p.name,
+      coefficient: Beta[k],
+      oddsRatio: Math.exp(Beta[k]),
+      standardError: seBeta[k],
+      waldZ: tStats[k],
+      pValue: pValues[k],
+      isSignificant: pValues[k] < 0.05
+    };
+  });
+}

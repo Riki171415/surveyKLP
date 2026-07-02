@@ -3,7 +3,7 @@ import { supabase } from '../supabaseClient';
 import * as XLSX from 'xlsx';
 import XlsxPopulate from 'xlsx-populate';
 import { motion, AnimatePresence } from 'framer-motion';
-import { penyakitPasienBulanan } from './SurveyForm';
+import { penyakitPasienBulanan, relevansiItems, peranSpkklpItems, layananDirujukItems, layananBelumBerjalanItems } from './SurveyForm';
 import { id as localeID } from 'date-fns/locale';
 import { format, parseISO } from 'date-fns';
 import { 
@@ -124,7 +124,13 @@ export default function Dashboard() {
       "Total Peserta PRB", "Kunjungan Rutin PRB", "Tidak Berkunjung PRB",
       "PRB DM", "PRB Hipertensi", "PRB Jantung", "PRB PPOK", "PRB Asma", "PRB Stroke", "PRB Epilepsi", "PRB Skizofrenia", "PRB SLE",
       "Rata Rujukan PRB", "Kendala PRB", "Kolaborasi Homecare", "Kolaborasi Paliatif",
-      ...penyakitPasienBulanan.map(p => `Pasien_Bulanan_${p.label}`)
+      ...penyakitPasienBulanan.map(p => `Pasien_Bulanan_${p.label}`),
+      ...relevansiItems.map(p => `Relevansi_SpKKLP_${p}`),
+      ...peranSpkklpItems.map(p => `Peran_SpKKLP_${p}`),
+      "Rujukan_Berkurang_Krn_SpKKLP", "Lainnya_Dirujuk",
+      ...layananDirujukItems.map(p => `Masih_Dirujuk_${p}`),
+      "Lainnya_Belum_Berjalan",
+      ...layananBelumBerjalanItems.map(p => `Belum_Berjalan_${p}`)
     ];
 
     // Kolom indeks numerik (0-based, setelah header) yang bisa dihitung rata-ratanya
@@ -158,7 +164,13 @@ export default function Dashboard() {
         ...penyakitPasienBulanan.map(p => {
           const val = row.data_pasien_bulanan?.[p.id];
           return val !== undefined && val !== '' ? Number(val) : '';
-        })
+        }),
+        ...relevansiItems.map((_, idx) => row.relevansi_spkklp?.[idx] || ''),
+        ...peranSpkklpItems.map((_, idx) => row.peran_spkklp?.[idx] || ''),
+        row.layanan_dirujuk?.pengaruhPenurunanRujukan || '', row.layanan_dirujuk?.lainnya || '',
+        ...layananDirujukItems.map((_, idx) => row.layanan_dirujuk?.[idx] ? 'Ya' : 'Tidak'),
+        row.layanan_belum_berjalan?.lainnya || '',
+        ...layananBelumBerjalanItems.map((_, idx) => row.layanan_belum_berjalan?.[idx] ? 'Ya' : 'Tidak')
       ];
     });
 
