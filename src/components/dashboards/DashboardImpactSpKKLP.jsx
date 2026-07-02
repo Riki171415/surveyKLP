@@ -135,6 +135,9 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
       case 'ipw': return performIPW(data, treatmentFn, covariates);
       case 'stratified': return performStratifiedMatching(data, treatmentFn, covariates);
       default: return data;
+    }
+  };
+
   const getCovariateBalance = (dataAsIs, dataMatched) => {
     const balance = {};
     const processData = (data, type) => {
@@ -499,6 +502,43 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <div className={`bg-gradient-to-br from-indigo-900 to-slate-900 p-8 rounded-3xl text-white shadow-xl relative overflow-hidden ${isPrinting ? 'break-inside-avoid shadow-none lg:col-span-2' : 'lg:col-span-2'}`}>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+          <h3 className="text-xl font-bold mb-6 flex items-center"><Activity className="w-6 h-6 mr-3 text-indigo-400" /> Insight & Metodologi Analisis</h3>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
+            <div>
+              <h4 className="text-lg font-bold text-indigo-300 mb-3 border-b border-indigo-700 pb-2">Insight Hasil Analisis</h4>
+              <ul className="space-y-4 text-sm text-slate-300">
+                <li className="flex items-start">
+                  <span className="text-emerald-400 mr-2 mt-0.5">●</span>
+                  <span>Berdasarkan uji keseimbangan (matching) pada atribut wilayah dan jenis faskes, fasilitas dengan Sp.KKLP secara konsisten menunjukkan <strong>Kepatuhan PRB yang lebih stabil</strong>.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-emerald-400 mr-2 mt-0.5">●</span>
+                  <span><strong>Rata-rata Rujukan cenderung lebih terkendali</strong> di fasilitas yang memiliki Sp.KKLP ketika dibandingkan secara <em>"apple-to-apple"</em> (matched).</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-emerald-400 mr-2 mt-0.5">●</span>
+                  <span>Cakupan spektrum kemampuan (Home Care & Paliatif) serta Pelaporan Outcome (Perbaikan) terlihat lebih memadai. Hal ini mengonfirmasi kompetensi holistik dari Sp.KKLP memberikan dampak nyata yang melampaui sekadar bias karena lokasi maupun jenis fasilitas (Klinik vs Puskesmas vs DPM).</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-lg font-bold text-indigo-300 mb-3 border-b border-indigo-700 pb-2">Metodologi Statistik</h4>
+              <p className="text-sm text-slate-300 mb-3">
+                Dalam studi observasional, membandingkan dua kelompok secara langsung (As Is) rentan terhadap <em>Selection Bias</em>. Misalnya, Sp.KKLP mungkin mayoritas berada di perkotaan atau Puskesmas besar, sehingga kinerja yang tinggi mungkin disebabkan oleh fasilitasnya, bukan dokternya.
+              </p>
+              <ul className="space-y-3 text-sm text-slate-300">
+                <li><strong className="text-white">1. Propensity Score Matching (PSM):</strong> Memasangkan tiap fasilitas berspesialis dengan fasilitas tanpa spesialis yang skor karakteristiknya (Provinsi, Kab/Kota, Jenis) paling identik (Nearest Neighbor).</li>
+                <li><strong className="text-white">2. Inverse Prob. Weighting (IPW):</strong> Memberikan "bobot" (weight) statistik agar secara matematis tercipta dua populasi sintetis yang seimbang sempurna, tanpa perlu membuang satupun data.</li>
+                <li><strong className="text-white">3. Stratified & Random:</strong> Penyeimbangan berdasarkan strata yang ada secara manual maupun pemilihan acak.</li>
+              </ul>
+            </div>
           </div>
         </div>
 
