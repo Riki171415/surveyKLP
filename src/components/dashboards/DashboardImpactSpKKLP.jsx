@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -587,15 +587,18 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
               })}
             </div>
 
-            {aiInsight && (
+            <div
+              className="overflow-hidden transition-all duration-500 ease-in-out"
+              style={{ maxHeight: aiInsight ? '800px' : '0', opacity: aiInsight ? 1 : 0 }}
+            >
               <div className="mt-6 pt-6 border-t border-indigo-500/30 space-y-3">
                 <h4 className="text-sm font-bold text-indigo-300 mb-2 flex items-center">
-                  <Cpu className="w-4 h-4 mr-2" />
+                  <Check className="w-4 h-4 mr-2 text-emerald-400" />
                   Insight Tambahan (AI Generated)
                 </h4>
-                {aiInsight.map((p, i) => <p key={i}>{p}</p>)}
+                {aiInsight && aiInsight.map((p, i) => <p key={i}>{p}</p>)}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
