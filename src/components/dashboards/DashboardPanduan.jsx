@@ -1,4 +1,5 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
+import { useScrollPreserve } from '../../utils/useScrollPreserve';
 import { BookOpen, Users, Activity, HeartPulse, Stethoscope, AlertTriangle, MessageSquare, Database, Printer, Filter, Home, ShieldAlert, Beaker, Lightbulb, ChevronDown, ChevronUp, Info, HelpCircle, FileSearch } from 'lucide-react';
 import ReportGenerator from '../ui/ReportGenerator';
 
@@ -167,6 +168,9 @@ const GUIDES = [
 
 export default function DashboardPanduan({ isPrinting }) {
   const [expandedId, setExpandedId] = useState(GUIDES[0].id);
+
+  // Preserve scroll position saat AI state update agar halaman tidak loncat ke atas
+  useScrollPreserve([]);
 
   return (
     <>

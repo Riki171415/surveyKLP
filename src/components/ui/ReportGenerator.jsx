@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FileText, Download, Loader, RefreshCw, CheckCircle, AlertTriangle, Save, ChevronDown, ChevronUp, Cpu } from 'lucide-react';
 import { callGeminiApiText, saveAiReportToDb, fetchAiReportFromDb } from '../../utils/aiUtils';
+import { useScrollPreserve } from '../../utils/useScrollPreserve';
 
 /**
  * Mengekspor konten HTML ke file .doc yang bisa dibuka di Microsoft Word.
@@ -61,6 +62,9 @@ export default function ReportGenerator({ dashboardId, dashboardName, promptCont
   const [savedAt, setSavedAt] = useState(null);
   const previewRef = useRef(null);
   const dbId = `report_${dashboardId}`;
+
+  // Preserve scroll saat laporan AI muncul / isExpanded toggle
+  useScrollPreserve([reportHtml, isExpanded, isGenerating]);
 
   // Muat laporan tersimpan dari DB saat komponen mount
   // Note: isExpanded tetap false saat load awal — user klik sendiri untuk buka

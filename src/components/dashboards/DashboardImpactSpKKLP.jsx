@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { useScrollPreserve } from '../../utils/useScrollPreserve';
 import { createPortal } from 'react-dom';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -40,6 +41,9 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
   const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+
+  // Preserve scroll position saat AI state update agar halaman tidak loncat ke atas
+  useScrollPreserve([aiInsight, isGenerating]);
 
   useEffect(() => {
     const loadReport = async () => {

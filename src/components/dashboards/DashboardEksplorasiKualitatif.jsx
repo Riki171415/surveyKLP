@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useScrollPreserve } from '../../utils/useScrollPreserve';
 import { Lightbulb, Key, X, RefreshCw, CheckCircle2, ChevronRight, MessageSquare, Map, AlertCircle, Coins, Scale, BrainCircuit } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
 import ReportGenerator from '../ui/ReportGenerator';
@@ -73,6 +74,9 @@ export default function DashboardEksplorasiKualitatif({ filteredData, isPrinting
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
   const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+
+  // Preserve scroll position saat AI state update agar halaman tidak loncat ke atas
+  useScrollPreserve([isGenerating]);
 
   // Load existing reports from DB
   useEffect(() => {

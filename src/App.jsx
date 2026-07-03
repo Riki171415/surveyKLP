@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState } from 'react';
+import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/AuthContext';
 import Login from './components/Login';
@@ -170,6 +170,18 @@ function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
 function AppContent() {
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const mainRef = useRef(null);
+
+  // Preserve scroll position when child AI state updates cause re-render
+  // by storing scroll on every scroll event and restoring after render
+  const scrollPosRef = useRef(0);
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const handleScroll = () => { scrollPosRef.current = el.scrollTop; };
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, []);
   
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans relative overflow-hidden">
@@ -204,7 +216,7 @@ function AppContent() {
             </button>
           </div>
         )}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto scroll-smooth">
+        <main id="main-scroll" ref={mainRef} className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto scroll-smooth">
           <div className="max-w-[1600px] mx-auto space-y-6 animate-fade-in-up h-full">
             <Suspense fallback={<PageLoader />}>
               <Routes>

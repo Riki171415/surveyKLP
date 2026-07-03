@@ -1,4 +1,5 @@
-﻿import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { useScrollPreserve } from '../../utils/useScrollPreserve';
 import { createPortal } from 'react-dom';
 import { Target, Activity, Stethoscope, AlertTriangle, Info, FileSearch, CheckCircle2, Cpu, RefreshCw, Key, X, Download } from 'lucide-react';
 import { performChiSquare, performLogisticRegression } from '../../utils/advancedStatsUtils';
@@ -21,6 +22,9 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
   const [tempKey, setTempKey] = useState('');
   const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
   const [activeModalContext, setActiveModalContext] = useState('');
+
+  // Preserve scroll position saat AI state update agar halaman tidak loncat ke atas
+  useScrollPreserve([isGenerating]);
 
   useEffect(() => {
     const loadReports = async () => {
