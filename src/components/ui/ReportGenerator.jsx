@@ -63,12 +63,14 @@ export default function ReportGenerator({ dashboardId, dashboardName, promptCont
   const dbId = `report_${dashboardId}`;
 
   // Muat laporan tersimpan dari DB saat komponen mount
+  // Note: isExpanded tetap false saat load awal — user klik sendiri untuk buka
   useEffect(() => {
     const loadReport = async () => {
       const data = await fetchAiReportFromDb(dbId);
       if (data && typeof data === 'string') {
         setReportHtml(data);
-        setIsExpanded(true);
+        // Tidak auto-expand agar tidak mendorong layout di atas
+        setIsExpanded(false);
         setSavedAt('tersimpan di database');
       }
     };
@@ -171,7 +173,7 @@ Output dimulai LANGSUNG dengan: <h1>`;
       setReportHtml(finalHtml);
       setIsExpanded(true);
       setStatus('success');
-      setStatusMsg('Laporan berhasil di-generate!');
+      setStatusMsg('Laporan berhasil di-generate! Klik "▲" untuk menyembunyikan.');
 
       // Auto-save ke DB
       setIsSaving(true);
@@ -269,16 +271,22 @@ Output dimulai LANGSUNG dengan: <h1>`;
       )}
 
       {/* Generating spinner area */}
-      {isGenerating && (
+      <div
+        className="overflow-hidden transition-all duration-500 ease-in-out"
+        style={{ maxHeight: isGenerating ? '200px' : '0px', opacity: isGenerating ? 1 : 0 }}
+      >
         <div className="px-6 py-10 flex flex-col items-center gap-3 text-slate-500 bg-slate-50">
           <Loader className="w-10 h-10 animate-spin text-indigo-500" />
           <p className="text-sm font-medium">Gemini AI sedang menyusun laporan formal...</p>
           <p className="text-xs text-slate-400">Proses ini membutuhkan 15–30 detik. Harap tunggu.</p>
         </div>
-      )}
+      </div>
 
-      {/* Preview Area — A4-like paper */}
-      {!isGenerating && reportHtml && isExpanded && (
+      {/* Preview Area — A4-like paper, dengan transisi smooth */}
+      <div
+        className="overflow-hidden transition-all duration-700 ease-in-out"
+        style={{ maxHeight: (!isGenerating && reportHtml && isExpanded) ? '1000px' : '0px' }}
+      >
         <div className="bg-slate-100 p-6 overflow-auto max-h-[900px]">
           <div
             ref={previewRef}
@@ -296,7 +304,7 @@ Output dimulai LANGSUNG dengan: <h1>`;
             dangerouslySetInnerHTML={{ __html: reportHtml }}
           />
         </div>
-      )}
+      </div>
 
       {/* Empty state */}
       {!isGenerating && !reportHtml && (
