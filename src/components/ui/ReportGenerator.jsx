@@ -157,21 +157,22 @@ Output dimulai LANGSUNG dengan: <h1>`;
       
       htmlOutput = htmlOutput.trim();
 
-      // Inject style Times New Roman ke dalam HTML output
+      // Inject style Times New Roman ke dalam HTML output, dibatasi (scoped) hanya untuk preview ini
       const styleInject = `<style>
-        * { font-family: 'Times New Roman', Times, serif !important; font-size: 12pt; }
-        h1 { font-size: 14pt !important; font-weight: bold; text-align: center; border-bottom: 2px solid #000; padding-bottom: 6pt; margin-bottom: 8pt; }
-        h2 { font-size: 13pt !important; font-weight: bold; margin-top: 14pt; margin-bottom: 6pt; }
-        h3 { font-size: 12pt !important; font-weight: bold; margin-top: 10pt; margin-bottom: 4pt; }
-        p, li, td, th { font-size: 12pt !important; line-height: 1.8; }
-        p { text-align: justify; margin-bottom: 8pt; }
-        table { width: 100%; border-collapse: collapse; margin: 10pt 0; }
-        th { border: 1px solid #000; padding: 5pt 8pt; background: #e0e0e0; font-weight: bold; }
-        td { border: 1px solid #000; padding: 4pt 8pt; }
-        .meta { font-style: italic; color: #444; text-align: center; margin-bottom: 12pt; }
-        .highlight { border-left: 4px solid #555; padding: 6pt 12pt; background: #f0f0f0; margin: 8pt 0; }
-        .warning  { border-left: 4px solid #888; padding: 6pt 12pt; background: #f8f8f8; margin: 8pt 0; }
-        .footer   { border-top: 1px solid #999; padding-top: 6pt; margin-top: 20pt; font-size: 10pt !important; color: #666; text-align: center; font-style: italic; }
+        .report-preview-content { font-family: 'Times New Roman', Times, serif !important; font-size: 12pt; color: #000; line-height: 1.8; }
+        .report-preview-content * { font-family: 'Times New Roman', Times, serif !important; font-size: 12pt; }
+        .report-preview-content h1 { font-size: 14pt !important; font-weight: bold; text-align: center; border-bottom: 2px solid #000; padding-bottom: 6pt; margin-bottom: 8pt; line-height: 1.4; }
+        .report-preview-content h2 { font-size: 13pt !important; font-weight: bold; margin-top: 14pt; margin-bottom: 6pt; line-height: 1.4; }
+        .report-preview-content h3 { font-size: 12pt !important; font-weight: bold; margin-top: 10pt; margin-bottom: 4pt; line-height: 1.4; }
+        .report-preview-content p, .report-preview-content li, .report-preview-content td, .report-preview-content th { font-size: 12pt !important; line-height: 1.8; }
+        .report-preview-content p { text-align: justify; margin-bottom: 8pt; }
+        .report-preview-content table { width: 100%; border-collapse: collapse; margin: 10pt 0; }
+        .report-preview-content th { border: 1px solid #000; padding: 5pt 8pt; background: #e0e0e0; font-weight: bold; }
+        .report-preview-content td { border: 1px solid #000; padding: 4pt 8pt; }
+        .report-preview-content .meta { font-style: italic; color: #444; text-align: center; margin-bottom: 12pt; }
+        .report-preview-content .highlight { border-left: 4px solid #555; padding: 6pt 12pt; background: #f0f0f0; margin: 8pt 0; }
+        .report-preview-content .warning  { border-left: 4px solid #888; padding: 6pt 12pt; background: #f8f8f8; margin: 8pt 0; }
+        .report-preview-content .footer   { border-top: 1px solid #999; padding-top: 6pt; margin-top: 20pt; font-size: 10pt !important; color: #666; text-align: center; font-style: italic; }
       </style>`;
 
       const finalHtml = styleInject + htmlOutput.trim();
@@ -297,7 +298,7 @@ Output dimulai LANGSUNG dengan: <h1>`;
         <div className="bg-slate-100 p-6 overflow-auto max-h-[900px]">
           <div
             ref={previewRef}
-            className="bg-white mx-auto shadow-xl rounded-sm"
+            className="report-preview-content bg-white mx-auto shadow-xl rounded-sm"
             style={{
               width: '210mm',
               minHeight: '297mm',
