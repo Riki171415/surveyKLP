@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useScrollPreserve } from '../../utils/useScrollPreserve';
+import { saveScroll } from '../../utils/scrollUtils';
 import { createPortal } from 'react-dom';
 import { Target, Activity, Stethoscope, AlertTriangle, Info, FileSearch, CheckCircle2, Cpu, RefreshCw, Key, X, Download } from 'lucide-react';
 import { performChiSquare, performLogisticRegression } from '../../utils/advancedStatsUtils';
@@ -145,6 +146,7 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
   }, [uniqueFktpData]);
 
   const handleGenerateAi = async (context, overrideKey, overrideModel) => {
+    const restoreScroll = saveScroll();
     try {
       setIsGenerating(prev => ({ ...prev, [context]: true }));
       setAiErrors(prev => ({ ...prev, [context]: '' }));
@@ -186,6 +188,7 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
       }
     } finally {
       setIsGenerating(prev => ({ ...prev, [context]: false }));
+      restoreScroll();
     }
   };
 

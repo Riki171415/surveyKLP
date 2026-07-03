@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FileText, Download, Loader, RefreshCw, CheckCircle, AlertTriangle, Save, ChevronDown, ChevronUp, Cpu } from 'lucide-react';
 import { callGeminiApiText, saveAiReportToDb, fetchAiReportFromDb } from '../../utils/aiUtils';
 import { useScrollPreserve } from '../../utils/useScrollPreserve';
+import { saveScroll } from '../../utils/scrollUtils';
 
 /**
  * Mengekspor konten HTML ke file .doc yang bisa dibuka di Microsoft Word.
@@ -82,6 +83,7 @@ export default function ReportGenerator({ dashboardId, dashboardName, promptCont
   }, [dbId]);
 
   const handleGenerate = async () => {
+    const restoreScroll = saveScroll();
     setIsGenerating(true);
     setStatus('idle');
     setStatusMsg('');
@@ -191,6 +193,7 @@ Output dimulai LANGSUNG dengan: <h1>`;
       console.error(err);
     } finally {
       setIsGenerating(false);
+      restoreScroll();
     }
   };
 

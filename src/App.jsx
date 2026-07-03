@@ -216,7 +216,7 @@ function AppContent() {
             </button>
           </div>
         )}
-        <main id="main-scroll" ref={mainRef} className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto scroll-smooth">
+        <main id="main-scroll" ref={mainRef} className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <div className="max-w-[1600px] mx-auto space-y-6 animate-fade-in-up h-full">
             <Suspense fallback={<PageLoader />}>
               <Routes>

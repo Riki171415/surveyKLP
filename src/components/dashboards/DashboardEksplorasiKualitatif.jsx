@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useScrollPreserve } from '../../utils/useScrollPreserve';
+import { saveScroll } from '../../utils/scrollUtils';
 import { Lightbulb, Key, X, RefreshCw, CheckCircle2, ChevronRight, MessageSquare, Map, AlertCircle, Coins, Scale, BrainCircuit } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
 import ReportGenerator from '../ui/ReportGenerator';
@@ -188,6 +189,7 @@ export default function DashboardEksplorasiKualitatif({ filteredData, isPrinting
   };
 
   const handleGenerate = async (expId, overrideKey = '', overrideModel = '') => {
+    const restoreScroll = saveScroll();
     try {
       setError('');
       setIsGenerating(true);
@@ -209,6 +211,7 @@ export default function DashboardEksplorasiKualitatif({ filteredData, isPrinting
       }
     } finally {
       setIsGenerating(false);
+      restoreScroll();
     }
   };
 

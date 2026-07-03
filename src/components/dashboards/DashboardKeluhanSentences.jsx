@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useScrollPreserve } from '../../utils/useScrollPreserve';
+import { saveScroll } from '../../utils/scrollUtils';
 import { createPortal } from 'react-dom';
 import { AlertTriangle, ChevronDown, ChevronUp, MessageSquare, User, Filter, FileText, Cpu, RefreshCw, Check, Key, X, Lightbulb, Target, Copy, Download , Image as ImageIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
@@ -299,6 +300,7 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
   };
 
   const handleGenerateGeminiSummary = async (data, total, overrideKey, overrideModel) => {
+    const restoreScroll = saveScroll();
     try {
       setIsGeneratingGemini(true);
       setGeminiError('');
@@ -341,10 +343,12 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
       }
     } finally {
       setIsGeneratingGemini(false);
+      restoreScroll();
     }
   };
 
   const handleGenerateAutoSummary = async (clusters, total, overrideKey, overrideModel) => {
+    const restoreScroll = saveScroll();
     try {
       setIsGeneratingAuto(true);
       setAutoError('');
@@ -389,6 +393,7 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
       }
     } finally {
       setIsGeneratingAuto(false);
+      restoreScroll();
     }
   };
 

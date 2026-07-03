@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Sparkles, BarChart2, Filter, FileText, Check, AlertCircle, RefreshCw, Layers, Users, Zap, Target, Activity, Key, Cpu, X , Image as ImageIcon } from 'lucide-react';
 import { downloadElementAsPNG } from '../../utils/exportImageUtils';
 import { supabase } from '../../supabaseClient';
+import { saveScroll } from '../../utils/scrollUtils';
 
 export default function DeepDiveAIReport({ rawData, isPrinting }) {
   const [isAnalyzing, setIsAnalyzing] = useState(true);
@@ -53,6 +54,7 @@ export default function DeepDiveAIReport({ rawData, isPrinting }) {
   };
 
   const handleGenerateGemini = async () => {
+    const restoreScroll = saveScroll();
     if (!geminiApiKey) {
       setTempKey(geminiApiKey);
       setTempModel(geminiModel);
@@ -150,6 +152,7 @@ ${JSON.stringify(smartAnswers)}
       setGeminiError(err.message || 'Terjadi kesalahan saat memanggil Gemini API.');
     } finally {
       setIsGeneratingGemini(false);
+      restoreScroll();
     }
   };
 

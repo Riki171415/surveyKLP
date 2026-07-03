@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useScrollPreserve } from '../../utils/useScrollPreserve';
+import { saveScroll } from '../../utils/scrollUtils';
 import { createPortal } from 'react-dom';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -231,6 +232,7 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
   const statsAsIs = activeMetricsAsIs.stats;
 
   const handleGenerateAi = async (overrideKey, overrideModel) => {
+    const restoreScroll = saveScroll();
     try {
       setIsGenerating(true);
       setAiError('');
@@ -266,6 +268,7 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
       }
     } finally {
       setIsGenerating(false);
+      restoreScroll();
     }
   };
 
