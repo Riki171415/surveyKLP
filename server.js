@@ -87,6 +87,37 @@ app.post('/api/ai-reports', async (req, res) => {
   }
 });
 
+// POST /api/generate-ai
+app.post('/api/generate-ai', async (req, res) => {
+  const { prompt } = req.body;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+  const model = process.env.GEMINI_MODEL || process.env.VITE_GEMINI_MODEL || 'gemini-3.5-pro';
+  
+  if (!apiKey) {
+    return res.status(400).json({ error: 'GEMINI_API_KEY atau VITE_GEMINI_API_KEY tidak ditemukan di env server.' });
+  }
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.2 }
+      })
+    });
+    
+    const data = await response.json();
+    if (data.error) {
+      return res.status(400).json({ error: data.error });
+    }
+    res.json(data);
+  } catch (err) {
+    console.error('Gemini API error:', err);
+    res.status(500).json({ error: { message: err.message } });
+  }
+});
+
 
 // GET /api/surveys
 app.get('/api/surveys', async (req, res) => {

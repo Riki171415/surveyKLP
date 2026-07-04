@@ -60,15 +60,15 @@ export default function GenerateReport() {
       const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
       let surveysData = [];
       if (useSupabase) {
-        // Fetch only those with wawancara data to save token
-        const { data, error } = await supabase.from('surveys').select('*').not('wawancara', 'is', null);
+        // Ambil semua data tanpa filter strict agar tidak kosong
+        const { data, error } = await supabase.from('surveys').select('*');
         if (error) throw error;
         surveysData = data || [];
       } else {
         const response = await fetch('/api/surveys');
         const json = await response.json();
         if (json.error) throw json.error;
-        surveysData = (json.data || []).filter(s => s.wawancara);
+        surveysData = json.data || [];
       }
       setSurveys(surveysData);
     } catch (err) {
@@ -80,17 +80,15 @@ export default function GenerateReport() {
 
 
   const constructPromptAndData = () => {
-    // Format the interview data to be compact
+    // Format the data as a clean JSON representation (rekapan)
     const formattedData = surveys.map(s => {
-      let dataString = `Faskes: ${s.fktp_name || '-'}\n`;
-      if (s.wawancara && Array.isArray(s.wawancara)) {
-        s.wawancara.forEach((ans, i) => {
-          if (ans && ans.trim() !== '') {
-            dataString += `Q${i+1}: ${ans}\n`;
-          }
-        });
-      }
-      return dataString;
+      const cleanRow = { ...s };
+      delete cleanRow.id;
+      delete cleanRow.created_at;
+      delete cleanRow.updated_at;
+      delete cleanRow.edit_history;
+      delete cleanRow.is_editable;
+      return JSON.stringify(cleanRow);
     }).join('\n---\n');
 
     const prompt = `Bertindaklah sebagai Ahli Analis Kebijakan Kesehatan Masyarakat dan Peneliti Layanan Kesehatan Primer. Saya memiliki data hasil wawancara/survei terkait "Optimalisasi Program JKN di Fasilitas Kesehatan Tingkat Pertama (FKTP) dalam Rangka Transformasi Layanan Primer", yang berfokus pada peran dan dampak dokter Spesialis Kedokteran Keluarga Layanan Primer (Sp.KKLP).
@@ -109,47 +107,52 @@ Instruksi Tambahan:
 - Gunakan format Markdown (bold, list, dsb) dengan rapi.
 - Jangan hanya merangkum jawaban "ya" atau "tidak", tetapi gali alasan "mengapa".
 
-Data Wawancara Responden:
+Data Wawancara Responden (JSON Recap):
 ${formattedData}`;
 
     return prompt;
   };
 
   const handleGenerate = async () => {
-    const keyToUse = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!keyToUse) {
-      alert('VITE_GEMINI_API_KEY tidak ditemukan di file .env');
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
       setReport('');
       
       const prompt = constructPromptAndData();
-      const model = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-pro';
-
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-          }
-        })
-      });
-
-      const data = await response.json();
       
-      if (data.error) {
-        throw new Error(data.error.message);
-      }
+      const useSupabase = import.meta.env.VITE_USE_LOCAL_API !== 'true';
+      let generatedText = '';
 
-      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!useSupabase) {
+        // Gunakan backend proxy jika menggunakan API lokal
+        const response = await fetch('/api/generate-ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message || data.error);
+        generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      } else {
+        // Fallback panggil gemini langsung
+        const keyToUse = import.meta.env.VITE_GEMINI_API_KEY;
+        if (!keyToUse) {
+          throw new Error('VITE_GEMINI_API_KEY tidak ditemukan di env.');
+        }
+        const model = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-pro';
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.2 }
+          })
+        });
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message);
+        generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      }
       if (generatedText) {
         setReport(generatedText);
         await saveReport(generatedText);
