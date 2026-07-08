@@ -58,7 +58,7 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
 
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
-  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash');
+  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
   const [activeModalContext, setActiveModalContext] = useState(''); 
 
   const handleSaveKey = () => {
@@ -234,7 +234,7 @@ export default function DashboardKeluhanSentences({ filteredData, isPrinting }) 
 
   const callGeminiApi = async (prompt, overrideKey, overrideModel, retryCount = 0) => {
     const apiKey = overrideKey || localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
-    const model = overrideModel || localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash';
+    const model = overrideModel || localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
     
     if (!apiKey) {
       throw new Error("API_KEY_MISSING");
@@ -336,7 +336,7 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
       if (err.message === "API_KEY_MISSING") {
         setActiveModalContext('keluhan');
         setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
-        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash');
+        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
         setShowKeyModal(true);
       } else {
         setGeminiError(err.message || 'Terjadi kesalahan saat memanggil Gemini API.');
@@ -386,7 +386,7 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
       if (err.message === "API_KEY_MISSING") {
         setActiveModalContext('auto');
         setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
-        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash');
+        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
         setShowKeyModal(true);
       } else {
         setAutoError(err.message || 'Terjadi kesalahan saat memanggil Gemini API.');

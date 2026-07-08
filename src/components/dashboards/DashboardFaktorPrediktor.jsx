@@ -21,7 +21,7 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
   
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
-  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash');
+  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
   const [activeModalContext, setActiveModalContext] = useState('');
 
   // Preserve scroll position saat AI state update agar halaman tidak loncat ke atas
@@ -181,7 +181,7 @@ export default function DashboardFaktorPrediktor({ uniqueFktpData, isPrinting })
       if (err.message === "API_KEY_MISSING") {
         setActiveModalContext(context);
         setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
-        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash');
+        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
         setShowKeyModal(true);
       } else {
         setAiErrors(prev => ({ ...prev, [context]: err.message || 'Terjadi kesalahan saat memanggil Gemini API.' }));
