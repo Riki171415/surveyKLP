@@ -1,9 +1,13 @@
-﻿import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useScrollPreserve } from '../../utils/useScrollPreserve';
+import { saveScroll } from '../../utils/scrollUtils';
+import { callGeminiApi, saveAiReportToDb, fetchAiReportFromDb } from '../../utils/aiUtils';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
   ScatterChart, Scatter, ReferenceLine, ZAxis 
 } from 'recharts';
-import { Activity, Beaker, FileText, CheckCircle2, AlertTriangle, TrendingUp, TrendingDown, Stethoscope, Download } from 'lucide-react';
+import { Activity, Beaker, FileText, CheckCircle2, AlertTriangle, TrendingUp, TrendingDown, Stethoscope, Download, Cpu, Key, X } from 'lucide-react';
 import { performPSM } from '../../utils/statisticsUtils';
 import { calculateSMD, getPropensityScoreHistogram, performTTest, performMultivariateRegression } from '../../utils/advancedStatsUtils';
 import { exportAnalisisLanjutToExcel } from '../../utils/exportExcelUtils';
@@ -11,6 +15,16 @@ import ReportGenerator from '../ui/ReportGenerator';
 
 export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) {
   const [isExporting, setIsExporting] = useState(false);
+
+  const [aiReports, setAiReports] = useState({});
+  const [isGenerating, setIsGenerating] = useState({});
+  const [aiErrors, setAiErrors] = useState({});
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [tempKey, setTempKey] = useState('');
+  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+  const [activeModalContext, setActiveModalContext] = useState('');
+
+  useScrollPreserve([isGenerating]);
 
   const outcomeOptions = [
     { id: 'kepatuhan_prb', label: 'Kepatuhan PRB (%)', fn: (d) => {
@@ -71,6 +85,66 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
 
     return { dataAsIs, dataMatched, psHistogram, smdData, allOutcomesResults };
   }, [uniqueFktpData]);
+
+  useEffect(() => {
+    const loadReports = async () => {
+      if (allOutcomesResults) {
+        const reports = {};
+        for (const outcome of allOutcomesResults) {
+          const rep = await fetchAiReportFromDb(`analisis_lanjut_${outcome.id}`);
+          if (rep) reports[outcome.id] = rep;
+        }
+        setAiReports(reports);
+      }
+    };
+    if (allOutcomesResults && allOutcomesResults.length > 0) {
+      loadReports();
+    }
+  }, [allOutcomesResults]);
+
+  const handleGenerateInsight = async (outcomeId, label, tTestResult, regressionResult, overrideKey = null, overrideModel = null) => {
+    const restoreScroll = saveScroll();
+    
+    try {
+      setIsGenerating(prev => ({ ...prev, [outcomeId]: true }));
+      setAiErrors(prev => ({ ...prev, [outcomeId]: '' }));
+      
+      const key = overrideKey || tempKey;
+      const model = overrideModel || tempModel;
+
+      let prompt = `Kamu adalah analis kesehatan. Berikut hasil Analisis Statistik Lanjut mengenai dampak Sp.KKLP terhadap ${label}.\n`;
+      if (tTestResult) {
+          prompt += `- T-Test (Post-Matching): Beda rata-rata=${tTestResult.diff.toFixed(4)}, p-value=${tTestResult.pValue.toFixed(4)} (${tTestResult.isSignificant ? 'Signifikan' : 'Tidak Signifikan'}).\n`;
+      }
+      if (regressionResult) {
+          prompt += `- Regresi Multivariat (As-Is): Efek Sp.KKLP=${regressionResult.treatmentEffect.toFixed(4)}, p-value=${regressionResult.pValue.toFixed(4)} (${regressionResult.isSignificant ? 'Signifikan' : 'Tidak Signifikan'}).\n`;
+      }
+      prompt += `Buat 2-3 paragraf ringkas interpretasi eksekutif. KEMBALIKAN DALAM FORMAT JSON murni: { "paragraphs": ["Paragraf 1..."] }`;
+      
+      const text = await callGeminiApi(prompt, key, model);
+      let textSum = [text];
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed.paragraphs) textSum = parsed.paragraphs;
+      } catch (e) {}
+      
+      setAiReports(prev => ({ ...prev, [outcomeId]: textSum }));
+      await saveAiReportToDb(`analisis_lanjut_${outcomeId}`, textSum);
+      
+    } catch (err) {
+      if (err.message === "API_KEY_MISSING") {
+        setActiveModalContext(outcomeId);
+        setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
+        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+        setShowKeyModal(true);
+      } else {
+        setAiErrors(prev => ({ ...prev, [outcomeId]: err.message || 'Terjadi kesalahan saat memanggil Gemini API.' }));
+      }
+    } finally {
+      setIsGenerating(prev => ({ ...prev, [outcomeId]: false }));
+      restoreScroll();
+    }
+  };
 
   const handleExportExcel = async () => {
     if (!dataAsIs) return;
@@ -268,35 +342,58 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
 
           <div className={`bg-gradient-to-br from-slate-800 to-indigo-900 p-6 rounded-2xl text-white shadow-lg relative overflow-hidden ${isPrinting ? 'break-inside-avoid shadow-none' : ''}`}>
             <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-            <h4 className="text-lg font-bold mb-3 flex items-center"><Activity className="w-5 h-5 mr-3 text-indigo-400" /> Interpretasi Naratif (AI Generated) - {label}</h4>
-            <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
-              <p>
-                {tTestResult && tTestResult.isSignificant ? (
-                  <span className="text-emerald-300 font-medium">Berdasarkan Uji-T pada data yang telah disetarakan (matched), kehadiran Sp.KKLP terbukti memberikan efek sebesar {tTestResult.diff.toFixed(2)} pada {label}. Perbedaan ini signifikan secara statistik (p &lt; 0.05). </span>
-                ) : (
-                  <span className="text-amber-300 font-medium">Berdasarkan Uji-T pada data yang disetarakan (matched), efek Sp.KKLP sebesar {tTestResult ? tTestResult.diff.toFixed(2) : 0} pada {label} tidak signifikan secara statistik (p &gt; 0.05). </span>
+            
+            <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 relative z-10 gap-3">
+                <h4 className="text-lg font-bold flex items-center"><Cpu className="w-5 h-5 mr-3 text-indigo-400" /> Insight AI: {label}</h4>
+                {!isPrinting && (
+                    <button 
+                      onClick={() => handleGenerateInsight(id, label, tTestResult, regressionResult)}
+                      disabled={isGenerating[id]}
+                      className="flex items-center px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/50 rounded-lg text-sm font-medium transition"
+                    >
+                      {isGenerating[id] ? 'Menganalisis...' : 'Generate AI Insight'}
+                    </button>
                 )}
-              </p>
-              <p>
-                {regressionResult && regressionResult.isSignificant ? (
-                  <span>Lebih lanjut, hasil pemodelan <strong>Regresi Linier Multivariat</strong> yang mengontrol seluruh kovariat sekaligus juga mengonfirmasi adanya efek murni yang signifikan dari Sp.KKLP terhadap {label} sebesar <strong>{regressionResult.treatmentEffect > 0 ? '+' : ''}{regressionResult.treatmentEffect.toFixed(2)}</strong> (p = {regressionResult.pValue.toFixed(3)}). </span>
-                ) : (
-                  <span>Hasil pemodelan <strong>Regresi Linier Multivariat</strong> juga mengonfirmasi temuan tersebut, di mana efek murni Sp.KKLP (setelah dikontrol terhadap kovariat) adalah <strong>{regressionResult && regressionResult.treatmentEffect > 0 ? '+' : ''}{regressionResult ? regressionResult.treatmentEffect.toFixed(2) : 0}</strong> dan belum signifikan (p = {regressionResult ? regressionResult.pValue.toFixed(3) : 1}). </span>
-                )}
-              </p>
+            </div>
+
+            <div className="space-y-3 text-sm text-slate-300 leading-relaxed relative z-10">
+              {aiErrors[id] && (
+                  <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200">
+                      {aiErrors[id]}
+                  </div>
+              )}
+              
+              <div 
+                  className="overflow-hidden transition-all duration-500"
+                  style={{ maxHeight: aiReports[id] ? '800px' : '0', opacity: aiReports[id] ? 1 : 0 }}
+              >
+                  <div className="space-y-3 mb-4">
+                      {aiReports[id] && aiReports[id].map((p, i) => <p key={i}>{p}</p>)}
+                  </div>
+              </div>
+
+              {!aiReports[id] && !isGenerating[id] && (
+                  <div className="text-center p-6 border border-dashed border-white/20 rounded-xl text-slate-400">
+                      Klik "Generate AI Insight" untuk membuat narasi interpretasi secara otomatis.
+                  </div>
+              )}
+              
               <div className="mt-4 p-3 bg-white/10 rounded-xl border border-white/20">
-                <h5 className="text-white font-bold text-xs mb-1">Kesimpulan Utama:</h5>
-                {tTestResult?.isSignificant || regressionResult?.isSignificant ? (
-                  <div className="flex items-start">
-                    <TrendingUp className="w-4 h-4 text-emerald-400 mr-2 shrink-0 mt-0.5" />
-                    <span>Secara ilmiah (dengan tingkat signifikansi 5%), dapat disimpulkan bahwa kehadiran Sp.KKLP memiliki dampak yang secara meyakinkan dan signifikan terhadap {label}.</span>
-                  </div>
-                ) : (
-                  <div className="flex items-start">
-                    <AlertTriangle className="w-4 h-4 text-amber-400 mr-2 shrink-0 mt-0.5" />
-                    <span>Saat ini belum ditemukan bukti statistik yang cukup kuat untuk menyimpulkan bahwa Sp.KKLP memengaruhi {label} secara signifikan setelah dikontrol perancu.</span>
-                  </div>
-                )}
+                <h5 className="text-white font-bold text-xs mb-2">Ringkasan Statistik Dasar:</h5>
+                <p>
+                  {tTestResult && tTestResult.isSignificant ? (
+                    <span className="text-emerald-300 font-medium">Berdasarkan Uji-T pada data yang telah disetarakan (matched), kehadiran Sp.KKLP terbukti memberikan efek sebesar {tTestResult.diff.toFixed(2)} pada {label}. Perbedaan ini signifikan secara statistik (p &lt; 0.05). </span>
+                  ) : (
+                    <span className="text-amber-300 font-medium">Berdasarkan Uji-T pada data yang disetarakan (matched), efek Sp.KKLP sebesar {tTestResult ? tTestResult.diff.toFixed(2) : 0} pada {label} tidak signifikan secara statistik (p &gt; 0.05). </span>
+                  )}
+                </p>
+                <p className="mt-1">
+                  {regressionResult && regressionResult.isSignificant ? (
+                    <span>Lebih lanjut, hasil pemodelan <strong>Regresi Linier Multivariat</strong> yang mengontrol seluruh kovariat sekaligus juga mengonfirmasi adanya efek murni yang signifikan dari Sp.KKLP terhadap {label} sebesar <strong>{regressionResult.treatmentEffect > 0 ? '+' : ''}{regressionResult.treatmentEffect.toFixed(2)}</strong> (p = {regressionResult.pValue.toFixed(3)}). </span>
+                  ) : (
+                    <span>Hasil pemodelan <strong>Regresi Linier Multivariat</strong> juga mengonfirmasi temuan tersebut, di mana efek murni Sp.KKLP (setelah dikontrol terhadap kovariat) adalah <strong>{regressionResult && regressionResult.treatmentEffect > 0 ? '+' : ''}{regressionResult ? regressionResult.treatmentEffect.toFixed(2) : 0}</strong> dan belum signifikan (p = {regressionResult ? regressionResult.pValue.toFixed(3) : 1}). </span>
+                  )}
+                </p>
               </div>
             </div>
           </div>
@@ -307,8 +404,52 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
     <ReportGenerator
       dashboardId="analisis_lanjut"
       dashboardName="Analisis Statistik Lanjut (T-Test dan Regresi)"
-      promptContext={`Total FKTP: ${uniqueFktpData?.length ?? 0}. Jumlah outcome dianalisis: ${allOutcomesResults?.length ?? 0}. Outcome pertama (${allOutcomesResults?.[0]?.label ?? 'N/A'}): T-Test diff: ${allOutcomesResults?.[0]?.tTestResult?.diff?.toFixed(4) ?? 'N/A'}, T-Test p-value: ${allOutcomesResults?.[0]?.tTestResult?.pValue?.toFixed(4) ?? 'N/A'}, Signifikan: ${allOutcomesResults?.[0]?.tTestResult?.isSignificant ? 'Ya' : 'Tidak'}. Regresi treatment effect: ${allOutcomesResults?.[0]?.regressionResult?.treatmentEffect?.toFixed(4) ?? 'N/A'}, Regresi p-value: ${allOutcomesResults?.[0]?.regressionResult?.pValue?.toFixed(4) ?? 'N/A'}, Signifikan: ${allOutcomesResults?.[0]?.regressionResult?.isSignificant ? 'Ya' : 'Tidak'}.`}
+      promptContext={`Total FKTP: ${uniqueFktpData?.length ?? 0}. Hasil analisis kausalitas untuk semua outcome:\n${allOutcomesResults?.map(o => 
+        `- ${o.label}: T-Test diff=${o.tTestResult?.diff?.toFixed(4) ?? 'N/A'} (p=${o.tTestResult?.pValue?.toFixed(4) ?? 'N/A'}, ${o.tTestResult?.isSignificant ? 'Signifikan' : 'Tidak'}), Regresi koef=${o.regressionResult?.treatmentEffect?.toFixed(4) ?? 'N/A'} (p=${o.regressionResult?.pValue?.toFixed(4) ?? 'N/A'}, ${o.regressionResult?.isSignificant ? 'Signifikan' : 'Tidak'})`
+      ).join('\n')}`}
     />
+
+    {showKeyModal && createPortal(
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+        <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-zoom-in">
+          <div className="bg-slate-800 p-4 flex justify-between items-center text-white">
+            <h3 className="font-bold flex items-center"><Key className="w-5 h-5 mr-2 text-indigo-400" /> Konfigurasi Gemini API</h3>
+            <button onClick={() => setShowKeyModal(false)} className="text-slate-400 hover:text-white transition"><X className="w-5 h-5" /></button>
+          </div>
+          <div className="p-6">
+            <p className="text-sm text-slate-600 mb-4">
+              API Key Gemini diperlukan untuk fitur AI Insight. Dapatkan gratis di <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer" className="text-indigo-600 font-medium hover:underline">Google AI Studio</a>.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">API Key</label>
+                <input type="password" value={tempKey} onChange={e => setTempKey(e.target.value)} placeholder="AIzaSy..." className="w-full border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Model (Opsional)</label>
+                <input type="text" value={tempModel} onChange={e => setTempModel(e.target.value)} placeholder="gemini-3.5-flash" className="w-full border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
+              </div>
+              <button 
+                onClick={() => {
+                  localStorage.setItem('GEMINI_API_KEY', tempKey);
+                  localStorage.setItem('GEMINI_MODEL', tempModel);
+                  setShowKeyModal(false);
+                  
+                  const activeOutcome = allOutcomesResults.find(o => o.id === activeModalContext);
+                  if (activeOutcome) {
+                    handleGenerateInsight(activeOutcome.id, activeOutcome.label, activeOutcome.tTestResult, activeOutcome.regressionResult, tempKey, tempModel);
+                  }
+                }}
+                className="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition"
+              >
+                Simpan & Lanjutkan
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>,
+      document.body
+    )}
     </>
   );
 }
