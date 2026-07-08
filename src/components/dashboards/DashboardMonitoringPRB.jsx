@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -129,8 +129,8 @@ export default function DashboardMonitoringPRB({ filteredData, uniqueFktpData, C
       { title: 'Proporsi Mekanisme Utama PRB (Per FKTP)', headers: ['Mekanisme', 'Jumlah FKTP (Nilai)', 'Persentase (%)'], data: mekanismeDataF.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`]) },
       { title: 'Top 10 Kata Kunci Kendala Pelaksanaan (Per Responden)', headers: ['Kata Kunci', 'Frekuensi Penyebutan'], data: kendalaDataR.map(d => [d.name, d.value]) },
       { title: 'Top 10 Kata Kunci Kendala Pelaksanaan (Per FKTP)', headers: ['Kata Kunci', 'Frekuensi Penyebutan'], data: kendalaDataF.map(d => [d.name, d.value]) },
-      { title: 'Komparasi Mekanisme Berdasarkan Sp.KKLP', headers: ['Mekanisme', 'Ada Sp.KKLP', 'Tidak Ada'], data: crossSpkklpData.map(d => ({ name: d.name, ada: d['Ada Sp.KKLP'], tidak: d['Tidak Ada'] })) },
-      { title: 'Komparasi Mekanisme Berdasarkan Jenis FKTP', headers: ['Mekanisme', 'Puskesmas', 'Klinik', 'DPM'], data: crossTypeData.map(d => ({ name: d.name, p: d['Puskesmas'], k: d['Klinik'], dpm: d['DPM'] })) }
+      { title: 'Komparasi Mekanisme Berdasarkan Sp.KKLP', headers: ['Mekanisme', 'Ada Sp.KKLP', 'Tidak Ada'], data: crossSpkklpData.map(d => [d.name, d['Ada Sp.KKLP'], d['Tidak Ada']]) },
+      { title: 'Komparasi Mekanisme Berdasarkan Jenis FKTP', headers: ['Mekanisme', 'Puskesmas', 'Klinik', 'DPM'], data: crossTypeData.map(d => [d.name, d['Puskesmas'], d['Klinik'], d['DPM']]) }
     ];
 
     const rawData = {

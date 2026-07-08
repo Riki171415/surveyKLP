@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { exportTablesToExcel } from '../../utils/exportExcelUtils';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -161,9 +161,9 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
       { title: 'Distribusi Kendala Pelayanan (Per FKTP)', headers: ['Kategori Kendala', 'Jumlah FKTP (Nilai)', 'Persentase (%)'], data: kendalaDataF.map(d => [d.name, d.value, `${uniqueFktpData.length > 0 ? ((d.value / uniqueFktpData.length) * 100).toFixed(1) : 0}%`]) },
       { title: 'Proporsi Kebutuhan Dukungan (Per Responden)', headers: ['Kategori Dukungan', 'Frekuensi Jawaban'], data: dukunganDataR.map(d => [d.name, d.value]) },
       { title: 'Proporsi Kebutuhan Dukungan (Per FKTP)', headers: ['Kategori Dukungan', 'Frekuensi Jawaban'], data: dukunganDataF.map(d => [d.name, d.value]) },
-      { title: 'Kata Kunci Kendala Spesifik (Per Responden)', headers: ['Kata Kunci', 'Frekuensi'], data: teksDataR.map(d => ({ text: d.text, value: d.value })) },
-      { title: 'Kata Kunci Kendala Spesifik (Per FKTP)', headers: ['Kata Kunci', 'Frekuensi'], data: teksDataF.map(d => ({ text: d.text, value: d.value })) },
-      { title: 'Heatmap Kendala per Provinsi', headers: ['Provinsi', 'SDM', 'Sarana Prasarana', 'Alat Kesehatan', 'Obat', 'Pembiayaan', 'Regulasi', 'Total'], data: heatmapData.map(d => ({ reg: d.regional, sdm: d['SDM'] || 0, sarpras: d['Sarana prasarana'] || 0, alkes: d['Alat kesehatan'] || 0, obat: d['Obat'] || 0, dana: d['Pembiayaan'] || 0, regu: d['Regulasi'] || 0, tot: d.total })) }
+      { title: 'Kata Kunci Kendala Spesifik (Per Responden)', headers: ['Kata Kunci', 'Frekuensi'], data: teksDataR.map(d => [d.text, d.value]) },
+      { title: 'Kata Kunci Kendala Spesifik (Per FKTP)', headers: ['Kata Kunci', 'Frekuensi'], data: teksDataF.map(d => [d.text, d.value]) },
+      { title: 'Heatmap Kendala per Provinsi', headers: ['Provinsi', 'SDM', 'Sarana Prasarana', 'Alat Kesehatan', 'Obat', 'Pembiayaan', 'Regulasi', 'Total'], data: heatmapData.map(d => [d.regional, d['SDM'] || 0, d['Sarana prasarana'] || 0, d['Alat kesehatan'] || 0, d['Obat'] || 0, d['Pembiayaan'] || 0, d['Regulasi'] || 0, d.total]) }
     ];
 
     const rawData = {
