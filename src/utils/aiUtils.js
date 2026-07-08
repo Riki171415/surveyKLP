@@ -2,7 +2,7 @@ import { supabase } from '../supabaseClient';
 
 export const callGeminiApi = async (prompt, overrideKey, overrideModel, retryCount = 0) => {
   const apiKey = overrideKey || localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
-  const model = overrideModel || localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
+  const model = overrideModel || localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash';
   
   if (!apiKey) {
     throw new Error("API_KEY_MISSING");
@@ -54,7 +54,7 @@ export const callGeminiApi = async (prompt, overrideKey, overrideModel, retryCou
 // agar Gemini tidak memaksa output dalam format JSON
 export const callGeminiApiText = async (prompt, overrideKey, overrideModel, retryCount = 0) => {
   const apiKey = overrideKey || localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
-  const model = overrideModel || localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
+  const model = overrideModel || localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash';
   
   if (!apiKey) throw new Error("API_KEY_MISSING");
 

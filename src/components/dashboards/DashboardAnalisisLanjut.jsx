@@ -21,7 +21,7 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
   const [aiErrors, setAiErrors] = useState({});
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
-  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash');
   const [activeModalContext, setActiveModalContext] = useState('');
 
   useScrollPreserve([isGenerating]);
@@ -135,7 +135,7 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
       if (err.message === "API_KEY_MISSING") {
         setActiveModalContext(outcomeId);
         setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
-        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash');
         setShowKeyModal(true);
       } else {
         setAiErrors(prev => ({ ...prev, [outcomeId]: err.message || 'Terjadi kesalahan saat memanggil Gemini API.' }));
@@ -427,7 +427,7 @@ export default function DashboardAnalisisLanjut({ uniqueFktpData, isPrinting }) 
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Model (Opsional)</label>
-                <input type="text" value={tempModel} onChange={e => setTempModel(e.target.value)} placeholder="gemini-3.5-flash" className="w-full border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
+                <input type="text" value={tempModel} onChange={e => setTempModel(e.target.value)} placeholder="gemini-2.0-flash" className="w-full border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm" />
               </div>
               <button 
                 onClick={() => {

@@ -41,7 +41,7 @@ export default function DashboardImpactSpKKLP({ filteredData, uniqueFktpData, CO
   
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
-  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash');
 
   // Preserve scroll position saat AI state update agar halaman tidak loncat ke atas
   useScrollPreserve([aiInsight, isGenerating]);
@@ -261,7 +261,7 @@ KEMBALIKAN OUTPUT MURNI DALAM FORMAT JSON SEPERTI BERIKUT (tanpa markdown):
     } catch (err) {
       if (err.message === "API_KEY_MISSING") {
         setTempKey(localStorage.getItem('GEMINI_API_KEY') || '');
-        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+        setTempModel(localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash');
         setShowKeyModal(true);
       } else {
         setAiError(err.message || 'Terjadi kesalahan saat memanggil Gemini API.');

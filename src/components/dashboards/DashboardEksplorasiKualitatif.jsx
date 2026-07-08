@@ -74,7 +74,7 @@ export default function DashboardEksplorasiKualitatif({ filteredData, isPrinting
   const [error, setError] = useState('');
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
-  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash');
+  const [tempModel, setTempModel] = useState(import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash');
 
   // Preserve scroll position saat AI state update agar halaman tidak loncat ke atas
   useScrollPreserve([isGenerating]);
@@ -134,7 +134,7 @@ export default function DashboardEksplorasiKualitatif({ filteredData, isPrinting
 
   const callGeminiApi = async (prompt, textData, overrideKey, overrideModel) => {
     const apiKey = overrideKey || localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
-    const model = overrideModel || localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
+    const model = overrideModel || localStorage.getItem('GEMINI_MODEL') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash';
     
     if (!apiKey) throw new Error("API_KEY_MISSING");
 
@@ -330,7 +330,7 @@ export default function DashboardEksplorasiKualitatif({ filteredData, isPrinting
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5">Model Gemini</label>
                   <select value={tempModel} onChange={(e) => setTempModel(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition">
-                    <option value="gemini-3.5-flash">Gemini 3.5 Flash (Tercepat & Default)</option>
+                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Tercepat & Default)</option>
                     <option value="gemini-1.5-pro">Gemini 1.5 Pro (Lebih Cerdas & Detail)</option>
                   </select>
                 </div>

@@ -140,7 +140,7 @@ ${formattedData}`;
         if (!keyToUse) {
           throw new Error('VITE_GEMINI_API_KEY tidak ditemukan di env.');
         }
-        const model = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-pro';
+        const model = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash';
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
