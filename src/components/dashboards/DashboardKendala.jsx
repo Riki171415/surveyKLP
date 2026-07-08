@@ -208,7 +208,7 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
         <StatCard title="Top 3 Kendala Utama" value={kendalaStats.top3[2]?.value || 0} subtitle={kendalaStats.top3[2]?.name || '-'} icon={FileText} colorClass="bg-red-500 text-red-600 bg-red-100" />
       </div>
 
-      <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div id="kendala-distribusi-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           {!isPrinting && (
             <button onClick={() => downloadElementAsPNG('kendala-distribusi-chart', 'Distribusi_Kendala')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
@@ -262,7 +262,7 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
         </div>
 
         {/* Word Cloud */}
-        <div id="kendala-teks-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
+        <div id="kendala-teks-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           {!isPrinting && (
             <button onClick={() => downloadElementAsPNG('kendala-teks-chart', 'Kata_Kunci_Kendala')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
               <ImageIcon className="w-4 h-4" />
@@ -277,7 +277,7 @@ export default function DashboardKendala({ filteredData, uniqueFktpData, COLORS,
         </div>
 
         {/* Heatmap Regional */}
-        <div id="kendala-heatmap-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300 lg:col-span-3' : 'lg:col-span-3'}`}>
+        <div id="kendala-heatmap-chart" className={`bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative lg:col-span-2 ${isPrinting ? 'break-inside-avoid shadow-none border-slate-300' : ''}`}>
           {!isPrinting && (
             <button onClick={() => downloadElementAsPNG('kendala-heatmap-chart', 'Heatmap_Kendala')} className="capture-exclude absolute top-4 right-4 p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition z-10" title="Download Chart PNG">
               <ImageIcon className="w-4 h-4" />
